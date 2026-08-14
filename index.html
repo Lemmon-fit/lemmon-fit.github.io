@@ -7,19 +7,92 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="LEMMON FIT">
-<meta name="theme-color" content="#100f0d">
+<meta name="theme-color" id="meta-theme" content="#100f0d">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" href="icon-512.png">
 <title>LEMMON FIT</title>
 <style>
+  /* ---------------------------------------------------------------
+     PALETTES. Le theme actif est pose par data-theme sur <html>.
+     « systeme » est resolu en JS vers sombre ou clair : une valeur
+     concrete est toujours ecrite, ce qui evite une cascade de media
+     queries et rend la couleur lisible depuis le JavaScript.
+     --------------------------------------------------------------- */
+  :root, :root[data-theme="sombre"] {
+    --fond:         #100f0d;  /* fond de page */
+    --fond-carte:   #1e1a15;  /* carte, proposition */
+    --fond-encart:  #1a1712;  /* encart en retrait */
+    --fond-champ:   #100f0d;  /* champ de saisie, creuse */
+    --fond-pill:    #2c281f;  /* pastille, jeton */
+    --fond-pill-2:  #24201b;  /* pastille secondaire */
+    --sep:          #2c281f;  /* separateur */
+    --bord:         #3a352c;  /* bordure standard */
+    --bord-champ:   #3a3428;  /* bordure de champ */
+    --bord-discret: #4a4436;  /* bordure a peine visible */
+    --bord-moyen:   #6b6455;  /* bordure intermediaire */
+    --bord-fort:    #8c8474;  /* bordure de controle, 4,5:1 */
+    --texte:        #ede6d3;  /* texte principal */
+    --texte-1b:     #cfc6b3;  /* texte courant */
+    --texte-2:      #a89e8a;  /* texte secondaire */
+    --texte-3:      #978e7e;  /* texte discret, plancher 4,5:1 sur TOUS les fonds */
+    --sur-accent:   #100f0d;  /* texte pose SUR une surface accent */
+    --accent:       #f4d912;  /* surface accent : fond, bordure */
+    --accent-txt:   #f4d912;  /* accent en TEXTE, lisible sur le fond */
+    --accent-pill:  #f2e58a;  /* texte sur pastille accent */
+    --vert:         #8caa7c;  /* surface verte */
+    --vert-txt:     #8caa7c;  /* vert en texte */
+    --vert-pill:    #cfe3c6;  /* texte sur pastille verte */
+    --bleu:         #4a9eff;  /* surface bleue */
+    --bleu-txt:     #bcdcff;  /* bleu en texte */
+    --bleu-pill:    #bcdcff;  /* texte sur pastille bleue */
+    --bleu-bord:    #7fb3e8;  /* liseré des propositions IA */
+    --rouge:        #e08a80;  /* surface rouge */
+    --rouge-txt:    #e08a80;  /* rouge en texte */
+    --rouge-fort:   #c1685f;  /* bordure rouge appuyee */
+    --rouge-pill:   #f0b3ac;  /* texte sur pastille rouge */
+  }
+  :root[data-theme="clair"] {
+    --fond:         #f7f3ea;
+    --fond-carte:   #fffdf7;
+    --fond-encart:  #efe9dc;
+    --fond-champ:   #fffdf7;
+    --fond-pill:    #e7e0cf;
+    --fond-pill-2:  #ece5d6;
+    --sep:          #e2dccd;
+    --bord:         #ded7c6;
+    --bord-champ:   #cfc7b4;
+    --bord-discret: #ded7c6;
+    --bord-moyen:   #a89e8a;
+    --bord-fort:    #7d7566;
+    --texte:        #1f1c17;
+    --texte-1b:     #3d382f;
+    --texte-2:      #544d41;
+    --texte-3:      #676052;
+    --sur-accent:   #100f0d;
+    --accent:       #f4d912;
+    --accent-txt:   #6b5b00;
+    --accent-pill:  #5c4e00;
+    --vert:         #5a7d4a;
+    --vert-txt:     #3f6132;
+    --vert-pill:    #2f5226;
+    --bleu:         #2f7fd4;
+    --bleu-txt:     #1a5bab;
+    --bleu-pill:    #16497f;
+    --bleu-bord:    #2f7fd4;
+    --rouge:        #c1483a;
+    --rouge-txt:    #a13529;
+    --rouge-fort:   #a13529;
+    --rouge-pill:   #8c2a1f;
+  }
+
   * { box-sizing: border-box; }
   button, input { -webkit-tap-highlight-color: transparent; }
 
-  html, body { background: #100f0d; margin: 0; min-height: 100vh; }
+  html, body { background:var(--fond); margin: 0; min-height: 100vh; }
   body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    color: #ede6d3;
+    color:var(--texte);
     padding: calc(20px + env(safe-area-inset-top)) 16px calc(40px + env(safe-area-inset-bottom));
     overscroll-behavior-y: contain;
   }
@@ -33,10 +106,10 @@
   .tabs { display: flex; gap: 6px; margin-bottom: 16px; }
   .tab {
     flex: 1; min-height: 46px; border-radius: 10px; background: transparent;
-    border: 1.5px solid #8c8474 !important; color: #cfc6b3; font-size: 13px; font-weight: 700;
+    border:1.5px solid var(--bord-fort) !important; color:var(--texte-1b); font-size: 13px; font-weight: 700;
   }
-  .tab-active { background: #f4d912; border-color: #f4d912 !important; color: #100f0d; }
-  .swipe-hint { text-align: center; font-size: 11px; color: #8a8171; margin: -6px 0 14px; }
+  .tab-active { background:var(--accent); border-color:var(--accent) !important; color:var(--sur-accent); }
+  .swipe-hint { text-align: center; font-size: 11px; color:var(--texte-3); margin: -6px 0 14px; }
 
   @keyframes slideFromRight { from { transform: translateX(28px); opacity: 0.35; } to { transform: none; opacity: 1; } }
   @keyframes slideFromLeft  { from { transform: translateX(-28px); opacity: 0.35; } to { transform: none; opacity: 1; } }
@@ -48,11 +121,11 @@
 
   .brandmark { display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 18px; }
   .brandmark-icon { width: 22px; height: 22px; border-radius: 6px; }
-  .brandmark-text { font-size: 13px; font-weight: 700; letter-spacing: 1.5px; color: #cfc6b3; }
-  .brandmark-text b { color: #f4d912; font-weight: 800; }
+  .brandmark-text { font-size: 13px; font-weight: 700; letter-spacing: 1.5px; color:var(--texte-1b); }
+  .brandmark-text b { color:var(--accent-txt); font-weight: 800; }
 
   #splash {
-    position: fixed; inset: 0; background: #100f0d; z-index: 9999;
+    position: fixed; inset: 0; background:var(--fond); z-index: 9999;
     display: flex; align-items: center; justify-content: center;
     transition: opacity 0.4s ease;
   }
@@ -63,56 +136,56 @@
     border-radius: 10px; padding: 12px 14px; font-size: 13px; line-height: 1.4;
     margin-bottom: 16px; font-weight: 600;
   }
-  .banner-error { background: rgba(193,104,95,0.15); border: 1px solid #c1685f; color: #f0b3ac; }
-  .banner-ok { background: rgba(140,170,124,0.15); border: 1px solid #8caa7c; color: #cfe3c6; }
-  .banner-info { background: rgba(74,158,255,0.12); border: 1px solid #4a9eff; color: #bcdcff; }
-  .banner-warn { background: rgba(244,217,18,0.12); border: 1px solid #f4d912; color: #f2e58a; }
+  .banner-error { background: rgba(193,104,95,0.15); border:1px solid var(--rouge-fort); color:var(--rouge-pill); }
+  .banner-ok { background: rgba(140,170,124,0.15); border:1px solid var(--vert); color:var(--vert-pill); }
+  .banner-info { background: rgba(74,158,255,0.12); border:1px solid var(--bleu); color:var(--bleu-pill); }
+  .banner-warn { background: rgba(244,217,18,0.12); border:1px solid var(--accent); color:var(--accent-pill); }
   .banner-btn {
     display: block; width: 100%; margin-top: 10px; min-height: 44px; border-radius: 8px;
-    background: rgba(244,217,18,0.18); border: 1px solid #f4d912 !important;
-    color: #f4d912; font-size: 13px; font-weight: 700;
+    background: rgba(244,217,18,0.18); border:1px solid var(--accent) !important;
+    color:var(--accent-txt); font-size: 13px; font-weight: 700;
   }
 
-  .settings-card { border-color: #3a352c; }
+  .settings-card { border-color:var(--bord); }
   .backup-row { display: flex; gap: 8px; }
   .backup-btn {
-    flex: 1; min-height: 48px; border-radius: 8px; border: 1.5px solid #8c8474 !important;
-    background: transparent; color: #cfc6b3; font-size: 13px; font-weight: 600;
+    flex: 1; min-height: 48px; border-radius: 8px; border:1.5px solid var(--bord-fort) !important;
+    background: transparent; color:var(--texte-1b); font-size: 13px; font-weight: 600;
   }
 
   button { touch-action: manipulation; border: none; font-family: inherit; }
 
   .header { text-align: center; margin-bottom: 14px; }
-  .header-date { font-size: 13px; color: #b3a890; text-transform: capitalize; margin-bottom: 4px; }
-  .header-title { font-size: 30px; font-weight: 800; letter-spacing: 1px; margin: 0; color: #ede6d3; }
-  .header-title-rest { color: #8caa7c; }
-  .header-sub { font-size: 15px; color: #b3a890; margin-top: 4px; }
-  .header-override { font-size: 12px; color: #f2e58a; margin-top: 7px; line-height: 1.4; }
+  .header-date { font-size: 13px; color:var(--texte-2); text-transform: capitalize; margin-bottom: 4px; }
+  .header-title { font-size: 30px; font-weight: 800; letter-spacing: 1px; margin: 0; color:var(--texte); }
+  .header-title-rest { color:var(--vert-txt); }
+  .header-sub { font-size: 15px; color:var(--texte-2); margin-top: 4px; }
+  .header-override { font-size: 12px; color:var(--accent-pill); margin-top: 7px; line-height: 1.4; }
 
   /* Ordre chronologique de gauche à droite : avant-hier, hier, aujourd'hui. */
   .day-row { display: flex; gap: 6px; margin-bottom: 10px; }
   .day-btn {
-    flex: 1; min-height: 44px; border-radius: 8px; border: 1.5px solid #8c8474 !important;
-    background: transparent; color: #cfc6b3; font-size: 13px; font-weight: 600;
+    flex: 1; min-height: 44px; border-radius: 8px; border:1.5px solid var(--bord-fort) !important;
+    background: transparent; color:var(--texte-1b); font-size: 13px; font-weight: 600;
   }
-  .day-btn-active { background: #f4d912; border-color: #f4d912 !important; color: #100f0d; }
+  .day-btn-active { background:var(--accent); border-color:var(--accent) !important; color:var(--sur-accent); }
   .day-date { width: 100%; margin-bottom: 14px; }
   .date-link {
     display: block; width: 100%; min-height: 40px; margin-bottom: 14px;
-    background: transparent; color: #8a8171; font-size: 12px; text-decoration: underline;
-    text-decoration-color: #4a4436;
+    background: transparent; color:var(--texte-3); font-size: 12px; text-decoration: underline;
+    text-decoration-color:var(--bord-discret);
   }
   .prog-toggle {
-    width: 100%; min-height: 44px; background: transparent; border: 1px dashed #8c8474 !important;
-    border-radius: 8px; color: #b3a890; font-size: 13px; font-weight: 600; margin-bottom: 10px;
+    width: 100%; min-height: 44px; background: transparent; border:1px dashed var(--bord-fort) !important;
+    border-radius: 8px; color:var(--texte-2); font-size: 13px; font-weight: 600; margin-bottom: 10px;
   }
   .prog-picker { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
   .prog-btn {
     flex: 1 1 auto; min-width: 74px; min-height: 46px; border-radius: 8px;
-    border: 1.5px solid #8c8474 !important; background: transparent; color: #cfc6b3;
+    border:1.5px solid var(--bord-fort) !important; background: transparent; color:var(--texte-1b);
     font-size: 13px; font-weight: 700;
   }
-  .prog-btn-active { background: #f4d912; border-color: #f4d912 !important; color: #100f0d; }
+  .prog-btn-active { background:var(--accent); border-color:var(--accent) !important; color:var(--sur-accent); }
 
   .hero { text-align: center; margin-bottom: 20px; }
   .hero-flame-wrap { display: inline-flex; padding: 14px 22px; border-radius: 999px; }
@@ -121,9 +194,9 @@
   .hero-flame { display:flex; align-items:center; justify-content:center; gap: 8px; font-size: 28px; }
   .hero-number {
     font-family: ui-monospace, "SF Mono", "Cascadia Code", monospace;
-    font-size: 44px; font-weight: 700; color: #ede6d3;
+    font-size: 44px; font-weight: 700; color:var(--texte);
   }
-  .hero-label { font-size: 13px; color: #b3a890; margin-top: 2px; }
+  .hero-label { font-size: 13px; color:var(--texte-2); margin-top: 2px; }
 
   /* Grille par semaine. La barre de 20 carrés d'avant ne disait rien : elle
      répétait le streak affiché juste au-dessus, sans aucun repère de date, et
@@ -137,100 +210,119 @@
     gap: 5px; margin: 14px auto 0; max-width: 250px;
   }
   .wg-head, .wg-label {
-    font-size: 10px; color: #a89e8a; text-align: center; line-height: 16px;
+    font-size: 10px; color:var(--texte-2); text-align: center; line-height: 16px;
     font-family: ui-monospace, "SF Mono", monospace;
   }
   .wg-label { text-align: right; padding-right: 3px; }
   .wg-cell { height: 17px; border-radius: 4px; }
-  .wg-done { background: #f4d912; }
-  .wg-miss { background: transparent; border: 1.5px solid #8c8474; }
-  .wg-today { background: transparent; border: 1.5px solid #f4d912; box-shadow: inset 0 0 0 2px rgba(244,217,18,0.22); }
-  .wg-today-done { background: #f4d912; box-shadow: 0 0 0 2px rgba(244,217,18,0.35); }
-  .wg-future { background: transparent; border: 1.5px dashed #4a4436; }
-  .wg-legend { display: flex; gap: 12px; justify-content: center; font-size: 10px; color: #8a8171; margin-top: 9px; flex-wrap: wrap; }
+  .wg-done { background:var(--accent); }
+  .wg-miss { background: transparent; border:1.5px solid var(--bord-fort); }
+  .wg-today { background: transparent; border:1.5px solid var(--accent); box-shadow: inset 0 0 0 2px rgba(244,217,18,0.22); }
+  .wg-today-done { background:var(--accent); box-shadow: 0 0 0 2px rgba(244,217,18,0.35); }
+  .wg-future { background: transparent; border:1.5px dashed var(--bord-discret); }
+  /* --bord-discret plafonne a 1,30:1 en theme clair, meme a pleine opacite : les
+     cases « avant tes debuts » y etaient invisibles. Monter l'opacite ne servait
+     a rien, c'est la TEINTE qui manquait. --bord-moyen donne 2,39:1 en clair, et
+     le pointille suffit a garder la hierarchie par rapport aux cases pleines. */
+  .wg-pre { background: transparent; border:1.5px dotted var(--bord-moyen); }
+
+  /* Meme mal que .wg-pre, et sur la case qui compte le plus : en theme clair,
+     l'accent jaune sur fond creme donne 1,28:1 — le contraste le PLUS FAIBLE de
+     toute la grille, plus faible que les cases « avant tes debuts » qu'elle est
+     censee dominer. Sur une installation neuve, cette case est le seul repere de
+     l'ecran d'accueil. --accent-txt est l'accent lisible EN TRAIT (5,36:1 en
+     clair) ; le theme sombre, deja excellent, garde le jaune. */
+  :root[data-theme="clair"] .wg-today { border-color: var(--accent-txt); }
+
+  .ia-cle-avis {
+    font-size: 13px; color:var(--texte); background:var(--bord);
+    border-left:3px solid var(--accent-txt);
+    border-radius: 6px; padding: 8px 10px; margin-top: 8px; line-height: 1.4;
+  }
+  .wg-legend { display: flex; gap: 12px; justify-content: center; font-size: 10px; color:var(--texte-3); margin-top: 9px; flex-wrap: wrap; }
   .wg-legend span { display: inline-flex; align-items: center; gap: 4px; }
   .wg-swatch { width: 11px; height: 11px; border-radius: 3px; display: inline-block; }
 
-  .card { background: #24201b; border: 1px solid #3a352c; border-radius: 14px; padding: 16px; margin-bottom: 14px; }
+  .card { background:var(--fond-pill-2); border:1px solid var(--bord); border-radius: 14px; padding: 16px; margin-bottom: 14px; }
   .card-title {
-    font-size: 14px; font-weight: 700; color: #b3a890; text-transform: uppercase;
+    font-size: 14px; font-weight: 700; color:var(--texte-2); text-transform: uppercase;
     letter-spacing: 0.5px; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;
   }
 
-  .motivation-card { background: #2d2820; border-color: #4a4030; }
-  .motivation-head { font-size: 20px; font-weight: 700; color: #ede6d3; margin-bottom: 6px; }
-  .motivation-sub { font-size: 15px; color: #b3a890; line-height: 1.5; }
+  .motivation-card { background:var(--fond-pill-2); border-color:var(--bord-discret); }
+  .motivation-head { font-size: 20px; font-weight: 700; color:var(--texte); margin-bottom: 6px; }
+  .motivation-sub { font-size: 15px; color:var(--texte-2); line-height: 1.5; }
 
   .duration-pill {
-    background: #3a352c; color: #d9cdb0; font-size: 11px; font-weight: 800;
+    background:var(--bord); color:var(--texte-1b); font-size: 11px; font-weight: 800;
     padding: 3px 8px; border-radius: 20px; margin-left: auto;
   }
 
   .last-session {
-    font-size: 13px; color: #cfc6b3; background: #1e1a15; border-radius: 8px;
+    font-size: 13px; color:var(--texte-1b); background:var(--fond-carte); border-radius: 8px;
     padding: 9px 12px; margin-bottom: 12px; line-height: 1.4;
   }
-  .last-session strong { color: #ede6d3; }
-  .last-session-empty { color: #a89e8a; font-style: italic; }
+  .last-session strong { color:var(--texte); }
+  .last-session-empty { color:var(--texte-2); font-style: italic; }
 
   .detail-toggle {
-    width: 100%; min-height: 48px; background: transparent; border: 1px dashed #8c8474 !important;
-    border-radius: 8px; color: #b3a890; font-size: 13px; font-weight: 600; margin-bottom: 4px;
+    width: 100%; min-height: 48px; background: transparent; border:1px dashed var(--bord-fort) !important;
+    border-radius: 8px; color:var(--texte-2); font-size: 13px; font-weight: 600; margin-bottom: 4px;
   }
 
   .exercise-list { list-style: none; margin: 12px 0 0; padding: 0; }
-  .exercise-item { padding: 12px 0 14px 12px; border-bottom: 1px solid #3a352c; border-left: 3px solid transparent; }
+  .exercise-item { padding: 12px 0 14px 12px; border-bottom:1px solid var(--bord); border-left: 3px solid transparent; }
   .exercise-item:last-child { border-bottom: none; }
   .exercise-item-top { display: flex; align-items: center; gap: 6px; }
   /* Le nom replie ou déplie l'exercice. Le « ? » vient juste après, collé au
      nom : posé en bout de ligne, on ne voyait plus à quoi il se rapportait. */
   .exercise-item-name {
     flex: 0 1 auto; text-align: left; background: transparent; padding: 4px 0; min-height: 44px;
-    font-family: inherit; font-size: 14px; font-weight: 700; color: #ede6d3;
+    font-family: inherit; font-size: 14px; font-weight: 700; color:var(--texte);
     display: flex; align-items: center; gap: 8px;
   }
   /* Chevron nettement visible : à 12 px il ne se lisait pas comme un bouton. */
   .exo-caret {
     flex-shrink: 0; width: 22px; height: 22px; border-radius: 6px;
-    background: #3a352c; color: #f4d912;
+    background:var(--bord); color:var(--accent-txt);
     font-size: 13px; line-height: 22px; text-align: center;
   }
   .howto-btn {
     flex-shrink: 0; width: 30px; height: 30px; border-radius: 50%;
-    border: 1px solid #8c8474 !important; background: transparent; color: #a89e8a;
+    border:1px solid var(--bord-fort) !important; background: transparent; color:var(--texte-2);
     font-size: 13px; font-weight: 700; font-family: inherit;
   }
-  .howto-btn[aria-expanded="true"] { border-color: #f4d912 !important; color: #f4d912; }
+  .howto-btn[aria-expanded="true"] { border-color:var(--accent) !important; color:var(--accent-txt); }
   .exercise-check-icon { margin-left: auto; }
   /* Replié : la ligne se tasse et se grise, pour que l'effet soit visible même
      sur un exercice court comme un échauffement. */
   .exercise-item-folded { padding-top: 6px; padding-bottom: 6px; opacity: 0.72; }
   .exercise-item-folded .exercise-item-name { min-height: 34px; font-weight: 600; }
   .exo-summary {
-    font-size: 12px; color: #a89e8a; padding-left: 42px; margin-top: -4px;
+    font-size: 12px; color:var(--texte-2); padding-left: 42px; margin-top: -4px;
     font-family: ui-monospace, "SF Mono", monospace;
   }
-  .exercise-item-detail { font-size: 13px; color: #b3a890; margin-top: 2px; }
+  .exercise-item-detail { font-size: 13px; color:var(--texte-2); margin-top: 2px; }
 
   .howto {
-    background: #1a1712; border: 1px solid #3a352c; border-radius: 8px;
+    background:var(--fond-encart); border:1px solid var(--bord); border-radius: 8px;
     padding: 11px 12px; margin-top: 9px;
   }
   .howto-mat {
     font-size: 11px; font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase;
-    color: #f4d912; margin-bottom: 7px;
+    color:var(--accent-txt); margin-bottom: 7px;
   }
   .howto-list { margin: 0; padding-left: 17px; }
-  .howto-list li { font-size: 13px; color: #cfc6b3; line-height: 1.45; margin-bottom: 5px; }
+  .howto-list li { font-size: 13px; color:var(--texte-1b); line-height: 1.45; margin-bottom: 5px; }
   .howto-video {
     display: block; text-align: center; margin-top: 10px; min-height: 44px; line-height: 44px;
-    border-radius: 8px; border: 1px solid #4a9eff; background: rgba(74,158,255,0.14);
-    color: #bcdcff; font-size: 13px; font-weight: 700; text-decoration: none;
+    border-radius: 8px; border:1px solid var(--bleu); background: rgba(74,158,255,0.14);
+    color:var(--bleu-pill); font-size: 13px; font-weight: 700; text-decoration: none;
   }
-  .howto-note { font-size: 11px; color: #8a8171; margin-top: 8px; line-height: 1.4; }
-  .exercise-item-done { border-left-color: #8caa7c; background: rgba(140,170,124,0.07); }
-  .exercise-item-done .exercise-item-name { color: #cfe3c6; }
-  .exercise-check-icon { color: #8caa7c; flex-shrink: 0; font-weight: 900; }
+  .howto-note { font-size: 11px; color:var(--texte-3); margin-top: 8px; line-height: 1.4; }
+  .exercise-item-done { border-left-color:var(--vert); background: rgba(140,170,124,0.07); }
+  .exercise-item-done .exercise-item-name { color:var(--vert-pill); }
+  .exercise-check-icon { color:var(--vert-txt); flex-shrink: 0; font-weight: 900; }
 
   /* Pastilles : seulement pour les exercices chronométrés, sans charge.
      Zone de frappe portée à 46 px par un pseudo-élément, écart suffisant pour
@@ -238,53 +330,53 @@
   .set-row { display: flex; align-items: center; flex-wrap: wrap; gap: 16px; row-gap: 14px; margin-top: 12px; }
   .set-dot {
     position: relative;
-    width: 30px; height: 30px; border-radius: 50%; border: 1.5px solid #8c8474; background: transparent;
-    color: #cfc6b3; font-size: 13px; font-weight: 700;
+    width: 30px; height: 30px; border-radius: 50%; border:1.5px solid var(--bord-fort); background: transparent;
+    color:var(--texte-1b); font-size: 13px; font-weight: 700;
     display: flex; align-items: center; justify-content: center; flex-shrink: 0;
   }
   .set-dot::after { content: ""; position: absolute; top: -8px; right: -8px; bottom: -8px; left: -8px; }
-  .set-remaining { font-size: 12px; color: #a89e8a; }
+  .set-remaining { font-size: 12px; color:var(--texte-2); }
 
   /* Saisie série par série : la charge peut monter ou descendre entre les séries. */
   .serie-table { margin-top: 10px; }
   .serie-line { display: flex; align-items: center; gap: 7px; margin-bottom: 7px; }
   .serie-num {
     width: 20px; flex-shrink: 0; text-align: center;
-    font-family: ui-monospace, "SF Mono", monospace; font-size: 12px; font-weight: 700; color: #a89e8a;
+    font-family: ui-monospace, "SF Mono", monospace; font-size: 12px; font-weight: 700; color:var(--texte-2);
   }
-  .serie-line-filled .serie-num { color: #f4d912; }
+  .serie-line-filled .serie-num { color:var(--accent-txt); }
   .serie-input {
-    width: 74px; min-height: 46px; background: #100f0d; border: 1.5px solid #8c8474; border-radius: 8px;
-    color: #ede6d3; font-size: 16px; padding: 0 8px; text-align: center;
+    width: 74px; min-height: 46px; background: var(--fond-champ); border:1.5px solid var(--bord-fort); border-radius: 8px;
+    color:var(--texte); font-size: 16px; padding: 0 8px; text-align: center;
     font-family: ui-monospace, "SF Mono", monospace;
   }
-  .serie-input:focus { outline: 2px solid #f4d912; border-color: #f4d912; }
-  .serie-unit { font-size: 12px; color: #a89e8a; flex-shrink: 0; }
-  .serie-x { color: #a89e8a; font-size: 14px; font-weight: 700; flex-shrink: 0; }
+  .serie-input:focus { outline:2px solid var(--accent); border-color:var(--accent); }
+  .serie-unit { font-size: 12px; color:var(--texte-2); flex-shrink: 0; }
+  .serie-x { color:var(--texte-2); font-size: 14px; font-weight: 700; flex-shrink: 0; }
   .serie-sub {
     font-family: ui-monospace, "SF Mono", monospace; font-size: 12px; font-weight: 700;
-    color: #f4d912; margin-left: auto; flex-shrink: 0;
+    color:var(--accent-txt); margin-left: auto; flex-shrink: 0;
   }
 
   .exo-compare {
     display: flex; align-items: baseline; justify-content: space-between; gap: 8px; flex-wrap: wrap;
-    background: #1e1a15; border-radius: 8px; padding: 9px 11px; margin-top: 9px;
-    font-size: 12px; color: #a89e8a;
+    background:var(--fond-carte); border-radius: 8px; padding: 9px 11px; margin-top: 9px;
+    font-size: 12px; color:var(--texte-2);
   }
-  .exo-compare b { color: #ede6d3; font-weight: 700; font-family: ui-monospace, "SF Mono", monospace; font-size: 14px; }
-  .exo-today b { color: #f4d912; }
-  .load-up { color: #8caa7c; font-weight: 700; }
-  .load-down { color: #e08a80; font-weight: 700; }
+  .exo-compare b { color:var(--texte); font-weight: 700; font-family: ui-monospace, "SF Mono", monospace; font-size: 14px; }
+  .exo-today b { color:var(--accent-txt); }
+  .load-up { color:var(--vert-txt); font-weight: 700; }
+  .load-down { color:var(--rouge-txt); font-weight: 700; }
 
   .tonnage-line {
     display: flex; align-items: baseline; justify-content: space-between; gap: 8px;
-    background: #1e1a15; border-radius: 8px; padding: 10px 12px; margin-top: 12px;
+    background:var(--fond-carte); border-radius: 8px; padding: 10px 12px; margin-top: 12px;
   }
-  .tonnage-value { font-family: ui-monospace, "SF Mono", monospace; font-size: 19px; font-weight: 700; color: #f4d912; }
-  .tonnage-label { font-size: 12px; color: #a89e8a; }
+  .tonnage-value { font-family: ui-monospace, "SF Mono", monospace; font-size: 19px; font-weight: 700; color:var(--accent-txt); }
+  .tonnage-label { font-size: 12px; color:var(--texte-2); }
 
   .all-done-hint {
-    background: rgba(140,170,124,0.14); border: 1px solid #8caa7c; color: #cfe3c6;
+    background: rgba(140,170,124,0.14); border:1px solid var(--vert); color:var(--vert-pill);
     font-size: 13px; font-weight: 600; padding: 10px 12px; border-radius: 8px; margin-top: 12px;
   }
 
@@ -292,40 +384,40 @@
   .nutrition-item {
     display: flex; align-items: center; gap: 12px; width: 100%; text-align: left;
     padding: 12px 8px; min-height: 48px; border-radius: 6px;
-    border: none; border-bottom: 1px solid #3a352c; border-left: 3px solid transparent;
+    border: none; border-bottom:1px solid var(--bord); border-left: 3px solid transparent;
     background: transparent; color: inherit; font-family: inherit;
   }
   .nutrition-list li:last-child .nutrition-item { border-bottom: none; }
-  .nutrition-item-done { border-left-color: #8caa7c; background: rgba(140,170,124,0.07); }
-  .nutrition-item-done .nutrition-item-name { color: #cfe3c6; }
-  .nutrition-check-icon { color: #8caa7c; flex-shrink: 0; margin-left: auto; font-weight: 900; }
-  .nutrition-time { font-family: ui-monospace, "SF Mono", monospace; font-size: 13px; font-weight: 700; color: #f4d912; min-width: 48px; }
+  .nutrition-item-done { border-left-color:var(--vert); background: rgba(140,170,124,0.07); }
+  .nutrition-item-done .nutrition-item-name { color:var(--vert-pill); }
+  .nutrition-check-icon { color:var(--vert-txt); flex-shrink: 0; margin-left: auto; font-weight: 900; }
+  .nutrition-time { font-family: ui-monospace, "SF Mono", monospace; font-size: 13px; font-weight: 700; color:var(--accent-txt); min-width: 48px; }
   .nutrition-item-text { display: flex; flex-direction: column; flex: 1; }
-  .nutrition-item-name { font-size: 14px; color: #ede6d3; }
-  .nutrition-item-note { font-size: 12px; color: #a89e8a; margin-top: 1px; }
+  .nutrition-item-name { font-size: 14px; color:var(--texte); }
+  .nutrition-item-note { font-size: 12px; color:var(--texte-2); margin-top: 1px; }
 
   .checkin-btn {
-    width: 100%; min-height: 54px; border-radius: 10px; border: 1.5px solid #8c8474 !important; background: transparent;
-    color: #ede6d3; font-size: 15px; font-weight: 600;
+    width: 100%; min-height: 54px; border-radius: 10px; border:1.5px solid var(--bord-fort) !important; background: transparent;
+    color:var(--texte); font-size: 15px; font-weight: 600;
     display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 16px;
   }
-  .checkin-btn-active { background: #8caa7c; border-color: #8caa7c !important; color: #100f0d; }
+  .checkin-btn-active { background:var(--vert); border-color:var(--vert) !important; color:var(--sur-accent); }
 
   .field { margin-bottom: 14px; }
-  .field-label { font-size: 14px; color: #b3a890; margin-bottom: 6px; display:block; }
+  .field-label { font-size: 14px; color:var(--texte-2); margin-bottom: 6px; display:block; }
   .weight-input {
-    width: 100%; min-height: 50px; background: #100f0d; border: 1.5px solid #8c8474; border-radius: 10px;
-    color: #ede6d3; font-size: 18px; padding: 0 14px; font-family: ui-monospace, "SF Mono", monospace;
+    width: 100%; min-height: 50px; background: var(--fond-champ); border:1.5px solid var(--bord-fort); border-radius: 10px;
+    color:var(--texte); font-size: 18px; padding: 0 14px; font-family: ui-monospace, "SF Mono", monospace;
   }
-  .weight-input:focus { outline: 2px solid #f4d912; border-color: #f4d912; }
-  .field-hint { font-size: 12px; color: #a89e8a; margin-top: 5px; }
+  .weight-input:focus { outline:2px solid var(--accent); border-color:var(--accent); }
+  .field-hint { font-size: 12px; color:var(--texte-2); margin-top: 5px; }
 
   .level-row { display:flex; gap: 8px; }
   .level-btn {
-    flex: 1; min-height: 48px; border-radius: 8px; border: 1.5px solid #8c8474 !important; background: transparent;
-    color: #cfc6b3; font-size: 14px; font-weight: 600;
+    flex: 1; min-height: 48px; border-radius: 8px; border:1.5px solid var(--bord-fort) !important; background: transparent;
+    color:var(--texte-1b); font-size: 14px; font-weight: 600;
   }
-  .level-btn-active { background: #f4d912; border-color: #f4d912 !important; color: #100f0d; }
+  .level-btn-active { background:var(--accent); border-color:var(--accent) !important; color:var(--sur-accent); }
 
   /* L'échelle verticale est en HTML, dans une gouttière à gauche : le SVG est en
      preserveAspectRatio="none", donc tout texte placé dedans serait étiré. */
@@ -334,50 +426,50 @@
   .chart-yaxis { position: absolute; left: 0; top: 0; width: 28px; height: 150px; }
   .chart-ytick {
     position: absolute; right: 0; transform: translateY(-50%);
-    font-family: ui-monospace, "SF Mono", monospace; font-size: 10px; color: #a89e8a;
-    background: #24201b; padding: 0 2px; line-height: 1.1;
+    font-family: ui-monospace, "SF Mono", monospace; font-size: 10px; color:var(--texte-2);
+    background:var(--fond-pill-2); padding: 0 2px; line-height: 1.1;
   }
-  .chart-ytick-target { color: #8caa7c; font-weight: 700; }
-  .chart-labels { display: flex; justify-content: space-between; font-size: 11px; color: #a89e8a; margin-top: 6px; padding-left: 32px; }
-  .chart-labels b { color: #ede6d3; font-family: ui-monospace, "SF Mono", monospace; font-weight: 700; }
-  .chart-target-label { color: #8caa7c; font-weight: 600; }
+  .chart-ytick-target { color:var(--vert-txt); font-weight: 700; }
+  .chart-labels { display: flex; justify-content: space-between; font-size: 11px; color:var(--texte-2); margin-top: 6px; padding-left: 32px; }
+  .chart-labels b { color:var(--texte); font-family: ui-monospace, "SF Mono", monospace; font-weight: 700; }
+  .chart-target-label { color:var(--vert-txt); font-weight: 600; }
   .chart-modes { display: flex; gap: 6px; margin-bottom: 10px; }
   .chart-mode-btn {
-    flex: 1; min-height: 44px; border-radius: 8px; border: 1.5px solid #8c8474 !important;
-    background: transparent; color: #cfc6b3; font-size: 12px; font-weight: 600;
+    flex: 1; min-height: 44px; border-radius: 8px; border:1.5px solid var(--bord-fort) !important;
+    background: transparent; color:var(--texte-1b); font-size: 12px; font-weight: 600;
   }
-  .chart-mode-active { background: #f4d912; border-color: #f4d912 !important; color: #100f0d; }
-  .chart-legend { display: flex; gap: 14px; justify-content: center; font-size: 11px; color: #a89e8a; margin-top: 8px; flex-wrap: wrap; }
+  .chart-mode-active { background:var(--accent); border-color:var(--accent) !important; color:var(--sur-accent); }
+  .chart-legend { display: flex; gap: 14px; justify-content: center; font-size: 11px; color:var(--texte-2); margin-top: 8px; flex-wrap: wrap; }
   .chart-legend span { display: inline-flex; align-items: center; gap: 5px; }
   .legend-swatch { width: 14px; height: 3px; border-radius: 2px; display: inline-block; }
 
   .stat-grid { display: flex; gap: 10px; margin-bottom: 12px; }
-  .stat-box { flex: 1; text-align: center; padding: 11px 6px; border-radius: 10px; background: #1e1a15; border: 1.5px solid #3a352c; }
-  .stat-num { font-family: ui-monospace, "SF Mono", monospace; font-size: 18px; font-weight: 700; color: #f4d912; }
-  .stat-label { font-size: 11px; color: #a89e8a; margin-top: 3px; line-height: 1.3; }
+  .stat-box { flex: 1; text-align: center; padding: 11px 6px; border-radius: 10px; background:var(--fond-carte); border:1.5px solid var(--bord); }
+  .stat-num { font-family: ui-monospace, "SF Mono", monospace; font-size: 18px; font-weight: 700; color:var(--accent-txt); }
+  .stat-label { font-size: 11px; color:var(--texte-2); margin-top: 3px; line-height: 1.3; }
 
   .badges { display:flex; gap: 10px; }
-  .badge { flex: 1; text-align: center; padding: 12px 6px; border-radius: 10px; border: 1.5px solid #8c8474; background: #1e1a15; }
-  .badge-unlocked { border-color: #f4d912; background: rgba(232,183,74,0.14); }
-  .badge-num { font-family: ui-monospace, "SF Mono", monospace; font-size: 18px; font-weight: 700; color: #d9cdb0; }
-  .badge-unlocked .badge-num { color: #f4d912; }
-  .badge-label { font-size: 12px; color: #cfc6b3; margin-top: 2px; font-weight: 600; }
-  .total-line { text-align:center; font-size: 12px; color: #a89e8a; margin-top: 12px; line-height: 1.5; }
+  .badge { flex: 1; text-align: center; padding: 12px 6px; border-radius: 10px; border:1.5px solid var(--bord-fort); background:var(--fond-carte); }
+  .badge-unlocked { border-color:var(--accent); background: rgba(232,183,74,0.14); }
+  .badge-num { font-family: ui-monospace, "SF Mono", monospace; font-size: 18px; font-weight: 700; color:var(--texte-1b); }
+  .badge-unlocked .badge-num { color:var(--accent-txt); }
+  .badge-label { font-size: 12px; color:var(--texte-1b); margin-top: 2px; font-weight: 600; }
+  .total-line { text-align:center; font-size: 12px; color:var(--texte-2); margin-top: 12px; line-height: 1.5; }
 
   .footer-row { text-align: center; margin-top: 8px; }
-  .reset-btn { background: none; color: #8a8171; font-size: 12px; min-height: 44px; padding: 0 14px; display: inline-flex; align-items: center; gap: 5px; }
+  .reset-btn { background: none; color:var(--texte-3); font-size: 12px; min-height: 44px; padding: 0 14px; display: inline-flex; align-items: center; gap: 5px; }
   .update-btn {
-    background: rgba(74,158,255,0.14); border: 1px solid #4a9eff !important; color: #bcdcff;
+    background: rgba(74,158,255,0.14); border:1px solid var(--bleu) !important; color:var(--bleu-pill);
     font-size: 12px; font-weight: 700; padding: 0 18px; min-height: 44px; border-radius: 22px;
     display: inline-flex; align-items: center; gap: 5px; margin-bottom: 10px;
   }
-  .version-tag { font-size: 11px; color: #8a8171; margin-top: 8px; }
+  .version-tag { font-size: 11px; color:var(--texte-3); margin-top: 8px; }
 
   button:active { transform: scale(0.96); filter: brightness(1.25); }
   .nutrition-item:active { background: rgba(244,217,18,0.10); }
-  .set-dot:active { border-color: #f4d912; }
+  .set-dot:active { border-color:var(--accent); }
 
-  input:focus, button:focus-visible { outline: 2px solid #f4d912; outline-offset: 2px; }
+  input:focus, button:focus-visible { outline:2px solid var(--accent); outline-offset: 2px; }
 
   .sr-only {
     position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
@@ -387,55 +479,55 @@
   /* --- Diagnostic de première utilisation ---------------------------------- */
   .ob-container { max-width: 460px; }
   .ob-dots { display: flex; gap: 5px; justify-content: center; margin-bottom: 10px; }
-  .ob-dot { width: 22px; height: 4px; border-radius: 2px; background: #3a352c; }
-  .ob-dot-past { background: #6b6455; }
-  .ob-dot-on { background: #f4d912; }
+  .ob-dot { width: 22px; height: 4px; border-radius: 2px; background:var(--bord); }
+  .ob-dot-past { background:var(--bord-moyen); }
+  .ob-dot-on { background:var(--accent); }
   .ob-step-label {
-    text-align: center; font-size: 11px; color: #8a8171; margin-bottom: 14px;
+    text-align: center; font-size: 11px; color:var(--texte-3); margin-bottom: 14px;
     text-transform: uppercase; letter-spacing: 0.6px; font-weight: 700;
   }
   .ob-card { padding: 18px 16px; }
-  .ob-lead { font-size: 15px; line-height: 1.5; color: #cfc6b3; margin: 0 0 16px; }
-  .ob-lead b { color: #ede6d3; }
+  .ob-lead { font-size: 15px; line-height: 1.5; color:var(--texte-1b); margin: 0 0 16px; }
+  .ob-lead b { color:var(--texte); }
 
   .ob-row { display: flex; gap: 8px; }
   .ob-row-wrap { flex-wrap: wrap; }
   .ob-chip {
     flex: 1 1 auto; min-width: 88px; min-height: 48px; padding: 0 12px; border-radius: 9px;
-    border: 1.5px solid #8c8474 !important; background: transparent; color: #cfc6b3;
+    border:1.5px solid var(--bord-fort) !important; background: transparent; color:var(--texte-1b);
     font-size: 13px; font-weight: 600; font-family: inherit;
   }
-  .ob-chip-on { background: #f4d912; border-color: #f4d912 !important; color: #100f0d; font-weight: 700; }
+  .ob-chip-on { background:var(--accent); border-color:var(--accent) !important; color:var(--sur-accent); font-weight: 700; }
 
   /* Sept jours sur une ligne : cases carrées, zone de frappe suffisante. */
   .ob-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
   .ob-day {
-    min-height: 52px; border-radius: 9px; border: 1.5px solid #8c8474 !important;
-    background: transparent; color: #cfc6b3; font-size: 12px; font-weight: 700; font-family: inherit;
+    min-height: 52px; border-radius: 9px; border:1.5px solid var(--bord-fort) !important;
+    background: transparent; color:var(--texte-1b); font-size: 12px; font-weight: 700; font-family: inherit;
   }
-  .ob-day-on { background: #f4d912; border-color: #f4d912 !important; color: #100f0d; }
+  .ob-day-on { background:var(--accent); border-color:var(--accent) !important; color:var(--sur-accent); }
 
   .ob-equip-list { display: flex; flex-direction: column; gap: 8px; }
   .ob-equip {
     display: flex; align-items: center; gap: 11px; width: 100%; text-align: left;
     min-height: 58px; padding: 10px 12px; border-radius: 10px;
-    border: 1.5px solid #8c8474 !important; background: transparent; font-family: inherit;
+    border:1.5px solid var(--bord-fort) !important; background: transparent; font-family: inherit;
   }
-  .ob-equip-on { border-color: #f4d912 !important; background: rgba(244,217,18,0.09); }
+  .ob-equip-on { border-color:var(--accent) !important; background: rgba(244,217,18,0.09); }
   .ob-equip-box {
-    flex-shrink: 0; width: 24px; height: 24px; border-radius: 6px; border: 1.5px solid #8c8474;
-    color: #100f0d; font-size: 14px; font-weight: 900; line-height: 22px; text-align: center;
+    flex-shrink: 0; width: 24px; height: 24px; border-radius: 6px; border:1.5px solid var(--bord-fort);
+    color:var(--sur-accent); font-size: 14px; font-weight: 900; line-height: 22px; text-align: center;
   }
-  .ob-equip-on .ob-equip-box { background: #f4d912; border-color: #f4d912; }
+  .ob-equip-on .ob-equip-box { background:var(--accent); border-color:var(--accent); }
   .ob-equip-text { display: flex; flex-direction: column; gap: 2px; }
-  .ob-equip-text b { font-size: 14px; color: #ede6d3; font-weight: 700; }
-  .ob-equip-text span { font-size: 12px; color: #a89e8a; line-height: 1.35; }
+  .ob-equip-text b { font-size: 14px; color:var(--texte); font-weight: 700; }
+  .ob-equip-text span { font-size: 12px; color:var(--texte-2); line-height: 1.35; }
 
   /* Sous-liste des machines : décalée et sur fond sombre pour qu'on voie qu'elle
      dépend de la case « salle de sport » juste au-dessus. */
   .ob-gear {
     margin-top: 16px; padding: 13px 12px 4px; border-radius: 10px;
-    background: #1a1712; border: 1px solid #3a352c;
+    background:var(--fond-encart); border:1px solid var(--bord);
   }
   .ob-equip-sub { min-height: 52px; padding: 8px 11px; }
   .ob-equip-sub .ob-equip-text b { font-size: 13px; }
@@ -446,124 +538,124 @@
   .ob-kinds { display: flex; flex-wrap: wrap; gap: 6px; }
   .ob-kind {
     flex: 1 1 auto; min-width: 62px; min-height: 54px; border-radius: 9px;
-    border: 1.5px solid #8c8474 !important; background: transparent;
+    border:1.5px solid var(--bord-fort) !important; background: transparent;
     display: flex; flex-direction: column; align-items: center; justify-content: center;
     gap: 2px; font-family: inherit;
   }
-  .ob-kind-day { font-size: 13px; font-weight: 700; color: #ede6d3; }
-  .ob-kind-what { font-size: 10px; color: #a89e8a; text-transform: uppercase; letter-spacing: 0.4px; }
-  .ob-kind-run { border-color: #4a9eff !important; background: rgba(74,158,255,0.12); }
-  .ob-kind-run .ob-kind-day { color: #bcdcff; }
-  .ob-kind-run .ob-kind-what { color: #4a9eff; font-weight: 700; }
+  .ob-kind-day { font-size: 13px; font-weight: 700; color:var(--texte); }
+  .ob-kind-what { font-size: 10px; color:var(--texte-2); text-transform: uppercase; letter-spacing: 0.4px; }
+  .ob-kind-run { border-color:var(--bleu) !important; background: rgba(74,158,255,0.12); }
+  .ob-kind-run .ob-kind-day { color:var(--bleu-pill); }
+  .ob-kind-run .ob-kind-what { color:var(--bleu-txt); font-weight: 700; }
 
   .ob-sess { margin-bottom: 14px; }
   .ob-sess-head {
-    display: flex; align-items: center; gap: 6px; font-size: 13px; color: #b3a890;
-    padding-bottom: 6px; border-bottom: 1px solid #3a352c; margin-bottom: 4px;
+    display: flex; align-items: center; gap: 6px; font-size: 13px; color:var(--texte-2);
+    padding-bottom: 6px; border-bottom:1px solid var(--bord); margin-bottom: 4px;
   }
-  .ob-sess-head b { color: #f4d912; text-transform: capitalize; }
+  .ob-sess-head b { color:var(--accent-txt); text-transform: capitalize; }
   .ob-exo-list { list-style: none; margin: 0; padding: 0; }
   .ob-exo {
     display: flex; align-items: center; gap: 10px;
-    padding: 7px 0; border-bottom: 1px solid #2c281f;
+    padding: 7px 0; border-bottom:1px solid var(--sep);
   }
   .ob-exo:last-child { border-bottom: none; }
   .ob-exo-text { display: flex; flex-direction: column; flex: 1; gap: 1px; }
-  .ob-exo-text b { font-size: 13px; color: #ede6d3; font-weight: 600; }
-  .ob-exo-text span { font-size: 11px; color: #8a8171; }
+  .ob-exo-text b { font-size: 13px; color:var(--texte); font-weight: 600; }
+  .ob-exo-text span { font-size: 11px; color:var(--texte-3); }
   .ob-exo-no {
     flex-shrink: 0; width: 34px; height: 34px; border-radius: 50%;
-    border: 1px solid #6b6455 !important; background: transparent; color: #a89e8a;
+    border:1px solid var(--bord-moyen) !important; background: transparent; color:var(--texte-2);
     font-size: 13px; font-weight: 700; font-family: inherit;
   }
-  .ob-exo-no:active { border-color: #e08a80 !important; color: #e08a80; }
-  .ob-excluded { margin-top: 12px; padding-top: 12px; border-top: 1px solid #3a352c; }
+  .ob-exo-no:active { border-color:var(--rouge) !important; color:var(--rouge-txt); }
+  .ob-excluded { margin-top: 12px; padding-top: 12px; border-top:1px solid var(--bord); }
   .ob-back-chip {
     display: inline-block; margin: 4px 5px 0 0; min-height: 38px; padding: 0 11px; border-radius: 19px;
-    border: 1px solid #6b6455 !important; background: transparent; color: #a89e8a;
+    border:1px solid var(--bord-moyen) !important; background: transparent; color:var(--texte-2);
     font-size: 12px; font-family: inherit;
   }
 
   .ob-note {
-    background: #1e1a15; border-left: 3px solid #f4d912; border-radius: 6px;
-    padding: 10px 12px; font-size: 13px; color: #cfc6b3; line-height: 1.45; margin-top: 12px;
+    background:var(--fond-carte); border-left:3px solid var(--accent); border-radius: 6px;
+    padding: 10px 12px; font-size: 13px; color:var(--texte-1b); line-height: 1.45; margin-top: 12px;
   }
-  .ob-note b { color: #ede6d3; }
+  .ob-note b { color:var(--texte); }
   .ob-warn {
-    background: rgba(193,104,95,0.13); border: 1px solid #c1685f; border-radius: 8px;
-    padding: 10px 12px; font-size: 12px; color: #f0b3ac; line-height: 1.45; margin-top: 12px;
+    background: rgba(193,104,95,0.13); border:1px solid var(--rouge-fort); border-radius: 8px;
+    padding: 10px 12px; font-size: 12px; color:var(--rouge-pill); line-height: 1.45; margin-top: 12px;
   }
-  .ob-warn-soft { background: rgba(140,132,116,0.10); border-color: #6b6455; color: #b3a890; }
-  .ob-warn b { color: #ede6d3; }
+  .ob-warn-soft { background: rgba(140,132,116,0.10); border-color:var(--bord-moyen); color:var(--texte-2); }
+  .ob-warn b { color:var(--texte); }
 
-  .ob-recap { background: #1e1a15; border-radius: 10px; padding: 4px 12px; margin-bottom: 12px; }
+  .ob-recap { background:var(--fond-carte); border-radius: 10px; padding: 4px 12px; margin-bottom: 12px; }
   .ob-recap-row {
     display: flex; align-items: baseline; justify-content: space-between; gap: 10px;
-    padding: 9px 0; border-bottom: 1px solid #2c281f; font-size: 13px; color: #a89e8a;
+    padding: 9px 0; border-bottom:1px solid var(--sep); font-size: 13px; color:var(--texte-2);
   }
   .ob-recap-row:last-child { border-bottom: none; }
-  .ob-recap-row b { color: #ede6d3; font-weight: 700; text-align: right; }
+  .ob-recap-row b { color:var(--texte); font-weight: 700; text-align: right; }
 
-  .ob-restore { margin-top: 18px; padding-top: 14px; border-top: 1px solid #3a352c; }
+  .ob-restore { margin-top: 18px; padding-top: 14px; border-top:1px solid var(--bord); }
   .ob-restore-btn {
     width: 100%; min-height: 46px; border-radius: 8px; background: transparent;
-    border: 1px dashed #8c8474 !important; color: #a89e8a; font-size: 13px; font-family: inherit;
+    border:1px dashed var(--bord-fort) !important; color:var(--texte-2); font-size: 13px; font-family: inherit;
   }
 
   .ob-nav { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 4px; }
   .ob-back {
     min-height: 50px; padding: 0 18px; border-radius: 10px; background: transparent;
-    border: 1.5px solid #8c8474 !important; color: #cfc6b3; font-size: 14px; font-weight: 600;
+    border:1.5px solid var(--bord-fort) !important; color:var(--texte-1b); font-size: 14px; font-weight: 600;
   }
   .ob-next {
-    flex: 1; min-height: 54px; border-radius: 10px; background: #f4d912; border: none;
-    color: #100f0d; font-size: 15px; font-weight: 800;
+    flex: 1; min-height: 54px; border-radius: 10px; background:var(--accent); border: none;
+    color:var(--sur-accent); font-size: 15px; font-weight: 800;
   }
-  .ob-next[disabled] { background: #3a352c; color: #7a7263; }
-  .ob-safe { text-align: center; font-size: 11px; color: #8a8171; margin-top: 14px; line-height: 1.5; }
+  .ob-next[disabled] { background:var(--bord); color:var(--texte-3); }
+  .ob-safe { text-align: center; font-size: 11px; color:var(--texte-3); margin-top: 14px; line-height: 1.5; }
 
   /* --- Carte profil, dans Bilan & réglages --------------------------------- */
   .profile-row {
     display: flex; align-items: baseline; justify-content: space-between; gap: 10px;
-    padding: 8px 0; border-bottom: 1px solid #2c281f; font-size: 13px; color: #a89e8a;
+    padding: 8px 0; border-bottom:1px solid var(--sep); font-size: 13px; color:var(--texte-2);
   }
   .profile-row:last-of-type { border-bottom: none; }
-  .profile-row b { color: #ede6d3; font-weight: 600; text-align: right; }
+  .profile-row b { color:var(--texte); font-weight: 600; text-align: right; }
   .profile-btn {
     width: 100%; min-height: 48px; margin-top: 12px; border-radius: 8px;
-    border: 1.5px solid #8c8474 !important; background: transparent; color: #cfc6b3;
+    border:1.5px solid var(--bord-fort) !important; background: transparent; color:var(--texte-1b);
     font-size: 13px; font-weight: 600;
   }
   .nutri-targets { display: flex; gap: 8px; margin-bottom: 10px; }
   .nutri-target {
     flex: 1; text-align: center; padding: 9px 4px; border-radius: 9px;
-    background: #1e1a15; border: 1.5px solid #3a352c;
+    background:var(--fond-carte); border:1.5px solid var(--bord);
   }
   .nutri-target-num {
-    font-family: ui-monospace, "SF Mono", monospace; font-size: 16px; font-weight: 700; color: #f4d912;
+    font-family: ui-monospace, "SF Mono", monospace; font-size: 16px; font-weight: 700; color:var(--accent-txt);
   }
-  .nutri-target-label { font-size: 10px; color: #a89e8a; margin-top: 2px; line-height: 1.3; }
+  .nutri-target-label { font-size: 10px; color:var(--texte-2); margin-top: 2px; line-height: 1.3; }
   /* --- Carte Analyse ------------------------------------------------------- */
   .ana-bloc { margin-top: 14px; }
   .ana-prop {
-    background: #1e1a15; border-left: 3px solid #f4d912; border-radius: 8px;
+    background:var(--fond-carte); border-left:3px solid var(--accent); border-radius: 8px;
     padding: 11px 12px; margin-bottom: 9px;
   }
-  .ana-prop-texte { font-size: 14px; font-weight: 700; color: #ede6d3; }
-  .ana-prop-raison { font-size: 12px; color: #a89e8a; line-height: 1.45; margin-top: 4px; }
+  .ana-prop-texte { font-size: 14px; font-weight: 700; color:var(--texte); }
+  .ana-prop-raison { font-size: 12px; color:var(--texte-2); line-height: 1.45; margin-top: 4px; }
   .ana-prop-actes { display: flex; gap: 8px; margin-top: 10px; }
   .ana-ok-btn {
     flex: 1; min-height: 44px; border-radius: 8px; border: none;
-    background: #f4d912; color: #100f0d; font-size: 13px; font-weight: 800; font-family: inherit;
+    background:var(--accent); color:var(--sur-accent); font-size: 13px; font-weight: 800; font-family: inherit;
   }
   .ana-non-btn {
     flex: 1; min-height: 44px; border-radius: 8px; background: transparent;
-    border: 1.5px solid #8c8474 !important; color: #a89e8a; font-size: 13px; font-family: inherit;
+    border:1.5px solid var(--bord-fort) !important; color:var(--texte-2); font-size: 13px; font-family: inherit;
   }
 
   .ana-ligne {
     display: flex; align-items: flex-start; gap: 10px;
-    padding: 9px 0; border-bottom: 1px solid #2c281f;
+    padding: 9px 0; border-bottom:1px solid var(--sep);
   }
   .ana-ligne:last-child { border-bottom: none; }
   .ana-pastille {
@@ -571,91 +663,108 @@
     font-size: 12px; font-weight: 900; line-height: 22px; text-align: center;
     font-family: ui-monospace, "SF Mono", monospace;
   }
-  .ana-up   { background: rgba(140,170,124,0.22); color: #cfe3c6; }
-  .ana-down { background: rgba(224,138,128,0.20); color: #e08a80; }
-  .ana-warn { background: rgba(244,217,18,0.20); color: #f4d912; }
-  .ana-flat { background: rgba(74,158,255,0.18); color: #bcdcff; }
-  .ana-ok   { background: #2c281f; color: #8caa7c; }
-  .ana-wait { background: #2c281f; color: #7a7263; }
+  .ana-up   { background: rgba(140,170,124,0.22); color:var(--vert-pill); }
+  .ana-down { background: rgba(224,138,128,0.20); color:var(--rouge-txt); }
+  .ana-warn { background: rgba(244,217,18,0.20); color:var(--accent-txt); }
+  .ana-flat { background: rgba(74,158,255,0.18); color:var(--bleu-pill); }
+  .ana-ok   { background:var(--sep); color:var(--vert-txt); }
+  .ana-wait { background:var(--sep); color:var(--texte-3); }
   .ana-ligne-texte { display: flex; flex-direction: column; gap: 2px; flex: 1; }
-  .ana-ligne-texte b { font-size: 13px; color: #ede6d3; font-weight: 700; }
-  .ana-ligne-texte span { font-size: 12px; color: #a89e8a; line-height: 1.45; }
+  .ana-ligne-texte b { font-size: 13px; color:var(--texte); font-weight: 700; }
+  .ana-ligne-texte span { font-size: 12px; color:var(--texte-2); line-height: 1.45; }
 
   /* --- Pont IA ------------------------------------------------------------- */
   .ia-note {
-    font-size: 12px; color: #a89e8a; line-height: 1.5; margin: 10px 0 12px;
-    padding: 10px 11px; background: #1a1713; border-radius: 8px;
+    font-size: 12px; color:var(--texte-2); line-height: 1.5; margin: 10px 0 12px;
+    padding: 10px 11px; background:var(--fond-encart); border-radius: 8px;
   }
-  .ia-note b { color: #ede6d3; }
+  .ia-note b { color:var(--texte); }
   .ia-etape {
-    font-size: 11px; font-weight: 800; color: #f4d912; letter-spacing: 0.04em;
+    font-size: 11px; font-weight: 800; color:var(--accent-txt); letter-spacing: 0.04em;
     text-transform: uppercase; margin: 14px 0 6px;
   }
   .ia-zone {
-    width: 100%; box-sizing: border-box; background: #100f0d; color: #cfc7b4;
-    border: 1.5px solid #3a3428; border-radius: 8px; padding: 10px;
+    width: 100%; box-sizing: border-box; background: var(--fond-champ); color:var(--texte-1b);
+    border:1.5px solid var(--bord-champ); border-radius: 8px; padding: 10px;
     font-family: ui-monospace, "SF Mono", monospace; font-size: 11px; line-height: 1.5;
     -webkit-appearance: none; resize: vertical;
   }
   .ia-btn {
     width: 100%; min-height: 44px; margin-top: 8px; border-radius: 8px;
-    border: 1.5px solid #8c8474; background: transparent; color: #ede6d3;
+    border:1.5px solid var(--bord-fort); background: transparent; color:var(--texte);
     font-size: 13px; font-weight: 700; font-family: inherit;
   }
   .ia-btn-fort {
-    background: #f4d912; border-color: #f4d912 !important; color: #100f0d; font-weight: 800;
+    background:var(--accent); border-color:var(--accent) !important; color:var(--sur-accent); font-weight: 800;
   }
   .ia-btn[disabled] { opacity: 0.55; }
   .ia-ou {
-    text-align: center; font-size: 11px; color: #7a7263; margin: 12px 0 2px;
+    text-align: center; font-size: 11px; color:var(--texte-3); margin: 12px 0 2px;
     text-transform: uppercase; letter-spacing: 0.04em;
   }
   .ia-select, .ia-input {
-    width: 100%; box-sizing: border-box; min-height: 44px; background: #100f0d;
-    color: #ede6d3; border: 1.5px solid #8c8474; border-radius: 8px; padding: 10px;
+    width: 100%; box-sizing: border-box; min-height: 44px; background: var(--fond-champ);
+    color:var(--texte); border:1.5px solid var(--bord-fort); border-radius: 8px; padding: 10px;
     font-size: 15px; font-family: inherit; -webkit-appearance: none;
   }
   .ia-input { font-family: ui-monospace, "SF Mono", monospace; font-size: 13px; }
   .ia-cle-masque {
     min-height: 44px; box-sizing: border-box; padding: 12px 10px; border-radius: 8px;
-    background: #100f0d; border: 1.5px dashed #3a3428; color: #a89e8a;
+    background: var(--fond-champ); border:1.5px dashed var(--bord-champ); color:var(--texte-2);
     font-family: ui-monospace, "SF Mono", monospace; font-size: 13px; word-break: break-all;
   }
-  .ia-cle-masque i { font-family: inherit; font-style: italic; color: #7a7263; }
+  .ia-cle-masque i { font-family: inherit; font-style: italic; color:var(--texte-3); }
   .ia-lien {
     display: block; width: 100%; min-height: 44px; margin-top: 8px; background: none;
-    border: none; color: #f4d912; font-size: 13px; font-family: inherit; text-align: left;
+    border: none; color:var(--accent-txt); font-size: 13px; font-family: inherit; text-align: left;
     text-decoration: underline; padding: 0;
   }
-  .ia-lien-danger { color: #e08a80; }
-  .ia-cle-etat { font-size: 12px; color: #8caa7c; margin-top: 10px; }
+  .ia-lien-danger { color:var(--rouge-txt); }
+  .ia-cle-etat { font-size: 12px; color:var(--vert-txt); margin-top: 10px; }
 
   .ia-resultat { margin-top: 14px; }
-  .ia-prop { border-left-color: #7fb3e8; }
+  .ia-prop { border-left-color:var(--bleu-bord); }
   .ia-rejets {
-    margin-top: 12px; padding: 10px 11px; background: #1a1713;
-    border-left: 3px solid #8c8474; border-radius: 8px;
+    margin-top: 12px; padding: 10px 11px; background:var(--fond-encart);
+    border-left:3px solid var(--bord-fort); border-radius: 8px;
   }
   .ia-rejets ul { margin: 6px 0 0; padding-left: 18px; }
-  .ia-rejets li { font-size: 12px; color: #a89e8a; line-height: 1.5; margin-bottom: 4px; }
-  .ia-rejets-pourquoi { font-size: 11px; color: #7a7263; line-height: 1.45; margin-top: 8px; }
+  .ia-rejets li { font-size: 12px; color:var(--texte-2); line-height: 1.5; margin-bottom: 4px; }
+  .ia-rejets-pourquoi { font-size: 11px; color:var(--texte-3); line-height: 1.45; margin-top: 8px; }
 
-  .ana-jrn { font-size: 12px; color: #a89e8a; padding: 6px 0; line-height: 1.4; }
+  .ana-jrn { font-size: 12px; color:var(--texte-2); padding: 6px 0; line-height: 1.4; }
   .ana-jrn span {
-    display: inline-block; min-width: 58px; color: #7a7263;
+    display: inline-block; min-width: 58px; color:var(--texte-3);
     font-family: ui-monospace, "SF Mono", monospace; font-size: 11px;
   }
 
   /* Charge visée, sur l'écran de séance. */
   .ana-cible {
-    font-size: 12px; color: #a89e8a; margin-top: 9px;
+    font-size: 12px; color:var(--texte-2); margin-top: 9px;
     padding: 6px 10px; background: rgba(244,217,18,0.09);
     border-radius: 6px; display: inline-block;
   }
-  .ana-cible b { color: #f4d912; font-family: ui-monospace, "SF Mono", monospace; font-size: 13px; }
+  .ana-cible b { color:var(--accent-txt); font-family: ui-monospace, "SF Mono", monospace; font-size: 13px; }
 
-  .nutri-disclaimer { font-size: 11px; color: #8a8171; margin-top: 10px; line-height: 1.45; }
+  .nutri-disclaimer { font-size: 11px; color:var(--texte-3); margin-top: 10px; line-height: 1.45; }
 </style>
+<script>
+/* Pose le theme avant le premier rendu, pour eviter le clignotement. */
+(function () {
+  try {
+    var s = JSON.parse(localStorage.getItem("olivier-coach-settings") || "{}");
+    var t = s && s.theme;
+    if (t !== "clair" && t !== "sombre" && t !== "systeme") t = "systeme";
+    if (t === "systeme") {
+      t = (window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches)
+            ? "clair" : "sombre";
+    }
+    document.documentElement.setAttribute("data-theme", t);
+    var m = document.getElementById("meta-theme");
+    if (m && t === "clair") m.setAttribute("content", "#f7f3ea");
+  } catch (e) { /* theme sombre par defaut */ }
+})();
+</script>
 </head>
 <body>
 <div id="splash">
@@ -676,8 +785,8 @@
   //   MINEUR    : nouvelle fonctionnalité, ou changement de comportement visible
   //   CORRECTIF : correction de bug seule, aucun changement de comportement voulu
   // ===========================================================================
-  var APP_VERSION = "1.4.0";
-  var APP_BUILD = "13 août 2026";
+  var APP_VERSION = "1.4.1";
+  var APP_BUILD = "14 août 2026";
 
   // NE JAMAIS CHANGER sans écrire une migration : c'est ici que vit l'historique.
   var STORAGE_KEY = "olivier-coach-log";
@@ -703,9 +812,41 @@
   var MAX_BACKDAYS = 365;      // pas de saisie plus ancienne que ça
   var LOOKBACK_DAYS = 120;     // profondeur de recherche de la séance de référence
 
-  var ACCENT = "#f4d912";
-  var ACCENT_REST = "#8caa7c";
-  var TREND_COLOR = "#4a9eff";
+  // --- Theme -----------------------------------------------------------
+  // « systeme » est resolu ici vers une valeur CONCRETE, sombre ou clair,
+  // plutot que laisse a une media query. Deux raisons : le CSS reste une
+  // simple paire de palettes sans cascade conditionnelle, et le JavaScript
+  // peut relire les couleurs du graphique sans avoir a deviner quel theme
+  // s'applique.
+  function couleurCss(nom) {
+    try {
+      var v = window.getComputedStyle(document.documentElement).getPropertyValue("--" + nom);
+      v = String(v || "").replace(/^\s+|\s+$/g, "");
+      return v || null;
+    } catch (e) { return null; }
+  }
+
+  function themeSysteme() {
+    try {
+      return (window.matchMedia &&
+              window.matchMedia("(prefers-color-scheme: light)").matches) ? "clair" : "sombre";
+    } catch (e) { return "sombre"; }
+  }
+
+  function themeEffectif() {
+    return state.theme === "systeme" ? themeSysteme() : state.theme;
+  }
+
+  function appliqueTheme() {
+    var eff = themeEffectif();
+    try { document.documentElement.setAttribute("data-theme", eff); } catch (e) {}
+    // La barre d'etat d'iOS suit cette balise. Elle n'accepte pas var(), c'est
+    // le seul endroit ou il faut relire la valeur reelle.
+    try {
+      var m = document.getElementById("meta-theme");
+      if (m) m.setAttribute("content", couleurCss("fond") || "#100f0d");
+    } catch (e) {}
+  }
 
   // ===========================================================================
   // CATALOGUE D'EXERCICES
@@ -2724,12 +2865,15 @@
     showNutrition: true,
     showProgPicker: false,
     chartMode: "both",
+    theme: "systeme",       // "sombre" | "clair" | "systeme"
+
     openExo: null,          // identifiant de l'exercice dont la fiche est ouverte
     exoFolded: {},          // exercices repliés, non persistés : tout est déplié au lancement
     showDatePicker: false,  // champ date replié par défaut, il ne sert qu'au rattrapage
     page: "seance",         // "seance" | "annexe"
     pageAnim: null,         // sens du glissement pour le prochain rendu
     storageOk: true,
+    logRaw: null,         // chaine EXACTE du journal en stockage, vue par cette instance
     notice: null,
     ob: null,             // brouillon du diagnostic, non persisté
     showAnalyse: false,   // l'analyse ne se calcule qu'une fois la carte ouverte
@@ -2738,8 +2882,25 @@
     iaRes: null,          // propositions retenues et ecartees apres validation
     iaOccupe: false,      // un appel direct est en cours
     avanceOuvert: false,  // carte des reglages avances, repliee par defaut
-    iaCleVisible: false   // la cle est masquee tant qu'on ne la modifie pas
+    iaCleVisible: false,  // la cle est masquee tant qu'on ne la modifie pas
+    iaAvisCle: ""         // avis rendu DANS la carte, la banniere du haut n'y est pas vue
   };
+
+  function syncLogDepuisStockage() {
+    // Même garde que loadLog : jamais avant applyProfile, sinon cleanLog
+    // validerait contre un PROGRAM vide et écarterait tout.
+    if (!countKeys(PROGRAM)) return;
+    var raw = null;
+    try { raw = localStorage.getItem(STORAGE_KEY); } catch (e) { return; }
+    if (raw === null) return;
+    if (raw === state.logRaw) return;   // rien n'a bougé : cas normal, coût nul
+    try {
+      var parsed = JSON.parse(raw);
+      if (parsed && parsed.log && typeof parsed.log === "object") parsed = parsed.log;
+      state.log = cleanLog(parsed);
+      state.logRaw = raw;
+    } catch (e) { /* stockage illisible : on garde la copie mémoire */ }
+  }
 
   function loadLog() {
     try {
@@ -2748,21 +2909,25 @@
       if (parsed && parsed.log && typeof parsed.log === "object") parsed = parsed.log;
       state.log = cleanLog(parsed);
       state.storageOk = true;
+      state.logRaw = JSON.stringify(state.log);
       // Si le nettoyage ou la migration ont changé quoi que ce soit, on réécrit
       // tout de suite : sinon les données rejetées resteraient en stockage.
       // On ne réécrit JAMAIS le journal tant que le programme n'est pas chargé :
       // ce qui vient d'être « nettoyé » l'aurait été contre un programme vide,
       // et la réécriture graverait la perte.
-      if (raw && countKeys(PROGRAM) && JSON.stringify(state.log) !== raw) persist();
+      if (raw && countKeys(PROGRAM) && state.logRaw !== raw) persist();
     } catch (e) {
       state.storageOk = false;
       state.log = {};
+      state.logRaw = null;
     }
   }
 
   function persist() {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state.log));
+      var s = JSON.stringify(state.log);
+      localStorage.setItem(STORAGE_KEY, s);
+      state.logRaw = s;                 // notre écriture devient la référence
       state.storageOk = true;
       return true;
     } catch (e) {
@@ -2782,6 +2947,9 @@
       if (s.chartMode === "both" || s.chartMode === "raw" || s.chartMode === "trend") {
         state.chartMode = s.chartMode;
       }
+      if (s.theme === "sombre" || s.theme === "clair" || s.theme === "systeme") {
+        state.theme = s.theme;
+      }
       if (s.profile) profile = cleanProfile(s.profile);
       // Reglages IA : valides a part, parce qu'ils vivent hors du profil et
       // echappent donc a cleanProfile. Sans cette ligne, un stockage abime
@@ -2796,6 +2964,7 @@
         showExercises: state.showExercises,
         showNutrition: state.showNutrition,
         chartMode: state.chartMode,
+        theme: state.theme,
         profile: profile,
         // Frere du profil, jamais dedans : buildPayload() exporte `profile`,
         // et une cle d'API n'a rien a faire dans un fichier fait pour etre
@@ -2808,6 +2977,7 @@
   function updateEntry(patch) {
     var key = state.editDate;
     if (!DATE_RE.test(key)) return;
+    syncLogDepuisStockage();
     var entry = {}, ek, k;
     var existing = state.log[key];
     if (existing) { for (ek in existing) { if (has(existing, ek)) entry[ek] = existing[ek]; } }
@@ -3134,6 +3304,7 @@
 
   function render() {
     try {
+      appliqueTheme();
       renderInner();
       renderedDay = todayKey();
     } catch (e) {
@@ -3190,7 +3361,8 @@
     // dès qu'un prog pointait vers un jour absent du plan, ce que la validation
     // de forme de cleanProg rend désormais possible.
     var overriddenProg = !!(entry.prog && PROGRAM[naturalDow] && progKey !== naturalDow);
-    var accent = program ? ACCENT : ACCENT_REST;
+    var accentFond = program ? "var(--accent)" : "var(--vert)";
+    var accentTxt = program ? "var(--accent-txt)" : "var(--vert-txt)";
     var entryNutri = entry.nutri || {};
 
     // --- Statistiques globales ---
@@ -3362,7 +3534,7 @@
       '<header class="header">' +
         '<div class="header-date">' + esc(longDate(editKey)) + (isToday ? "" : " (rattrapage)") + '</div>' +
         (program
-          ? '<h1 class="header-title" style="color:' + accent + '">' + esc(program.label) + '</h1>'
+          ? '<h1 class="header-title" style="color:' + accentTxt + '">' + esc(program.label) + '</h1>'
           : '<h1 class="header-title header-title-rest">REPOS</h1>') +
         '<div class="header-sub">' + (program ? esc(program.sub) : "Choisis une séance ci-dessous si tu en as fait une") + '</div>' +
         // Sans cette mention, rien ne signale qu'on regarde une séance forcée :
@@ -3404,6 +3576,9 @@
       gridKeys.map(function (pk2) {
         return '<span class="wg-head" aria-hidden="true">' + DAY_INITIALS[pk2 === 7 ? 0 : pk2] + '</span>';
       }).join("");
+    // Cases antérieures à la première trace d'entraînement : ni faites, ni
+    // manquées. L'appli n'était pas encore sur le téléphone.
+    var gridPre = 0;
     var thisMonday = mondayOf(new Date());
     for (var wi = 3; wi >= 0; wi--) {
       var wMon = addDays(thisMonday, -wi * 7);
@@ -3413,8 +3588,15 @@
         var cd = addDays(wMon, gridKeys[dj] - 1), ck2 = fmt(cd);
         var isDone = !!(log[ck2] && log[ck2].done);
         var cls;
+        // AUJOURD'HUI se teste AVANT « avant tes débuts », sans quoi le jour
+        // courant disparaissait sur une installation neuve : firstTrainKey est
+        // nul tant qu'aucune séance n'a laissé de trace, toutes les cases
+        // passaient en pointillés, et l'écran de premier lancement — celui qui a
+        // le plus besoin du repère « c'est aujourd'hui, vas-y » — n'en avait
+        // aucun. Même chose pour qui commence par se peser.
         if (ck2 > tKey) { cls = "wg-future"; }
         else if (ck2 === tKey) { cls = isDone ? "wg-today-done" : "wg-today"; if (isDone) gridDone++; }
+        else if (!firstTrainKey || ck2 < firstTrainKey) { cls = "wg-pre"; gridPre++; }
         else if (isDone) { cls = "wg-done"; gridDone++; }
         else { cls = "wg-miss"; gridMiss++; missByDay[dj]++; }
         gridCells += '<span class="wg-cell ' + cls + '" aria-hidden="true"></span>';
@@ -3428,18 +3610,19 @@
       else if (missByDay[mi] === worstCount && worstCount > 0) { sameMax++; }
     }
     var gridNote = (worstCount >= 2 && sameMax === 1)
-      ? '<div class="wg-legend"><span>Jour le plus manqué sur 4 semaines : <b style="color:#cfc6b3">le ' +
+      ? '<div class="wg-legend"><span>Jour le plus manqué sur 4 semaines : <b style="color:var(--texte-1b)">le ' +
           DAY_FULL[gridKeys[worstDay] === 7 ? 0 : gridKeys[worstDay]] + '</b></span></div>'
       : '<div class="wg-legend">' +
-          '<span><i class="wg-swatch" style="background:#f4d912"></i> faite</span>' +
-          '<span><i class="wg-swatch" style="border:1.5px solid #8c8474"></i> manquée</span>' +
-          '<span><i class="wg-swatch" style="border:1.5px dashed #4a4436"></i> à venir</span>' +
+          '<span><i class="wg-swatch" style="background:var(--accent)"></i> faite</span>' +
+          '<span><i class="wg-swatch" style="border:1.5px solid var(--bord-fort)"></i> manquée</span>' +
+          '<span><i class="wg-swatch" style="border:1.5px dashed var(--bord-discret)"></i> à venir</span>' +
+          (gridPre ? '<span><i class="wg-swatch" style="border:1.5px dotted var(--bord-moyen)"></i> avant tes débuts</span>' : '') +
         '</div>';
 
     var heroHtml =
       '<section class="hero">' +
-        '<div class="hero-flame-wrap ' + glowCls + '" style="--glow:' + ACCENT + '">' +
-          '<div class="hero-flame"><span aria-hidden="true">🔥</span><span class="hero-number" style="' + (currentStreak === 0 ? "color:#a89e8a" : "") + '">' + currentStreak + '</span></div>' +
+        '<div class="hero-flame-wrap ' + glowCls + '" style="--glow:var(--accent)">' +
+          '<div class="hero-flame"><span aria-hidden="true">🔥</span><span class="hero-number" style="' + (currentStreak === 0 ? "color:var(--texte-2)" : "") + '">' + currentStreak + '</span></div>' +
         '</div>' +
         '<div class="hero-label">séances d\'affilée, sur tes jours prévus</div>' +
         '<div class="weekgrid" role="img" style="grid-template-columns:30px repeat(' + nCols + ',1fr);max-width:' + (30 + nCols * 44) + 'px"' +
@@ -3476,7 +3659,7 @@
         exListHtml = '<ol class="exercise-list">' + exerciseProgress.map(function (p, i) {
           var ex = p.ex;
           var itemCls = "exercise-item" + (p.isDone ? " exercise-item-done" : "");
-          var borderStyle = (p.isPartial && !p.isDone) ? ' style="border-left-color:' + accent + '"' : "";
+          var borderStyle = (p.isPartial && !p.isDone) ? ' style="border-left-color:' + accentFond + '"' : "";
           var body = "";
 
           if (p.track === "run") {
@@ -3575,7 +3758,7 @@
             var dotsHtml = "", di, filled, dotStyle, nextVal;
             for (di = 0; di < p.total; di++) {
               filled = di < p.done;
-              dotStyle = filled ? ' style="background:' + accent + ';border-color:' + accent + ';color:#100f0d"' : "";
+              dotStyle = filled ? ' style="background:' + accentFond + ';border-color:' + accentFond + ';color:var(--sur-accent)"' : "";
               nextVal = (di + 1 === p.done) ? di : di + 1;
               dotsHtml += '<button type="button" class="set-dot" data-action="set-sets" data-ex="' + ex.id + '" data-val="' + nextVal + '"' + dotStyle +
                 ' aria-label="' + esc(ex.name) + ', série ' + (di + 1) + ' sur ' + p.total + (filled ? ", faite" : ", à faire") + '">' + (di + 1) + '</button>';
@@ -3671,7 +3854,7 @@
           LEVELS_ROW("Sommeil", "sleep", entry.sleep) +
           LEVELS_ROW("Force ressentie", "strength", entry.strength) +
           '<button type="button" class="checkin-btn ' + (entry.done ? "checkin-btn-active" : "") + '"' +
-            ' style="' + (!entry.done ? "border-color:" + accent + ";color:" + accent : "") + '"' +
+            ' style="' + (!entry.done ? "border-color:" + accentFond + ";color:" + accentTxt : "") + '"' +
             ' data-action="toggle-done" aria-pressed="' + (entry.done ? "true" : "false") + '">✓ ' +
             (entry.done ? "Séance terminée" : "Valider la séance") + '</button>' +
         '</section>';
@@ -3769,14 +3952,14 @@
       var lastTrend = trend[trend.length - 1];
       var rawDotR = showTrend ? 2.6 : 3.4;
       var rawSvg = showRaw
-        ? '<path d="' + pathOf(weightSeries) + '" fill="none" stroke="' + ACCENT + '" stroke-width="' + (showTrend ? 1.5 : 2.4) + '" opacity="' + (showTrend ? 0.75 : 1) + '" stroke-linejoin="round"/>' +
+        ? '<path d="' + pathOf(weightSeries) + '" fill="none" style="stroke:var(--accent)" stroke-width="' + (showTrend ? 1.5 : 2.4) + '" opacity="' + (showTrend ? 0.75 : 1) + '" stroke-linejoin="round"/>' +
           weightSeries.map(function (d) {
-            return '<circle cx="' + xScale(d.date).toFixed(1) + '" cy="' + yScale(d.poids).toFixed(1) + '" r="' + rawDotR + '" fill="' + ACCENT + '"/>';
+            return '<circle cx="' + xScale(d.date).toFixed(1) + '" cy="' + yScale(d.poids).toFixed(1) + '" r="' + rawDotR + '" style="fill:var(--accent)"/>';
           }).join("")
         : "";
       // Trait de tendance affiné : à 3,5 px il recouvrait entièrement les pesées.
       var trendSvg = showTrend
-        ? '<path d="' + pathOf(trend) + '" fill="none" stroke="' + TREND_COLOR + '" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>'
+        ? '<path d="' + pathOf(trend) + '" fill="none" style="stroke:var(--bleu)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>'
         : "";
 
       // Échelle verticale. Sans repère chiffré, une courbe ne dit rien : on ne
@@ -3789,7 +3972,7 @@
       for (tv = Math.ceil(yMin / TICK_STEP) * TICK_STEP; tv <= yMax; tv += TICK_STEP) ticks.push(tv);
       var gridSvg = ticks.map(function (v) {
         var y = yScale(v).toFixed(1);
-        return '<line x1="0" y1="' + y + '" x2="' + w + '" y2="' + y + '" stroke="#3a352c" stroke-width="1"/>';
+        return '<line x1="0" y1="' + y + '" x2="' + w + '" y2="' + y + '" style="stroke:var(--bord)" stroke-width="1"/>';
       }).join("");
       var yLabels = ticks.map(function (v) {
         return '<span class="chart-ytick" style="top:' + ((yScale(v) / h) * 100).toFixed(2) + '%">' + v + '</span>';
@@ -3804,8 +3987,8 @@
       }).join("");
 
       var legend = '<span class="chart-target-label">ligne verte : objectif ' + TARGET_WEIGHT + ' kg</span>';
-      if (showRaw) legend = '<span><i class="legend-swatch" style="background:' + ACCENT + '"></i> pesées</span>' + legend;
-      if (showTrend) legend = '<span><i class="legend-swatch" style="background:' + TREND_COLOR + '"></i> tendance ' + TREND_WINDOW_DAYS + ' j</span>' + legend;
+      if (showRaw) legend = '<span><i class="legend-swatch" style="background:var(--accent)"></i> pesées</span>' + legend;
+      if (showTrend) legend = '<span><i class="legend-swatch" style="background:var(--bleu)"></i> tendance ' + TREND_WINDOW_DAYS + ' j</span>' + legend;
 
       chartHtml =
         '<section class="card">' +
@@ -3817,7 +4000,7 @@
               ' aria-label="Courbe de poids de ' + frDec(weightSeries[0].poids) + ' à ' + frDec(last.poids) +
               ' kg, tendance lissée à ' + frDec(lastTrend.poids.toFixed(1)) + ' kg, objectif ' + TARGET_WEIGHT + ' kg">' +
               gridSvg +
-              '<line x1="0" y1="' + targetY.toFixed(1) + '" x2="' + w + '" y2="' + targetY.toFixed(1) + '" stroke="#8caa7c" stroke-dasharray="4 4" stroke-width="1.5"/>' +
+              '<line x1="0" y1="' + targetY.toFixed(1) + '" x2="' + w + '" y2="' + targetY.toFixed(1) + '" style="stroke:var(--vert)" stroke-dasharray="4 4" stroke-width="1.5"/>' +
               rawSvg + trendSvg +
             '</svg>' +
           '</div>' +
@@ -3898,6 +4081,32 @@
         '</section>';
     }
 
+    var THEME_OPTIONS = [
+      { v: "sombre",  label: "Sombre" },
+      { v: "clair",   label: "Clair" },
+      { v: "systeme", label: "Système" }
+    ];
+    var themeBtns = "", thi;
+    for (thi = 0; thi < THEME_OPTIONS.length; thi++) {
+      themeBtns +=
+        '<button type="button" class="chart-mode-btn' +
+          (state.theme === THEME_OPTIONS[thi].v ? " chart-mode-active" : "") +
+          '" data-action="set-theme" data-theme="' + THEME_OPTIONS[thi].v + '"' +
+          ' aria-pressed="' + (state.theme === THEME_OPTIONS[thi].v ? "true" : "false") + '">' +
+          THEME_OPTIONS[thi].label + '</button>';
+    }
+    var themeHtml =
+      '<section class="card">' +
+        '<div class="card-title">Apparence</div>' +
+        '<div class="chart-modes" role="group" aria-label="Thème de l\'application">' + themeBtns + '</div>' +
+        '<div class="field-hint" style="margin-top:8px">' +
+          (state.theme === "systeme"
+            ? 'Suit le réglage de ton téléphone — actuellement ' +
+              (themeSysteme() === "clair" ? "clair" : "sombre") + '.'
+            : 'Choix fixe, quel que soit le réglage du téléphone.') +
+        '</div>' +
+      '</section>';
+
     var settingsHtml =
       '<section class="card settings-card">' +
         '<div class="card-title">Sauvegarde</div>' +
@@ -3935,7 +4144,7 @@
 
     var pageHtml = isAnnexe
       ? (nutritionHtml + chartHtml + badgesSectionHtml + analyseHtml() + profileHtml +
-         iaCleHtml() + settingsHtml + footerHtml)
+         themeHtml + iaCleHtml() + settingsHtml + footerHtml)
       : (headerHtml + heroHtml + motivationHtml + seanceHtml);
 
     var animCls = state.pageAnim ? " page-from-" + state.pageAnim : "";
@@ -4474,7 +4683,22 @@
     for (i = 0; i < LOOKBACK_DAYS && out.length < ANA_PROFONDEUR; i++) {
       k = fmt(cursor);
       e = state.log[k];
-      if (e) {
+      // La journée EN COURS ne compte que si elle a été validée. Tant que
+      // « Séance terminée » n'est pas coché, ce qui est saisi est un brouillon :
+      // chaque frappe est pourtant écrite en stockage. Mesuré, une seule série
+      // d'échauffement à 60 kg pendant qu'on travaille à 100 suffisait à
+      // retourner « Progression normale » en « stagnation » et à proposer de
+      // remplacer l'exercice ; à faire franchir le seuil des trois séances par
+      // une séance qui n'existe pas encore ; et à ré-ancrer sur 60 kg la charge
+      // de référence que le pont IA annonce au modèle, dont dépend son garde-fou
+      // de ratio. Regarder son bilan pendant le repos entre deux séries est le
+      // geste le plus naturel du monde.
+      //
+      // Les journées PASSÉES restent comptées même sans `done` : beaucoup ne
+      // sont jamais validées, et les perdre amputerait l'historique. Et une
+      // séance du jour VALIDÉE compte, elle : c'est bien le décalage 0 qui est
+      // voulu, seul l'état brouillon manquait.
+      if (e && !(k === todayKey() && !e.done)) {
         arr = setsOf(e, exId);
         if (arr.length) out.push({ date: k, sets: arr });
       }
@@ -4635,6 +4859,15 @@
     for (i = 0; i < CATALOG.length; i++) {
       c = CATALOG[i];
       if (c.pat !== pat || c.id === ex.id) continue;
+      // Un exercice CHRONOMÉTRÉ ne remplace pas un exercice CHARGÉ, ni l'inverse.
+      // Les patterns sont mixtes : « core » contient le crunch, qui se compte en
+      // répétitions et accepte une charge, à côté du hollow hold, qui se tient
+      // 20 à 40 secondes. appliquerProposition écrit track "load" sans discuter,
+      // et repsBounds(undefined) retombe alors sur son repli 8-12 : l'appli
+      // affichait « Hollow hold — 8-12 reps » et réclamait des kilos pour un
+      // maintien isométrique. La vraie prescription du catalogue était perdue,
+      // et la corruption survivait à cleanProfile.
+      if (isLoadableEx(c) !== (ex.track === "load")) continue;
       if (exclus[c.id] || deja[c.id]) continue;
       if (c.gear && noGear[c.gear]) continue;
       ok = true;
@@ -4782,6 +5015,79 @@
     if (profile.journal.length > 40) profile.journal = profile.journal.slice(-40);
   }
 
+  // La pastille de durée et le drapeau « ça ne rentre pas dans ton temps » sont
+  // posés par buildPlan, et plus personne n'y touchait ensuite. Un ajustement de
+  // séries ou de repos les laissait donc mentir : mesuré, une seule proposition
+  // de repos acceptée faisait passer la séance de 55 à 65 minutes réelles avec
+  // la pastille figée sur « ~60 min », et une salve complète l'emmenait à 229.
+  // Le budget de temps est un choix explicite du profil — il ne saute pas en
+  // silence. On recalcule sur le MÊME coût que buildPlan.
+  //
+  // Le repli sur CAT_BY_ID n'est pas une précaution de style : les exercices
+  // STOCKÉS dans le plan ne portent ni mins ni blockMins, seul le catalogue les
+  // a. Sans lui, un échauffement chronométré compterait comme une série et
+  // toutes les séances intactes perdraient cinq minutes d'affichage à la simple
+  // mise à jour de l'appli.
+  function coutSeance(s) {
+    var t = 0, i, e, c, o;
+    for (i = 0; i < s.exercises.length; i++) {
+      e = s.exercises[i];
+      c = CAT_BY_ID[e.id];
+      o = { sets: e.sets, rest: (e.rest || 60) };
+      if (c && c.mins) { o.mins = c.mins; }
+      else if (c && c.blockMins) { o.blockMins = c.blockMins; }
+      t += costOf(o, i === 0);
+    }
+    return t;
+  }
+
+  // `jours` limite le recalcul aux séances réellement modifiées. Sans cette
+  // limite, un ajustement sur le mercredi réécrivait les pastilles des cinq
+  // jours : sans effet sur un plan produit par le générateur courant, mais un
+  // plan plus ancien — le plan par défaut adopté au démarrage pour quiconque
+  // vient d'une version antérieure au profil — n'a pas été chiffré avec ce
+  // modèle de coût. Ses cinq pastilles changeaient d'un coup, et un « ça ne
+  // rentre pas dans ton temps » pouvait s'allumer sur une séance que personne
+  // n'avait touchée.
+  function rafraichirDurees(jours) {
+    var pk, s, mins;
+    for (pk in PROGRAM) {
+      if (!has(PROGRAM, pk)) continue;
+      if (jours && !jours[pk]) continue;
+      s = PROGRAM[pk];
+      // Une séance de course a sa propre durée (distance x allure) : ses blocs
+      // n'ont ni séries ni repos exploitables ici.
+      if (s.course) continue;
+      mins = Math.round(coutSeance(s) / 60 / 5) * 5;
+      s.duration = "~" + mins + " min";
+      s.over = profile ? (mins > profile.minutes) : false;
+    }
+  }
+
+  // Une prescription écrite en toutes lettres dans le catalogue porte une nuance
+  // que repsLo/repsHi ne savent pas rendre. « 10 par lettre » sur Y-T-W au sol,
+  // c'est 10 en Y, 10 en T, 10 en W — trente mouvements, pas dix. En rejouant
+  // detailFromPlan on écrivait « 10 reps », le tiers du volume prescrit, et la
+  // fiche détaillée continuait de décrire les trois lettres : l'écran se
+  // contredisait, et le plan amputé partait en stockage.
+  //
+  // Tant que les bornes numériques n'ont pas bougé, on rejoue donc le texte du
+  // catalogue et on ne réécrit que ce qui a réellement changé : les séries et le
+  // repos. Si un ajustement modifie un jour les bornes, on repasse aux chiffres
+  // plutôt que d'afficher un texte périmé.
+  function detailAjuste(e) {
+    if (e.track !== "load") return e.detail;
+    var c = CAT_BY_ID[e.id], b;
+    if (c && c.reps && !/^\s*\d+(\s*-\s*\d+)?\s*$/.test(String(c.reps))) {
+      b = repsBounds(c.reps);
+      if (b.lo === e.repsLo && b.hi === e.repsHi) {
+        return String(c.reps) + " reps × " + e.sets +
+               " sets, repos " + fmtRest(e.rest || 60);
+      }
+    }
+    return detailFromPlan(e);
+  }
+
   function appliquerProposition(p, applique) {
     if (!profile || !profile.plan || !p) return false;
     var places = (p.ex !== undefined) ? planExercices(p.ex) : [];
@@ -4805,10 +5111,10 @@
           // volumes différents pour le même exercice, et l'intention « une série
           // de moins » se transpose, un « passe à 3 » non.
           e.sets = Math.max(1, Math.min(MAX_SETS, e.sets + p.delta));
-          e.detail = detailFromPlan(e);
+          e.detail = detailAjuste(e);
         } else if (p.type === "repos") {
           e.rest = p.rest;
-          e.detail = detailFromPlan(e);
+          e.detail = detailAjuste(e);
         } else if (p.type === "remplacer") {
           var b = repsBounds(neuf.reps);
           // On garde la POSITION dans la séance : un polyarticulaire ne se
@@ -4818,8 +5124,19 @@
             load: true, track: "load", rest: neuf.rest || 60,
             repsLo: b.lo, repsHi: b.hi, decideLe: todayKey()
           };
-          cible.liste[cible.rang].detail = detailFromPlan(cible.liste[cible.rang]);
+          cible.liste[cible.rang].detail = detailAjuste(cible.liste[cible.rang]);
         }
+      }
+      // Seules les séances qu'on vient d'écrire sont rechiffrées, et seulement
+      // si on a écrit : un REFUS ne doit rien changer au plan.
+      //
+      // Une charge cible n'entre dans aucun terme du calcul de durée : accepter
+      // « viser 40 kg » ne change ni les séries ni le repos. Rechiffrer dans ce
+      // cas ne ferait que réécrire la pastille d'un plan hérité, pour rien.
+      if (p.type !== "charge") {
+        var joursTouches = {};
+        for (i = 0; i < places.length; i++) joursTouches[places[i].jour] = true;
+        rafraichirDurees(joursTouches);
       }
       journaliser(p.texte);
     }
@@ -4870,6 +5187,32 @@
     var corps = "";
 
     if (!a.exploitables) {
+      // Un programme 100 % course ne contient AUCUN exercice en track "load" :
+      // analyser() n'a rien à balayer et exploitables vaut 0 pour toujours.
+      // Répondre « pas encore assez de séances » à quelqu'un qui a couru dix-sept
+      // fois est doublement faux — il en a, et il en aura toujours plus. On
+      // nomme la vraie raison au lieu de lui promettre un verdict qui ne viendra
+      // jamais.
+      //
+      // On ne rend délibérément PAS la carte du pont IA ici : pour un plan sans
+      // fonte, le bilan envoyé se réduirait à « aucune séance avec charge
+      // enregistrée », c'est-à-dire un appel facturé sans donnée.
+      var aDeLaFonte = false, axk, axi;
+      for (axk in PROGRAM) {
+        if (!has(PROGRAM, axk)) continue;
+        for (axi = 0; axi < PROGRAM[axk].exercises.length; axi++) {
+          if (PROGRAM[axk].exercises[axi].track === "load") { aDeLaFonte = true; break; }
+        }
+        if (aDeLaFonte) break;
+      }
+      if (!aDeLaFonte) {
+        corps =
+          '<div class="ob-note">Ton programme est <b>100 % course</b>. Cette analyse ne porte ' +
+          'que sur les exercices avec charge : elle n\'a rien à dire sur des kilomètres. ' +
+          'Tes sorties se comparent à la précédente dans l\'écran de la séance, et tes ' +
+          'kilomètres sont totalisés juste au-dessus.</div>';
+        return '<section class="card">' + entete + corps + '</section>';
+      }
       // Exactement ce que demandait le cahier des charges : pas de verdict tant
       // qu'il n'y a pas de quoi en tirer un.
       var manque = ANA_MIN_SEANCES;
@@ -5249,7 +5592,16 @@
                           " kg pour " + frDec(String(ref)) + " kg actuels.");
           continue;
         }
-        if (kg === ref) continue;                      // ne rien changer n'est pas une proposition
+        // Ne rien changer n'est pas une proposition, mais ce n'est pas non plus
+        // une ligne illisible : on le DIT. Sans ça le filet de fin attribuait un
+        // motif faux — « aucune ligne au format attendu » — et le modèle passait
+        // pour muet alors qu'il avait répondu, exactement ce que le contrat de
+        // ce module interdit.
+        if (kg === ref) {
+          res.rejets.push("Charge inchangée pour " + ex.name + " (" +
+                          frDec(String(ref)) + " kg) : rien à appliquer.");
+          continue;
+        }
         // Plafond de HAUSSES, pas de baisses : redescendre n'a jamais blessé
         // personne. Le refus est montré, pour qu'une salve tronquée ne passe
         // pas pour l'avis complet du modèle.
@@ -5272,14 +5624,47 @@
           res.rejets.push("Variation de series illisible pour " + ex.name + " (« " + val + " »).");
           continue;
         }
-        var cibleSets = ex.sets + delta;
-        if (cibleSets < 1 || cibleSets > MAX_SETS) {
-          res.rejets.push("Volume hors bornes pour " + ex.name + " : " + cibleSets + " series.");
+        // Un exercice chargé vit souvent dans PLUSIEURS jours, à des volumes
+        // différents — le générateur le produit tout seul. iaExerciceDuPlan ne
+        // rend que la PREMIÈRE place : la phrase « passer à 6 séries » était
+        // vraie pour le mardi et fausse pour le vendredi, qui partait à 7. Et le
+        // refus « hors bornes : 0 séries » désignait le mauvais jour.
+        //
+        // On vérifie donc les bornes sur TOUTES les places, et on ne cite un
+        // nombre absolu que si elles y arrivent toutes ; sinon on parle en
+        // delta, qui est ce qui sera réellement appliqué.
+        var pl = planExercices(id), pi2, sN, sMin = null, sMax = null, encaisse = 0;
+        for (pi2 = 0; pi2 < pl.length; pi2++) {
+          sN = pl[pi2].liste[pl[pi2].rang].sets + delta;
+          if (sMin === null || sN < sMin) sMin = sN;
+          if (sMax === null || sN > sMax) sMax = sN;
+          if (sN >= 1 && sN <= MAX_SETS) encaisse++;
+        }
+        if (sMin === null) {
+          sMin = ex.sets + delta; sMax = sMin;
+          encaisse = (sMin >= 1 && sMin <= MAX_SETS) ? 1 : 0;
+        }
+        // On ne refuse que si AUCUNE place n'encaisse le delta. Refuser des que
+        // l'UNE d'elles deborde jetait un « une serie de moins » parfaitement
+        // applicable au jour qui en fait quatre, sous pretexte qu'un autre jour
+        // est deja au plancher. appliquerProposition borne deja place par place.
+        if (!encaisse) {
+          res.rejets.push("Volume hors bornes pour " + ex.name + " : " +
+                          (sMin === sMax ? sMin + " series."
+                                         : sMin + " a " + sMax + " series selon le jour."));
           continue;
+        }
+        var texteVol;
+        if (sMin === sMax) {
+          texteVol = "Passer " + ex.name + " a " + sMin + " series";
+        } else if (delta > 0) {
+          texteVol = "Ajouter " + delta + " serie" + (delta > 1 ? "s" : "") + " a " + ex.name;
+        } else {
+          texteVol = "Retirer " + (-delta) + " serie" + ((-delta) > 1 ? "s" : "") + " a " + ex.name;
         }
         vus[type + ":" + id] = true;
         res.props.push({ type: "volume", ex: id, delta: delta, ia: true,
-          texte: "Passer " + ex.name + " a " + cibleSets + " series",
+          texte: texteVol,
           raison: raison || "Propose par l'IA." });
 
       } else if (type === "REPOS") {
@@ -5288,7 +5673,11 @@
           res.rejets.push("Temps de repos illisible pour " + ex.name + " (« " + val + " »).");
           continue;
         }
-        if (sec === (ex.rest || 60)) continue;
+        if (sec === (ex.rest || 60)) {
+          res.rejets.push("Repos inchangé pour " + ex.name + " (" +
+                          fmtRest(sec) + ") : rien à appliquer.");
+          continue;
+        }
         vus[type + ":" + id] = true;
         res.props.push({ type: "repos", ex: id, rest: sec, ia: true,
           texte: "Repos de " + ex.name + " a " + fmtRest(sec),
@@ -5334,8 +5723,18 @@
         if (!ref || p.kg === ref) continue;
         if (p.kg > ref * IA_RATIO_MAX || p.kg < ref * IA_RATIO_MIN) continue;
       } else if (p.type === "volume") {
-        var nb = cible.ex.sets + p.delta;
-        if (nb < 1 || nb > MAX_SETS) continue;
+        // Même balayage que dans iaLire : sinon les deux divergent, et une
+        // proposition acceptée à la lecture serait écartée à la revalidation.
+        var plR = planExercices(p.ex), pr, nR, encaisseR = 0;
+        for (pr = 0; pr < plR.length; pr++) {
+          nR = plR[pr].liste[plR[pr].rang].sets + p.delta;
+          if (nR >= 1 && nR <= MAX_SETS) encaisseR++;
+        }
+        if (!plR.length) {
+          nR = cible.ex.sets + p.delta;
+          encaisseR = (nR >= 1 && nR <= MAX_SETS) ? 1 : 0;
+        }
+        if (!encaisseR) continue;
       } else if (p.type === "repos") {
         if (p.rest === (cible.ex.rest || 60)) continue;
       } else if (p.type === "remplacer") {
@@ -5809,6 +6208,44 @@
     return null;
   }
 
+  // Changer de fournisseur INVALIDE la cle enregistree.
+  //
+  // Le modele par defaut depend du fournisseur, et on le remet a zero pour cette
+  // raison. La cle en depend tout autant, et l'oublier coutait beaucoup plus
+  // cher : une cle Anthropic conservee au passage sur Mistral partait telle
+  // quelle chez api.mistral.ai, dans un en-tete Authorization, au premier
+  // « Tester la connexion ». Un moyen de paiement transmis a un tiers qui n'a
+  // jamais eu a le connaitre, et qu'il faut ensuite aller revoquer.
+  //
+  // Pire, l'ecran MENTAIT : la carte repliee affichait « Cle enregistree ·
+  // Mistral » et le masque « sk-ant••••••••6789 ». On efface donc, on le DIT, et
+  // la saisie se rouvre pour que ce ne soit pas une surprise silencieuse.
+  //
+  // Le test d'egalite garde l'idempotence : re-choisir le MEME fournisseur ne
+  // detruit rien, et rien n'est annonce quand aucune cle n'est posee.
+  function iaChangerFournisseur(v) {
+    var nouveau = cleanIaReglages({ fournisseur: v }).fournisseur;
+    state.iaAvisCle = "";
+    if (nouveau !== iaReglages.fournisseur) {
+      if (iaReglages.cle) {
+        iaReglages.cle = "";
+        // Deux situations, deux phrases. « — Aucun (pont presse-papier) — » se
+        // lit comme « je repasse au collage », pas comme « supprime ma clé » :
+        // lui répondre « saisis celle du nouveau » n'aurait aucun sens, il n'y a
+        // pas de nouveau fournisseur.
+        state.iaAvisCle = nouveau
+          ? "Clé effacée : elle appartenait au fournisseur précédent. Saisis celle du nouveau."
+          : "Clé effacée : plus aucun fournisseur sélectionné.";
+      }
+      // Le modèle par défaut dépend du fournisseur : le garder n'aurait aucun
+      // sens. On ne le remet à zéro QUE sur un vrai changement, sinon rouvrir le
+      // menu sans rien changer effaçait le modèle saisi à la main.
+      iaReglages.modele = "";
+    }
+    iaReglages.fournisseur = nouveau;
+    state.iaCleVisible = !iaReglages.cle;
+  }
+
   // Une cle est-elle utilisable ? On ne verifie pas sa validite — seul le
   // fournisseur peut le dire — seulement qu'il y a de quoi tenter l'appel.
   function iaClePrete() {
@@ -5837,6 +6274,12 @@
     if (champCle) {
       iaReglages.cle = String(champCle.value)
         .replace(/^\s+|\s+$/g, "").replace(/[\r\n\t ]/g, "").slice(0, IA_CLE_MAX);
+      // Une clé est de nouveau posée : l'avis d'effacement a fait son office et
+      // devient un mensonge. Sans cette ligne, la carte affichait en même temps
+      // « Clé effacée, saisis celle du nouveau » et la clé enregistrée avec son
+      // bouton « Effacer ». On le remet à zéro ici, c'est-à-dire dans le seul
+      // endroit que TOUS les gestes utilisant la clé traversent.
+      if (iaReglages.cle) state.iaAvisCle = "";
     }
     if (champModele) {
       iaReglages.modele = String(champModele.value).replace(/^\s+|\s+$/g, "").slice(0, IA_MODELE_MAX);
@@ -5903,6 +6346,16 @@
       '<div class="field">' +
         '<label class="field-label" for="ia-fournisseur">Fournisseur</label>' +
         '<select id="ia-fournisseur" class="ia-select" data-action="ia-fournisseur">' + opts + '</select>' +
+        // L'avis d'effacement se rend ICI, sous le sélecteur, et pas seulement
+        // en bannière : mesuré sur un iPhone, la bannière se pose en haut du
+        // document alors que ces réglages sont tout en bas — 3 296 px au-dessus
+        // de l'écran, jamais vue, et effacée au bout de sept secondes. Le seul
+        // signal perçu était le champ de saisie qui se rouvre, ce qui n'explique
+        // rien. Or c'est précisément l'information qu'il ne faut pas manquer :
+        // sans elle, on croit sa clé toujours en place.
+        (state.iaAvisCle
+          ? '<div class="ia-cle-avis" role="status">' + esc(state.iaAvisCle) + '</div>'
+          : '') +
       '</div>';
 
     if (f) {
@@ -6070,6 +6523,7 @@
       annuler();
       return;
     }
+    syncLogDepuisStockage();
     for (k in cleaned) { if (has(cleaned, k)) state.log[k] = cleaned[k]; }
     // Le journal EN PREMIER : si le stockage refuse d'écrire, mieux vaut ne pas
     // avoir remplacé le profil pour un journal qui n'a pas pu s'enregistrer.
@@ -6089,6 +6543,23 @@
 
   // --- Mise à jour ----------------------------------------------------------
   // On ne détruit JAMAIS le cache avant d'avoir la nouvelle version en main.
+  //
+  // Ce commentaire était là depuis la v1.1.0, et le code faisait le contraire :
+  // il téléchargeait le HTML frais, le JETAIT, purgeait tout le CacheStorage,
+  // puis rechargeait en comptant sur un SECOND téléchargement pour tout
+  // reconstruire. Entre la purge et ce second téléchargement, l'appli n'avait
+  // plus rien : une coupure réseau à cet instant précis — le métro, un ascenseur,
+  // le sous-sol de la salle — et l'écran affichait « LEMMON FIT est hors-ligne et
+  // n'a rien en cache ». Une appli qui fonctionnait parfaitement hors-ligne
+  // trente secondes plus tôt devenait inutilisable, les données intactes mais
+  // plus aucun moyen de les voir. Reproduit en chargeant le vrai sw.js : cinq
+  // entrées en cache avant le clic, zéro après, puis 503.
+  //
+  // On SÈME d'abord, on purge ENSUITE. Le HTML frais est déjà en main, il suffit
+  // de l'écrire sous la clé que sw.js utilisera : cacheKey() retire la requête,
+  // donc c'est exactement origin + pathname, la variable `base`. Entre les deux
+  // opérations, le cache contient toujours une coquille servable.
+  //
   // La sonde porte "?nocache=" : sw.js laisse passer ces requêtes sans y toucher,
   // sinon elle serait servie depuis le cache et réussirait même hors-ligne,
   // l'appli s'effaçant alors en croyant le réseau disponible.
@@ -6104,13 +6575,65 @@
       })
       .then(function (html) {
         // Un portail Wi-Fi répond 200 avec sa propre page : on vérifie qu'on a
-        // bien récupéré l'appli avant de vider le cache.
+        // bien récupéré l'appli avant de toucher au cache.
         if (html.length < 5000 || html.indexOf("LEMMON FIT") === -1) {
           throw new Error("réponse inattendue du réseau");
         }
-        if (!window.caches || !caches.keys) return null;
-        return caches.keys().then(function (keys) {
-          return Promise.all(keys.map(function (k) { return caches.delete(k); }));
+        // Sans caches ni Response, on NE PURGE PAS : sw.js est réseau-d'abord et
+        // cacheKey() range ?v= sous la même clé, donc le HTML frais écrasera
+        // l'entrée de lui-même. Purger ne ferait que retirer le filet.
+        if (!window.caches || !caches.keys || !window.Response) return null;
+        // On sème dans le cache COURANT, pas dans un cache à part.
+        //
+        // Un cache transitoire séparé paraissait plus propre, et il était pire :
+        // il ne s'auto-nettoyait que si un nouveau service worker s'activait,
+        // donc jamais quand on tape « Mettre à jour » alors que rien de neuf
+        // n'est déployé. Il survivait, et comme CacheStorage.match rend la
+        // PREMIÈRE correspondance dans l'ordre de création, ce semis périmé
+        // l'emportait ensuite sur le cache à jour à chaque repli hors-ligne.
+        //
+        // Le nom découle de la version, exactement comme dans sw.js : c'est le
+        // cache que le service worker utilise déjà, donc rien de concurrent.
+        var SEMIS = "lemmonfit-" + APP_VERSION;
+        // sw.js précache DEUX clés de navigation : "./" et "./index.html".
+        // cacheKey() ne retire que la requête, pas le nom de fichier, donc ce
+        // sont bien deux entrées distinctes. En ne semant que sous celle qui est
+        // ouverte, l'autre survivait à la purge avec l'ANCIENNE appli — et comme
+        // déployer un index.html sans toucher au sw.js ne réinstalle rien,
+        // addAll ne repassait jamais. Hors-ligne sur l'autre adresse, c'est la
+        // vieille version qui se lançait.
+        //
+        // Les deux clés se dérivent du DOSSIER, jamais du chemin ouvert. Dérivées
+        // de `base`, elles se confondaient dès que la page était ouverte SUR
+        // "./index.html" — ce qui est justement le start_url du manifeste, donc
+        // le cas de l'appli installée sur l'écran d'accueil : la clé "./" n'était
+        // alors jamais resemée et gardait l'ancienne version. Passer par le
+        // dossier couvre les deux sens, et évite d'écrire hors du périmètre de
+        // l'appli si elle était un jour servie depuis un sous-dossier.
+        var dossier = new URL("./", base).href;
+        var cibles = [base];
+        if (cibles.indexOf(dossier) === -1) cibles.push(dossier);
+        if (cibles.indexOf(dossier + "index.html") === -1) cibles.push(dossier + "index.html");
+        var repondre = function () {
+          return new Response(html, {
+            headers: { "Content-Type": "text/html; charset=utf-8" }
+          });
+        };
+        return caches.open(SEMIS).then(function (cache) {
+          return Promise.all(cibles.map(function (u) { return cache.put(u, repondre()); }));
+        }).then(function () {
+          return caches.keys().then(function (keys) {
+            return Promise.all(keys.map(function (k) {
+              return k === SEMIS ? null : caches.delete(k);
+            }));
+          });
+        })["catch"](function () {
+          // Le stockage a refusé d'écrire (quota, cache évincé). Ce n'est PAS
+          // une raison d'abandonner : le HTML frais est en main, sw.js va au
+          // réseau d'abord, et le rechargement suffit à mettre à jour l'appli.
+          // Abandonner ici rendait le bouton définitivement inopérant en
+          // accusant le réseau, qui n'y était pour rien.
+          return null;
         });
       })
       .then(function () { window.location.replace(fresh); })
@@ -6118,7 +6641,6 @@
         notify("Mise à jour impossible : réseau injoignable. L'appli reste utilisable telle quelle, tes données sont intactes.", "error");
       });
   }
-
   // --- Écriture des séries --------------------------------------------------
   function copySets(entry) {
     var out = {}, k, i, src;
@@ -6240,16 +6762,38 @@
         render();
       }
 
+    } else if (action === "set-theme") {
+      var thv = t.getAttribute("data-theme");
+      if (thv === "sombre" || thv === "clair" || thv === "systeme") {
+        state.theme = thv;
+        persistSettings();
+        appliqueTheme();
+        render();
+      }
+
     } else if (action === "toggle-avance") {
+      // On relit le champ AVANT de replier. Sur iOS, un collage par le menu
+      // systeme ne declenche pas toujours l'evenement input : la cle etait alors
+      // a l'ecran mais pas dans iaReglages, et replier la carte la faisait
+      // disparaitre sans un mot. La branche « Tester » relisait deja, pas
+      // celles-ci.
+      iaLireChamps();
       state.avanceOuvert = !state.avanceOuvert;
       state.iaCleVisible = false;   // on ne laisse pas la cle en clair derriere soi
+      state.iaAvisCle = "";         // l'avis a ete lu, ou ne concerne plus rien
+      persistSettings();
       render();
 
     } else if (action === "ia-cle-voir") {
       // En passant en saisie, le champ part VIDE : on ne remet pas la cle en
       // clair dans le DOM pour la modifier. Retaper est le prix de ne pas
       // l'exposer.
+      //
+      // Meme raison qu'au-dessus : « Masquer la cle » perdait une cle collee
+      // sans evenement input.
+      iaLireChamps();
       state.iaCleVisible = !state.iaCleVisible;
+      persistSettings();
       render();
 
     } else if (action === "ia-cle-effacer") {
@@ -6563,9 +7107,7 @@
       render();   // en sortie de champ seulement, pour rafraîchir l'estimation
 
     } else if (action === "ia-fournisseur") {
-      iaReglages.fournisseur = cleanIaReglages({ fournisseur: t.value }).fournisseur;
-      iaReglages.modele = "";        // le modele par defaut change avec le fournisseur
-      state.iaCleVisible = !iaReglages.cle;
+      iaChangerFournisseur(t.value);
       persistSettings();
       render();
 
@@ -6676,6 +7218,18 @@
   document.addEventListener("visibilitychange", function () { if (!document.hidden) refreshIfNewDay(); });
   window.addEventListener("pageshow", refreshIfNewDay);
   window.addEventListener("focus", refreshIfNewDay);
+
+  appliqueTheme();
+  try {
+    var mqTheme = window.matchMedia("(prefers-color-scheme: light)");
+    var suivreSysteme = function () {
+      if (state.theme !== "systeme") return;
+      appliqueTheme();
+      render();
+    };
+    if (mqTheme.addEventListener) mqTheme.addEventListener("change", suivreSysteme);
+    else if (mqTheme.addListener) mqTheme.addListener(suivreSysteme);
+  } catch (e) { /* pas de matchMedia : le mode systeme restera sur sombre */ }
 
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("sw.js").catch(function () {});
