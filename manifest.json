@@ -1,0 +1,29 @@
+{
+  "version": "1.4.0",
+  "id": "lemmon-fit",
+  "name": "LEMMON FIT",
+  "short_name": "LEMMON FIT",
+  "description": "Suivi de séances, de nutrition et de poids. Programme construit au premier lancement selon ton objectif, ton temps et ton matériel.",
+  "lang": "fr",
+  "dir": "ltr",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#100f0d",
+  "theme_color": "#100f0d",
+  "icons": [
+    {
+      "src": "icon-180.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
