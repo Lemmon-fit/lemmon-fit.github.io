@@ -171,6 +171,10 @@
   .header-title-rest { color:var(--vert-txt); }
   .header-sub { font-size: 15px; color:var(--texte-2); margin-top: 4px; }
   .header-override { font-size: 12px; color:var(--accent-pill); margin-top: 7px; line-height: 1.4; }
+  .header-override-btn {
+    background: none; border: 0; padding: 0; margin-left: 4px;
+    font: inherit; color: inherit; text-decoration: underline; cursor: pointer;
+  }
 
   /* Ordre chronologique de gauche à droite : avant-hier, hier, aujourd'hui. */
   .day-row { display: flex; gap: 6px; margin-bottom: 10px; }
@@ -939,6 +943,12 @@
   .ana-cible b { color:var(--accent-txt); font-family: ui-monospace, "SF Mono", monospace; font-size: 13px; }
 
   .nutri-disclaimer { font-size: 11px; color:var(--texte-3); margin-top: 10px; line-height: 1.45; }
+  .pnns-bloc { margin-top: 16px; border-top:1px solid var(--sep); padding-top: 14px; }
+  .pnns-ligne { padding: 7px 0; border-bottom:1px solid var(--sep); }
+  .pnns-tete { display:flex; justify-content:space-between; align-items:baseline; gap: 12px; }
+  .pnns-quoi { font-size: 13px; color:var(--texte); }
+  .pnns-val { font-size: 13px; color:var(--texte-1b); text-align:right; }
+  .pnns-detail { font-size: 11px; color:var(--texte-3); margin-top: 3px; line-height: 1.45; }
 </style>
 <script>
 /* Pose le theme avant le premier rendu, pour eviter le clignotement. */
@@ -977,8 +987,8 @@
   //   MINEUR    : nouvelle fonctionnalité, ou changement de comportement visible
   //   CORRECTIF : correction de bug seule, aucun changement de comportement voulu
   // ===========================================================================
-  var APP_VERSION = "1.9.0";
-  var APP_BUILD = "16 août 2026 (1.9.0)";
+  var APP_VERSION = "1.10.0";
+  var APP_BUILD = "16 août 2026 (1.10.0)";
 
   // NE JAMAIS CHANGER sans écrire une migration : c'est ici que vit l'historique.
   var STORAGE_KEY = "olivier-coach-log";
@@ -2188,6 +2198,320 @@
   // La découpe suit le nombre de séances, pas les jours choisis. En dessous de
   // quatre séances, le full body bat toute découpe : chaque groupe est sollicité
   // à chaque fois, au lieu d'une fois par semaine.
+  // ===========================================================================
+  // L'OBJECTIF CONFIRME, ET CE QU'IL CHANGE DANS LE PROGRAMME
+  // ---------------------------------------------------------------------------
+  // Jusqu'ici l'appli DEDUISAIT l'objectif de l'ecart entre le poids du jour et
+  // le poids vise, et ne le disait jamais. Deux consequences mesurees sur le
+  // livrable v1.9.3 :
+  //   - un ecart de 200 g decidait silencieusement entre « perte » et « prise »,
+  //     alors que 200 g sur une balance de salle de bain sont du bruit ;
+  //   - la seule chose qui reagissait etait l'ASSIETTE. Le programme, lui, etait
+  //     rigoureusement le meme pour quelqu'un qui veut perdre dix kilos et pour
+  //     quelqu'un qui veut en prendre huit.
+  //
+  // ON DEMANDE DONC, ET ON FAIT REAGIR. La question est une CONFIRMATION : c'est
+  // le couple (poids actuel, poids cible) qui propose la branche, l'utilisateur
+  // qui la valide. Poser une question ouverte aurait autorise « je veux prendre
+  // de la masse » avec une cible cinq kilos plus bas — une contradiction que
+  // l'appli aurait ensuite du arbitrer toute seule, en silence.
+  //
+  // LE CHAMP N'EST PAS OBLIGATOIRE, ET C'EST VOULU. `objectif` vaut null tant
+  // qu'il n'a pas ete confirme, et un profil a null recoit EXACTEMENT le
+  // programme de la v1.9.3, a l'octet pres. C'est ce qui permet a un profil deja
+  // installe — celui du telephone d'Olivier, en v1.4.1 — de ne pas voir son plan
+  // changer sous ses pieds au premier lancement de cette version. Le diagnostic,
+  // lui, EXIGE une reponse : obCanAdvance bloque le bouton tant que rien n'est
+  // choisi, donc tout profil neuf en porte un.
+  //
+  // TROIS LEVIERS, ET AUCUN N'EST DECORATIF. Ils sont mesures par test_c_objectif :
+  //   1. LA DECOUPE. En prise de masse, le jour de HIIT et le jour de cardio ne
+  //      sont pas des jours de prise : ils sont remplaces par du travail avec
+  //      charges. En perte, ils restent — c'est justement ce qu'on vient
+  //      chercher.
+  //   2. LES ZONES VISEES. En prise de masse seulement : les creneaux qui
+  //      servent une zone choisie passent de « confort » a « utile » (ils ne sont
+  //      donc plus les premiers sacrifies quand le temps manque) et gagnent une
+  //      serie. Une prise ciblee « haut du corps » ne rend pas la meme seance
+  //      qu'une prise ciblee « jambes ».
+  //   3. LE SCHEMA. Prise : moins de repetitions, plus de repos. Tonification :
+  //      plus de repetitions, moins de repos. Perte : repetitions inchangees et
+  //      repos raccourci d'un cran.
+  //   4. LA SURVIE DU GAINAGE EN PERTE : les creneaux de gainage, de HIIT et de
+  //      cardio cessent d'etre les premiers coupes quand la seance deborde.
+  //
+  // POURQUOI LA PERTE A RECU UN REPOS PLUS COURT, ALORS QUE LA PREMIERE
+  // ECRITURE N'EN AVAIT PAS. Elle n'avait que le levier 4, et la MESURE a dit
+  // qu'il ne changeait RIEN : a 30 minutes et trois jours, le programme de perte
+  // etait identique a la reference, exercice pour exercice. La cause est simple
+  // et elle etait sous les yeux — dans les gabarits full body, `core` est DEJA
+  // en priorite 2 ; le promouvoir de 3 a 2 ne le promeut nulle part. Et la ou il
+  // etait vraiment en 3 (le HIIT, le cardio), la seance courte le coupait de
+  // toute facon en arrivant a la priorite 2.
+  //
+  // ON NE REPARE PAS CA EN PASSANT LE GAINAGE EN PRIORITE 1 : il serait alors
+  // garde meme quand il fait deborder la seance, et l'appli annoncerait 30
+  // minutes pour en servir 36. Le repos raccourci fait le meme travail par
+  // l'autre bout — il LIBERE du temps, donc la taille coupe moins et la passe
+  // d'extension remet des creneaux —, il ne fait jamais deborder personne, et il
+  // dit quelque chose de juste sur l'entrainement en deficit : c'est la densite
+  // qui compte, pas la charge maximale.
+  //
+  // POURQUOI LE SCHEMA PASSE PAR UNE COPIE DE L'ENTREE DE CATALOGUE. `chosen[i].ex`
+  // POINTE sur l'objet du CATALOG, qui est partage par tous les profils et par
+  // toutes les seances de la meme execution. Le muter reecrirait le catalogue
+  // pour tout le monde, et le second profil construit dans le meme onglet
+  // recevrait le schema du premier. On copie donc l'entree avant d'y toucher.
+  // ===========================================================================
+
+  // Les trois objectifs. `v` est ce qui est stocke ; rien d'autre n'est accepte
+  // par cleanProfile, et un profil qui porterait autre chose retombe a null.
+  var OBJECTIFS = [
+    { v: "perte",    label: "Perdre du gras",
+      court: "Perte de poids",
+      hint: "garder le muscle pendant que la balance descend" },
+    { v: "prise",    label: "Prendre de la masse",
+      court: "Prise de masse",
+      hint: "construire du muscle, la balance monte lentement" },
+    { v: "tonifier", label: "Tonifier sans changer de poids",
+      court: "Tonification",
+      hint: "même poids sur la balance, plus de muscle et moins de gras" }
+  ];
+
+  function objectifDef(v) {
+    var i;
+    for (i = 0; i < OBJECTIFS.length; i++) { if (OBJECTIFS[i].v === v) return OBJECTIFS[i]; }
+    return null;
+  }
+
+  // LES ZONES MUSCULAIRES. Elles ne decrivent pas des muscles, elles decrivent
+  // des CRENEAUX de seance : c'est la seule facon pour que la reponse change
+  // quelque chose au programme. Chaque zone porte donc la liste des patterns du
+  // catalogue qui la servent, et la reunion des sept couvre tout le catalogue
+  // charge — seuls l'echauffement, le HIIT et le cardio n'appartiennent a
+  // aucune zone, parce qu'ils ne visent pas un muscle.
+  //
+  // SEPT ET PAS DOUZE. « Trapezes », « avant-bras », « lombaires » auraient l'air
+  // plus precis, mais l'appli n'a pas de creneau pour eux : la reponse serait
+  // restee sans effet, c'est-a-dire exactement le defaut qu'on corrige.
+  var ZONES = [
+    { v: "pecs",     label: "Pectoraux",             pats: ["push-h", "chest-iso"] },
+    { v: "dos",      label: "Dos",                   pats: ["pull-v", "pull-h"] },
+    { v: "epaules",  label: "Épaules",               pats: ["push-v", "delt"] },
+    { v: "bras",     label: "Bras",                  pats: ["bi", "tri"] },
+    { v: "jambes",   label: "Cuisses et mollets",    pats: ["knee", "quad-iso", "calf"] },
+    { v: "fessiers", label: "Fessiers et ischios",   pats: ["hip", "ham-iso", "hip-abd"] },
+    { v: "abdos",    label: "Abdominaux et gainage", pats: ["core"] }
+  ];
+
+  function zoneDef(v) {
+    var i;
+    for (i = 0; i < ZONES.length; i++) { if (ZONES[i].v === v) return ZONES[i]; }
+    return null;
+  }
+
+  // LA BRANCHE PROPOSEE, ET SA ZONE MORTE. 500 g d'ecart ne sont pas un objectif,
+  // c'est la difference entre deux pesees du meme matin — l'appli le dit
+  // elle-meme dans sa carte de poids. En dessous de ce seuil on propose la
+  // tonification, qui est la reponse honnete a « je veux rester a ce poids ».
+  //
+  // LE SEUIL EST SYMETRIQUE et il n'existe qu'ICI : c'est la proposition qu'il
+  // gouverne, jamais l'enregistrement. Quelqu'un qui confirme « prise » a 300 g
+  // d'ecart obtient une prise — c'est sa reponse qui compte, pas le calcul.
+  var OBJ_ECART_NUL = 0.5;
+  function objectifSuggere(actuel, cible) {
+    var a = Number(actuel), c = Number(cible);
+    if (!(a > 0) || !(c > 0)) return "tonifier";
+    if (a - c > OBJ_ECART_NUL) return "perte";
+    if (c - a > OBJ_ECART_NUL) return "prise";
+    return "tonifier";
+  }
+
+  // L'objectif REELLEMENT confirme d'un profil, ou null. Tout le reste du bloc
+  // passe par ici : un seul endroit sait ce que « non confirme » veut dire.
+  function objectifDe(prof) {
+    if (!prof) return null;
+    return objectifDef(prof.objectif) ? prof.objectif : null;
+  }
+
+  // Les zones visees, et elles n'ont de sens QU'EN PRISE DE MASSE. Quelqu'un qui
+  // passe de « prise » a « perte » garde ses zones dans son profil — on ne perd
+  // pas une reponse — mais elles cessent d'agir. Sans ce filtre, un aller-retour
+  // dans le questionnaire laissait un renforcement fantome sur un programme de
+  // perte, sans que rien a l'ecran ne le dise.
+  function zonesDe(prof) {
+    var out = [], i;
+    if (!prof || objectifDe(prof) !== "prise" || !isArray(prof.zones)) return out;
+    for (i = 0; i < prof.zones.length; i++) {
+      if (zoneDef(prof.zones[i]) && out.indexOf(prof.zones[i]) < 0) out.push(prof.zones[i]);
+    }
+    return out;
+  }
+
+  // Les patterns servis par les zones visees, en table pour un test en O(1)
+  // dans la boucle de construction de seance.
+  function objPatsVises(prof) {
+    var z = zonesDe(prof), out = {}, i, j, d;
+    for (i = 0; i < z.length; i++) {
+      d = zoneDef(z[i]);
+      if (!d) continue;
+      for (j = 0; j < d.pats.length; j++) out[d.pats[j]] = true;
+    }
+    return out;
+  }
+
+  // --- LEVIER 1 : la decoupe --------------------------------------------------
+  // On ne reecrit PAS splitFor : il porte le raisonnement sur le nombre de jours
+  // — full body en dessous de quatre seances, haut/bas a quatre, push/pull/legs
+  // au-dela — et ce raisonnement ne depend pas de l'objectif. On SUBSTITUE
+  // ensuite les gabarits qui ne servent pas l'objectif.
+  //
+  // EN PRISE, LE HIIT ET LE CARDIO SORTENT. Un jour d'intervalles ne construit
+  // pas de muscle ; a cinq seances, c'est un cinquieme du volume hebdomadaire
+  // qui ne va pas dans la direction demandee. Ils sont remplaces par un jour
+  // charge — full body a cinq seances, ou le gabarit haut/bas au-dela.
+  //
+  // EN PERTE ET EN TONIFICATION, RIEN NE BOUGE : le HIIT y a toute sa place, et
+  // le programme de reference de l'appli a ete construit pour ce cas-la.
+  var OBJ_REMPLACE_PRISE = { hiit: "full", cardio: "full" };
+  function splitPour(n, profile) {
+    var base = splitFor(n), obj = objectifDe(profile), out = [], i, code;
+    if (obj !== "prise") return base;
+    for (i = 0; i < base.length; i++) {
+      code = base[i] ? base[i].code : null;
+      if (code && has(OBJ_REMPLACE_PRISE, code) && TPL[OBJ_REMPLACE_PRISE[code]]) {
+        out.push(TPL[OBJ_REMPLACE_PRISE[code]]);
+      } else {
+        out.push(base[i]);
+      }
+    }
+    return out;
+  }
+
+  // --- LEVIER 3 : le schema de repetitions et de repos -------------------------
+  // LES BORNES SONT DES BORNES, pas des cibles. Un exercice ecrit « 15-20 » ne
+  // monte pas a « 18-23 » en tonification : au-dela de vingt repetitions on ne
+  // travaille plus la meme chose, et le catalogue a deja place ces exercices la
+  // ou il faut.
+  //
+  // `reps: 0` VEUT DIRE « ON N'Y TOUCHE PAS », et pas « on reecrit a
+  // l'identique ». La nuance est reelle : la reecriture normalise le separateur,
+  // donc « 8 - 10 » ressortirait « 8-10 » et le detail affiche changerait sans
+  // qu'aucune regle ne l'ait demande. La perte ne touche qu'au repos.
+  var OBJ_SCHEMA = {
+    prise:    { reps: -2, repsMin: 5,  repsMax: 15, repos: 1.25 },
+    tonifier: { reps: +3, repsMin: 10, repsMax: 20, repos: 0.8 },
+    perte:    { reps: 0,  repsMin: 1,  repsMax: 99, repos: 0.85 }
+  };
+  var OBJ_REPOS_MIN = 30, OBJ_REPOS_MAX = 210;
+
+  // Deplace une fourchette de repetitions en gardant ce qui l'accompagne.
+  // « 8-10 » -> « 6-8 », « 12 par jambe » -> « 10 par jambe ». Une chaine dont
+  // la tete n'est pas un nombre ressort INTACTE : le catalogue en porte, et les
+  // reecrire au chausse-pied produirait la ligne absurde qu'on passe son temps
+  // a corriger ailleurs.
+  function objDecalerReps(reps, sch) {
+    var s = String(reps == null ? "" : reps);
+    var m = s.match(/^(\d+)(\s*[-–]\s*(\d+))?/);
+    if (!m) return reps;
+    var lo = parseInt(m[1], 10) + sch.reps;
+    var hi = m[3] ? parseInt(m[3], 10) + sch.reps : lo;
+    if (lo < sch.repsMin) lo = sch.repsMin;
+    if (hi < lo) hi = lo;
+    if (hi > sch.repsMax) hi = sch.repsMax;
+    if (lo > hi) lo = hi;
+    return (lo === hi ? String(lo) : (lo + "-" + hi)) + s.slice(m[0].length);
+  }
+
+  function objDecalerRepos(rest, sch) {
+    var r = Math.round((rest || 60) * sch.repos / 15) * 15;
+    if (r < OBJ_REPOS_MIN) r = OBJ_REPOS_MIN;
+    if (r > OBJ_REPOS_MAX) r = OBJ_REPOS_MAX;
+    return r;
+  }
+
+  // Copie d'une entree de catalogue. Voir l'entete : `chosen[i].ex` pointe sur
+  // l'objet PARTAGE du catalogue, et le muter reecrirait le programme de tous
+  // les profils construits ensuite dans le meme onglet.
+  function objCopieEx(ex) {
+    var o = {}, k;
+    for (k in ex) { if (has(ex, k)) o[k] = ex[k]; }
+    return o;
+  }
+
+  // --- L'application des leviers 2, 3 et 4 sur une seance en construction ------
+  // Appelee par buildSession JUSTE APRES le remplissage des creneaux et AVANT la
+  // taille : c'est la seule position ou le changement se voit vraiment. Posee
+  // apres la taille, une serie de plus aurait fait deborder la seance sans que
+  // le budget de temps ait son mot a dire ; un repos allonge n'aurait compte
+  // dans aucun cout, et l'appli aurait annonce une duree fausse.
+  //
+  // ELLE NE REND RIEN : elle modifie `chosen` sur place, comme les trois boucles
+  // de taille qui la suivent.
+  var OBJ_SETS_MAX = 5;
+  function objRenforcer(chosen, profile) {
+    var obj = objectifDe(profile);
+    if (!obj) return;                       // profil non confirme : v1.9.3 intacte
+    var vises = objPatsVises(profile), sch = has(OBJ_SCHEMA, obj) ? OBJ_SCHEMA[obj] : null;
+    var i, c;
+    for (i = 0; i < chosen.length; i++) {
+      c = chosen[i];
+      if (!c || !c.ex) continue;
+
+      // LEVIER 3 — le schema. Il ne touche que les exercices qui se comptent en
+      // REPETITIONS : un gainage tenu « 30-45 sec » n'a pas de fourchette a
+      // decaler, et lui allonger le repos ne repond a aucun objectif.
+      if (sch && c.ex.reps) {
+        c.ex = objCopieEx(c.ex);
+        if (sch.reps) c.ex.reps = objDecalerReps(c.ex.reps, sch);
+        c.ex.rest = objDecalerRepos(c.ex.rest, sch);
+      }
+
+      // LEVIER 4 — en perte, le gainage et le cardio ne sont plus les premiers
+      // sacrifies. C'est le seul effet de la branche « perte », et il est reel :
+      // a 30 minutes, une seance perdait son gainage AVANT toute autre chose,
+      // c'est-a-dire exactement le creneau qu'on vient chercher.
+      if (obj === "perte" && c.prio === 3 &&
+          (c.ex.pat === "core" || c.ex.pat === "hiit" || c.ex.pat === "cardio")) {
+        c.prio = 2;
+      }
+
+      // LEVIER 2 — les zones visees, en prise de masse uniquement (zonesDe le
+      // garantit). Le creneau passe de « confort » a « utile », donc il survit a
+      // la taille, et il gagne une serie s'il se compte en repetitions.
+      if (vises[c.ex.pat]) {
+        if (c.prio === 3) c.prio = 2;
+        if (c.ex.reps && c.sets < OBJ_SETS_MAX) c.sets++;
+      }
+    }
+  }
+
+  // --- Ce que l'ecran en dit ---------------------------------------------------
+  // Une phrase par branche, ecrite au present et sans promesse. Elle est lue au
+  // diagnostic ET dans la carte de profil : deux copies auraient diverge.
+  function objPhrase(prof) {
+    var obj = objectifDe(prof), z, i, noms;
+    if (obj === "prise") {
+      z = zonesDe(prof); noms = [];
+      for (i = 0; i < z.length; i++) noms.push(zoneDef(z[i]).label.toLowerCase());
+      return noms.length
+        ? "Prise de masse, en insistant sur " + noms.join(", ") + "."
+        : "Prise de masse.";
+    }
+    if (obj === "perte") return "Perte de poids : repos plus court, gainage et cardio préservés.";
+    if (obj === "tonifier") return "Tonification à poids constant : plus de répétitions, moins de repos.";
+    return "Objectif non confirmé.";
+  }
+
+  // Le resume court de la carte de profil et de l'ecran de fin de diagnostic.
+  function objResume(prof) {
+    var obj = objectifDe(prof), d = objectifDef(obj), z;
+    if (!d) return "non confirmé";
+    if (obj !== "prise") return d.court;
+    z = zonesDe(prof);
+    return d.court + (z.length ? " · " + z.length + " zone" + (z.length > 1 ? "s" : "") : "");
+  }
+
   function splitFor(n) {
     if (n <= 1) return [TPL.fullA];
     if (n === 2) return [TPL.fullA, TPL.fullB];
@@ -2253,6 +2577,11 @@
       // isolations, on ne finit pas une séance par un soulevé de terre.
       chosen.push({ ex: ex, prio: tpl.slots[i].prio, sets: ex.sets || 1, idx: i });
     }
+
+    // L'OBJECTIF CONFIRME AGIT ICI, ET AVANT LA TAILLE. Voir objRenforcer :
+    // zones visees, schema de repetitions et de repos, survie du gainage en
+    // perte. Sans objectif confirme, elle ne fait rien du tout.
+    objRenforcer(chosen, profile);
 
     var budget = profile.minutes * 60;
     function currentList() {
@@ -2550,7 +2879,7 @@
       if (kindOfDay(profile, days[i]) === "course") joursCourse.push(days[i]);
       else joursMuscu.push(days[i]);
     }
-    var tplsM = joursMuscu.length ? splitFor(joursMuscu.length) : [];
+    var tplsM = joursMuscu.length ? splitPour(joursMuscu.length, profile) : [];
     var tplsC = joursCourse.length ? runWeek(joursCourse.length, profile.runLevel) : [];
 
     var plan = {};
@@ -3011,6 +3340,12 @@
       runLevel: "debut",       // niveau de course, sert à calibrer les distances
       dayKinds: {},            // en mode mixte : jour de la semaine -> discipline
       days: [1, 3, 5],
+      // L'OBJECTIF CONFIRME, ET NULL TANT QU'IL NE L'EST PAS. Un profil deja
+      // installe n'en a pas : il doit garder SON programme, pas en recevoir un
+      // autre au premier lancement de cette version. Le diagnostic, lui, exige
+      // une reponse — voir obObjectifOk.
+      objectif: null,          // "perte" | "prise" | "tonifier" | null
+      zones: [],               // zones musculaires visees, en prise de masse
       equipment: [],
       noGear: [],          // familles de machines ABSENTES de la salle
       excluded: [],
@@ -3141,6 +3476,20 @@
 
     v = cleanNumber(raw.startWeight, MIN_WEIGHT, MAX_WEIGHT, 1); p.startWeight = v === null ? d.startWeight : v;
     v = cleanNumber(raw.targetWeight, MIN_WEIGHT, MAX_WEIGHT, 1); p.targetWeight = v === null ? d.targetWeight : v;
+
+    // L'OBJECTIF CONFIRME. Une valeur inconnue retombe a null, c'est-a-dire au
+    // comportement de la v1.9.3 : mieux vaut un profil qui ne dit rien qu'un
+    // profil qui dit quelque chose d'ininterpretable.
+    p.objectif = objectifDef(raw.objectif) ? raw.objectif : null;
+    // LES ZONES SONT GARDEES MEME HORS PRISE. zonesDe les ignore quand
+    // l'objectif n'est pas la prise de masse ; les effacer ici punirait
+    // l'aller-retour de quelqu'un qui hesite entre deux objectifs.
+    p.zones = [];
+    if (isArray(raw.zones)) {
+      for (i = 0; i < raw.zones.length; i++) {
+        if (zoneDef(raw.zones[i]) && p.zones.indexOf(raw.zones[i]) < 0) p.zones.push(raw.zones[i]);
+      }
+    }
     // Plancher à 20 min : en dessous, il ne reste plus de place pour un
     // échauffement et deux mouvements structurants, et le programme rendu
     // dépasserait de toute façon le temps annoncé.
@@ -4503,7 +4852,10 @@
     // la main, le mercredi c'est normalement LEGS » alors que LEGS est affiché —
     // dès qu'un prog pointait vers un jour absent du plan, ce que la validation
     // de forme de cleanProg rend désormais possible.
-    var overriddenProg = !!(entry.prog && PROGRAM[naturalDow] && progKey !== naturalDow);
+    // Le garde `PROGRAM[naturalDow]` a quitte la CONDITION pour rejoindre la
+    // PHRASE : il empechait l'alerte de sortir les jours de repos, c'est-a-dire
+    // exactement quand on choisit une seance a la main.
+    var overriddenProg = !!(entry.prog && progKey !== naturalDow);
     var accentFond = program ? "var(--accent)" : "var(--vert)";
     var accentTxt = program ? "var(--accent-txt)" : "var(--vert-txt)";
     var entryNutri = entry.nutri || {};
@@ -4688,8 +5040,13 @@
         // Sans cette mention, rien ne signale qu'on regarde une séance forcée :
         // on voit PULL un mercredi et on croit à un bug de l'appli.
         (overriddenProg
-          ? '<div class="header-override">Séance choisie à la main. Le ' + esc(weekdayName(editKey)) +
-            ', c\'est normalement ' + esc(PROGRAM[naturalDow].label) + '.</div>'
+          ? '<div class="header-override">Séance choisie à la main. ' +
+            (PROGRAM[naturalDow]
+              ? 'Le ' + esc(weekdayName(editKey)) + ', c\'est normalement ' +
+                esc(PROGRAM[naturalDow].label) + '.'
+              : 'Le ' + esc(weekdayName(editKey)) + ' n\'est pas un jour prévu.') +
+            ' <button type="button" class="header-override-btn" data-action="prog-reset">' +
+            'Revenir au programme du jour</button></div>'
           : "") +
       '</header>' +
       // « Changer de séance » juste sous le titre : c'est ce titre qu'il change,
@@ -5150,6 +5507,7 @@
           ' ' + (state.showNutrition ? "▲" : "▼") +
         '</button>' +
         nutriListHtml +
+        (profile ? pnnsCarteHtml() : '') +
         (profile
           ? '<div class="nutri-disclaimer">Des repères estimés à partir de ton poids et de ton volume d\'entraînement, ' +
             'pas une prescription : aucun métabolisme n\'est mesuré ici. Ajuste d\'après ce que fait la balance sur trois semaines.</div>'
@@ -5158,6 +5516,21 @@
 
     // --- Graphique de poids ---
     var chartHtml = "";
+    // UNE SEULE PESEE : pas de courbe, mais pas de silence non plus. Sans cette
+    // branche, la carte entiere disparaissait et se lisait comme une perte.
+    if (weightSeries.length === 1) {
+      chartHtml =
+        '<section class="card">' +
+          '<div class="card-title">⚖️ Poids</div>' +
+          '<div class="total-line">Première pesée : <b>' +
+            frDec(String(weightSeries[0].poids)) + ' kg</b> le ' +
+            esc(shortDate(weightSeries[0].date)) + '</div>' +
+          '<div class="ob-note">Il faut une <b>deuxième pesée</b> pour tracer une courbe : ' +
+            'une tendance sur un seul point n\'existe pas. Pèse-toi une prochaine fois ' +
+            'dans les mêmes conditions — au réveil, avant de manger — et la courbe ' +
+            'apparaîtra ici, avec ta tendance et ta ligne d\'objectif.</div>' +
+        '</section>';
+    }
     if (weightSeries.length >= 2) {
       var w = 300, h = 150, padX = 10, padY = 16;
 
@@ -5386,6 +5759,7 @@
           '<div class="profile-rows">' +
             pRow("Prénom", profile.name || "non renseigné", "Toi") +
             pRow("Objectif", frDec(profile.startWeight) + " → " + frDec(profile.targetWeight) + " kg", "Poids") +
+            pRow("Objectif d'entraînement", objResume(profile), "Objectif") +
             // LE RANG 2 ETAIT INATTEIGNABLE. Sans cette ligne, passer de la
             // musculation seule a la course imposait de refaire tout le
             // diagnostic. Le niveau de course ne merite pas sa propre ligne : il
@@ -5500,7 +5874,9 @@
     var pageHtml = isAnnexe
       ? (nutritionHtml + chartHtml + badgesSectionHtml + analyseHtml() + freinHtml + profileHtml +
          themeHtml + iaCleHtml() + settingsHtml + footerHtml)
-      : (headerHtml + heroHtml + motivationHtml + seanceHtml);
+      : (state.bravo === editKey
+          ? bravoHtml(editKey, entry, program)
+          : headerHtml + heroHtml + motivationHtml + seanceHtml);
 
     var animCls = state.pageAnim ? " page-from-" + state.pageAnim : "";
     state.pageAnim = null;   // l'animation ne joue qu'au changement d'écran
@@ -5542,7 +5918,7 @@
   // Les etapes sont designees par leur NOM et non par leur rang : inserer
   // « Pratique » au milieu aurait sinon oblige a renumeroter chaque branche du
   // rendu, et une seule oubliee affiche la mauvaise question.
-  var OB_STEPS = ["Toi", "Poids", "Pratique", "Rythme", "Matériel", "Programme", "Nutrition", "C'est parti"];
+  var OB_STEPS = ["Toi", "Poids", "Objectif", "Pratique", "Rythme", "Matériel", "Programme", "Nutrition", "C'est parti"];
   // 45 EST DANS LA LISTE PARCE QUE C'EST LA VALEUR PAR DEFAUT. Sans elle, le
   // premier ecran que voit un nouvel utilisateur affichait cinq boutons dont
   // AUCUN n'etait selectionne, sous une phrase qui annonce « de 45 minutes ».
@@ -5587,6 +5963,8 @@
     { c: "sex",          l: "ton sexe",                      plan: false, nutri: true },
     { c: "startWeight",  l: "ton poids",                     plan: false, nutri: true },
     { c: "targetWeight", l: "ton objectif",                  plan: false, nutri: true },
+    { c: "objectif",     l: "ton objectif d'entraînement",   plan: true,  nutri: false },
+    { c: "zones",        l: "tes zones à développer",        plan: true,  nutri: false },
     { c: "minutes",      l: "la durée des séances",          plan: true,  nutri: false },
     { c: "days",         l: "tes jours",                     plan: true,  nutri: true },
     { c: "discipline",   l: "ta pratique",                   plan: true,  nutri: true },
@@ -5695,6 +6073,7 @@
   function obCanAdvance(step) {
     var d = obDraft(), nom = OB_STEPS[step];
     if (nom === "Poids") return d.startWeight > 0 && d.targetWeight > 0;
+    if (nom === "Objectif") return obObjectifOk(d);
     if (nom === "Rythme") return d.days.length >= 1 && obMixteOk(d);
     if (nom === "Pratique") return obMixteOk(d);
     return true;
@@ -5774,6 +6153,148 @@
       ' aria-pressed="' + (active ? "true" : "false") + '">' + esc(label) + '</button>';
   }
 
+  // ===========================================================================
+  // L'ETAPE « OBJECTIF » DU DIAGNOSTIC
+  // ---------------------------------------------------------------------------
+  // Elle vient JUSTE APRES « Poids », et pas ailleurs : la question porte sur
+  // les deux nombres qu'on vient de saisir, et les relire une page plus loin
+  // demanderait de se souvenir de ce qu'on a tape.
+  //
+  // CE N'EST PAS UN CHOIX LIBRE, C'EST UNE CONFIRMATION. La branche est proposee
+  // par l'ecart entre les deux poids ; les deux autres restent atteignables,
+  // mais elles sont ecrites comme ce qu'elles sont — un desaccord avec les
+  // chiffres saisis — et l'ecran DIT alors quoi corriger. Sans cette phrase,
+  // quelqu'un pouvait enregistrer « prendre de la masse » avec une cible cinq
+  // kilos plus bas et recevoir un plan nutrition en deficit sous un programme de
+  // prise, sans qu'aucun ecran ne signale la contradiction.
+  //
+  // LES ZONES NE SORTENT QU'EN PRISE, et le bouton reste gris tant qu'aucune
+  // n'est choisie. Une prise de masse sans zone visee est un objectif valable —
+  // « tout le corps » — mais alors la question n'aurait servi a rien ; on demande
+  // donc au moins une zone, et « tout le corps » se dit en les cochant toutes.
+  // ===========================================================================
+
+  // Une zone se coche et se decoche. Rien d'autre a savoir, mais ca vit ICI :
+  // le repartiteur d'evenements ne doit connaitre que le nom du geste.
+  function obZoneBascule(d, v) {
+    if (!zoneDef(v)) return;
+    if (!isArray(d.zones)) d.zones = [];
+    var i = d.zones.indexOf(v);
+    if (i >= 0) d.zones.splice(i, 1); else d.zones.push(v);
+  }
+
+  // CHANGER D'OBJECTIF NE VIDE PAS LES ZONES. Quelqu'un qui hesite entre prise
+  // et tonification fait l'aller-retour deux fois ; lui effacer ses sept coches
+  // a chaque passage serait une punition. Elles dorment — zonesDe les ignore
+  // hors prise — et se reveillent s'il revient.
+  function obObjectifChoisir(d, v) {
+    if (!objectifDef(v)) return;
+    d.objectif = v;
+  }
+
+  // La regle d'avancement de l'etape. Elle est ICI et pas dans obCanAdvance pour
+  // la meme raison que tout le reste : c'est une regle metier.
+  function obObjectifOk(d) {
+    if (!objectifDef(d.objectif)) return false;
+    if (d.objectif !== "prise") return true;
+    return zonesDe(d).length > 0;
+  }
+
+  function obObjectifHtml(d) {
+    var sugg = objectifSuggere(d.startWeight, d.targetWeight);
+    var ecart = Math.round(Math.abs(d.startWeight - d.targetWeight) * 10) / 10;
+    var i, btns = "", o, on;
+
+    // L'ENTETE DIT LES CHIFFRES QU'ON VIENT DE SAISIR. C'est ce qui transforme
+    // la question en confirmation : on ne demande pas « que veux-tu faire ? »
+    // dans le vide, on demande « c'est bien ce que disent tes deux nombres ? »
+    var lead;
+    if (sugg === "perte") {
+      lead = "Tu as saisi <b>" + esc(frDec(d.startWeight)) + " kg</b> aujourd'hui pour <b>" +
+        esc(frDec(d.targetWeight)) + " kg</b> visés, soit <b>" + esc(frDec(ecart)) +
+        " kg à perdre</b>. Confirme, ou change ton choix si ce n'est pas ça.";
+    } else if (sugg === "prise") {
+      lead = "Tu as saisi <b>" + esc(frDec(d.startWeight)) + " kg</b> aujourd'hui pour <b>" +
+        esc(frDec(d.targetWeight)) + " kg</b> visés, soit <b>" + esc(frDec(ecart)) +
+        " kg à prendre</b>. Confirme, ou change ton choix si ce n'est pas ça.";
+    } else {
+      lead = "Ton poids d'aujourd'hui et ton objectif sont les mêmes, à moins de " +
+        esc(frDec(OBJ_ECART_NUL)) + " kg près. Ce n'est pas rien : c'est un objectif à part entière.";
+    }
+
+    for (i = 0; i < OBJECTIFS.length; i++) {
+      o = OBJECTIFS[i];
+      on = d.objectif === o.v;
+      btns +=
+        '<button type="button" class="ob-equip' + (on ? " ob-equip-on" : "") + '"' +
+          ' data-action="ob-objectif" data-v="' + o.v + '" aria-pressed="' + (on ? "true" : "false") + '">' +
+          '<span class="ob-equip-box" aria-hidden="true">' + (on ? "✓" : "") + '</span>' +
+          '<span class="ob-equip-text"><b>' + esc(o.label) +
+            (o.v === sugg ? " · proposé" : "") + '</b><span>' + esc(o.hint) + '</span></span>' +
+        '</button>';
+    }
+
+    // LE DESACCORD SE DIT, ET IL DIT QUOI FAIRE. Confirmer « prise » avec une
+    // cible plus basse n'est pas interdit — c'est peut-etre la cible qui est
+    // fausse — mais alors les deux ecrans doivent se parler.
+    var contra = "";
+    if (objectifDef(d.objectif) && d.objectif !== sugg) {
+      if (d.objectif === "prise" && sugg === "perte") {
+        contra = '<div class="ob-warn">Tu confirmes une <b>prise de masse</b> alors que ton objectif de poids est ' +
+          'plus BAS que ton poids d\'aujourd\'hui. Le programme sera bien construit pour la prise, mais l\'assiette ' +
+          'restera calculée en déficit. Reviens à l\'étape précédente pour relever ton objectif de poids.</div>';
+      } else if (d.objectif === "perte" && sugg === "prise") {
+        contra = '<div class="ob-warn">Tu confirmes une <b>perte de poids</b> alors que ton objectif de poids est ' +
+          'plus HAUT que ton poids d\'aujourd\'hui. L\'assiette sera calculée en surplus. Reviens à l\'étape ' +
+          'précédente pour baisser ton objectif de poids.</div>';
+      } else {
+        contra = '<div class="ob-note">Ce n\'est pas ce que disent tes deux poids, et c\'est ton droit. ' +
+          'L\'assiette suit les kilos ; le programme suit ce choix-ci.</div>';
+      }
+    }
+
+    // LES ZONES. Elles ne sortent qu'en prise, et l'ecran dit ce qu'elles font —
+    // sans quoi on coche au hasard.
+    var zonesHtml = "";
+    if (d.objectif === "prise") {
+      var zb = "", z, zon, nz = zonesDe(d).length;
+      for (i = 0; i < ZONES.length; i++) {
+        z = ZONES[i];
+        zon = isArray(d.zones) && d.zones.indexOf(z.v) >= 0;
+        zb += obBtn("ob-zone", z.label, ' data-v="' + z.v + '"', zon);
+      }
+      zonesHtml =
+        '<div class="ob-gear">' +
+          '<div class="field-label">Quelles zones veux-tu développer ?</div>' +
+          '<div class="field-hint" style="margin-bottom:10px">Les exercices qui servent ces zones gagnent une série ' +
+            'et ne sont plus les premiers retirés quand la séance déborde. Coche tout si tu veux du volume partout.</div>' +
+          '<div class="ob-row ob-row-wrap">' + zb + '</div>' +
+          (nz
+            ? '<div class="ob-note">' + nz + ' zone' + (nz > 1 ? "s" : "") + ' visée' + (nz > 1 ? "s" : "") + '.</div>'
+            : '<div class="ob-warn">Choisis au moins une zone pour continuer.</div>') +
+        '</div>';
+    }
+
+    // CE QUE LE PROGRAMME VA FAIRE, ECRIT AVANT DE LE CONSTRUIRE. C'est la
+    // reponse a « la question est-elle decorative ? », et elle est a l'ecran.
+    var effet = "";
+    if (d.objectif === "prise") {
+      effet = '<div class="ob-note">Les journées de HIIT et de cardio sont remplacées par du travail avec charges, ' +
+        'les répétitions descendent et le repos s\'allonge.</div>';
+    } else if (d.objectif === "tonifier") {
+      effet = '<div class="ob-note">Mêmes exercices, plus de répétitions et moins de repos : c\'est le repos raccourci ' +
+        'qui fait le travail ici.</div>';
+    } else if (d.objectif === "perte") {
+      effet = '<div class="ob-note">Le repos raccourcit d\'un cran — c\'est la densité qui compte en déficit, pas la ' +
+        'charge maximale — et le temps ainsi libéré garde le gainage et le cardio dans la séance, au lieu ' +
+        'd\'en faire les premiers retirés.</div>';
+    }
+
+    return '<p class="ob-lead">' + lead + '</p>' +
+      '<div class="ob-equip-list">' + btns + '</div>' +
+      contra + zonesHtml + effet;
+  }
+
   function renderOnboarding() {
     var d = obDraft(), step = state.ob.step, body = "", i;
     var etape = OB_STEPS[step];
@@ -5786,7 +6307,7 @@
     if (etape === "Toi") {
       body =
         '<p class="ob-lead">Cette appli va construire un programme pour <b>toi</b> : ton objectif, ton temps, ton matériel. ' +
-          'Sept questions, deux minutes. Tu pourras tout changer plus tard.</p>' +
+          'Huit questions, deux minutes. Tu pourras tout changer plus tard.</p>' +
         '<div class="field">' +
           '<label class="field-label" for="ob-name">Ton prénom</label>' +
           '<input id="ob-name" type="text" autocomplete="given-name" class="weight-input" maxlength="24"' +
@@ -5846,6 +6367,9 @@
           '<input id="ob-target" type="text" inputmode="decimal" autocomplete="off" class="weight-input"' +
             ' data-action="ob-target" placeholder="ex. 75" value="' + esc(frDec(d.targetWeight)) + '">' +
         '</div>' + warn;
+
+    } else if (etape === "Objectif") {
+      body = obObjectifHtml(d);
 
     } else if (etape === "Pratique") {
       var discBtns = "";
@@ -6092,6 +6616,7 @@
           '<div class="ob-recap-row"><span>Jours</span><b>' + esc(dayNames.join(", ")) + '</b></div>' +
           '<div class="ob-recap-row"><span>Durée</span><b>' + d.minutes + ' min par séance</b></div>' +
           '<div class="ob-recap-row"><span>Objectif</span><b>' + frDec(d.startWeight) + ' → ' + frDec(d.targetWeight) + ' kg</b></div>' +
+          '<div class="ob-recap-row"><span>Entraînement</span><b>' + esc(objResume(d)) + '</b></div>' +
           (t.weeks ? '<div class="ob-recap-row"><span>Horizon</span><b>' + t.weeks + ' semaines environ</b></div>' : "") +
         '</div>' +
         '<div class="ob-recap">' +
@@ -7254,6 +7779,67 @@
       '<div class="field-label">' + props.length + ' proposition' +
         (props.length > 1 ? "s" : "") + '</div>' + s +
     '</div>';
+  }
+
+  // L'ECRAN DE FIN DE SEANCE. Il ne calcule rien de neuf : il relit ce que la
+  // journee porte deja, et le dit une fois.
+  function bravoHtml(dateKey, entry, program) {
+    var kg = sessionTonnage(dateKey, entry), sets = 0, exos = 0, km = 0, k;
+    var s = entry && entry.sets ? entry.sets : {};
+    for (k in s) {
+      if (!has(s, k) || !isArray(s[k])) continue;
+      var fait = 0, z;
+      for (z = 0; z < s[k].length; z++) {
+        if (!s[k][z]) continue;
+        if (s[k][z].reps > 0 || s[k][z].km > 0 || s[k][z].min > 0) fait++;
+        if (s[k][z].km > 0) km += s[k][z].km;
+      }
+      if (fait) { exos++; sets += fait; }
+    }
+
+    // Trois cas, dans cet ordre. Aucun tirage au sort : l'ecran doit etre
+    // reproductible, sinon il n'est pas testable.
+    var naturel = PROGRAM[dayKey(dateFromKey(dateKey).getDay())];
+    var phrase;
+    if (!naturel) {
+      phrase = "Ce jour n'était pas prévu au programme. Il compte quand même.";
+    } else if (km > 0 && kg <= 0) {
+      phrase = "Les kilomètres faciles sont ceux qui construisent le reste.";
+    } else {
+      phrase = "C'est la répétition qui fait le résultat, pas la séance parfaite.";
+    }
+
+    var suivant = prochainJourPrevu(fmt(addDays(dateFromKey(dateKey), 1)));
+    var chiffres =
+      '<div class="stat-grid">' +
+        '<div class="stat-box"><div class="stat-num">' + exos + '</div>' +
+          '<div class="stat-label">exercice' + (exos > 1 ? "s" : "") + '</div></div>' +
+        '<div class="stat-box"><div class="stat-num">' + sets + '</div>' +
+          '<div class="stat-label">série' + (sets > 1 ? "s" : "") + '</div></div>' +
+        (kg > 0
+          ? '<div class="stat-box"><div class="stat-num">' + frPoids(kg) + '</div>' +
+            '<div class="stat-label">soulevé<br>aujourd\'hui</div></div>'
+          : '') +
+        (km > 0
+          ? '<div class="stat-box"><div class="stat-num">' +
+            frDec(String(Math.round(km * 10) / 10)) + ' km</div>' +
+            '<div class="stat-label">parcourus</div></div>'
+          : '') +
+      '</div>';
+
+    return '<section class="card">' +
+      '<div class="card-title">✓ Séance validée</div>' +
+      '<div class="total-line">' + esc(program ? program.label : "Séance libre") +
+        ' · ' + esc(longDate(dateKey)) + '</div>' +
+      chiffres +
+      '<div class="ob-note">' + esc(phrase) + '</div>' +
+      '<div class="total-line">' +
+        (suivant
+          ? 'Prochaine séance : ' + esc(longDate(suivant))
+          : 'Aucune séance prévue dans les huit prochains jours.') +
+      '</div>' +
+      '<button type="button" class="btn-primary" data-action="bravo-fermer">Continuer</button>' +
+    '</section>';
   }
 
   function analyseHtml() {
@@ -8678,7 +9264,7 @@
     { id: "thon",       nom: "thon au naturel",       cat: "prot", por: "boîte",    nPor: 1, gPor: 110, prot100: 26,   kcal100: 115 },
     { id: "sardines",   nom: "sardines",              cat: "prot", por: "boîte",    nPor: 1, gPor: 90,  prot100: 24,   kcal100: 220, gras: 1 },
     { id: "crevettes",  nom: "crevettes cuites",      cat: "prot", por: "portion",  nPor: 1, gPor: 120, prot100: 21,   kcal100: 100 },
-    { id: "jambon",     nom: "jambon blanc",          cat: "prot", por: "tranche",  nPor: 2, gPor: 40,  prot100: 20,   kcal100: 110 },
+    { id: "jambon",     nom: "jambon blanc",          cat: "prot", por: "tranche",  nPor: 2, gPor: 40,  prot100: 20,   kcal100: 110, maxPor: 3 },
     { id: "saumonfume", nom: "saumon fumé", gras: 1,           cat: "prot", por: "tranche",  nPor: 2, gPor: 30,  prot100: 22,   kcal100: 180 },
     { id: "poischiche", nom: "pois chiches égouttés", cat: "prot", por: "portion",  nPor: 1, gPor: 150, prot100: 8,    kcal100: 130 },
     { id: "harirouges", nom: "haricots rouges égouttés", cat: "prot", por: "portion", nPor: 1, gPor: 150, prot100: 8,  kcal100: 120 },
@@ -8702,20 +9288,20 @@
     { id: "mozza",      nom: "mozzarella",               cat: "lait", por: "boule", nPor: 1, gPor: 125, prot100: 18,  kcal100: 240 },
 
     // --- Féculents (état CUIT, sauf pain et flocons) -------------------------
-    { id: "riz",        nom: "riz cuit",            cat: "fec", por: "poignée",  nPor: 2, gPor: 100, prot100: 2.6, kcal100: 130, cuisson: 1 },
-    { id: "pates",      nom: "pâtes cuites",        cat: "fec", por: "assiette", nPor: 1, gPor: 200, prot100: 5,   kcal100: 150, cuisson: 1 },
-    { id: "semoule",    nom: "semoule cuite",       cat: "fec", por: "portion",  nPor: 1, gPor: 200, prot100: 4,   kcal100: 120, cuisson: 1 },
-    { id: "quinoa",     nom: "quinoa cuit",         cat: "fec", por: "bol",      nPor: 1, gPor: 180, prot100: 4.4, kcal100: 120, cuisson: 1 },
-    { id: "pdt",        nom: "pommes de terre",     cat: "fec", por: "pomme de terre", porPl: "pommes de terre", nPor: 3, gPor: 100, prot100: 2, kcal100: 85, cuisson: 1, nu: 1 },
-    { id: "patdouce",   nom: "patate douce cuite",  cat: "fec", por: "portion",  nPor: 1, gPor: 200, prot100: 1.6, kcal100: 90,  cuisson: 1 },
-    { id: "pain",       nom: "pain complet",        cat: "fec", por: "tranche",  nPor: 2, gPor: 40,  prot100: 9,   kcal100: 250 },
+    { id: "riz",        nom: "riz complet cuit",    cat: "fec", por: "poignée",  nPor: 2, gPor: 100, prot100: 2.6, kcal100: 130, cuisson: 1, maxPor: 3 },
+    { id: "pates",      nom: "pâtes complètes cuites", cat: "fec", por: "assiette", nPor: 1, gPor: 200, prot100: 5,   kcal100: 150, cuisson: 1, maxPor: 2 },
+    { id: "semoule",    nom: "semoule complète cuite", cat: "fec", por: "portion",  nPor: 1, gPor: 200, prot100: 4,   kcal100: 120, cuisson: 1, maxPor: 2 },
+    { id: "quinoa",     nom: "quinoa cuit",         cat: "fec", por: "bol",      nPor: 1, gPor: 180, prot100: 4.4, kcal100: 120, cuisson: 1, maxPor: 2 },
+    { id: "pdt",        nom: "pommes de terre",     cat: "fec", por: "pomme de terre", porPl: "pommes de terre", nPor: 3, gPor: 100, prot100: 2, kcal100: 85, cuisson: 1, nu: 1, maxPor: 5 },
+    { id: "patdouce",   nom: "patate douce cuite",  cat: "fec", por: "portion",  nPor: 1, gPor: 200, prot100: 1.6, kcal100: 90,  cuisson: 1, maxPor: 2 },
+    { id: "pain",       nom: "pain complet",        cat: "fec", por: "tranche",  nPor: 2, gPor: 40,  prot100: 9,   kcal100: 250, maxPor: 4, parUnite: 2, contenant: "Sandwich complet", contenantPl: "sandwiches complets" },
     { id: "flocons",    nom: "flocons d'avoine",    cat: "fec", por: "bol",      nPor: 1, gPor: 60,  prot100: 13,  kcal100: 370 },
-    { id: "wrap",       nom: "wraps complets",      cat: "fec", por: "wrap",     nPor: 2, gPor: 60,  prot100: 8,   kcal100: 300, nu: 1 },
+    { id: "wrap",       nom: "wraps complets",      cat: "fec", por: "wrap",     nPor: 2, gPor: 60,  prot100: 8,   kcal100: 300, nu: 1, maxPor: 2, contenant: "Wrap garni" },
     // Deux feculents PRETS A MANGER, d'une autre famille que le pain (voir
     // FEC_FAM) : sans eux, une assiette sans cuisson n'avait le choix qu'entre
     // du pain et du pain.
-    { id: "taboule",    nom: "taboulé",             cat: "fec", por: "portion",  nPor: 1, gPor: 200, prot100: 3.5, kcal100: 145 },
-    { id: "mais",       nom: "maïs égoutté",        cat: "fec", por: "portion",  nPor: 1, gPor: 150, prot100: 3,   kcal100: 100 },
+    { id: "taboule",    nom: "taboulé",             cat: "fec", por: "portion",  nPor: 1, gPor: 200, prot100: 3.5, kcal100: 145, maxPor: 2 },
+    { id: "mais",       nom: "maïs égoutté",        cat: "fec", por: "portion",  nPor: 1, gPor: 150, prot100: 3,   kcal100: 100, maxPor: 2 },
 
     // --- Légumes (libre : à volonté, le grammage n'est là que pour le calcul) -
     { id: "brocolis",   nom: "brocolis",            cat: "leg", por: "portion",  nPor: 1, gPor: 200, prot100: 3,   kcal100: 35, cuisson: 1, libre: 1 },
@@ -8883,6 +9469,28 @@
       if (pieces[i] && pieces[i].a && pieces[i].a.gras) return true;
     }
     return false;
+  }
+
+  // LE PLAFOND DE PORTION REALISTE. Un aliment marque `maxPor` ne se sert jamais
+  // au-dela de ce nombre de portions, quel que soit le budget calorique restant.
+  // Mesure avant : 27 % des services de pain depassaient trois tranches, 38 %
+  // des wraps depassaient deux. L'arithmetique etait juste et le repas faux.
+  function grPlafondPortion(a, g) {
+    if (!a) return g;
+    // L'UNITE MANGEABLE D'ABORD. Une tranche de pain n'est pas un aliment qu'on
+    // sert seul : c'est une MOITIE de sandwich. `parUnite` dit combien de
+    // portions font une unite, et le grammage est ramene a un multiple de
+    // celle-ci. Sans ca, le plafond rendait « 3 tranches » — un sandwich qui
+    // n'existe pas, et le titre l'annoncait comme un plat.
+    if (a.parUnite > 1 && a.gPor > 0) {
+      var pas = a.parUnite * a.gPor;
+      var u = Math.round(g / pas);
+      if (u < 1) u = 1;
+      g = u * pas;
+    }
+    if (!(a.maxPor > 0)) return g;
+    var max = a.maxPor * a.gPor;
+    return g > max ? max : g;
   }
 
   function alimentPluriel(al, n) {
@@ -10447,13 +11055,341 @@
   // densite des feculents (fecTropLegers). Absente — un appelant qui ne l'a pas
   // sous la main —, la regle se tait et le vivier reste entier : c'est le
   // comportement d'avant, a l'identique.
+  // ===========================================================================
+  // LES REPERES PNNS DANS LE GENERATEUR DE REPAS
+  // ---------------------------------------------------------------------------
+  // CE SONT DES REGLES DE SANTE PUBLIQUE, ET ELLES ONT ETE RELUES A LA SOURCE
+  // AVANT D'ETRE ECRITES ICI. Chaque chiffre de la table ci-dessous vient d'une
+  // page de mangerbouger.fr — le site du Programme national nutrition sante,
+  // edite par Sante publique France — consultee le 16 aout 2026. Aucun n'a ete
+  // pose de memoire : c'etait la condition posee par le proprietaire, et elle
+  // vaut pour toute modification future de cette table.
+  //
+  //   legumes secs .......... au moins 2 fois par semaine
+  //     .../augmenter/augmenter-les-legumes-secs
+  //   poisson ............... 2 fois par semaine, dont un poisson gras
+  //     .../aller-vers/aller-vers-les-poissons-gras-et-maigres-en-alternance
+  //   feculents complets .... au moins une fois par jour
+  //     .../aller-vers/aller-vers-les-feculents-complets
+  //   fruits a coque ........ une petite poignee par jour, non sales
+  //     .../augmenter/augmenter-les-fruits-a-coque-non-sales-noix-noisettes-amandes-etc
+  //   viande hors volaille .. 500 g par semaine au maximum ; privilegier la volaille
+  //     .../reduire/reduire-la-viande-porc-baeuf-veau-mouton-agneau-abats
+  //   charcuterie ........... 150 g par semaine au maximum, soit environ 3 tranches
+  //     .../reduire/reduire-la-charcuterie
+  //   fruits et legumes ..... au moins 5 par jour, une portion valant 80 a 100 g
+  //     .../augmenter/augmenter-les-fruits-et-legumes
+  //
+  // CE QUI EST REPRIS ET CE QUI NE L'EST PAS. On reprend les SEUILS — des
+  // frequences et des grammages, c'est-a-dire des faits — et on les reecrit dans
+  // les mots de l'appli. On ne reprend NI les textes NI les recettes du site :
+  // c'est son contenu editorial, meme regle que pour les planches du guide
+  // Delavier. Et la Fabrique a menus reste ecartee : l'appli est statique, sans
+  // serveur, sa CSP `connect-src` est close, et le site n'expose pas d'API.
+  //
+  // COMMENT UN REPERE HEBDOMADAIRE ENTRE DANS UN GENERATEUR QUOTIDIEN. nutriJour
+  // est DETERMINISTE par date : la meme date et le meme profil rendent la meme
+  // journee, et rouvrir hier redonne ce qu'on y avait lu. On peut donc etaler un
+  // repere sur la semaine sans stocker le moindre historique — c'est le meme
+  // mecanisme que la rotation d'alimPick, qui fait deja avancer le tirage d'un
+  // cran par jour.
+  //
+  // ON NE TIRE PAS AU SORT PUIS ON NE CORRIGE PAS : ON RETRECIT LE VIVIER, comme
+  // fecTropLegers et encasTropProteines. Le hachage reste le meme, la
+  // composition reste reproductible, l'anti-repetition continue de jouer sur ce
+  // qui reste. Et comme `exclu` NE SE REPLIE PAS, chaque regle verifie qu'elle
+  // ne vide pas le vivier avant de mordre — sinon elle se tait. Un profil qui ne
+  // cuisine pas perd le saumon et les lentilles, qui demandent une cuisson : il
+  // lui reste les sardines et le saumon fume pour le poisson gras, les pois
+  // chiches et les haricots pour les legumes secs. Le jour ou il ne resterait
+  // rien, la regle s'efface au lieu de rendre une assiette vide.
+  // ===========================================================================
+
+  // LES FAMILLES, EN IDENTIFIANTS. Meme choix que NUTRI_POOL, et pour la meme
+  // raison : la table ALIMENTS decrit des aliments, pas des categories
+  // reglementaires. Une entree renommee disparait proprement de ces listes au
+  // lieu de casser la composition.
+  var PNNS_LEGSEC   = ["lentilles", "poischiche", "harirouges", "hariblancs"];
+  var PNNS_POISSON  = ["saumon", "cabillaud", "thon", "sardines", "saumonfume"];
+  // Poisson GRAS au sens du repere : les especes riches en omega 3. Le drapeau
+  // `gras` de la table dit exactement ca et il est deja pose sur les trois.
+  var PNNS_POIS_GRAS = ["saumon", "sardines", "saumonfume"];
+  // Viande HORS VOLAILLE. Le poulet, la dinde et les tranches de dinde n'y sont
+  // pas : ce sont eux que le repere invite au contraire a privilegier.
+  var PNNS_VIANDE   = ["boeuf", "porc"];
+  var PNNS_CHARCUT  = ["jambon"];
+  // Feculents COMPLETS. Le pain de la table est deja « pain complet » ; le riz,
+  // les pates et la semoule sont passes a leur forme complete dans cette version,
+  // parce que le repere porte precisement sur ces trois-la. Les autres feculents
+  // ne sont pas concernes : une pomme de terre n'a pas de version complete.
+  var PNNS_FEC_COMPLET = ["pain", "riz", "pates", "semoule"];
+  // Fruits a COQUE. Le repere nomme les noix, noisettes, amandes et pistaches ;
+  // l'appli sert des amandes et des noix de cajou. Les abricots secs sont un
+  // fruit sec, pas un fruit a coque : ils restent au vivier mais ne comptent pas.
+  var PNNS_COQUE    = ["amandes", "cajou"];
+
+  // --- LE CALENDRIER DE LA SEMAINE --------------------------------------------
+  // 0 vaut LUNDI. jourNumero est un compte de jours julien, dont le modulo 7
+  // vaut 6 un lundi : le decalage de un remet la semaine a l'endroit. Verifie
+  // sur huit dates consecutives autour du 16 aout 2026.
+  //
+  // POURQUOI DES JOURS FIXES ET NON UN COMPTE. Un compteur demanderait de savoir
+  // ce qui a ete servi les jours precedents, donc de garder un historique — et
+  // l'historique du plan nutrition est deja le point le plus delicat de l'appli
+  // (les cases cochees sont indexees par POSITION). Un calendrier fixe rend le
+  // meme service, se lit d'un coup d'oeil, et se verifie par un banc qui compte
+  // les services sur sept jours au lieu de croire un compteur.
+  //
+  // POURQUOI UN CRENEAU PAR REGLE ET NON LA JOURNEE. Une regle posee sur la
+  // journee entiere s'appliquerait au dejeuner ET au diner : deux services de
+  // viande le meme jour, c'est jusqu'a 520 g pour un plafond hebdomadaire de
+  // 500. Le creneau est l'unite qui permet de compter.
+  function pnnsJour(dateKey) {
+    return (jourNumero(dateKey) + 1) % 7;
+  }
+
+  // Les creneaux ou un repere IMPOSE une famille. Le vivier y est reduit a cette
+  // famille, et a rien d'autre.
+  //   lundi    dejeuner  legumes secs   |  jeudi     diner     legumes secs
+  //   mardi    diner     poisson gras   |  vendredi  dejeuner  poisson
+  // Deux services de legumes secs et deux de poisson dont un gras : les deux
+  // reperes sont tenus a l'exact, sans en faire plus que ce qu'ils demandent.
+  var PNNS_IMPOSE = [
+    { j: 0, slot: "dej", garder: PNNS_LEGSEC,    quoi: "legsec" },
+    { j: 3, slot: "din", garder: PNNS_LEGSEC,    quoi: "legsec" },
+    { j: 1, slot: "din", garder: PNNS_POIS_GRAS, quoi: "poisgras" },
+    { j: 4, slot: "dej", garder: PNNS_POISSON,   quoi: "poisson" }
+  ];
+
+  // Les creneaux ou une famille PLAFONNEE est autorisee. Partout ailleurs elle
+  // est retiree du vivier. Deux services de viande hors volaille par semaine, un
+  // seul de charcuterie : voir le banc, qui MESURE les grammes servis plutot que
+  // de compter les autorisations.
+  var PNNS_FENETRE = [
+    { fam: PNNS_VIANDE,  j: 2, slot: "din" },
+    { fam: PNNS_VIANDE,  j: 5, slot: "dej" },
+    { fam: PNNS_CHARCUT, j: 6, slot: "dej" }
+  ];
+
+  // LE FECULENT COMPLET, TOUS LES JOURS. Il s'accroche a un repas de structure,
+  // et il ALTERNE entre le dejeuner et le diner : le poser toujours au meme
+  // repas aurait reduit ce repas-la a quatre feculents pour toute la vie du
+  // profil, alors que l'autre en garde dix. Quand un seul des deux repas existe
+  // — deux prises par jour —, c'est celui-la qui le porte.
+  //
+  // ET IL EVITE LE REPAS QUI PORTE DEJA UN REPERE, PARCE QUE LES DEUX SE SONT
+  // MARCHE DESSUS. Mesure de la premiere ecriture, le jeudi : le diner portait
+  // l'imposition « legumes secs » ET le feculent complet, et il est sorti
+  // « 450 g de haricots rouges egouttes + 200 g de brocolis » — SANS AUCUN
+  // feculent. La cause est le plafond de masse : une legumineuse est peu dense,
+  // le generateur en sert beaucoup, et il ne restait plus de grammes pour le
+  // feculent. Deux reperes dans la meme assiette en annulent un.
+  //
+  // Il n'y a rien a arbitrer : l'autre repas de la journee est libre, et le
+  // repere « au moins une fois par jour » ne dit pas dans quel repas.
+  function pnnsSlotImpose(ctx) {
+    var j = pnnsJour(ctx.dateKey), i;
+    for (i = 0; i < PNNS_IMPOSE.length; i++) {
+      if (PNNS_IMPOSE[i].j === j) return PNNS_IMPOSE[i].slot;
+    }
+    return null;
+  }
+  function pnnsSlotComplet(ctx) {
+    var slots = (ctx && isArray(ctx.slots)) ? ctx.slots : [];
+    var aDej = slots.indexOf("dej") >= 0, aDin = slots.indexOf("din") >= 0;
+    if (aDej && aDin) {
+      var pris = pnnsSlotImpose(ctx);
+      if (pris === "dej") return "din";
+      if (pris === "din") return "dej";
+      return (pnnsJour(ctx.dateKey) % 2 === 0) ? "dej" : "din";
+    }
+    if (aDej) return "dej";
+    if (aDin) return "din";
+    return null;
+  }
+
+  // LES FRUITS A COQUE : LE SEUL REPERE QUE CE GENERATEUR NE TIENT PAS, ET LE
+  // CHIFFRE EXACT EST ECRIT DANS LA CARTE.
+  //
+  // Le repere dit « une petite poignee par jour ». Cinq jours sur sept sont
+  // marques jours a coque — le vivier de l'en-cas y est reduit aux amandes et
+  // aux noix de cajou —, mais la MESURE dit deux a trois services par semaine.
+  // La cause n'est ni le vivier ni l'ordre : c'est le BUDGET de la collation.
+  // Trois jours sur sept, sa source est une barre proteinee a 60 g, qui prend
+  // toute la prise — l'appli ecrit alors « seul aliment de la prise », ce qui
+  // est vrai.
+  //
+  // CE QU'ON A REFUSE DE FAIRE POUR GAGNER TROIS SERVICES : ecarter la barre
+  // proteinee du vivier de collation les jours a coque. Ca aurait marche, et ca
+  // aurait DEFAIT un correctif delibere de la v1.9.0 — les barres proteinees
+  // n'etaient servies nulle part, et c'est la collation qui les bloquait. On ne
+  // reprend pas d'une main ce qu'on a corrige de l'autre pour faire monter un
+  // chiffre, surtout quand le repere decrit une habitude quotidienne et non un
+  // seuil sanitaire comme les 500 g de viande.
+  //
+  // Les deux jours restants gardent le vivier entier : les abricots secs ne
+  // disparaissent pas de l'appli pour autant.
+  var PNNS_COQUE_REPOS = [2, 5];
+  function pnnsJourCoque(ctx) {
+    return !!(ctx && ctx.dateKey && PNNS_COQUE_REPOS.indexOf(pnnsJour(ctx.dateKey)) < 0);
+  }
+
+  // RETRECIR LE VIVIER NE SUFFISAIT PAS, ET LA MESURE L'A DIT. Premiere
+  // ecriture : l'en-cas etait bien restreint aux fruits a coque cinq jours sur
+  // sept, et il n'etait servi AUCUN de ces jours. Sur sept collations, six
+  // sortaient « 1 barre proteinee, seul aliment » ou « 2 oeufs durs + 1 pomme ».
+  // La cause n'est pas le vivier mais l'ORDRE : l'en-cas est le dernier servi de
+  // la collation, et le budget calorique etait deja parti dans la source et le
+  // fruit. Un repere restreint a un tirage qui n'aboutit pas est un repere
+  // decoratif — exactement ce que ce projet refuse.
+  //
+  // ON REUTILISE LE MECANISME QUI EXISTE DEJA. `encasDabord` a ete ecrit en
+  // v1.9.0 pour la meme forme de probleme — deux prises de fruit nu qui se
+  // suivent —, et il fait exactement ce qu'il faut : il sert l'accompagnement
+  // SEC avant le fruit, sans toucher a la cible calorique de la prise ni
+  // imposer un gramme de proteines de plus. Le fruit se contente de ce qui
+  // reste, comme il le fait deja dans l'autre cas.
+
+  // --- LA REGLE, EN UN SEUL POINT D'ENTREE -------------------------------------
+  // Rend la liste des identifiants a RETIRER du vivier pour ce role, ce creneau
+  // et cette date. Elle se concatene a ce que choisirPourSlot excluait deja.
+  //
+  // `second` distingue la SOURCE de la SECONDE source d'une assiette. Les
+  // reperes qui IMPOSENT une famille ne portent que sur la source : la seconde
+  // n'est servie que lorsque la premiere ne peut pas atteindre la cible du
+  // creneau, et lui imposer la meme famille reviendrait a servir deux fois des
+  // lentilles. Les PLAFONDS, eux, portent sur les deux : c'est le grammage
+  // hebdomadaire qu'ils tiennent, et il compte les deux pieces.
+  function pnnsExclu(role, motif, slotK, ctx, second) {
+    var out = [], dispo, j, i, k, id;
+    if (!ctx || !ctx.dateKey) return out;
+
+    if (role === "encas") {
+      if (!pnnsJourCoque(ctx)) return out;
+      return pnnsGarder(alimCandidats("encas", motif, ctx.cook), PNNS_COQUE);
+    }
+
+    if (role === "fec" && motif === "repas") {
+      if (slotK !== pnnsSlotComplet(ctx)) return out;
+      return pnnsGarder(alimCandidats("fec", "repas", ctx.cook), PNNS_FEC_COMPLET);
+    }
+
+    if (role !== "prot" || motif !== "repas") return out;
+
+    j = pnnsJour(ctx.dateKey);
+    dispo = alimCandidats("prot", "repas", ctx.cook);
+
+    if (!second) {
+      for (i = 0; i < PNNS_IMPOSE.length; i++) {
+        if (PNNS_IMPOSE[i].j !== j || PNNS_IMPOSE[i].slot !== slotK) continue;
+        // Une regle qui impose REMPLACE les plafonds : la famille imposee ne
+        // contient ni viande ni charcuterie, il n'y a donc rien a plafonner en
+        // plus, et cumuler les deux listes ne ferait que risquer de vider le
+        // vivier pour rien.
+        return pnnsGarder(dispo, PNNS_IMPOSE[i].garder);
+      }
+    }
+
+    // Les plafonds. Une famille est retiree sauf si le couple (jour, creneau)
+    // est dans sa fenetre.
+    for (i = 0; i < PNNS_FENETRE.length; i++) {
+      if (PNNS_FENETRE[i].j === j && PNNS_FENETRE[i].slot === slotK) continue;
+      for (k = 0; k < PNNS_FENETRE[i].fam.length; k++) {
+        id = PNNS_FENETRE[i].fam[k];
+        if (out.indexOf(id) < 0) out.push(id);
+      }
+    }
+    // Une fenetre ouverte ce jour-la rend sa famille, meme si une autre entree
+    // de la table l'avait retiree : la boucle ci-dessus voit trois lignes, et
+    // deux d'entre elles concernent la meme famille.
+    for (i = 0; i < PNNS_FENETRE.length; i++) {
+      if (PNNS_FENETRE[i].j !== j || PNNS_FENETRE[i].slot !== slotK) continue;
+      for (k = 0; k < PNNS_FENETRE[i].fam.length; k++) {
+        var p = out.indexOf(PNNS_FENETRE[i].fam[k]);
+        if (p >= 0) out.splice(p, 1);
+      }
+    }
+    return pnnsSurNonVide(dispo, out);
+  }
+
+  // Traduit « ne garder que ceux-ci » en « retirer tous les autres », qui est le
+  // seul langage que comprend `exclu`. Rend une liste VIDE — donc aucune
+  // restriction — si le vivier disponible n'en contient aucun : mieux vaut une
+  // assiette qui ne tient pas le repere qu'une assiette qui n'existe pas.
+  function pnnsGarder(dispo, gardes) {
+    var out = [], reste = 0, i;
+    for (i = 0; i < dispo.length; i++) {
+      if (gardes.indexOf(dispo[i].id) >= 0) reste++;
+    }
+    if (!reste) return [];
+    for (i = 0; i < dispo.length; i++) {
+      if (gardes.indexOf(dispo[i].id) < 0) out.push(dispo[i].id);
+    }
+    return out;
+  }
+
+  // Meme precaution, dans l'autre sens : une liste d'exclusions qui emporterait
+  // tout le vivier est abandonnee en bloc.
+  function pnnsSurNonVide(dispo, exclus) {
+    var reste = 0, i;
+    for (i = 0; i < dispo.length; i++) {
+      if (exclus.indexOf(dispo[i].id) < 0) reste++;
+    }
+    return reste ? exclus : [];
+  }
+
+  // --- CE QUE L'ECRAN EN DIT ---------------------------------------------------
+  // Les reperes sont affiches PARCE QU'ILS SONT TENUS. Une carte qui reciterait
+  // des recommandations sans que le generateur les serve serait un affichage
+  // decoratif — exactement ce que le proprietaire a refuse pour la confirmation
+  // d'objectif. Chaque ligne dit donc ce que l'appli FAIT, et la derniere dit
+  // honnetement ce qu'elle ne tient qu'en partie.
+  var PNNS_LIGNES = [
+    { t: "Légumes secs", v: "2 fois par semaine",
+      d: "lentilles, pois chiches ou haricots au déjeuner du lundi et au dîner du jeudi" },
+    { t: "Poisson", v: "2 fois par semaine, dont un gras",
+      d: "un poisson gras au dîner du mardi, un poisson au déjeuner du vendredi" },
+    { t: "Féculents complets", v: "au moins une fois par jour",
+      d: "pain, riz, pâtes ou semoule complets, en alternant le déjeuner et le dîner" },
+    { t: "Viande hors volaille", v: "500 g par semaine au maximum",
+      d: "servie deux fois, le reste de la semaine en volaille, poisson, œufs ou légumes secs" },
+    { t: "Charcuterie", v: "150 g par semaine au maximum",
+      d: "une seule fois, et jamais plus de trois tranches" },
+    { t: "Fruits à coque non salés", v: "une petite poignée par jour",
+      d: "amandes ou noix de cajou quand ta collation laisse la place — deux à trois jours sur sept, mesuré" }
+  ];
+
+  function pnnsCarteHtml() {
+    var i, l, lignes = "";
+    for (i = 0; i < PNNS_LIGNES.length; i++) {
+      l = PNNS_LIGNES[i];
+      lignes +=
+        '<div class="pnns-ligne">' +
+          '<div class="pnns-tete"><span class="pnns-quoi">' + esc(l.t) + '</span>' +
+            '<b class="pnns-val">' + esc(l.v) + '</b></div>' +
+          '<div class="pnns-detail">' + esc(l.d) + '</div>' +
+        '</div>';
+    }
+    return '<div class="pnns-bloc">' +
+        '<div class="field-label">Les repères de la semaine</div>' +
+        '<div class="field-hint" style="margin-bottom:10px">Ton plan les tient tout seul : ' +
+          'ils sont déjà dans les prises ci-dessus, tu n\'as rien à compter.</div>' +
+        lignes +
+        '<div class="nutri-disclaimer">Repères du Programme national nutrition santé ' +
+          '(mangerbouger.fr, Santé publique France), relus à la source le 16 août 2026. ' +
+          'Un repère de plus ne se tient pas dans un générateur et se compte à l\'œil : ' +
+          'au moins 5 fruits et légumes par jour, une portion valant 80 à 100 g.</div>' +
+      '</div>';
+  }
+
   function choisirPourSlot(s, ctx, slotK, cible) {
     var c = {}, kCible = (cible && cible.kcal > 0) ? cible.kcal : 0;
     // La SOURCE d'une collation reçoit la meme memoire longue que son fruit :
     // « 3 oeufs durs (165 g), seul aliment de la prise » six fois en quatorze
     // jours, c'est elle qu'on relisait, pas l'accompagnement. Voir COL_TOURNE.
     if (!(ctx.sans && ctx.sans[slotK]) || slotGardeSaSource(slotK)) {
-      c.prot = alimPick("prot", s.motif, ctx, slotK, null,
+      c.prot = alimPick("prot", s.motif, ctx, slotK,
+                        pnnsExclu("prot", s.motif, slotK, ctx, false),
                         s.forme === "collation" ? COL_TOURNE : false);
     }
     if (s.forme === "assiette") {
@@ -10464,13 +11400,34 @@
       // La FAMILLE de la premiere source est ecartee, pas seulement son
       // identifiant : deux legumineuses en conserve dans la meme assiette, ce
       // sont deux fois la meme chose et 750 g de bocal. Voir PROT_FAM.
-      if (c.prot) c.prot2 = alimPick("prot", s.motif, ctx, slotK + "p2", protMemeFamille(c.prot.id));
+      // LA SECONDE SOURCE NE RECOIT QUE LES PLAFONDS, pas les reperes qui
+      // imposent une famille : elle ne sert qu'a combler une cible que la
+      // premiere n'atteint pas, et lui imposer les lentilles reviendrait a en
+      // servir deux fois. Voir pnnsExclu, parametre `second`.
+      if (c.prot) c.prot2 = alimPick("prot", s.motif, ctx, slotK + "p2",
+                                     protMemeFamille(c.prot.id).concat(
+                                       pnnsExclu("prot", s.motif, slotK, ctx, true)));
       c.leg = alimPick("leg", "repas", ctx, slotK);
       // Le vivier des feculents se retrecit aux DENSES quand l'assiette doit
       // porter plus de kcal qu'elle n'a le droit de peser de grammes. Voir
       // fecTropLegers : en dessous du seuil, `legers` est vide et rien ne change.
       var legers = fecTropLegers("repas", ctx.cook, kCible);
-      c.fec = alimPick("fec", "repas", ctx, slotK, legers);
+      // LE PLAFOND DE MASSE L'EMPORTE SUR LE REPERE, ET LA MESURE L'A IMPOSE.
+      // Les deux interdictions se recouvrent : `legers` ecarte le riz, la
+      // semoule, le quinoa, la pomme de terre ; le repere du feculent complet ne
+      // garde que le pain, le riz, les pates et la semoule. Les cumuler sur une
+      // assiette dense laisse DEUX candidats — le pain, plafonne a 160 g, et les
+      // pates —, et l'assiette n'atteint plus sa cible.
+      // Mesure sur le profil le plus dur de l'appli (deux creneaux, homme de
+      // 90 kg), couverture calorique moyenne de la semaine : 79 % en cumulant
+      // les deux, 75 % apres le correctif du feculent complet, 79 % en laissant
+      // la densite trancher. Le repere est une habitude quotidienne ; le plafond
+      // de masse est une contrainte physique de l'assiette. La contrainte gagne,
+      // et elle ne gagne QUE la ou elle mord : `legers` est vide dans l'immense
+      // majorite des creneaux, a trois repas et au-dela.
+      c.fec = alimPick("fec", "repas", ctx, slotK,
+                       legers.length ? legers
+                                     : pnnsExclu("fec", "repas", slotK, ctx, false));
       c.gras = alimPick("gras", "repas", ctx, slotK + "g");
       // Le second feculent est TOUJOURS tire, jamais toujours servi :
       // nutriAjuster ne le pose que s'il reste une vraie portion a combler.
@@ -10504,13 +11461,15 @@
       // Sans source posee, l'en-cas ne peut pas en etre une deguisee : voir
       // encasTropProteines. Avec source, le vivier reste entier.
       c.encas = alimPick("encas", s.motif, ctx, slotK + "e",
-                         c.prot ? null : encasTropProteines(s.motif, ctx.cook), COL_TOURNE);
+                         (c.prot ? [] : encasTropProteines(s.motif, ctx.cook))
+                           .concat(pnnsExclu("encas", s.motif, slotK, ctx, false)), COL_TOURNE);
       c.gras = alimPick("gras", s.motif, ctx, slotK + "g", null, COL_TOURNE);
     } else if (s.forme === "legere") {
       c.fec = alimPick("fec", "pdj", ctx, slotK);
       c.fruit = alimPick("fruit", "tout", ctx, slotK + "f");
       c.encas = alimPick("encas", s.motif, ctx, slotK + "e",
-                         c.prot ? null : encasTropProteines(s.motif, ctx.cook), COL_TOURNE);
+                         (c.prot ? [] : encasTropProteines(s.motif, ctx.cook))
+                           .concat(pnnsExclu("encas", s.motif, slotK, ctx, false)), COL_TOURNE);
     } else if (s.forme === "laitier") {
       c.fruit = alimPick("fruit", "tout", ctx, slotK + "f");
     }
@@ -10538,7 +11497,10 @@
     // `encasDabord` est pose sur la COMPOSITION et non lu depuis ctx dans
     // nutriAjuster : celle-ci ne recoit pas le contexte, et le lui passer pour
     // un seul booleen aurait ouvert la porte a tout le reste du contexte.
-    c.encasDabord = !!(ctx && ctx.fruitNuPrec);
+    // Les jours de fruits a coque, l'en-cas passe devant le fruit — sinon il ne
+    // reste plus de budget quand vient son tour, et le repere ne serait servi
+    // aucun jour. Meme mecanisme, meme absence d'effet sur la cible.
+    c.encasDabord = !!(ctx && (ctx.fruitNuPrec || pnnsJourCoque(ctx)));
     return c;
   }
 
@@ -10589,6 +11551,14 @@
         // Les sources proteinees passent un SECOND plafond, sur leur propre
         // sous-total. Voir grBornerMasseProt.
         if (a.cat === "prot") gg = grBornerMasseProt(a, gg, masseProt);
+        // Un aliment qui va par unites mangeables — deux tranches font un
+        // sandwich — est ramene a un multiple de son unite, APRES tous les
+        // plafonds. Vers le bas : remonter annulerait le plafond de masse.
+        if (a.parUnite > 1 && a.gPor > 0) {
+          var pasU = a.parUnite * a.gPor;
+          var nU = Math.floor(gg / pasU);
+          gg = (nU < 1 ? 1 : nU) * pasU;
+        }
         if (!(gg > 0)) return false;
         b = alimentApport(a, gg);
         pieces.push({ a: a, g: gg });
@@ -10673,7 +11643,10 @@
       if (s.forme === "assiette") {
         reste = cible.kcal - kcal - reserveGras(c, cible.kcal - kcal, 40);
         if (c.fec && reste > 40) {
-          if (poser(c.fec, grPourKcal(c.fec, reste, amp), true)) pose.fec = true;
+          // Le budget restant ne se convertit plus en quatrieme tranche : ce qui
+          // depasse le plafond n'est pas depense. L'aveu « à resservir selon la
+          // faim » existe deja pour le dire.
+          if (poser(c.fec, grPlafondPortion(c.fec, grPourKcal(c.fec, reste, amp)), true)) pose.fec = true;
         }
         if (c.gras && grasVaAvecPrise(c.gras, pose) && !priseDejaGrasse(pieces) &&
             cible.kcal - kcal >= 60) {
@@ -10689,7 +11662,11 @@
         // calories a du pain — donc des proteines en plus, et 8 journees de
         // plus au-dessus du plafond de 2,2 g/kg. Mesure : 14 journees avec, 6
         // sans, sur les 4 032 du balayage.
-        if (c.fec2 && !priseDejaGrasse(pieces) && cible.kcal - kcal >= 150) {
+        // UN SEUL FECULENT PAR ASSIETTE. Le second est toujours TIRE — le retirer
+        // decalerait la graine et changerait tout le reste de la composition —
+        // mais il n'est plus SERVI. « 4 tranches de pain complet + 200 g de
+        // taboulé » etait le cas type des 7 assiettes sur 288 concernees.
+        if (false && c.fec2 && !priseDejaGrasse(pieces) && cible.kcal - kcal >= 150) {
           poser(c.fec2, grPourKcal(c.fec2, cible.kcal - kcal, amp), true);
         }
       } else if (s.forme === "pdj") {
@@ -10711,7 +11688,7 @@
         var budget = cible.kcal - resG;
         reste = budget - kcal;
         if (c.fec && reste > 40) {
-          if (poser(c.fec, grPourKcal(c.fec, reste, amp), true)) pose.fec = true;
+          if (poser(c.fec, grPlafondPortion(c.fec, grPourKcal(c.fec, reste, amp)), true)) pose.fec = true;
         }
         if (c.fruit && budget - kcal >= 45) {
           if (poser(c.fruit, grPourKcal(c.fruit, budget - kcal, amp), true)) pose.fruit = c.fruit.id;
@@ -10843,7 +11820,28 @@
   // auraient diverge des la premiere retouche, et l'utilisateur aurait lu deux
   // grammaires differentes pour la meme assiette sur le meme ecran.
   function nutriTextePrise(r, s, cible, nomSlot) {
-    var i, txt = [], manque = cible.kcal - r.kcal, texte, assais = [];
+    var i, txt = [], manque = cible.kcal - r.kcal, texte, assais = [], titre = "";
+    // UN FECULENT « CONTENANT » DONNE SON NOM AU PLAT. Il n'y a de plat que s'il
+    // y a de quoi le garnir : sans source de proteines, un wrap reste un wrap.
+    var aSource = false;
+    for (i = 0; i < r.pieces.length; i++) {
+      if (r.pieces[i].a && r.pieces[i].a.cat === "prot") aSource = true;
+    }
+    if (aSource) {
+      for (i = 0; i < r.pieces.length; i++) {
+        var ct = r.pieces[i].a;
+        if (!ct || !ct.contenant) continue;
+        titre = ct.contenant;
+        // LE TITRE COMPTE CE QU'IL ANNONCE. Quatre tranches ne font pas « un
+        // sandwich », elles en font deux. Un contenant qui va par unites
+        // (`parUnite`) dit combien il y en a des qu'il y en a plus d'une.
+        if (ct.parUnite > 1 && ct.gPor > 0) {
+          var nu = Math.round(r.pieces[i].g / (ct.parUnite * ct.gPor));
+          if (nu > 1) titre = nu + " " + (ct.contenantPl || (ct.contenant + "s"));
+        }
+        break;
+      }
+    }
     for (i = 0; i < r.pieces.length; i++) {
       // CE QUI ASSAISONNE NE SE COMPTE PAS COMME UN PLAT. « + 2 cuillères à
       // soupe d'huile d'olive (20 g) », au même rang que les sardines et le
@@ -10853,9 +11851,15 @@
         assais.push(alimentTexte(r.pieces[i].a, r.pieces[i].g));
         continue;
       }
+      // Le contenant ouvre la liste : c'est lui qui structure le plat.
+      if (titre && r.pieces[i].a && r.pieces[i].a.contenant) {
+        txt.unshift(alimentTexte(r.pieces[i].a, r.pieces[i].g));
+        continue;
+      }
       txt.push(alimentTexte(r.pieces[i].a, r.pieces[i].g));
     }
     texte = txt.join(" + ");
+    if (texte && titre) texte = titre + " : " + texte;
     if (texte && assais.length) texte += ", assaisonné de " + assais.join(" et ");
     if (!texte) texte = nomSlot + " libre";
     // « seule » etait ecrit en dur et invariable : le mot visait la COLLATION
@@ -10913,9 +11917,18 @@
              cibleProt: cible.prot, cibleKcal: cible.kcal };
   }
 
+  // Les cles de creneau d'une journee, dans l'ordre. Sortie en fonction plutot
+  // qu'ecrite en ligne : le contexte est construit dans une declaration `var`
+  // multiple, ou une boucle ne rentre pas.
+  function nutriClesDe(parts) {
+    var out = [], i;
+    for (i = 0; i < parts.length; i++) out.push(parts[i].k);
+    return out;
+  }
+
   function nutriComposerJournee(parts, n, dateKey, facteur, sans, amp, seance) {
     var ctx = { cook: n.cook !== false, dateKey: dateKey, dejaVu: {}, sans: sans,
-                seance: seance !== false },
+                seance: seance !== false, slots: nutriClesDe(parts) },
         out = [], i, cible, kc = 0, pr = 0, r;
     for (i = 0; i < parts.length; i++) {
       cible = { k: parts[i].k, prot: (sans && sans[parts[i].k]) ? 0 : parts[i].prot,
@@ -13339,6 +14352,8 @@
       var etaitFaite = !!currentEntry().done;
       updateEntry({ done: etaitFaite ? null : true });
       if (!etaitFaite) {
+        // L'ecran de fin remplace la seance jusqu'a ce qu'on le ferme.
+        state.bravo = state.editDate;
         var nReplies = replierLesFaits();
         render();
         // Le bouton qu'on vient de presser vit SOUS la liste : la replier le
@@ -13350,6 +14365,17 @@
       } else {
         render();
       }
+
+    } else if (action === "prog-reset") {
+      // Le retour au programme du jour existait depuis la v1.4.1 — rappuyer sur
+      // la seance active remet `prog` a null — mais rien ne le disait. Le geste
+      // est le meme, il a maintenant un bouton.
+      updateEntry({ prog: null });
+      render();
+
+    } else if (action === "bravo-fermer") {
+      state.bravo = null;
+      render();
 
     } else if (action === "fold-done") {
       replierLesFaits();
@@ -13481,6 +14507,12 @@
       var obdi = t.getAttribute("data-v");
       obDraft().discipline = (obdi === "course" || obdi === "mixte") ? obdi : "muscu";
       render();
+
+    } else if (action === "ob-objectif") {
+      obObjectifChoisir(obDraft(), t.getAttribute("data-v")); render();
+
+    } else if (action === "ob-zone") {
+      obZoneBascule(obDraft(), t.getAttribute("data-v")); render();
 
     } else if (action === "ob-runlevel") {
       obDraft().runLevel = t.getAttribute("data-v"); render();
