@@ -977,8 +977,8 @@
   //   MINEUR    : nouvelle fonctionnalité, ou changement de comportement visible
   //   CORRECTIF : correction de bug seule, aucun changement de comportement voulu
   // ===========================================================================
-  var APP_VERSION = "1.8.1";
-  var APP_BUILD = "16 août 2026 (1.8.1)";
+  var APP_VERSION = "1.9.0";
+  var APP_BUILD = "16 août 2026 (1.9.0)";
 
   // NE JAMAIS CHANGER sans écrire une migration : c'est ici que vit l'historique.
   var STORAGE_KEY = "olivier-coach-log";
@@ -2585,10 +2585,11 @@
   // de la musculation, pas une prescription. Aucune dose ne sort des fourchettes
   // usuelles, et chaque fiche dit a quel moment un avis medical vaut mieux.
   var SUPPS = [
-    { v: "creatine", label: "Créatine monohydrate", moment: "matin",
-      time: "Au choix", item: "Créatine 3 à 5 g", note: "tous les jours, séance ou pas",
+    { v: "creatine", label: "Créatine monohydrate", moment: "post",
+      time: "Après la séance", item: "Créatine 3 à 5 g",
+      note: "dans ton shaker, avec la protéine · les jours sans séance, au petit-déjeuner",
       why: "Le complément le mieux documenté pour la force et le volume d'entraînement.",
-      quand: "Le moment n'a aucune importance : matin, soir, avant ou après la séance, jours de repos compris. C'est la régularité qui compte, pas l'horaire. Prends-la au moment où tu ne risques pas de l'oublier.",
+      quand: "Dans ton shaker d'après séance, avec la protéine en poudre. Les jours sans séance, au petit-déjeuner. Ce qui compte, c'est de ne pas en sauter : un rendez-vous fixe est ce qui tient le mieux dans la durée, et l'accrocher à un geste que tu fais déjà est la façon la plus sûre de ne pas l'oublier.",
       comment: "Poudre à diluer dans 250 à 300 mL d'eau, de jus ou de lait. Elle se dissout mal à froid : remue, laisse reposer une minute, et bois le fond du verre. Avec ou sans repas, indifférent. Bois normalement dans la journée, 1,5 à 2 L : la créatine retient un peu d'eau dans le muscle.",
       dose: "3 à 5 g par jour, tous les jours. Au-delà de 5 g le surplus part dans les urines : monter à 10 g ne sert à rien. La « phase de charge » à 20 g par jour n'est pas nécessaire, elle fait seulement arriver au même point deux semaines plus tôt.",
       effet: "Le complément le mieux étudié sur la force et le volume de travail. Les muscles se saturent en 3 à 4 semaines à cette dose. La réserve honnête : 1 à 2 kg de plus sur la balance les premières semaines, c'est de l'eau retenue dans le muscle, ni du gras ni du muscle gagné. Ne recalcule pas ton objectif là-dessus.",
@@ -2621,13 +2622,14 @@
     // accrochee a la premiere prise, a la meme place dans la liste : les cases
     // cochees du journal sont indexees par POSITION, et la decaler ferait
     // parler chaque journee passee d'une autre ligne.
-    { v: "whey", label: "Protéine en poudre", moment: "matin",
-      time: "Au choix", item: "Protéine en poudre 25 à 30 g", note: "là où il te manque des protéines",
+    { v: "whey", label: "Protéine en poudre", moment: "post",
+      time: "Après la séance", item: "Protéine en poudre 25 à 30 g",
+      note: "dans le même shaker que la créatine · les jours sans séance, au petit-déjeuner",
       why: "Aucune vertu magique : c'est un moyen commode d'atteindre ses protéines quand un repas ne suffit pas.",
-      quand: "Le moment compte peu. La « fenêtre » des 30 minutes après la séance est un mythe tenace : sur la journée, c'est le total de protéines qui décide. Prends-la là où il te manque des protéines — après la séance si ça t'arrange, au petit-déjeuner si c'est là qu'il t'en manque.",
+      quand: "Après la séance, dans le même shaker que la créatine : c'est le moment le plus simple à tenir, et celui où le geste est déjà pris. Les jours sans séance, au petit-déjeuner. Une prise par jour suffit ; deux si ta cible en protéines est haute et qu'un repas ne suffit pas.",
       comment: "Une dose rase, la cuillère fournie, dans 250 à 300 mL d'eau ou de lait. Eau : plus digeste et plus rapide. Lait : plus rassasiant, et environ 8 g de protéines en plus par 250 mL. Verse le liquide avant la poudre, ça évite les grumeaux. Pendant ou hors repas, indifférent.",
       dose: "25 à 30 g de poudre par prise, soit environ 20 à 25 g de protéines. Une à deux doses par jour suffisent largement. Empiler quatre shakers ne fait pas progresser plus vite : au-delà d'environ 1,6 à 2,2 g de protéines par kilo et par jour, le supplément ne sert plus à rien.",
-      effet: "Aucune vertu propre : c'est un aliment pratique, pas un produit actif. Trente secondes contre un quart d'heure de cuisine pour la même quantité de protéines. Si tu atteins déjà ta cible en mangeant, elle ne t'apportera rien de plus.",
+      effet: "Aucune vertu propre : c'est un aliment pratique, pas un produit actif. Trente secondes contre un quart d'heure de cuisine pour la même quantité de protéines. Si tu atteins déjà ta cible en mangeant, elle ne t'apportera rien de plus. Et le total de la journée pèse davantage que l'heure de la prise : le créneau proposé ici est celui qui se tient le mieux, pas une fenêtre qui se refermerait.",
       avis: "Si le lactose te dérange — ballonnements, inconfort — une whey isolate ou une protéine végétale règle en général le problème. Avis médical en cas de maladie rénale ou hépatique connue." },
 
     { v: "vitd", label: "Vitamine D", moment: "soir",
@@ -2640,9 +2642,10 @@
       avis: "C'est LE complément où un dosage sanguin, la 25-OH-vitamine D, vaut vraiment mieux que la prise à l'aveugle : une prise de sang dit si tu en manques et de combien. Avis médical indispensable avant une ampoule fortement dosée, et en cas de problème rénal, de sarcoïdose ou de calcium élevé." },
 
     { v: "omega3", label: "Oméga 3", moment: "soir",
-      time: "Au dîner", item: "Oméga 3", note: "pendant le repas, pas à jeun",
+      time: "Au dîner", item: "Oméga 3 — 1 à 2 g d'EPA + DHA",
+      note: "pendant le repas, jamais à jeun · lis l'étiquette : c'est l'EPA + DHA qui compte, pas le poids de la capsule",
       why: "Utile en complément d'une alimentation pauvre en poisson, pas en remplacement.",
-      quand: "Le moment n'a pas d'importance. Une prise par jour, à n'importe quel repas, en restant régulier. Beaucoup les prennent au dîner par simple habitude, pas parce que le soir serait meilleur.",
+      quand: "Au dîner, pendant le repas. Les prendre à jeun donne des remontées au goût de poisson chez beaucoup de gens, et un repas qui contient du gras améliore l'absorption. Une prise par jour, tous les jours.",
       comment: "Capsules à avaler avec un grand verre d'eau, environ 200 mL, PENDANT un repas : à jeun, elles remontent souvent au goût de poisson. Garde la boîte au frais et à l'abri de la lumière, l'huile rancit. Une capsule qui sent fort se jette.",
       dose: "1 à 2 g d'huile par jour, en visant environ 500 mg à 1 g d'EPA + DHA cumulés. C'est ce chiffre-là qu'il faut lire sur l'étiquette, pas le poids total de la capsule. Au-delà de 3 g d'EPA + DHA par jour, demande un avis médical.",
       effet: "Utile surtout si tu manges moins de deux portions de poisson gras par semaine — sardine, maquereau, saumon, hareng. Ce n'est pas un produit de performance : n'attends pas d'effet sur tes charges. Deux portions de poisson gras par semaine font le même travail, pour moins cher.",
@@ -2857,6 +2860,13 @@
 
     for (i = 0; i < jour.prises.length; i++) {
       p = jour.prises[i];
+      // LE SHAKER D'APRES SEANCE SE POSE AVANT LE DINER, jamais apres. C'est sa
+      // place reelle dans la journee — on rentre de seance, on boit son shaker,
+      // on dine ensuite —, et c'est aussi la seule position ou son etiquette ne
+      // contredit pas son voisinage. Le defaut inverse a deja ete paye deux
+      // fois : la cafeine, puis la whey, toutes deux etiquetees « apres seance »
+      // et servies au petit-dejeuner.
+      if (p.slot === "din") poser("post");
       list.push({ time: p.h, item: p.texte, note: nutriNote(p.prot, p.kcal),
                   key: p.slot, nom: p.nom, prot: p.prot, kcal: p.kcal });
       // Les complements du matin s'accrochent a la PREMIERE prise et ceux du
@@ -3004,7 +3014,10 @@
       equipment: [],
       noGear: [],          // familles de machines ABSENTES de la salle
       excluded: [],
-      nutri: { meals: 3, breakfast: true, snack: true, cook: true, alcohol: "parfois", supps: [] },
+      // `snack` VAUT FAUX PAR DEFAUT. Une prise alimentaire de plus ne s'ajoute
+      // pas toute seule : trois repas demandes doivent donner trois repas. Le
+      // defaut inverse servait une collation a qui n'en avait jamais parle.
+      nutri: { meals: 3, breakfast: true, snack: false, cook: true, alcohol: "parfois", supps: [] },
       plan: null,
       nutriPlan: null,
       nutriPlanLe: null,       // date de generation du plan nutrition
@@ -6046,7 +6059,7 @@
           '<div class="field-label">Quelques habitudes</div>' +
           '<div class="ob-row ob-row-wrap">' +
             obBtn("ob-bool", "Je petit-déjeune", ' data-field="breakfast"', n.breakfast) +
-            obBtn("ob-bool", "Je grignote l\'après-midi", ' data-field="snack"', n.snack) +
+            obBtn("ob-bool", "J\'ajoute une collation", ' data-field="snack"', n.snack) +
             obBtn("ob-bool", "Je cuisine", ' data-field="cook"', n.cook) +
           '</div>' +
         '</div>' +
@@ -8619,7 +8632,8 @@
     leg:   "Légumes",
     fruit: "Fruits",
     gras:  "Matières grasses",
-    encas: "En-cas"
+    encas: "En-cas",
+    boisson: "Boissons"
   };
 
   // Champs d'un aliment :
@@ -8655,17 +8669,17 @@
     { id: "dinde",      nom: "dinde",                 cat: "prot", por: "escalope", nPor: 1, gPor: 120, prot100: 24,   kcal100: 110, cuisson: 1 },
     { id: "boeuf",      nom: "bœuf haché 5 %",        cat: "prot", por: "steak",    nPor: 1, gPor: 125, prot100: 21,   kcal100: 130, cuisson: 1 },
     { id: "porc",       nom: "filet mignon de porc",  cat: "prot", por: "portion",  nPor: 1, gPor: 130, prot100: 21,   kcal100: 145, cuisson: 1 },
-    { id: "saumon",     nom: "saumon",                cat: "prot", por: "pavé",     nPor: 1, gPor: 130, prot100: 20,   kcal100: 200, cuisson: 1 },
+    { id: "saumon",     nom: "saumon",                cat: "prot", por: "pavé",     nPor: 1, gPor: 130, prot100: 20,   kcal100: 200, cuisson: 1, gras: 1 },
     // « dos » est invariable : sans porPl, alimentPluriel ecrivait « 2 doss ».
     { id: "cabillaud",  nom: "cabillaud",             cat: "prot", por: "dos",      porPl: "dos", nPor: 1, gPor: 150, prot100: 18,   kcal100: 80,  cuisson: 1 },
     { id: "oeuf",       nom: "œufs",                  cat: "prot", por: "œuf",      nPor: 2, gPor: 55,  prot100: 13,   kcal100: 145, cuisson: 1, nu: 1 },
     { id: "tofu",       nom: "tofu ferme",            cat: "prot", por: "portion",  nPor: 1, gPor: 150, prot100: 12,   kcal100: 120, cuisson: 1 },
     { id: "lentilles",  nom: "lentilles cuites",      cat: "prot", por: "bol",      nPor: 1, gPor: 200, prot100: 9,    kcal100: 115, cuisson: 1 },
     { id: "thon",       nom: "thon au naturel",       cat: "prot", por: "boîte",    nPor: 1, gPor: 110, prot100: 26,   kcal100: 115 },
-    { id: "sardines",   nom: "sardines",              cat: "prot", por: "boîte",    nPor: 1, gPor: 90,  prot100: 24,   kcal100: 220 },
+    { id: "sardines",   nom: "sardines",              cat: "prot", por: "boîte",    nPor: 1, gPor: 90,  prot100: 24,   kcal100: 220, gras: 1 },
     { id: "crevettes",  nom: "crevettes cuites",      cat: "prot", por: "portion",  nPor: 1, gPor: 120, prot100: 21,   kcal100: 100 },
     { id: "jambon",     nom: "jambon blanc",          cat: "prot", por: "tranche",  nPor: 2, gPor: 40,  prot100: 20,   kcal100: 110 },
-    { id: "saumonfume", nom: "saumon fumé",           cat: "prot", por: "tranche",  nPor: 2, gPor: 30,  prot100: 22,   kcal100: 180 },
+    { id: "saumonfume", nom: "saumon fumé", gras: 1,           cat: "prot", por: "tranche",  nPor: 2, gPor: 30,  prot100: 22,   kcal100: 180 },
     { id: "poischiche", nom: "pois chiches égouttés", cat: "prot", por: "portion",  nPor: 1, gPor: 150, prot100: 8,    kcal100: 130 },
     { id: "harirouges", nom: "haricots rouges égouttés", cat: "prot", por: "portion", nPor: 1, gPor: 150, prot100: 8,  kcal100: 120 },
     // TROIS SOURCES QUI NE DEMANDENT PAS DE CASSEROLE. Sans elles, decocher
@@ -8723,7 +8737,21 @@
     { id: "compote",    nom: "compote sans sucre",  cat: "fruit", por: "gourde", nPor: 1, gPor: 90,  prot100: 0.3, kcal100: 50 },
 
     // --- Matières grasses ----------------------------------------------------
-    { id: "huile",      nom: "huile d'olive",       cat: "gras", por: "cuillère à soupe", porPl: "cuillères à soupe", nPor: 1, gPor: 10, prot100: 0, kcal100: 900, el: 1 },
+    { id: "huile",      nom: "huile d'olive",       cat: "gras", por: "cuillère à soupe", porPl: "cuillères à soupe", nPor: 1, gPor: 10, prot100: 0, kcal100: 900, el: 1, assaisonne: 1 },
+    // --- Boissons -------------------------------------------------------------
+    // Elles se posent en premier et a leur portion courante : voir nutriAjuster.
+    // Sans sucre ajoute, sans marque, comme tout le reste de cette table.
+    // PAS DE `nu` ICI, ET C'EST LE PIEGE QU'ON VIENT DE PAYER. `nu` dit « la
+    // portion EST l'aliment » : vrai pour « 2 œufs », faux pour « 1 tasse ».
+    // Avec ce drapeau, le cafe sortait « 1 tasse (200 g) », sans son nom.
+    // `sansG` : on ne pese pas une boisson. Le grammage sert au calcul, il ne
+    // s'affiche pas.
+    { id: "cafe",       nom: "café",                cat: "boisson", por: "tasse", nPor: 1, gPor: 200, prot100: 0.1, kcal100: 1,  boisson: 1, sansG: 1 },
+    { id: "the",        nom: "thé",                 cat: "boisson", por: "tasse", nPor: 1, gPor: 200, prot100: 0,   kcal100: 0,  boisson: 1, sansG: 1 },
+    { id: "jusorange",  nom: "jus d'orange",        cat: "boisson", por: "verre", nPor: 1, gPor: 200, prot100: 0.7, kcal100: 45, boisson: 1, sansG: 1 },
+    // PAS de drapeau `el` sur le jus : il force l'elision (« d' »), ce qui est
+    // juste pour « huile » (h muet) et FAUX pour « jus » — le banc a lu
+    // « 1 verre d'jus d'orange ». La regle par voyelle suffit ici.
     { id: "beurre",     nom: "beurre",              cat: "gras", por: "noisette", nPor: 1, gPor: 10, prot100: 0.7, kcal100: 750 },
     { id: "avocat",     nom: "avocat",              cat: "gras", por: "demi-avocat", entier: "avocat", nPor: 1, gPor: 75, prot100: 2, kcal100: 160, nu: 1 },
     { id: "cacahuete",  nom: "beurre de cacahuète", cat: "gras", por: "cuillère à soupe", porPl: "cuillères à soupe", nPor: 1, gPor: 15, prot100: 25, kcal100: 620 },
@@ -8829,6 +8857,34 @@
     return (c && ALIM_VOYELLES.indexOf(c) >= 0) ? "d'" : "de ";
   }
 
+  // UNITES QUI NE SE COMPTENT PAS. Un bol, une portion, une poignee, une
+  // assiette, une noisette : ce sont des contenants ou des prises en main, pas
+  // des objets denombrables. « 2 bols de flocons d'avoine » ne se dit pas ; on
+  // pese. Ces unites restent la reference du GENERATEUR — nPor x gPor dit ce
+  // qu'est une portion courante — et le LECTEUR de texte libre continue de les
+  // comprendre : seule l'ECRITURE change.
+  var ALIM_POR_PESEE = { "bol": 1, "portion": 1, "poignée": 1, "assiette": 1,
+                         "noisette": 1 };
+
+  // CE PLAT A-T-IL DEJA SON GRAS ? Question distincte de celle de GRAS_ACCORD,
+  // qui demande « ce corps gras va-t-il avec ce plat ? ». Une source marquee
+  // `gras` dans la table en porte assez pour assaisonner le repas toute seule :
+  // lui ajouter de l'huile double la matiere grasse. Mesure avant correctif :
+  // 16 services d'huile sur 19 tombaient sur une source deja grasse.
+  //
+  // ON INTERROGE CE QUI EST DANS L'ASSIETTE, pas ce qui a ete tire. Meme regle
+  // que `pose` pour GRAS_ACCORD, et pour la meme raison : une seconde source
+  // tiree mais non servie ne rend pas le plat gras. `pieces` porte exactement ce
+  // qui a ete pose, avec son aliment.
+  function priseDejaGrasse(pieces) {
+    var i;
+    if (!pieces) return false;
+    for (i = 0; i < pieces.length; i++) {
+      if (pieces[i] && pieces[i].a && pieces[i].a.gras) return true;
+    }
+    return false;
+  }
+
   function alimentPluriel(al, n) {
     if (n < 2) return al.por;
     return al.porPl || (al.por + "s");
@@ -8874,7 +8930,15 @@
     var dm = alimentDemi(al, n);
     if (dm === "") return alimentArrondiG(gExact) + " g " + alimentLiaison(al.nom, al.el) + al.nom;
     if (dm) return dm + " (" + gExact + " g)";
+    // Ce qui se pese s'ecrit en grammes, sans passer par son contenant.
+    if (ALIM_POR_PESEE[al.por]) {
+      return alimentArrondiG(gExact) + " g " + alimentLiaison(al.nom, al.el) + al.nom;
+    }
     if (al.nu) return n + " " + alimentPluriel(al, n) + " (" + gExact + " g)";
+    // On ne pese pas une boisson : son grammage sert au calcul, pas a l'ecran.
+    if (al.sansG) {
+      return n + " " + alimentPluriel(al, n) + " " + alimentLiaison(al.nom, al.el) + al.nom;
+    }
     return n + " " + alimentPluriel(al, n) + " " +
            alimentLiaison(al.nom, al.el) + al.nom + " (" + gExact + " g)";
   }
@@ -9318,11 +9382,25 @@
                        "saumonfume", "poischiche", "harirouges", "mozza",
                        "dindetr", "tofufume", "hariblancs", "oeufdur"],
     "prot|pdj":       ["skyr", "fbland", "yaourtgrec", "fgrains", "oeuf", "yaourt"],
-    "prot|collation": ["skyr", "fgrains", "barreprot", "oeufdur", "yaourtgrec", "fbland"],
+    // CE QU'ON EMPORTE. Une collation se mange debout, souvent dehors : la
+    // barre et les oeufs durs passent devant, le pot de skyr reste parce qu'il
+    // se transporte. Fromage blanc en grains, yaourt grec et fromage blanc
+    // sortent d'ici — mesure : ils produisaient 12 collations sur 32 servies
+    // comme « seul aliment de la prise », c'est-a-dire un quatrieme repas
+    // deguise. Ils gardent leurs creneaux « pdj » et « soir ».
+    "prot|collation": ["barreprot", "oeufdur", "skyr"],
     "prot|soir":      ["fbland", "skyr", "fgrains", "yaourtgrec"],
     "fec|repas":      ["riz", "pates", "semoule", "quinoa", "pdt", "patdouce", "pain", "wrap",
                        "taboule", "mais"],
     "fec|pdj":        ["flocons", "pain"],
+    // LE LAIT N'Y EST PAS, ET C'EST UNE MESURE QUI L'A SORTI. Premiere ecriture
+    // de ce vivier : il y figurait, au motif qu'un verre de lait est une boisson.
+    // Mais il porte 8 g de proteines par verre, et la boisson se pose a portion
+    // FIXE, hors du budget proteique du creneau — donc en PLUS de la source deja
+    // dosee. Mesure sur 1 120 journees : 3 journees au-dessus du plafond de
+    // 2,2 g/kg avec le lait, 0 sans lui. Un verre de lait est une source de
+    // proteines qui se boit ; il garde son role de laitage, ou il est DOSE.
+    "boisson|pdj":    ["cafe", "the", "jusorange"],
     "leg|repas":      ["brocolis", "haricotsv", "courgettes", "epinards", "poelee",
                        "salade", "tomates", "carottes", "concombre"],
     "fruit|tout":     ["banane", "pomme", "orange", "kiwi", "fruitsrges", "compote"],
@@ -10407,6 +10485,9 @@
       c.fec2 = alimPick("fec", "repas", ctx, slotK + "2",
                         (c.fec ? fecMemeFamille(c.fec.id) : []).concat(legers));
     } else if (s.forme === "pdj") {
+      // La boisson se tire comme les autres composants, avec sa propre graine :
+      // elle tourne d'un jour a l'autre sans decaler le reste de l'assiette.
+      c.boisson = alimPick("boisson", "pdj", ctx, slotK + "b");
       c.fec = alimPick("fec", "pdj", ctx, slotK);
       c.fruit = alimPick("fruit", "tout", ctx, slotK + "f");
       // LA OU LA CACAHUETE A SA PLACE. Elle est sortie du vivier sale par
@@ -10557,6 +10638,11 @@
         // GR_MIN_SERVI continue d'y regner comme avant. Voir grPlancherStruct.
         var gp = grBornerProt(c.prot, grPourProt(c.prot, viseSource, amp), capSource,
                               slotDeStructure(cible.k) ? grPlancherStruct(c.prot) : 0);
+        // UNE COLLATION SERT UNE PORTION DE SA SOURCE. Le fruit et l'en-cas y
+        // sont deja bornes ; la source ne l'etait pas, d'ou « 2 barres
+        // protéinées (120 g), seul aliment de la prise ». Sur un repas de
+        // structure, rien ne change : la borne ne vaut que pour la collation.
+        if (s.forme === "collation") gp = grPorAppoint(c.prot, gp);
         // La SOURCE passe la premiere, donc sur une assiette vide : le plafond de
         // masse ne peut pas la rogner, et c'est voulu. Elle est la raison d'etre
         // du repas ; ce qui doit ceder, ce sont les accompagnements.
@@ -10589,7 +10675,8 @@
         if (c.fec && reste > 40) {
           if (poser(c.fec, grPourKcal(c.fec, reste, amp), true)) pose.fec = true;
         }
-        if (c.gras && grasVaAvecPrise(c.gras, pose) && cible.kcal - kcal >= 60) {
+        if (c.gras && grasVaAvecPrise(c.gras, pose) && !priseDejaGrasse(pieces) &&
+            cible.kcal - kcal >= 60) {
           poser(c.gras, grPourKcal(c.gras, cible.kcal - kcal, amp), true);
         }
         // UN ACCOMPAGNEMENT DE PLUS. Quand tous les composants sont deja a leur
@@ -10597,7 +10684,12 @@
         // vaut mieux qu'un aveu : c'est ce qu'on ferait dans une vraie assiette.
         // Il n'arrive QUE s'il reste de la place pour une vraie portion, sinon
         // on ecrirait une ligne de plus pour 40 kcal.
-        if (c.fec2 && cible.kcal - kcal >= 150) {
+        // Une assiette DEJA GRASSE ne rattrape pas ses calories avec un second
+        // feculent. Sans ce garde, supprimer l'huile des sardines rendait ses
+        // calories a du pain — donc des proteines en plus, et 8 journees de
+        // plus au-dessus du plafond de 2,2 g/kg. Mesure : 14 journees avec, 6
+        // sans, sur les 4 032 du balayage.
+        if (c.fec2 && !priseDejaGrasse(pieces) && cible.kcal - kcal >= 150) {
           poser(c.fec2, grPourKcal(c.fec2, cible.kcal - kcal, amp), true);
         }
       } else if (s.forme === "pdj") {
@@ -10609,6 +10701,12 @@
         // disparu de l'appli. On garde donc `budget` sous le plafond pendant
         // TOUTE la composition de l'accompagnement, et on ne le relache qu'a la
         // ligne du gras.
+        // LA BOISSON D'ABORD, A SA PORTION COURANTE. Elle ne se dimensionne pas
+        // sur la cible — un cafe ne s'agrandit pas parce qu'il reste des
+        // calories, et un jus qui mangerait le budget des flocons serait un
+        // petit-dejeuner liquide. Ses calories comptent, elles, comme tout le
+        // reste : c'est ce qui empeche le verre de jus d'etre gratuit.
+        if (c.boisson) poser(c.boisson, c.boisson.nPor * c.boisson.gPor, true);
         var resG = reserveGras(c, cible.kcal - kcal, 45);
         var budget = cible.kcal - resG;
         reste = budget - kcal;
@@ -10618,7 +10716,8 @@
         if (c.fruit && budget - kcal >= 45) {
           if (poser(c.fruit, grPourKcal(c.fruit, budget - kcal, amp), true)) pose.fruit = c.fruit.id;
         }
-        if (c.gras && grasVaAvecPrise(c.gras, pose) && cible.kcal - kcal >= 60) {
+        if (c.gras && grasVaAvecPrise(c.gras, pose) && !priseDejaGrasse(pieces) &&
+            cible.kcal - kcal >= 60) {
           poser(c.gras, grPourKcal(c.gras, cible.kcal - kcal, amp), true);
         }
       } else if (s.forme === "collation") {
@@ -10744,9 +10843,20 @@
   // auraient diverge des la premiere retouche, et l'utilisateur aurait lu deux
   // grammaires differentes pour la meme assiette sur le meme ecran.
   function nutriTextePrise(r, s, cible, nomSlot) {
-    var i, txt = [], manque = cible.kcal - r.kcal, texte;
-    for (i = 0; i < r.pieces.length; i++) txt.push(alimentTexte(r.pieces[i].a, r.pieces[i].g));
+    var i, txt = [], manque = cible.kcal - r.kcal, texte, assais = [];
+    for (i = 0; i < r.pieces.length; i++) {
+      // CE QUI ASSAISONNE NE SE COMPTE PAS COMME UN PLAT. « + 2 cuillères à
+      // soupe d'huile d'olive (20 g) », au même rang que les sardines et le
+      // pain, se lit comme quelque chose qu'on mange à côté. On l'écrit comme ce
+      // que c'est : une incise, après les aliments.
+      if (r.pieces[i].a && r.pieces[i].a.assaisonne) {
+        assais.push(alimentTexte(r.pieces[i].a, r.pieces[i].g));
+        continue;
+      }
+      txt.push(alimentTexte(r.pieces[i].a, r.pieces[i].g));
+    }
     texte = txt.join(" + ");
+    if (texte && assais.length) texte += ", assaisonné de " + assais.join(" et ");
     if (!texte) texte = nomSlot + " libre";
     // « seule » etait ecrit en dur et invariable : le mot visait la COLLATION
     // mais se lisait comme un accord avec l'aliment, d'ou « 1 pot de yaourt grec
@@ -11213,7 +11323,11 @@
   // balayage : c'est son absence qui avait laisse passer deux versions du defaut.
   var NUTRI_LIGNE_MAX = 300;    // ligne composee par le generateur de repas
   var NUTRI_ITEM_MAX = 90;      // texte libre saisi par l'utilisateur
-  var NUTRI_NOTE_MAX = 60;      // idem pour .note
+  // MESUREE, PAS SUPPOSEE. Les notes de complements sont ECRITES PAR L'APPLI et
+  // depassaient cette borne : elles repartaient tronquees au milieu d'un mot au
+  // premier rechargement, sans que rien ne le dise. Longueurs relevees sur SUPPS
+  // en v1.9.0 : creatine 76, whey 78, omega 3 108, vitamine D 37, cafeine 55.
+  var NUTRI_NOTE_MAX = 160;     // idem pour .note
   var NUTRI_PROT_MAX = 300;     // g de proteines sur UNE prise
   var NUTRI_KCAL_MAX = 3000;    // kcal sur UNE prise
 
