@@ -987,8 +987,8 @@
   //   MINEUR    : nouvelle fonctionnalité, ou changement de comportement visible
   //   CORRECTIF : correction de bug seule, aucun changement de comportement voulu
   // ===========================================================================
-  var APP_VERSION = "1.15.0";
-  var APP_BUILD = "17 août 2026 (1.15.0)";
+  var APP_VERSION = "1.16.0";
+  var APP_BUILD = "17 août 2026 (1.16.0)";
 
   // NE JAMAIS CHANGER sans écrire une migration : c'est ici que vit l'historique.
   var STORAGE_KEY = "olivier-coach-log";
@@ -4250,6 +4250,14 @@
     page: "seance",         // "seance" | "annexe"
     pageAnim: null,         // sens du glissement pour le prochain rendu
     storageOk: true,
+    // Version SERVIE quand elle est strictement plus recente que celle qui tourne,
+    // sinon null. Jamais persistee : c'est un fait du reseau, pas un reglage, et le
+    // relire du stockage afficherait un bandeau perime au lancement suivant, avant
+    // meme d'avoir sonde.
+    majDispo: null,
+    // « Plus tard » : vaut pour la SESSION seulement. Persister le refus cacherait
+    // le bandeau pour toujours a quelqu'un qui n'a pas mis a jour.
+    majVue: false,
     logRaw: null,         // chaine EXACTE du journal en stockage, vue par cette instance
     notice: null,
     ob: null,             // brouillon du diagnostic, non persisté
@@ -5014,6 +5022,10 @@
     if (!state.storageOk) {
       bannersHtml += '<div class="banner banner-error">Stockage indisponible (navigation privée, ou mémoire pleine). Tes taps s\'affichent mais rien n\'est gardé : exporte tes données dès que possible.</div>';
     }
+    // APRES le stockage indisponible, qui est plus grave — ce qu'on tape n'y est
+    // pas garde —, et AVANT la notification passagere, qui disparait au bout de
+    // sept secondes. L'ordre suit la duree de vie de l'information.
+    bannersHtml += majBandeauHtml();
     if (state.notice) {
       bannersHtml += '<div class="banner banner-' + esc(state.notice.kind || "info") + '">' + esc(state.notice.text) + '</div>';
     }
@@ -14435,6 +14447,157 @@
            ok ? "ok" : "error");
   }
 
+  // ===========================================================================
+  // « UNE VERSION PLUS RÉCENTE EXISTE » — LA SONDE ET SON BANDEAU
+  // ---------------------------------------------------------------------------
+  // CE QUE CE BLOC AJOUTE, ET CE QU'IL N'AJOUTE PAS. Il ne met rien à jour : tout
+  // le mécanisme est déjà là, et il marche. sw.js est réseau d'abord, donc au
+  // prochain lancement avec du réseau la version fraîche arrive d'elle-même ; le
+  // bouton « ⟳ Mettre à jour l'appli » force le geste ; le nom du cache découle de
+  // la version, donc l'ancien se purge tout seul. Ce bloc ajoute UNE chose : le
+  // fait de le DIRE. Jusqu'ici il fallait aller chercher le bouton.
+  //
+  // TROIS CAS OÙ LE RÉSEAU-D'ABORD NE SUFFIT PAS, et c'est pour eux qu'on sonde :
+  //   1. réseau lent — au-delà de NET_TIMEOUT_MS, sw.js sert le cache, donc
+  //      l'ancien code tourne alors que le cache, lui, se rafraîchit derrière ;
+  //   2. PWA iOS suspendue — reprise après plusieurs jours, elle peut redémarrer
+  //      SANS renavigation, et l'ancien JavaScript reste en mémoire indéfiniment ;
+  //   3. fenêtre du CDN — GitHub Pages sert max-age=600.
+  //
+  // ⚠️ AUCUNE NOTIFICATION SYSTÈME N'EST POSSIBLE ICI, et ce n'est pas un manque de
+  // volonté : il faudrait du push, donc un serveur et une clé VAPID, alors que
+  // l'appli est une page statique dont la CSP porte connect-src en liste CLOSE. Et
+  // rien ne peut atteindre quelqu'un qui n'ouvre pas l'appli. C'est un bandeau DANS
+  // l'appli, et il ne prétend pas être autre chose.
+  // ===========================================================================
+
+  // LA SONDE EST manifest.json, ET ELLE N'AJOUTE AUCUN FICHIER À DÉPLOYER.
+  // 706 octets, déjà dans les cinq fichiers déposés, et il porte déjà « version ».
+  // Un version.json séparé aurait fait un sixième fichier à glisser à la main,
+  // donc une occasion de l'oublier — et une version qui diverge du triplet
+  // (APP_VERSION, sw.js, manifeste) est exactement ce que ce triplet existe pour
+  // empêcher.
+  var MAJ_SONDE_FICHIER = "./manifest.json";
+
+  // On ne sonde pas plus d'une fois par quart d'heure. Sans ce frein, quelqu'un qui
+  // fait des allers-retours entre l'appli et son minuteur déclencherait une requête
+  // à chaque retour — et la sonde est branchée sur visibilitychange, donc sur le
+  // geste le plus fréquent de toute la séance.
+  //
+  // Le premier retour après plusieurs jours passe évidemment, ce qui est le cas
+  // qu'on cherche à couvrir.
+  var MAJ_SONDE_MS = 15 * 60 * 1000;
+  var majDerniereSonde = 0;
+  var majEnVol = false;
+
+  // COMPARAISON ORDONNÉE, ET NUMÉRIQUE, JAMAIS UNE INÉGALITÉ DE CHAÎNES.
+  //
+  // « la version servie diffère de la mienne » est faux dans deux cas réels :
+  // pendant la fenêtre du CDN on peut recevoir un manifeste PLUS ANCIEN, et un
+  // retour en arrière volontaire en déploierait un aussi. Le bandeau annoncerait
+  // alors une mise à jour vers le passé, et un tap ne le ferait pas disparaître.
+  //
+  // ⚠️ ET LA COMPARAISON DE CHAÎNES AURAIT MORDU SUR CE PROJET PRÉCIS : « 1.9.3 »
+  // est SUPÉRIEUR à « 1.10.0 » quand on compare des chaînes, parce que « 9 » vient
+  // après « 1 ». L'appli est justement passée de 1.9.3 à 1.10.0. On compare donc
+  // nombre par nombre.
+  //
+  // Rend vrai seulement si `servie` est STRICTEMENT plus récente que `courante`.
+  function majPlusRecente(servie, courante) {
+    if (!/^\d+\.\d+\.\d+$/.test(String(servie))) return false;
+    if (!/^\d+\.\d+\.\d+$/.test(String(courante))) return false;
+    var a = String(servie).split("."), b = String(courante).split("."), i, x, y;
+    for (i = 0; i < 3; i++) {
+      x = parseInt(a[i], 10); y = parseInt(b[i], 10);
+      if (x > y) return true;
+      if (x < y) return false;
+    }
+    return false;                       // égales : il n'y a rien à annoncer
+  }
+
+  // La sonde. Ne rend rien : elle pose state.majDispo et redessine, ou elle se
+  // taît. `force` saute le frein — le bouton de réglages s'en sert.
+  //
+  // ⚠️ « ?nocache= » N'EST PAS UN ORNEMENT. sw.js laisse passer ces requêtes sans
+  // les intercepter (voir sa branche searchParams). Sans ce paramètre, la sonde
+  // serait servie DEPUIS LE CACHE : elle réussirait hors-ligne, rendrait l'ancienne
+  // version, et l'appli conclurait « tu es à jour » sans avoir joint le réseau.
+  // C'est mot pour mot le défaut déjà payé sur updateApp, dont la sonde porte le
+  // même paramètre pour la même raison.
+  //
+  // ⚠️ LE SILENCE EN CAS D'ÉCHEC EST UNE DÉCISION. Hors-ligne ne veut pas dire à
+  // jour. Une sonde qui échoue ne dit RIEN : ni bandeau, ni notification. Le seul
+  // appelant qui a le droit de parler est celui que l'utilisateur a déclenché
+  // lui-même, et il le fait de son côté.
+  function majSonder(force, onFini) {
+    if (majEnVol) return;
+    if (!window.fetch || !window.JSON) return;
+    var t = new Date().getTime();
+    if (!force && majDerniereSonde && (t - majDerniereSonde) < MAJ_SONDE_MS) return;
+    majDerniereSonde = t;
+    majEnVol = true;
+
+    var url;
+    try {
+      url = new URL(MAJ_SONDE_FICHIER, window.location.href).href + "?nocache=" + t;
+    } catch (e) { majEnVol = false; return; }
+
+    function fini(neuve) {
+      majEnVol = false;
+      if (onFini) onFini(neuve);
+    }
+
+    window.fetch(url, { cache: "reload" }).then(function (r) {
+      if (!r || !r.ok) throw new Error("réseau injoignable");
+      return r.text();
+    }).then(function (txt) {
+      // Un portail Wi-Fi répond 200 avec sa propre page : JSON.parse échoue, et
+      // l'échec est traité comme un échec de réseau. C'est la même précaution que
+      // celle d'updateApp, qui vérifie la longueur et le titre du HTML.
+      var j = JSON.parse(txt);
+      var v = (j && typeof j.version === "string") ? j.version : "";
+      if (majPlusRecente(v, APP_VERSION)) {
+        state.majDispo = v;
+        state.majVue = false;           // une version NEUVE se réannonce
+        render();
+        fini(v);
+        return;
+      }
+      // Rien de plus récent : on efface un bandeau qui aurait survécu à une mise à
+      // jour faite entre-temps par un autre chemin. Sans cette ligne, le bandeau
+      // restait après que sw.js avait fait le travail tout seul.
+      if (state.majDispo) { state.majDispo = null; render(); }
+      fini(null);
+    })["catch"](function () {
+      fini(null);                       // SILENCE : voir le commentaire ci-dessus
+    });
+  }
+
+  // Le bandeau. Il vit dans bannersHtml, avec les autres — pas dans une carte : ce
+  // n'est pas une information qu'on va consulter, c'est une information qui doit
+  // arriver.
+  //
+  // ⚠️ AUCUN RECHARGEMENT AUTOMATIQUE. Recharger sous les doigts de quelqu'un
+  // effacerait la série qu'il est en train de taper — et l'appli est faite pour
+  // être ouverte entre deux séries. Le bandeau porte un bouton, et c'est
+  // l'utilisateur qui décide. Même règle que toutes les propositions de l'appli :
+  // « Appliquer » à côté d'« Ignorer », jamais à la place.
+  //
+  // IL EST REFERMABLE, ET LE REFUS NE SURVIT PAS À LA SESSION. Persister « déjà
+  // vu » cacherait le bandeau pour toujours à quelqu'un qui n'a pas mis à jour ;
+  // ne pas le rendre refermable en ferait un bandeau qu'on apprend à ne plus voir.
+  // Il revient donc au prochain lancement, tant que la version n'a pas bougé.
+  function majBandeauHtml() {
+    if (!state.majDispo || state.majVue) return "";
+    return '<div class="banner banner-info">' +
+      '<strong>Version ' + esc(state.majDispo) + ' disponible</strong> — tu es en ' +
+      esc(APP_VERSION) + '. Tes séances, tes charges et tes pesées ne sont pas ' +
+      'touchées par une mise à jour.' +
+      '<button type="button" class="banner-btn" data-action="update-app">Mettre à jour</button>' +
+      '<button type="button" class="banner-btn" data-action="maj-plus-tard">Plus tard</button>' +
+    '</div>';
+  }
+
   // --- Mise à jour ----------------------------------------------------------
   // On ne détruit JAMAIS le cache avant d'avoir la nouvelle version en main.
   //
@@ -14889,6 +15052,12 @@
       if (off === 0) state.showDatePicker = false;   // de retour sur aujourd'hui, on replie
       render();
 
+    } else if (action === "maj-plus-tard") {
+      // Pour la SESSION seulement, et rien n'est persiste : le bandeau revient au
+      // prochain lancement tant que la version n'a pas bouge. Un refus definitif
+      // cacherait la mise a jour pour toujours a qui ne l'a pas faite.
+      state.majVue = true; render();
+
     } else if (action === "goto-today") {
       state.editDate = todayKey();
       state.editDatePinned = false;
@@ -15263,9 +15432,22 @@
     loadLog();
     render();
   }
-  document.addEventListener("visibilitychange", function () { if (!document.hidden) refreshIfNewDay(); });
-  window.addEventListener("pageshow", refreshIfNewDay);
-  window.addEventListener("focus", refreshIfNewDay);
+  // AU REVEIL : la journee peut avoir change, et une version plus recente peut
+  // avoir ete deployee. Les deux se verifient au meme moment et au meme endroit —
+  // deux listes d'evenements auraient divergé.
+  //
+  // ⚠️ C'EST CE BRANCHEMENT QUI COUVRE LE CAS LE PLUS PROBABLE : une PWA iOS
+  // ajoutee a l'ecran d'accueil, suspendue puis reprise apres plusieurs jours, peut
+  // redemarrer SANS renavigation — donc sans que sw.js soit consulte, donc en
+  // gardant son ancien JavaScript en memoire indefiniment. visibilitychange est le
+  // seul signal qui arrive dans ce cas-la.
+  function auReveil() {
+    refreshIfNewDay();
+    majSonder(false);
+  }
+  document.addEventListener("visibilitychange", function () { if (!document.hidden) auReveil(); });
+  window.addEventListener("pageshow", auReveil);
+  window.addEventListener("focus", auReveil);
 
   appliqueTheme();
   try {
@@ -15282,6 +15464,16 @@
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("sw.js").catch(function () {});
   }
+
+  // AU LANCEMENT AUSSI, et ce n'est PAS redondant avec le reseau-d'abord de sw.js.
+  // Quand le reseau depasse NET_TIMEOUT_MS, sw.js sert le cache : le code qui TOURNE
+  // est l'ancien, pendant que le telechargement de fond aboutit et rafraichit le
+  // cache pour la prochaine fois. La sonde, elle, ne passe pas par sw.js — elle
+  // porte « ?nocache= » — donc elle voit le reseau tel qu'il est.
+  //
+  // Elle part APRES l'enregistrement du service worker, et elle ne bloque aucun
+  // rendu : 706 octets, en arriere-plan, et le silence si ca echoue.
+  majSonder(true);
 })();
 </script>
 </body>
