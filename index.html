@@ -1038,8 +1038,8 @@
   //   MINEUR    : nouvelle fonctionnalité, ou changement de comportement visible
   //   CORRECTIF : correction de bug seule, aucun changement de comportement voulu
   // ===========================================================================
-  var APP_VERSION = "1.20.0";
-  var APP_BUILD = "17 août 2026 (1.20.0)";
+  var APP_VERSION = "1.21.0";
+  var APP_BUILD = "17 août 2026 (1.21.0)";
 
   // NE JAMAIS CHANGER sans écrire une migration : c'est ici que vit l'historique.
   var STORAGE_KEY = "olivier-coach-log";
@@ -4324,8 +4324,11 @@
     // tard.
     iaNutriOuvert: false,
     avanceOuvert: false,
-    // La provenance des deux cibles chiffrees, repliee par defaut. Non persistee :
-    // c'est une reponse qu'on lit une fois, pas un reglage.
+    // La provenance des reperes chiffres de la carte nutrition, repliee par defaut.
+    // Non persistee : c'est une reponse qu'on lit une fois, pas un reglage.
+    // ⚠️ NE PAS REINTRODUIRE UN COMPTE DANS LE LIBELLE : la rangee rend 2, 3 ou 4
+    // vignettes selon qu'un deficit ou un surplus existe. Le compte etait ecrit en
+    // dur en v1.20.0, et il etait faux des le premier profil en perte.
     nutriInfo: false,
     iaTexte: "",          // reponse collee, gardee le temps de la session
     iaRes: null,          // propositions retenues et ecartees apres validation
@@ -5710,7 +5713,7 @@
         (profile
           ? '<button type="button" class="ia-lien" data-action="nutri-info" aria-expanded="' +
               (state.nutriInfo ? "true" : "false") + '">' +
-              (state.nutriInfo ? "Masquer" : "D\'où viennent ces deux chiffres ?") +
+              (state.nutriInfo ? "Masquer" : "D\'où viennent ces chiffres ?") +
             '</button>' +
             (state.nutriInfo
               ? '<div class="field-hint">Des repères estimés à partir de ton poids et de ton ' +
