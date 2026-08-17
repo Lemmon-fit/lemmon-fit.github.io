@@ -726,7 +726,7 @@
      Mesure : --accent = 1,28:1 sur la page claire, 1,40:1 sur la carte. */
   .nutri-corrige { color: var(--accent-txt); font-weight: 900; margin-left: 5px; }
 
-  .nutri-edit { padding: 10px 12px 12px; background: var(--fond-encart);
+  .nutri-edit-supprime { padding: 10px 12px 12px; background: var(--fond-encart);
                 border-left: 2px solid var(--accent); }
   .nutri-edit-base { font-size: 12px; color: var(--texte-2); line-height: 1.5;
                      margin-bottom: 10px; }
@@ -987,8 +987,8 @@
   //   MINEUR    : nouvelle fonctionnalité, ou changement de comportement visible
   //   CORRECTIF : correction de bug seule, aucun changement de comportement voulu
   // ===========================================================================
-  var APP_VERSION = "1.10.0";
-  var APP_BUILD = "16 août 2026 (1.10.0)";
+  var APP_VERSION = "1.15.0";
+  var APP_BUILD = "17 août 2026 (1.15.0)";
 
   // NE JAMAIS CHANGER sans écrire une migration : c'est ici que vit l'historique.
   var STORAGE_KEY = "olivier-coach-log";
@@ -2951,7 +2951,7 @@
     // accrochee a la premiere prise, a la meme place dans la liste : les cases
     // cochees du journal sont indexees par POSITION, et la decaler ferait
     // parler chaque journee passee d'une autre ligne.
-    { v: "whey", label: "Protéine en poudre", moment: "post",
+    { v: "whey", label: "Protéine en poudre", moment: "post", alim: "poudreprot",
       time: "Après la séance", item: "Protéine en poudre 25 à 30 g",
       note: "dans le même shaker que la créatine · les jours sans séance, au petit-déjeuner",
       why: "Aucune vertu magique : c'est un moyen commode d'atteindre ses protéines quand un repas ne suffit pas.",
@@ -2997,6 +2997,17 @@
     // 5 a 6 heures. Exprime par rapport au COUCHER, il vaut pour celui qui
     // s'entraine a 12h comme pour celui qui s'entraine a 19h, et il ne peut plus
     // contredire l'heure d'un creneau.
+    { v: "barreprot", label: "Barre protéinée", moment: "collation",
+      alim: "barreprot",
+      time: "En collation", item: "Barre protéinée 1 par jour, environ 60 g",
+      note: "à emporter · lis l'étiquette : vise 20 g de protéines et moins de 10 g de sucres",
+      why: "Aucune vertu magique : une collation qui se transporte et qui porte de vraies protéines.",
+      quand: "À la collation, quand le repas suivant est loin ou que la journée ne laisse pas le temps de manger. C'est sa seule raison d'être : elle remplace une prise que tu sauterais, elle ne s'ajoute pas à une journée déjà complète.",
+      comment: "Elle se mange telle quelle, sans rien préparer, et se garde dans un sac ou un tiroir de bureau. Bois un grand verre d'eau avec : elle est sèche et concentrée. Au bureau, en voiture, entre deux rendez-vous — c'est là qu'elle rend service, et c'est pour ça qu'elle bat les œufs durs.",
+      dose: "Une barre par jour au maximum, environ 60 g. Deux ne servent à rien : ce n'est pas la barre qui construit le muscle, c'est le total de la journée. Au-delà d'environ 1,6 à 2,2 g de protéines par kilo et par jour, le supplément ne sert plus.",
+      effet: "Aucune vertu propre : c'est un aliment pratique, pas un produit actif. La comparaison honnête n'est pas « barre contre vrai repas » — le repas gagne toujours — mais « barre contre rien du tout », et là elle gagne. Lis l'étiquette : beaucoup de barres sont des confiseries avec un peu de protéines.",
+      avis: "Rien de particulier chez l'adulte en bonne santé. Si le lactose te dérange, regarde la liste : la plupart en contiennent. Les barres très riches en polyols peuvent donner des ballonnements." },
+
     { v: "cafeine", label: "Caféine avant séance", moment: "pre",
       time: "Avant séance", item: "Café", note: "30 à 45 min avant, et pas dans les 6 h avant le coucher",
       why: "Un coup de pouce ponctuel avant une séance lourde, pas un produit de fond. À éviter en fin de journée, le sommeil compte plus.",
@@ -3136,14 +3147,22 @@
   // toute autre ligne du plan, dans la meme grammaire et avec le meme
   // separateur, suivie de la posologie qui reste utile.
   //
-  // Effet de bord VOULU : nutriProtDe() sait relire « 23 g prot » dans une note.
-  // Un plan v1.3.0 sans champ chiffre totalisera desormais la whey lui aussi,
-  // ce qui est le compte juste. Pas de double compte pour autant — sur un plan
-  // v1.5.0 c'est le champ `prot` qui est lu, jamais la note.
+  // La note chiffree n'est pas qu'un affichage : c'est une forme RELUE. Le
+  // totaliseur du plan sait retrouver « 23 g prot » dans une note quand la ligne
+  // n'a pas de champ chiffre, ce qui est le cas des plans d'avant la v1.5.0. Pas
+  // de double compte pour autant — des qu'un champ `prot` existe, c'est lui qui
+  // est lu, jamais la note. Cette relecture sert aussi de garde-fou au plan
+  // ecrit par une IA : elle permet de comparer ce qu'une ligne ANNONCE a ce que
+  // le lecteur y comprend vraiment.
   function nutriLigneSupp(s, fixe) {
     var l = { time: s.time, item: s.item, note: s.note, supp: s.v,
               key: "s" + s.v, nom: s.label, prot: 0, kcal: 0 };
-    if (s.v === "whey" && fixe) {
+    // `fixe` etait fourni par la journee composee, qui n'existe plus. Les deux
+    // complements qui portent de vraies macros les calculent desormais
+    // eux-memes, depuis la table d'aliments : un seul endroit, comme la
+    // posologie.
+    if (!fixe && s.alim) fixe = nutriMacrosFixes(s.alim);
+    if (s.alim && fixe) {
       l.prot = fixe.prot; l.kcal = fixe.kcal;
       var chiffre = nutriNote(fixe.prot, fixe.kcal);
       if (chiffre) l.note = chiffre + " · " + s.note;
@@ -3166,55 +3185,58 @@
   // refonte : tout le mecanisme de variation par la date, concu et teste, ne
   // servait a rien en production. Quelqu'un qui installait l'appli mangeait le
   // meme dejeuner tous les jours, indefiniment.
+  // LES MACROS D'UN COMPLEMENT QUI EN PORTE. La whey et la barre proteinee sont
+  // les deux seules lignes de complement qui apportent quelque chose de
+  // mesurable. Ce calcul vivait dans nutriJour, qui composait la journee ; il
+  // en est SORTI pour survivre a la reduction, parce que sans lui la ligne whey
+  // repartirait non chiffree et le total de la journee mentirait vers le bas.
+  function nutriMacrosFixes(id) {
+    var a = aliment(id), ap;
+    if (!a) return { prot: 0, kcal: 0 };
+    ap = alimentApport(a, a.nPor * a.gPor);
+    return { prot: Math.round(ap.prot), kcal: ap.kcal };
+  }
+
+  // ===========================================================================
+  // LE PLAN DU JOUR — DES COMPLEMENTS, ET RIEN D'AUTRE
+  // ---------------------------------------------------------------------------
+  // L'APPLI NE COMPOSE PLUS DE REPAS. Decision du proprietaire du 17 aout 2026,
+  // prise apres cinq passes de correctifs et une mesure sans appel : 9,87 % des
+  // prises servaient un laitage en trois pots ou plus, jusqu'a quatre pots de
+  // 500 g. La cause n'etait pas une liste de bogues, elle etait architecturale —
+  // le generateur assemblait des ROLES et mettait les grammes a l'echelle pour
+  // atteindre une cible calorique et proteique, et « 4 pots de yaourt » est une
+  // BONNE reponse a ce probleme-la. L'espace des combinaisons absurdes est plus
+  // grand que l'espace des garde-fous qu'on peut ecrire contre elles.
+  //
+  // CE QUI RESTE EST CE QUE L'APPLI SAIT FAIRE SANS RIEN INVENTER : dire quand
+  // et comment prendre les complements qu'on a declares, et donner deux cibles
+  // chiffrees. Pour un vrai plan alimentaire, l'utilisateur connecte une IA et
+  // c'est ELLE qui ecrit — sous le controle d'un validateur, a partir de la
+  // v1.14.0.
+  //
+  // L'ORDRE DES LIGNES EST FIXE ET DOCUMENTE, parce que les cases cochees du
+  // journal sont indexees par POSITION : matin, avant la seance, apres la
+  // seance, collation, soir. Il suit la journee, et il ne depend plus d'aucun
+  // creneau de repas — c'est ce qui le rend enfin stable.
+  // ===========================================================================
+  var SUPP_ORDRE = ["matin", "pre", "post", "collation", "soir"];
+
   function buildNutrition(profile) {
-    var t = nutritionTargets(profile);
     var n = profile.nutri || {};
-    var supps = {}, i, j, list = [], p, lignes;
+    var supps = {}, i, z, list = [], lg;
     for (i = 0; i < (n.supps || []).length; i++) supps[n.supps[i]] = true;
 
-    var jour = nutriJour(profile, t, todayKey());
-
-    // TROIS crochets, et non deux. Avec « matin » et « soir » seuls, la cafeine
-    // — etiquetee "soir" faute de mieux — tombait APRES LE DINER, alors que sa
-    // propre note dit « 30 a 45 min avant la seance, rien apres 16h ». Le
-    // moment « pre » s'accroche au creneau « Avant la seance » quand la journee
-    // en a un, et a la PREMIERE prise sinon : dans les deux cas avant le soir.
-    var aPre = false;
-    for (i = 0; i < jour.prises.length; i++) if (jour.prises[i].slot === "pre") aPre = true;
-
-    function poser(moment) {
-      var lg = suppLignes(supps, moment), z;
-      for (z = 0; z < lg.length; z++) list.push(nutriLigneSupp(suppById(lg[z].supp), jour.fixe));
-    }
-
-    for (i = 0; i < jour.prises.length; i++) {
-      p = jour.prises[i];
-      // LE SHAKER D'APRES SEANCE SE POSE AVANT LE DINER, jamais apres. C'est sa
-      // place reelle dans la journee — on rentre de seance, on boit son shaker,
-      // on dine ensuite —, et c'est aussi la seule position ou son etiquette ne
-      // contredit pas son voisinage. Le defaut inverse a deja ete paye deux
-      // fois : la cafeine, puis la whey, toutes deux etiquetees « apres seance »
-      // et servies au petit-dejeuner.
-      if (p.slot === "din") poser("post");
-      list.push({ time: p.h, item: p.texte, note: nutriNote(p.prot, p.kcal),
-                  key: p.slot, nom: p.nom, prot: p.prot, kcal: p.kcal });
-      // Les complements du matin s'accrochent a la PREMIERE prise et ceux du
-      // soir au diner, parce que c'est la qu'on les prend. La posologie n'est
-      // ecrite qu'a UN seul endroit — la table SUPPS — au lieu d'etre recopiee
-      // ici comme en v1.3.0, ou les deux versions avaient deja diverge.
-      if (i === 0) {
-        poser("matin");
-        // Pas de creneau « avant la seance » dans cette journee : la premiere
-        // prise est le seul point d'accroche qui reste avant 16h.
-        if (!aPre) poser("pre");
+    for (i = 0; i < SUPP_ORDRE.length; i++) {
+      lg = suppLignes(supps, SUPP_ORDRE[i]);
+      for (z = 0; z < lg.length; z++) {
+        list.push(nutriLigneSupp(suppById(lg[z].supp), null));
       }
-      if (p.slot === "pre") poser("pre");
-      if (p.slot === "din") poser("soir");
     }
-    // Borne dure. MAX_NUTRI_ITEMS vaut 20 et le maximum atteignable est 12
-    // (sept creneaux, cinq complements) : la coupe ne devrait jamais servir.
-    // Elle est la parce que cleanProfile tronque au meme endroit, et qu'un plan
-    // plus long que ce que le stockage garde serait faux des le rechargement.
+    // Borne dure. Elle ne peut plus mordre — six complements au maximum contre
+    // vingt places — mais elle reste : cleanProfile tronque au meme endroit, et
+    // un plan plus long que ce que le stockage garde serait faux des le
+    // rechargement.
     if (list.length > MAX_NUTRI_ITEMS) list = list.slice(0, MAX_NUTRI_ITEMS);
     return list;
   }
@@ -3249,15 +3271,10 @@
     if (!prof || !isArray(prof.nutriPlan) || !prof.nutriPlan.length) return [];
     var struct = prof.nutriPlan, out = [], i, l, ln, p;
     if (!DATE_RE.test(String(dateKey))) dateKey = todayKey();
-    // Une recomposition qui echoue ne doit JAMAIS emporter l'affichage du plan :
-    // on retombe alors sur la proposition stockee, c'est-a-dire sur le
-    // comportement d'avant. Un ecran figé vaut mieux qu'un ecran blanc.
-    var jour = nutriJourMemo(prof, dateKey), parSlot = {};
-    if (jour) for (i = 0; i < jour.prises.length; i++) parSlot[jour.prises[i].slot] = jour.prises[i];
-    // Le meme booleen sert au libelle du creneau « pre » (dans nutriJour) et a
-    // la ligne cafeine (ici) : les deux disaient des choses opposees sur la
-    // meme carte, le creneau renomme « Fin d'apres-midi » et la cafeine
-    // toujours « Avant seance ». Une seule source pour les deux, desormais.
+    // La recomposition des lignes de repas est partie avec le generateur en
+    // v1.13.0. Ce qui reste depend encore de la date, et c'est la seule chose
+    // qui en dependait vraiment : la ligne cafeine change de texte les jours
+    // sans seance.
     var seance = nutriEstSeance(prof, dateKey);
     for (i = 0; i < struct.length; i++) {
       l = struct[i];
@@ -3271,19 +3288,6 @@
       if (l.supp === "cafeine" && !seance) {
         ln.time = CAF_REPOS.time; ln.item = CAF_REPOS.item;
         ln.note = CAF_REPOS.note; ln.nom = CAF_REPOS.nom;
-      }
-      // Une prise de REPAS se recompose. Un complement, non : 3 g de creatine ne
-      // varient pas avec le jour de la semaine, et sa ligne n'a pas de creneau
-      // dans la journee composee.
-      if (!l.supp && has(parSlot, l.key)) {
-        p = parSlot[l.key];
-        ln.item = p.texte;
-        ln.note = nutriNote(p.prot, p.kcal);
-        ln.prot = p.prot;
-        ln.kcal = p.kcal;
-        // Le LIBELLE du creneau suit la journee, sa CLE jamais : « Avant la
-        // seance » un jour d'entrainement, « Fin d'apres-midi » les autres.
-        if (p.nom) ln.nom = p.nom;
       }
       if (l.corr) ln.corr = l.corr;
       out.push(ln);
@@ -3357,7 +3361,18 @@
       nutriPlan: null,
       nutriPlanLe: null,       // date de generation du plan nutrition
       nutriMigreLe: null,      // date de recomposition d'un plan anterieur
-      nutriFrein: null,        // trace du « je monte quand meme »
+      // DATE A LAQUELLE UNE IA A ECRIT CE PLAN, ou null. Ce n'est pas un
+      // ornement : trois comportements en dependent.
+      //   1. la carte de nutrition JUGE le plan quand il vient d'une IA (une
+      //      journee complete est proposee) et se tait sinon ;
+      //   2. la migration de reduction NE DOIT PAS s'y declencher — un plan d'IA
+      //      porte des lignes de repas, donc le detecteur repond vrai sur lui ;
+      //   3. le bouton de retour arriere n'existe que s'il y a de quoi revenir.
+      nutriPlanIA: null,
+      // CE QUI A CAUSE LA DERNIERE MIGRATION : « v141 » ou « reduction ». Le
+      // message affiche differe, et un message qui se trompe de cause est pire
+      // qu'un silence.
+      nutriMigreCause: null,
       dechargeLe: null,        // date de la derniere semaine d'allegement
       joursHisto: [],          // epoques des jours prevus, voir joursPrevusLe
       allegeLe: null,          // date de la SEANCE allegee, voir fatigueRecente
@@ -3547,10 +3562,6 @@
       p.nutri.snack = raw.nutri.snack !== false;
       p.nutri.cook = raw.nutri.cook !== false;
       p.nutri.alcohol = (raw.nutri.alcohol === "non" || raw.nutri.alcohol === "souvent") ? raw.nutri.alcohol : "parfois";
-      // Coupe-circuit ASSUME du frein sur les charges. Absent ou vrai : le frein
-      // parle. Explicitement faux : il se tait. C'est un avertissement, pas une
-      // tutelle, et l'utilisateur doit pouvoir le desactiver.
-      p.nutri.frein = raw.nutri.frein !== false;
       p.nutri.supps = [];
       if (isArray(raw.nutri.supps)) {
         for (i = 0; i < raw.nutri.supps.length; i++) {
@@ -3683,7 +3694,10 @@
         if (co) lig.corr = co;
         np.push(lig);
       }
-      if (np.length) p.nutriPlan = np;
+      // UN TABLEAU VIDE EST UN PLAN VALIDE DEPUIS LA REDUCTION : c'est celui de
+      // qui ne prend aucun complement. `null` reste reserve a « jamais genere »,
+      // et isArray(null) etant faux, ce cas-la ne passe pas ici.
+      p.nutriPlan = np;
     }
 
     // Date de generation du plan. Les cases cochees du journal sont indexees par
@@ -3701,14 +3715,18 @@
     // ete lu, et un plan aurait change tout seul sans explication.
     p.nutriMigreLe = (typeof raw.nutriMigreLe === "string" && DATE_RE.test(raw.nutriMigreLe)) ? raw.nutriMigreLe : null;
 
-    // Trace du « je monte quand meme ». Elle achete NF_REPIT jours de paix : sans
-    // elle, l'appli retiendrait la meme proposition au rendu suivant, et le
-    // passage outre ne voudrait rien dire.
-    p.nutriFrein = null;
-    if (raw.nutriFrein && typeof raw.nutriFrein === "object") {
-      var ol = raw.nutriFrein.outreLe;
-      if (typeof ol === "string" && DATE_RE.test(ol)) p.nutriFrein = { outreLe: ol };
-    }
+    // DATE A LAQUELLE UNE IA A ECRIT CE PLAN. Meme forme que les deux dates
+    // au-dessus, et pour la meme raison : un champ non declare ici est efface au
+    // rechargement, et l'appli se remettrait a juger un plan de complements comme
+    // si c'etait une journee — le defaut trouve au navigateur en v1.13.0.
+    p.nutriPlanIA = (typeof raw.nutriPlanIA === "string" && DATE_RE.test(raw.nutriPlanIA)) ? raw.nutriPlanIA : null;
+
+    // LA CAUSE DE LA DERNIERE MIGRATION, dans un ensemble CLOS. Une chaine libre
+    // n'aurait aucun sens ici : cette valeur choisit un texte, et un texte
+    // introuvable laisserait la carte vide apres avoir change le plan de
+    // l'utilisateur.
+    p.nutriMigreCause = (raw.nutriMigreCause === "v141" || raw.nutriMigreCause === "reduction")
+                          ? raw.nutriMigreCause : null;
 
     // ------------------------------------------------------------------------
     // HISTORIQUE DES JOURS PREVUS. Champ hors `plan`, donc sa validation lui
@@ -4220,11 +4238,7 @@
     editDatePinned: false,
     showExercises: true,
     showNutrition: true,
-    nutriEdit: null,      // index de la prise en cours d'edition
-    nutriBrut: null,      // correction en composition, PAS encore enregistree
-    nutriPlus: false,     // choix aliment + quantite deplie
     suppFiche: null,      // identifiant du complement dont la fiche est ouverte
-    nutriFreinVu: false,  // le constat nutrition de la carte Analyse est deplie
     showProgPicker: false,
     chartMode: "both",
     chartSpan: "6mois",     // "6mois" | "tout" — largeur de l'echelle des dates
@@ -4244,6 +4258,16 @@
     iaTexte: "",          // reponse collee, gardee le temps de la session
     iaRes: null,          // propositions retenues et ecartees apres validation
     iaOccupe: false,      // un appel direct est en cours
+    // Pont IA NUTRITION. Trois champs plutot qu'un : le texte colle, sa lecture
+    // de FORME, et le JUGEMENT du plan. Les garder separes permet a la carte de
+    // dire « la forme est bonne, le contenu ne l'est pas » — le cas le plus
+    // frequent — au lieu d'un refus global qui n'apprend rien.
+    // Rien de tout ca n'est stocke : une reponse d'IA n'a pas a survivre a la
+    // session, et v1.14.0 n'ecrit nulle part.
+    iaNutriOuvert: false,
+    iaNutriTexte: "",
+    iaNutriRes: null,     // sortie de iaLireNutrition (la FORME)
+    iaNutriVal: null,     // sortie de nutriValiderPlanIA (le FOND)
     avanceOuvert: false,  // carte des reglages avances, repliee par defaut
     iaCleVisible: false,  // la cle est masquee tant qu'on ne la modifie pas
     iaAvisCle: ""         // avis rendu DANS la carte, la banniere du haut n'y est pas vue
@@ -5460,10 +5484,26 @@
       // Le bilan du plan est recalcule a l'affichage, jamais stocke : fige, il
       // deviendrait faux au premier changement de poids ou de correction, sans
       // prevenir. Meme regle que les pastilles chiffrees juste au-dessus.
-      var nbp = nutriBilanPlan(profile, NUTRITION);
-      if (nbp.texte) {
-        nutriListHtml += '<div class="nutri-bilan' + (nbp.niveau === 2 ? ' nutri-bilan-2' : '') +
-          '">' + esc(nbp.texte) + '</div>';
+      // ⚠️ LE JUGEMENT DU PLAN EST REBRANCHE, MAIS SEULEMENT POUR UN PLAN D'IA.
+      //
+      // Il avait ete debranche en v1.13.0 sur un defaut trouve au navigateur : la
+      // carte affichait « Le plan apporte 0 g de proteines pour 135 g vises » sous
+      // une liste ne contenant que des complements. L'appli reprochait a
+      // l'utilisateur un manque venu d'elle-meme.
+      //
+      // Un plan ecrit par une IA propose une JOURNEE ENTIERE. La comparaison
+      // retrouve donc exactement le sens qu'elle avait perdu, et se taire
+      // reviendrait a ne pas relire un plan venu de l'exterieur — l'inverse de ce
+      // que ce chantier existe pour faire.
+      //
+      // La condition est le DRAPEAU, pas la presence de lignes de repas : un plan
+      // v1.4.1 non migre en porte aussi, et il n'a pas ete relu par ce validateur.
+      if (profile && profile.nutriPlanIA) {
+        var nbp = nutriBilanPlan(profile, NUTRITION);
+        if (nbp.texte) {
+          nutriListHtml += '<div class="nutri-bilan' + (nbp.niveau === 2 ? ' nutri-bilan-2' : '') +
+            '">' + esc(nbp.texte) + '</div>';
+        }
       }
       if (nlCorr) {
         nutriListHtml += '<div class="nutri-remise">' +
@@ -5498,19 +5538,40 @@
       '<section class="card">' +
         '<div class="card-title">Nutrition ' + (isToday ? "du jour" : "du " + esc(shortDate(editKey))) + '</div>' +
         nutriMigreHtml() +
+        // D'OU VIENT CE PLAN, ET PAR OU EN SORTIR. Sans cette ligne, rien a
+        // l'ecran ne distingue un plan ecrit par une IA du plan de l'appli — et le
+        // retour arriere n'existerait nulle part.
+        (profile && profile.nutriPlanIA
+          ? '<div class="nutri-remise">' +
+              '<span>Plan écrit par une IA le ' + esc(shortDate(profile.nutriPlanIA)) + '.</span>' +
+              '<button type="button" class="btn-ghost" data-action="nutri-plan-appli">' +
+                'Revenir au plan de l\'appli</button>' +
+            '</div>'
+          : '') +
         nutriTargetsHtml +
-        '<button type="button" class="detail-toggle" data-action="toggle-nutrition" aria-expanded="' + (state.showNutrition ? "true" : "false") + '">' +
-          (state.showNutrition ? "Masquer" : "Voir les prises") + ' · ' +
-          (nutriVieux
-            ? (nutriVieuxN + ' coch\u00e9e' + (nutriVieuxN > 1 ? 's' : '') + ' sous un autre plan')
-            : (nutriDoneCount + '/' + NUTRITION.length + ' faites')) +
-          ' ' + (state.showNutrition ? "▲" : "▼") +
-        '</button>' +
-        nutriListHtml +
+        // LE CAS VIDE EST TRAITE, et il est frequent : c'est celui de quiconque ne
+        // coche aucun complement. Un bouton qui deplie une liste sans rien
+        // dedans est un bouton qui se moque de l'utilisateur ; on dit ce qu'il
+        // en est, et ou aller pour que ca change.
+        (NUTRITION.length
+          ? ('<button type="button" class="detail-toggle" data-action="toggle-nutrition" aria-expanded="' + (state.showNutrition ? "true" : "false") + '">' +
+              (state.showNutrition ? "Masquer" : "Voir les compléments") + ' · ' +
+              (nutriVieux
+                ? (nutriVieuxN + ' coch\u00e9e' + (nutriVieuxN > 1 ? 's' : '') + ' sous un autre plan')
+                : (nutriDoneCount + '/' + NUTRITION.length + ' pris')) +
+              ' ' + (state.showNutrition ? "▲" : "▼") +
+            '</button>' + nutriListHtml)
+          : '<div class="ob-note">Tu n\'as coché aucun complément, il n\'y a donc rien à suivre ici. ' +
+            'Tes deux repères chiffrés restent au-dessus. Pour en ajouter un, touche ' +
+            '<b>Nutrition</b> dans ta carte de profil.</div>') +
         (profile ? pnnsCarteHtml() : '') +
         (profile
           ? '<div class="nutri-disclaimer">Des repères estimés à partir de ton poids et de ton volume d\'entraînement, ' +
-            'pas une prescription : aucun métabolisme n\'est mesuré ici. Ajuste d\'après ce que fait la balance sur trois semaines.</div>'
+            'pas une prescription : aucun métabolisme n\'est mesuré ici. Ajuste d\'après ce que fait la balance sur trois semaines.' +
+            '<br><br><b>L\'appli ne compose plus tes repas.</b> Elle en était incapable sans écrire ' +
+            'régulièrement des assiettes que personne ne mange — c\'était mesuré, pas supposé. ' +
+            'Ce qu\'elle sait faire sans rien inventer, c\'est te dire quand et comment prendre ' +
+            'tes compléments, et te donner tes deux cibles.</div>'
           : '') +
       '</section>';
 
@@ -5811,31 +5872,6 @@
         '</div>' +
       '</section>';
 
-    // Le coupe-circuit du frein. Rendu SEULEMENT s'il y a un profil : sans
-    // profil il n'y a ni plan, ni cible, ni frein a couper.
-    var freinOn = !(profile && profile.nutri && profile.nutri.frein === false);
-    var freinHtml = profile
-      ? ('<section class="card">' +
-          '<div class="card-title">Nutrition et charges</div>' +
-          '<div class="chart-modes" role="group" aria-label="Frein sur les hausses de charge">' +
-            '<button type="button" class="chart-mode-btn' + (freinOn ? " chart-mode-active" : "") +
-              '" data-action="set-frein" data-frein="1" aria-pressed="' + (freinOn ? "true" : "false") + '">' +
-              'Tenir compte de la nutrition</button>' +
-            '<button type="button" class="chart-mode-btn' + (freinOn ? "" : " chart-mode-active") +
-              '" data-action="set-frein" data-frein="0" aria-pressed="' + (freinOn ? "false" : "true") + '">' +
-              'Ne pas en tenir compte</button>' +
-          '</div>' +
-          '<div class="field-hint" style="margin-top:8px">' +
-            (freinOn
-              ? 'Quand tes prises cochées restent bas sur deux semaines, les propositions de ' +
-                'monter en charge sont retenues, avec leur raison. Ce sont des cases cochées, ' +
-                'pas une assiette pesée : si tu manges bien sans cocher, coupe ce lien.'
-              : 'Les propositions de charge passent sans regarder la nutrition. Le constat ' +
-                'nutrition ne s\'affiche plus sur la carte Analyse.') +
-          '</div>' +
-        '</section>')
-      : '';
-
     var settingsHtml =
       '<section class="card settings-card">' +
         '<div class="card-title">Sauvegarde</div>' +
@@ -5872,7 +5908,7 @@
       '<div class="swipe-hint">' + (isAnnexe ? "← glisse vers la droite pour revenir à la séance" : "glisse vers la gauche pour le bilan →") + '</div>';
 
     var pageHtml = isAnnexe
-      ? (nutritionHtml + chartHtml + badgesSectionHtml + analyseHtml() + freinHtml + profileHtml +
+      ? (nutritionHtml + iaNutriHtml() + chartHtml + badgesSectionHtml + analyseHtml() + profileHtml +
          themeHtml + iaCleHtml() + settingsHtml + footerHtml)
       : (state.bravo === editKey
           ? bravoHtml(editKey, entry, program)
@@ -6200,6 +6236,54 @@
     return zonesDe(d).length > 0;
   }
 
+  // ===========================================================================
+  // LA DIRECTION SE LIT SUR L'ECRAN OU L'ON SAISIT LES DEUX POIDS
+  // ---------------------------------------------------------------------------
+  // Demande d'Olivier, mot pour mot : « quand je renseigne le poids avant et
+  // apres, c'est sur cet ecran que je dois voir si je suis en train de chercher
+  // une perte, une prise ou une tonification ».
+  //
+  // IL AVAIT RAISON, ET LE CAS LE PLUS PARLANT NE DISAIT RIEN DU TOUT. L'ecran
+  // « Poids » affichait bien une note quand les deux nombres different — « 7 kg
+  // a perdre, compte 12 a 20 semaines » —, mais il ne NOMMAIT jamais la
+  // direction, et a poids EGAL il n'affichait strictement rien : capture d'ecran
+  // a l'appui, 80 kg pour 80 kg rendait une carte muette. Le seul ecran ou l'on
+  // decide de son objectif ne disait pas quel objectif on venait de decrire.
+  //
+  // ET LA REGLE ELLE-MEME EST ECRITE. Ce n'est pas seulement « voila ta
+  // direction » : c'est « voila comment les trois se lisent », pour qu'on puisse
+  // corriger un nombre en sachant ce que ca change AVANT de passer a la suite.
+  //
+  // UNE SEULE SOURCE POUR LES DEUX ECRANS. La direction vient d'objectifSuggere,
+  // exactement comme l'etape « Objectif » qui suit. Deux calculs auraient
+  // diverge, et l'appli aurait annonce une perte a une etape et proposerait une
+  // prise a la suivante.
+  function obCapHtml(d) {
+    var sugg = objectifSuggere(d.startWeight, d.targetWeight);
+    var dit;
+    if (sugg === "perte") {
+      dit = "Tes deux nombres décrivent une <b>perte de poids</b> : garder le muscle " +
+            "pendant que la balance descend.";
+    } else if (sugg === "prise") {
+      dit = "Tes deux nombres décrivent une <b>prise de masse</b> : tu choisiras à l'étape " +
+            "suivante quelles zones musculaires développer.";
+    } else {
+      dit = "Tes deux nombres sont les mêmes : c'est une <b>tonification</b> — garder ce poids, " +
+            "gagner du muscle et perdre du gras. C'est un objectif à part entière, pas une absence d'objectif.";
+    }
+    return '<div class="ob-note">' + dit + '</div>' +
+      '<div class="ob-gear">' +
+        '<div class="field-label">Les trois parcours, et comment ils se lisent</div>' +
+        '<div class="field-hint">' +
+          'Objectif <b>plus bas</b> que ton poids d\'aujourd\'hui → perte de poids.<br>' +
+          'Objectif <b>plus haut</b> → prise de masse, et tu choisis les zones à développer.<br>' +
+          'Les deux à moins de ' + esc(frDec(OBJ_ECART_NUL)) + ' kg d\'écart → tonification à poids constant.<br>' +
+          'Tu confirmes à l\'étape suivante, et <b>c\'est ce choix qui construit ton programme</b> : ' +
+          'les séances ne sont pas les mêmes dans les trois cas.' +
+        '</div>' +
+      '</div>';
+  }
+
   function obObjectifHtml(d) {
     var sugg = objectifSuggere(d.startWeight, d.targetWeight);
     var ecart = Math.round(Math.abs(d.startWeight - d.targetWeight) * 10) / 10;
@@ -6366,7 +6450,7 @@
           '<label class="field-label" for="ob-target">Ton objectif (kg)</label>' +
           '<input id="ob-target" type="text" inputmode="decimal" autocomplete="off" class="weight-input"' +
             ' data-action="ob-target" placeholder="ex. 75" value="' + esc(frDec(d.targetWeight)) + '">' +
-        '</div>' + warn;
+        '</div>' + obCapHtml(d) + warn;
 
     } else if (etape === "Objectif") {
       body = obObjectifHtml(d);
@@ -6566,12 +6650,20 @@
         obBtn("ob-alcohol", "Souvent", ' data-v="souvent"', n.alcohol === "souvent");
       var suppBtns = "";
       for (i = 0; i < SUPPS.length; i++) {
-        var sp = SUPPS[i], onS = n.supps.indexOf(sp.v) >= 0;
+      var sp = SUPPS[i], onS = n.supps.indexOf(sp.v) >= 0;
+        // La barre proteinee est SUGGEREE quand une collation est declaree : c'est
+        // la seule ligne de complement qui reponde a une habitude plutot qu'a un
+        // objectif. Suggeree, pas cochee — une prise alimentaire de plus ne
+        // s'ajoute pas toute seule, c'est le defaut corrige en v1.9.0.
+        var sugg = (sp.v === "barreprot" && n.snack && !onS);
         suppBtns +=
           '<button type="button" class="ob-equip' + (onS ? " ob-equip-on" : "") + '"' +
             ' data-action="ob-supp" data-v="' + sp.v + '" aria-pressed="' + (onS ? "true" : "false") + '">' +
             '<span class="ob-equip-box" aria-hidden="true">' + (onS ? "✓" : "") + '</span>' +
-            '<span class="ob-equip-text"><b>' + esc(sp.label) + '</b><span>' + esc(sp.why) + '</span></span>' +
+            '<span class="ob-equip-text"><b>' + esc(sp.label) +
+              (sugg ? " · suggérée" : "") + '</b><span>' +
+              esc(sugg ? "Tu as déclaré une collation : c'est la prise qu'elle remplace le mieux quand tu n'es pas chez toi." : sp.why) +
+            '</span></span>' +
           '</button>';
       }
       body =
@@ -6699,6 +6791,11 @@
         (profile && profile.nutriPlan) ? profile.nutriPlan : null, buildNutrition(d));
       d.nutriPlan = repCorr.plan;
       d.nutriPlanLe = todayKey();
+      // LE PLAN REDEVIENT CELUI DE L'APPLI : le drapeau d'IA tombe. Sans cette
+      // ligne, la carte continuerait de juger un plan de complements comme une
+      // journee complete — le defaut trouve au navigateur en v1.13.0 — et la
+      // migration de reduction resterait desarmee sur ce profil pour toujours.
+      d.nutriPlanIA = null;
     }
     d.done = true;
     d.legacy = false;
@@ -7386,9 +7483,7 @@
     var aujourdhui = todayKey();
     var out = { exercices: [], propositions: [], globale: analyseGlobale(aujourdhui),
                 exploitables: 0, jeunes: 0, horsAnalyse: [],
-                frein: { niveau: "inconnu", freine: false, jours: 0, couv: null, cible: 0, repit: 0 },
-                fatigue: { basse: false, jours: [], sommeil: 0, force: 0, repit: 0 },
-                retenues: [] };
+                fatigue: { basse: false, jours: [], sommeil: 0, force: 0, repit: 0 } };
     if (!profile || !profile.plan) return out;
     var pk, i, ex, r, vus = {};
     for (pk in PROGRAM) {
@@ -7455,18 +7550,6 @@
       }
     }
 
-    out.frein = nutriBilan(aujourdhui);
-    if (out.frein.freine) {
-      var gardees = [], fi;
-      for (fi = 0; fi < out.propositions.length; fi++) {
-        if (out.propositions[fi].type === "charge" && out.propositions[fi].hausse) {
-          out.retenues.push(out.propositions[fi]);
-        } else {
-          gardees.push(out.propositions[fi]);
-        }
-      }
-      out.propositions = gardees;
-    }
     return out;
   }
 
@@ -7949,38 +8032,8 @@
     // --- Propositions ---------------------------------------------------------
     if (a.propositions.length) {
       corps += anaPropsBlocHtml(a.propositions);
-    } else if (!a.retenues.length) {
-      corps += '<div class="ob-note">Rien à changer pour l\'instant. Continue comme ça.</div>';
-    }
-
-    // --- Ce que la nutrition retient -------------------------------------------
-    // La proposition reste VISIBLE, avec sa raison : la cacher reviendrait a
-    // decider a la place de l'utilisateur au lieu de l'informer. Elle perd
-    // seulement son bouton « Appliquer », remplace par un « Monter quand meme »
-    // qui dit ce qu'il fait.
-    if (a.retenues.length) {
-      var rtn = "", rti;
-      for (rti = 0; rti < a.retenues.length; rti++) {
-        rtn +=
-          '<div class="ana-prop ana-prop-retenue">' +
-            '<div class="ana-prop-texte">' + esc(a.retenues[rti].texte) + '</div>' +
-            '<div class="ana-prop-raison">' + esc(a.retenues[rti].raison) + '</div>' +
-          '</div>';
-      }
-      corps +=
-        '<div class="ana-bloc">' +
-          '<div class="field-label">' + a.retenues.length + ' hausse de charge retenue' +
-            (a.retenues.length > 1 ? "s" : "") + '</div>' +
-          '<div class="ob-warn">' + esc(nutriFreinTexte(a.frein)) + '</div>' + rtn +
-          '<div class="ana-prop-actes">' +
-            '<button type="button" class="ana-non-btn" data-action="nutri-outre">Monter quand même</button>' +
-          '</div>' +
-        '</div>';
     } else {
-      // Rien n'est retenu : le constat nutrition se dit quand meme, quand il y a
-      // quelque chose d'honnete a dire. nutriFreinHtml rend "" le reste du temps
-      // — le silence est une reponse valable.
-      corps += nutriFreinHtml(a.frein, todayKey());
+      corps += '<div class="ob-note">Rien à changer pour l\'instant. Continue comme ça.</div>';
     }
 
     // --- Constat par exercice -------------------------------------------------
@@ -8500,6 +8553,590 @@
 
 
   // ===========================================================================
+  // PONT IA NUTRITION — IL LIT, IL JUGE, IL N'ECRIT RIEN
+  // ---------------------------------------------------------------------------
+  // POURQUOI CE BLOC EXISTE. L'appli a cessé de composer des repas en v1.13.0,
+  // sur une mesure : 9,87 % des prises servaient un laitage en trois pots ou
+  // plus, jusqu'à quatre pots de 500 g. La cause était architecturale et pas une
+  // liste de bogues — un assembleur de rôles qui met les grammes à l'échelle
+  // produit TOUTES les combinaisons qui satisfont les nombres, y compris celles
+  // que personne ne mange. Ce qui manque depuis, c'est le plan alimentaire
+  // lui-même. Une IA sait l'écrire. Elle ne sait pas se retenir.
+  //
+  // LE MANDAT VIT DANS LE VALIDATEUR, JAMAIS DANS LE PROMPT. C'est la règle du
+  // pont des charges et elle vaut ici davantage encore : un prompt se contourne,
+  // se dilue dans un contexte long, et n'existe plus du tout quand la réponse
+  // vient d'une conversation menée ailleurs. Le texte collé est une entrée
+  // HOSTILE, au même titre qu'un fichier importé.
+  //
+  // LES JETONS SONT DISJOINTS DE CEUX DU PONT DES CHARGES, dans les deux sens.
+  // « PRISE| » n'est pas lu par iaLire, « CHARGE| » n'est pas lu par
+  // iaLireNutrition, et les deux lecteurs comparent leur type par ÉGALITÉ
+  // STRICTE sur une chaîne réduite à [A-Z] — jamais par sous-chaîne, qui
+  // laisserait passer « CHAR » ou « PRIS ». Coller la réponse du mauvais pont
+  // dans l'autre zone ne produit donc pas un demi-plan : ça produit un refus.
+  //
+  // QUI ÉCRIT QUOI, ET C'EST LE PARTAGE QUI FAIT LA SÛRETÉ :
+  //   l'IA écrit    la COMPOSITION d'une prise, et ce qu'elle prétend y apporter ;
+  //   l'appli tient l'heure, le nom et la clé du créneau — donc le NOMBRE de
+  //                 prises, qui vient de ce que l'utilisateur a déclaré ;
+  //   l'appli tient aussi ses COMPLÉMENTS : leurs doses sont vérifiées et leurs
+  //                 fiches écrites, une IA n'a rien à y ajouter.
+  //
+  // CE QUE CETTE VERSION NE FAIT PAS : écrire. Rien n'est enregistré, et la
+  // carte le dit en toutes lettres. Le validateur expose `complet`, et c'est lui
+  // que le droit d'écrire consommera.
+  // ===========================================================================
+
+  // Le jeton de format. DISJOINT de CHARGE / VOLUME / REPOS / REMPLACER, et la
+  // chaîne de build refuse de publier si ça cessait d'être vrai.
+  var NUTRI_IA_TYPE = "PRISE";
+  // Le refus. « RIEN » appartient déjà au pont des charges (/^RIEN\b/i) : lui
+  // donner le même mot ferait qu'une seule réponse vaudrait pour les deux ponts,
+  // et un plan alimentaire annulerait des propositions de charge.
+  var NUTRI_IA_RIEN = "AUCUNPLAN";
+  // Même borne que le stockage. MAX_NUTRI_ITEMS est la borne FIXE de
+  // cleanProfile : accepter plus de lignes que ce que le stockage garde rendrait
+  // le plan faux dès le rechargement. On relit la constante, on n'en écrit pas
+  // une seconde qui divergerait.
+  var NUTRI_IA_MAX_LIGNES = MAX_NUTRI_ITEMS;
+
+  // TOLÉRANCE ENTRE CE QU'UNE LIGNE ANNONCE ET CE QUE L'APPLI Y LIT.
+  //
+  // Elle est LARGE à dessein. La table d'aliments donne des ordres de grandeur :
+  // elle ignore la cuisson, la marque, le gras de cuisson et la découpe. 8 g de
+  // protéines valent un œuf et demi, 150 kcal une cuillère d'huile — c'est le
+  // bruit de l'estimation, des deux côtés de la comparaison.
+  //
+  // Au-delà de 35 %, ce n'est plus un arrondi : la ligne décrit autre chose que
+  // ce qu'elle chiffre. Et une IA qui se trompe sur l'addition d'une assiette
+  // que l'appli sait lire ne mérite pas confiance sur celles qu'elle ne sait pas
+  // lire — c'est le seul endroit où son arithmétique est vérifiable, donc c'est
+  // là qu'on regarde.
+  var NUTRI_IA_ECART_PROT_G = 8;
+  var NUTRI_IA_ECART_PROT_PCT = 0.35;
+  var NUTRI_IA_ECART_KCAL = 150;
+  var NUTRI_IA_ECART_KCAL_PCT = 0.35;
+
+  // Plafond des calories ANNONCÉES, en multiple de la cible. Un plan à moitié
+  // au-dessus n'est pas un plan pour cette personne. Le plancher, lui, n'a pas
+  // besoin d'une constante de plus : nutritionTargets et nutriBilanPlan le
+  // portent déjà, et AV_KCAL_BRUIT dit depuis la v1.5.0 à partir de quel écart
+  // un total calorique cesse d'être du bruit.
+  var NUTRI_IA_KCAL_SUR_MAX = 1.5;
+
+  // LES CRÉNEAUX QU'UNE IA A LE DROIT DE REMPLIR, ET LA SEULE SOURCE DE CETTE
+  // LISTE. Le prompt les annonce, le validateur les exige, la carte les compte :
+  // trois lecteurs, une fonction. C'est la leçon de « REMPLACEMENTS AUTORISÉS »
+  // du pont des charges, où la liste envoyée et la liste revalidée sont déjà la
+  // même — deux listes auraient divergé à la première correction, et une
+  // proposition acceptée à la lecture serait écartée à la validation.
+  //
+  // Ils viennent de ce que l'utilisateur a DÉCLARÉ : nutriSlotsFor rend les
+  // créneaux d'une journée à n repas, avec ou sans petit-déjeuner, avec ou sans
+  // collation. Une IA ne décide donc pas combien de fois on mange.
+  function nutriCreneauxIA(prof) {
+    if (!prof) return [];
+    var keys = nutriSlotsFor(prof.nutri || {}), out = [], i, s;
+    for (i = 0; i < keys.length; i++) {
+      s = SLOT_BY_K[keys[i]];
+      if (s) out.push({ k: s.k, h: s.h, nom: s.nom });
+    }
+    return out;
+  }
+
+  // CE QUE L'APPLI SAIT DE L'ENTRAÎNEMENT RÉELLEMENT FAIT. Un plan écrit sur les
+  // séances DÉCLARÉES serait un plan pour quelqu'un d'autre : trois séances par
+  // semaine promises et une seule faite, ce n'est pas la même dépense, donc pas
+  // la même journée. C'est aussi la seule partie du bilan que l'utilisateur n'a
+  // pas saisie lui-même, donc la seule qu'il ne peut pas dire à l'IA sans nous.
+  function iaNutriSeancesTexte() {
+    var g = analyseGlobale(todayKey());
+    if (!g.seances) return "Aucune séance enregistrée pour l'instant.";
+    var txt = g.seances + " séance" + (g.seances > 1 ? "s" : "") + " enregistrée" +
+              (g.seances > 1 ? "s" : "");
+    if (g.semaines > 0) {
+      txt += " sur " + g.semaines + " semaine" + (g.semaines > 1 ? "s" : "") +
+             ", soit " + frDec(String(Math.round(g.seances / g.semaines * 10) / 10)) +
+             " par semaine";
+    }
+    return txt + ".";
+  }
+
+  // Ce que les compléments apportent DÉJÀ, retiré de la cible confiée à l'IA.
+  // Sans ça, un plan viserait 135 g de protéines aux repas quand la protéine en
+  // poudre et la barre en apportent 43 : la journée finirait au-dessus de
+  // 2,2 g/kg, et l'appli reprocherait ensuite à l'utilisateur un dépassement
+  // qu'elle a elle-même commandé. C'est exactement ce que faisait nutriRepartir
+  // avant la réduction, et c'est la raison pour laquelle nutriMacrosFixes en est
+  // sortie pour lui survivre.
+  //
+  // ON LIT buildNutrition, PAS UNE SECONDE TABLE : les lignes de complément que
+  // le prompt retire de la cible sont les lignes EXACTES que le validateur
+  // recollera au plan.
+  function iaNutriSupps(prof) {
+    var out = { lignes: [], prot: 0, kcal: 0 }, t;
+    try { out.lignes = buildNutrition(prof); } catch (e) { out.lignes = []; }
+    if (!isArray(out.lignes)) out.lignes = [];
+    t = nutriTotaux(out.lignes, -1);
+    out.prot = t.prot; out.kcal = t.kcal;
+    return out;
+  }
+
+  // ===========================================================================
+  // LE PROMPT
+  // ---------------------------------------------------------------------------
+  // Même contrat que celui du pont des charges : il est AFFICHÉ EN ENTIER avant
+  // d'être copié, parce que ces données partent chez un tiers et que c'est la
+  // condition pour décider en connaissance de cause.
+  //
+  // Il ne contient aucune donnée de santé qui ne soit déjà dans le bilan des
+  // charges : sexe, deux poids, séances, et ce que l'utilisateur a déclaré de ses
+  // habitudes alimentaires. Pas de prénom — il ne sert à rien à un modèle et
+  // c'est la seule donnée nominative du profil.
+  // ===========================================================================
+  function iaPromptNutrition() {
+    if (!profile || !profile.done) return "";
+    var L = [], cr = nutriCreneauxIA(profile), nt = nutritionTargets(profile);
+    var n = profile.nutri || {}, sup = iaNutriSupps(profile);
+    var i, jours = [], noms = [], disc = "Musculation";
+    var cibleP = Math.max(0, nt.prot - Math.round(sup.prot));
+    var cibleK = Math.max(0, nt.kcal - sup.kcal);
+
+    L.push("Tu es diététicien. Écris-moi le plan alimentaire d'UNE journée, en");
+    L.push("respectant strictement le cadre et le format décrits plus bas.");
+    L.push("");
+
+    L.push("== MON PROFIL ==");
+    L.push((profile.sex === "f" ? "Femme" : "Homme") + ", " + frDec(profile.startWeight) +
+           " kg, objectif " + frDec(profile.targetWeight) + " kg (" + objResume(profile) + ").");
+    for (i = 0; i < DISCIPLINES.length; i++) {
+      if (DISCIPLINES[i].v === profile.discipline) disc = DISCIPLINES[i].label;
+    }
+    for (i = 0; i < profile.days.length; i++) jours.push(DAY_LABELS[profile.days[i]]);
+    L.push(profile.days.length + " séances par semaine (" + jours.join(", ") + "), " +
+           profile.minutes + " min par séance, " + disc + ".");
+    L.push(iaNutriSeancesTexte());
+    L.push("");
+
+    L.push("== MES CIBLES, CALCULÉES PAR L'APPLI ==");
+    L.push(frNum(nt.kcal) + " kcal et " + nt.prot + " g de protéines pour la journée entière.");
+    if (sup.prot > 0 || sup.kcal > 0) {
+      L.push("Mes compléments en apportent déjà " + Math.round(sup.prot) + " g et " +
+             frNum(sup.kcal) + " kcal, et l'appli les ajoutera elle-même : tes lignes");
+      L.push("doivent donc totaliser environ " + frNum(cibleK) + " kcal et " + cibleP + " g.");
+    }
+    L.push("Ce sont des repères estimés à partir de mon poids et de mon volume");
+    L.push("d'entraînement, pas une mesure de métabolisme.");
+    L.push("");
+
+    L.push("== MES PRISES ALIMENTAIRES ==");
+    L.push("Je mange " + cr.length + " fois par jour, et pas autrement. Chaque prise porte");
+    L.push("sa clé entre crochets : c'est celle-là qu'il faut reprendre, telle quelle.");
+    for (i = 0; i < cr.length; i++) {
+      L.push("- " + cr[i].h + " " + cr[i].nom + " [" + cr[i].k + "]");
+    }
+    L.push("");
+
+    L.push("== CE QUE JE PEUX FAIRE ==");
+    L.push(n.cook === false
+             ? "Je ne cuisine pas : rien qui demande une casserole ou un four."
+             : "Je cuisine.");
+    L.push(n.alcohol === "non"
+             ? "Je ne bois pas d'alcool."
+             : (n.alcohol === "souvent"
+                  ? "Je bois de l'alcool souvent."
+                  : "Je bois de l'alcool de temps en temps."));
+    L.push("");
+
+    L.push("== MES COMPLÉMENTS, DÉJÀ DANS MON PLAN ==");
+    for (i = 0; i < SUPPS.length; i++) {
+      if ((n.supps || []).indexOf(SUPPS[i].v) >= 0) noms.push(SUPPS[i].label);
+    }
+    if (noms.length) {
+      L.push(noms.join(", ") + ".");
+      L.push("L'appli tient leurs doses et leurs horaires, et les remettra dans le plan");
+      L.push("elle-même. Ne les écris pas dans tes lignes.");
+    } else {
+      L.push("Aucun.");
+    }
+    L.push("");
+
+    L.push("== FORMAT DE REPONSE ==");
+    L.push("Une ligne par prise, exactement dans cette forme, séparateur barre verticale :");
+    L.push(NUTRI_IA_TYPE + IA_SEP + "clé" + IA_SEP + "ce que je mange, avec les quantités" +
+           IA_SEP + "grammes de protéines" + IA_SEP + "kcal");
+    L.push("");
+    L.push("Exemple :");
+    L.push(NUTRI_IA_TYPE + IA_SEP + "dej" + IA_SEP +
+           "1 filet de poulet (150 g) + 200 g de riz complet + brocolis" +
+           IA_SEP + "46" + IA_SEP + "620");
+    L.push("");
+    L.push("EXACTEMENT une ligne par clé ci-dessus, ni plus ni moins, et rien d'autre :");
+    L.push("l'appli refuse un plan qui saute une prise ou qui en ajoute une.");
+    L.push("Des grammes pour ce qui se pèse, des unités pour ce qui se compte : ni");
+    L.push("« 2 bols de flocons », ni « 110 g d'œufs ».");
+    L.push("Des portions qu'un adulte mange vraiment. L'appli relit chaque ligne et");
+    L.push("refuse tout ce qui atteint trois fois une portion courante : « 3 pizzas »");
+    L.push("ou « 500 g de kiwi » sont écartés, quelle que soit l'arithmétique.");
+    L.push("Les chiffres que tu annonces sont confrontés à ce que l'appli lit dans ta");
+    L.push("ligne : une ligne qui ne s'additionne pas est écartée elle aussi.");
+    L.push("Si tu ne peux pas répondre dans ce format, écris " + NUTRI_IA_RIEN + ".");
+
+    return L.join("\n");
+  }
+
+  // ===========================================================================
+  // LE LECTEUR
+  // ---------------------------------------------------------------------------
+  // Il ne juge PAS ce qu'il y a dans l'assiette : il ne fait que reconnaître la
+  // forme, résoudre la clé de créneau, et borner les champs. Le jugement vit dans
+  // nutriValiderPlanIA, en dessous. La séparation n'est pas cosmétique — elle
+  // permet au banc d'attaquer les deux séparément, et à la carte de dire « la
+  // forme est bonne, le contenu ne l'est pas », qui est le cas le plus fréquent.
+  //
+  // Rend { lignes, rejets, rien } :
+  //   lignes  les lignes de FORME valide, dans l'ordre du texte
+  //   rejets  les refus, COMPTÉS et destinés à être montrés
+  //   rien    le modèle a déclaré qu'il ne proposait pas de plan
+  // ===========================================================================
+  function iaLireNutrition(texte) {
+    var res = { lignes: [], rejets: [], rien: false };
+    if (!profile || !profile.done) {
+      res.rejets.push("Aucun profil actif : il n'y a pas de créneau à remplir.");
+      return res;
+    }
+    var cr = nutriCreneauxIA(profile);
+    if (!cr.length) {
+      res.rejets.push("Aucune prise alimentaire déclarée dans ton profil.");
+      return res;
+    }
+    var brut = String(texte || "");
+    if (!brut.replace(/^\s+|\s+$/g, "")) {
+      res.rejets.push("Rien n'a été collé.");
+      return res;
+    }
+
+    var lignes = brut.split(/\r?\n/), i, vus = {};
+    for (i = 0; i < lignes.length; i++) {
+      var ligne = lignes[i].replace(/^\s+|\s+$/g, "");
+      if (!ligne) continue;
+      // Les modèles encadrent volontiers leur réponse de ``` ou de puces.
+      ligne = ligne.replace(/^[`>\-\*\s]+/, "").replace(/`+$/, "");
+      if (ligne.toUpperCase().replace(/[^A-Z]/g, "").indexOf(NUTRI_IA_RIEN) === 0) {
+        res.rien = true; continue;
+      }
+      if (ligne.indexOf(IA_SEP) < 0) continue;      // de la prose, on l'ignore
+
+      var parts = ligne.split(IA_SEP), t;
+      for (t = 0; t < parts.length; t++) parts[t] = parts[t].replace(/^\s+|\s+$/g, "");
+      // ÉGALITÉ STRICTE, jamais une recherche de sous-chaîne : « PRIS » ou
+      // « PRISES » passeraient un test par indexOf, et « CHARGE » ne doit rien
+      // déclencher ici. C'est la même règle que iaLire, et c'est elle qui rend
+      // les deux ponts réellement disjoints.
+      if (parts[0].toUpperCase().replace(/[^A-Z]/g, "") !== NUTRI_IA_TYPE) continue;
+
+      // Le plafond ne se compte qu'une fois la ligne reconnue comme prise :
+      // sinon de la prose contenant une barre verticale déclencherait le
+      // message de surplus.
+      if (res.lignes.length >= NUTRI_IA_MAX_LIGNES) {
+        res.rejets.push("Plus de " + NUTRI_IA_MAX_LIGNES + " prises : le surplus est ignoré.");
+        break;
+      }
+
+      // La clé est réduite comme le fait cleanProfile sur le même champ : c'est
+      // une clé, pas du texte. Le libellé brut est gardé pour le message de
+      // refus — dire « « brunch » n'est pas un créneau » demande de citer ce qui
+      // a été écrit, pas sa forme nettoyée.
+      var brutCle = String(parts[1] || "").slice(0, 40);
+      var k = brutCle.toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 16);
+      var item = String(parts[2] || "").replace(/\s+/g, " ").replace(/^ | $/g, "");
+      var slot = null, ci;
+      for (ci = 0; ci < cr.length; ci++) { if (cr[ci].k === k) slot = cr[ci]; }
+      if (!slot) {
+        res.rejets.push("« " + brutCle + " » n'est pas une de mes prises : cette ligne est écartée.");
+        continue;
+      }
+      if (vus[k]) {
+        res.rejets.push("Deuxième ligne pour " + slot.nom + " : elle est écartée.");
+        continue;
+      }
+      if (item.length < 3) {
+        res.rejets.push("Rien de lisible à manger pour " + slot.nom + ".");
+        continue;
+      }
+      // ⚠️ UN CHAMP ABSENT ET UN CHAMP ILLISIBLE NE SONT PAS LA MEME CHOSE, et les
+      // confondre ouvrait un trou mesure au navigateur.
+      //
+      // cleanNumber rend null dans les DEUX cas : quand le champ est vide, et
+      // quand la valeur est hors bornes. Premiere ecriture : les deux devenaient
+      // « rien d'annonce ». Consequence — une ligne annoncant « 400 » grammes de
+      // proteines (au-dela de NUTRI_PROT_MAX) etait lue comme n'annoncant RIEN,
+      // donc elle echappait a la confrontation avec la lecture, ET elle annulait
+      // le total annonce du plan entier, donc le plafond calorique ne pouvait plus
+      // mordre. Un modele pouvait desarmer le controle du plan en ecrivant UN
+      // nombre absurde.
+      //
+      // Une valeur absente est un silence, et un silence est admis : l'appli met
+      // alors ses propres chiffres. Une valeur ECRITE mais impossible est une
+      // affirmation fausse, et elle se refuse — comme « Charge illisible » le fait
+      // depuis toujours dans le pont des charges.
+      var pBrut = String(parts[3] === undefined ? "" : parts[3]);
+      var kBrut = String(parts[4] === undefined ? "" : parts[4]);
+      var pNum = cleanNumber(pBrut, 0, NUTRI_PROT_MAX, 0);
+      var kNum = cleanNumber(kBrut, 0, NUTRI_KCAL_MAX, 0);
+      if (pBrut !== "" && pNum === null) {
+        res.rejets.push(slot.nom + " : protéines illisibles ou impossibles (« " +
+                        pBrut.slice(0, 20) + " »).");
+        continue;
+      }
+      if (kBrut !== "" && kNum === null) {
+        res.rejets.push(slot.nom + " : calories illisibles ou impossibles (« " +
+                        kBrut.slice(0, 20) + " »).");
+        continue;
+      }
+      vus[k] = true;
+      res.lignes.push({ k: k, nom: slot.nom, time: slot.h,
+                        item: item.slice(0, NUTRI_LIGNE_MAX),
+                        protIA: pNum, kcalIA: kNum });
+    }
+
+    if (!res.lignes.length && !res.rejets.length && !res.rien) {
+      res.rejets.push("Aucune ligne au format attendu n'a été trouvée.");
+    }
+    return res;
+  }
+
+  // ===========================================================================
+  // LE VALIDATEUR — UNE LIGNE
+  // ---------------------------------------------------------------------------
+  // Il s'adosse à alimentLireLibre, le moteur du lecteur de texte libre gardé en
+  // v1.12.0 pour ce jour précis. Ce moteur porte déjà tout ce qu'il faut :
+  //   - il lit une composition écrite en français et la chiffre ;
+  //   - il refuse de chiffrer PARTIELLEMENT (tout ou rien), donc il ne fait
+  //     jamais mentir un total vers le bas ;
+  //   - il porte le seuil d'excès depuis la v1.7.0 : trois fois la portion que la
+  //     table déclare elle-même, seuil ATTEINT et pas dépassé. « 3 pizzas » et
+  //     « 500 g de kiwi » sont les deux exemples nommés par le propriétaire de
+  //     l'appli, et ce sont exactement les deux que ce seuil attrape.
+  //
+  // Rend { ligne, refus, absurde, illisible }. `ligne` est prête à entrer dans un
+  // nutriPlan : elle porte l'heure, le nom et la clé de l'appli, la composition
+  // de l'IA, et des chiffres dont on sait d'où ils viennent.
+  // ===========================================================================
+  function nutriJugerLigneIA(src, slot) {
+    var out = { ligne: null, refus: "", absurde: false, illisible: false };
+    if (!src || !slot) { out.refus = "Ligne vide."; return out; }
+    var lu = alimentLireLibre(src.item);
+
+    // 1. L'ABSURDE D'ABORD, ET C'EST LE REFUS QUI NE SE DISCUTE PAS. « n'ignore
+    //    pas les imbécilités de nutrition que l'app pourrait imaginer » — la
+    //    consigne visait le générateur, elle vaut mot pour mot pour une IA, qui
+    //    en est capable avec beaucoup plus d'aplomb.
+    if (lu.exces) {
+      out.absurde = true;
+      out.refus = slot.nom + " : « " + src.item + " » fait " +
+        frDec(String(Math.round(lu.exces.fois * 10) / 10)) + " fois une portion de " +
+        lu.exces.al.nom + " (" + frNum(lu.exces.g) + " g). Ce n'est plus une grosse " +
+        "portion, c'est une aberration.";
+      return out;
+    }
+
+    // 2. UNE LIGNE QUE L'APPLI NE SAIT PAS LIRE N'EST PAS UNE LIGNE FAUSSE.
+    //    Sa table couvre cent vingt aliments : « blanquette de veau » n'y est
+    //    pas, et ce n'est pas une raison de refuser un dîner. On garde la ligne
+    //    et on laisse ses chiffres à NULL — la valeur qui dit « non chiffré », que
+    //    nutriTotaux compte comme une inconnue déclarée et jamais comme un zéro.
+    //
+    //    ON NE RECOPIE SURTOUT PAS LES CHIFFRES DE L'IA À LA PLACE. Ce serait
+    //    ouvrir exactement le tuyau que ce validateur existe pour fermer : un
+    //    modèle écrirait un texte que l'appli ne sait pas lire — ce qui est
+    //    facile — et ses chiffres entreraient sans contrôle dans le total de la
+    //    journée. Le nombre d'inconnues est COMPTÉ et montré.
+    if (!lu.reconnu) {
+      out.illisible = true;
+      out.ligne = { time: slot.h, nom: slot.nom, key: slot.k,
+                    item: src.item.slice(0, NUTRI_LIGNE_MAX),
+                    note: "quantités non vérifiées par l'appli",
+                    prot: null, kcal: null };
+      return out;
+    }
+
+    // 3. CE QUE LA LIGNE ANNONCE CONTRE CE QUE L'APPLI Y LIT. C'est le seul
+    //    endroit où l'arithmétique d'un modèle est vérifiable, donc c'est là
+    //    qu'on regarde. Une ligne qui ne s'additionne pas est écartée.
+    var tolP = Math.max(NUTRI_IA_ECART_PROT_G, lu.prot * NUTRI_IA_ECART_PROT_PCT);
+    var tolK = Math.max(NUTRI_IA_ECART_KCAL, lu.kcal * NUTRI_IA_ECART_KCAL_PCT);
+    if (src.protIA !== null && Math.abs(src.protIA - lu.prot) > tolP) {
+      out.refus = slot.nom + " : la ligne annonce " + frDec(String(src.protIA)) +
+        " g de protéines, l'appli en lit " + frDec(String(lu.prot)) +
+        ". L'écart est trop grand pour un arrondi.";
+      return out;
+    }
+    if (src.kcalIA !== null && Math.abs(src.kcalIA - lu.kcal) > tolK) {
+      out.refus = slot.nom + " : la ligne annonce " + frNum(src.kcalIA) +
+        " kcal, l'appli en lit " + frNum(lu.kcal) +
+        ". L'écart est trop grand pour un arrondi.";
+      return out;
+    }
+
+    // LES CHIFFRES RETENUS SONT CEUX DE L'APPLI, jamais ceux de l'IA. Ils sont
+    // déterministes : la même ligne relue depuis le stockage retrouve exactement
+    // la même valeur, donc rien ne dérive au rechargement. C'est la règle de
+    // cleanNutriCorr, au même endroit et pour la même raison.
+    out.ligne = { time: slot.h, nom: slot.nom, key: slot.k,
+                  item: src.item.slice(0, NUTRI_LIGNE_MAX),
+                  note: nutriNote(lu.prot, lu.kcal),
+                  prot: lu.prot, kcal: lu.kcal };
+    return out;
+  }
+
+  // ===========================================================================
+  // LE VALIDATEUR — LE PLAN ENTIER
+  // ---------------------------------------------------------------------------
+  // ON REPART DES CRÉNEAUX, JAMAIS DE L'ORDRE DU TEXTE, et c'est structurel :
+  // les cases cochées du journal sont indexées par POSITION dans le plan. Un
+  // modèle qui écrit le dîner avant le petit-déjeuner produirait un plan dont
+  // l'ordre dépend de sa rédaction, donc un plan dont les positions changent
+  // d'une réponse à l'autre. En balayant nutriCreneauxIA, l'ordre du plan est
+  // celui de la journée, toujours, et le nombre de lignes ne peut pas dépasser
+  // le nombre de prises déclarées.
+  //
+  // LE PLAN JUGÉ EST LE PLAN QUI SERAIT ÉCRIT : repas de l'IA, puis compléments
+  // de l'appli. Juger les seuls repas puis écrire autre chose ferait diverger le
+  // verdict et le contenu — le défaut exact corrigé en v1.9.0, où le bilan
+  // totalisait la proposition stockée pendant que l'écran montrait la journée.
+  //
+  // Rend { repas, plan, rejets, manquants, absurdes, illisibles, complet,
+  //        bilan, annonce, creneaux }.
+  // `complet` est la seule question qui décidera du droit d'écrire : un plan
+  // incomplet, ou dont une ligne a été refusée, n'est pas un plan.
+  // ===========================================================================
+  function nutriValiderPlanIA(prof, lu) {
+    var res = { repas: [], plan: [], rejets: [], manquants: [], absurdes: 0,
+                illisibles: 0, complet: false, bilan: null, annonce: null,
+                creneaux: 0 };
+    if (!prof || !prof.done) {
+      res.rejets.push("Aucun profil actif : il n'y a pas de créneau à remplir.");
+      return res;
+    }
+    var cr = nutriCreneauxIA(prof);
+    var src = (lu && isArray(lu.lignes)) ? lu.lignes : [];
+    var fmt = (lu && isArray(lu.rejets)) ? lu.rejets.length : 0;
+    var i, j, trouve, v;
+    res.creneaux = cr.length;
+
+    for (i = 0; i < cr.length; i++) {
+      trouve = null;
+      for (j = 0; j < src.length; j++) { if (src[j].k === cr[i].k) trouve = src[j]; }
+      if (!trouve) { res.manquants.push(cr[i].nom); continue; }
+      v = nutriJugerLigneIA(trouve, cr[i]);
+      if (v.refus) {
+        res.rejets.push(v.refus);
+        if (v.absurde) res.absurdes++;
+        continue;
+      }
+      if (v.illisible) res.illisibles++;
+      res.repas.push(v.ligne);
+    }
+
+    // UN PLAN QUI SAUTE UNE PRISE N'EST PAS UN PLAN, et le dire ne suffit pas :
+    // il faut le compter. C'est ce compte qui interdira l'écriture, parce qu'un
+    // plan plus court décalerait toutes les positions suivantes du journal.
+    if (res.manquants.length) {
+      res.rejets.push("Il manque " + res.manquants.length + " prise" +
+        (res.manquants.length > 1 ? "s" : "") + " sur " + cr.length + " : " +
+        res.manquants.join(", ") + ".");
+    }
+
+    var sup = iaNutriSupps(prof);
+    res.plan = res.repas.concat(sup.lignes);
+    if (res.plan.length > MAX_NUTRI_ITEMS) {
+      // Ne peut pas mordre aujourd'hui — sept créneaux au maximum et six
+      // compléments contre vingt places — mais la borne reste : cleanProfile
+      // tronque au même endroit, et un plan plus long que ce que le stockage
+      // garde serait faux dès le rechargement.
+      res.rejets.push("Le plan ferait " + res.plan.length + " lignes : le stockage " +
+                      "n'en garde que " + MAX_NUTRI_ITEMS + ".");
+    }
+
+    // CE QUE L'IA ANNONCE, ET C'EST ATTRIBUÉ À L'IA. On ne le présente jamais
+    // comme un chiffre de l'appli : il n'est vérifié par rien. Il n'est calculé
+    // que si TOUTES les lignes en portent un — un total partiel se lirait comme
+    // un total, et c'est le mode d'échec que ce fichier ferme partout ailleurs.
+    var aP = 0, aK = 0, tous = src.length > 0;
+    for (i = 0; i < src.length; i++) {
+      if (src[i].protIA === null || src[i].kcalIA === null) { tous = false; break; }
+      aP += src[i].protIA; aK += src[i].kcalIA;
+    }
+    if (tous) res.annonce = { prot: Math.round(aP), kcal: Math.round(aK) };
+
+    // LE PLANCHER MORD SUR L'ANNONCE, ET PAS SEULEMENT SUR CE QU'ON SAIT LIRE.
+    // C'est ce qui donne des dents au validateur sur un plan que la table ne
+    // couvre pas : un modèle qui annonce lui-même 1 100 kcal pour quelqu'un dont
+    // le plancher est à 1 600 a écrit un mauvais plan de son propre aveu, et
+    // aucune lecture d'aliment n'est nécessaire pour le voir.
+    //
+    // La marge de AV_KCAL_BRUIT n'est pas de la complaisance : nutritionTargets
+    // borne déjà la cible AU plancher, donc un plan qui vise correctement peut
+    // tomber quelques kilocalories dessous par arrondi. 100 kcal font 4 % d'une
+    // journée à 2 500 — la constante dit depuis la v1.5.0 que c'est sous la
+    // barre d'erreur du repère lui-même.
+    if (res.annonce) {
+      var nt = nutritionTargets(prof);
+      var plancher = (prof.sex === "f") ? 1400 : 1600;
+      if (res.annonce.kcal < plancher - AV_KCAL_BRUIT) {
+        res.rejets.push("L'IA annonce " + frNum(res.annonce.kcal) +
+          " kcal, sous le plancher de " + frNum(plancher) +
+          " kcal. En dessous, la fatigue arrive avant les résultats.");
+      } else if (res.annonce.kcal > nt.kcal * NUTRI_IA_KCAL_SUR_MAX) {
+        res.rejets.push("L'IA annonce " + frNum(res.annonce.kcal) + " kcal pour " +
+          frNum(nt.kcal) + " visées, soit plus de la moitié en trop.");
+      }
+    }
+
+    // LE PLAN EST COMPLET QUAND RIEN N'A ÉTÉ ÉCARTÉ, à aucun des deux étages.
+    // Les refus de FORME comptent autant que les refus de CONTENU : une ligne
+    // portant une clé inconnue veut dire que le modèle a proposé une prise de
+    // plus, et un plan de sept prises pour six déclarées est un plan dont le
+    // nombre de lignes diffère.
+    res.complet = !!(cr.length && !fmt && !res.rejets.length &&
+                     res.repas.length === cr.length &&
+                     res.plan.length <= MAX_NUTRI_ITEMS);
+
+    // LE JUGEMENT DU PLAN, PAR LA FONCTION GARDÉE POUR ÇA. nutriBilanPlan compare
+    // un plan à une cible QUOTIDIENNE : débranché de la carte en v1.13.0 parce
+    // qu'un plan de compléments ne prétendait plus couvrir une journée, il
+    // retrouve ici son sens exact — une journée complète est bien proposée.
+    //
+    // ⚠️ ET IL NE SE PRONONCE QUE SUR UN PLAN COMPLET. TROUVÉ AU NAVIGATEUR, PAR
+    // AUCUN BANC, ET C'EST LE MÊME DÉFAUT QUE CELUI DE LA v1.13.0 SOUS UN AUTRE
+    // VISAGE. Réponse hostile réelle : deux prises retenues sur cinq, trois lignes
+    // écartées — une pizza en triple, une clé inventée, des chiffres impossibles.
+    // La carte affichait alors, sous la liste des refus :
+    //
+    //     « Le plan apporte 94 g de protéines pour 140 g visés. »
+    //
+    // L'arithmétique était juste et la phrase fausse. Elle se lit comme un
+    // jugement DU PLAN, alors que le manque vient des lignes que l'appli venait
+    // elle-même de jeter : elle reprochait à l'utilisateur un trou qu'elle avait
+    // creusé. C'est mot pour mot le défaut mesuré et corrigé en v1.5.0, puis
+    // retrouvé en v1.13.0 — et deux fois sur trois c'est le navigateur qui l'a vu.
+    //
+    // LA RÈGLE EST DÉJÀ ÉCRITE AILLEURS DANS CE FICHIER, il suffisait de
+    // l'appliquer ici : nutriBilanPlan refuse de conclure dès qu'UNE prise n'est
+    // pas chiffrée (« on ne conclut pas »), et nutriTotaux compte les inconnues
+    // pour cette raison exacte. Un plan dont trois lignes ont été refusées n'est
+    // pas moins amputé qu'un plan dont trois lignes sont non chiffrées.
+    //
+    // On ne juge donc qu'un plan complet. Sur un plan incomplet, le message utile
+    // est la LISTE DES REFUS — c'est elle qui dit quoi redemander à l'IA — et un
+    // verdict de plus ne ferait que la brouiller.
+    res.bilan = res.complet ? nutriBilanPlan(prof, res.plan) : null;
+    return res;
+  }
+
+  // ===========================================================================
   // CARTE « DEMANDER A UNE IA »
   // ---------------------------------------------------------------------------
   // Deux zones de texte plutot qu'un bouton magique, et c'est un choix.
@@ -8618,12 +9255,345 @@
     return entete + corps + '</div>';
   }
 
+  // ===========================================================================
+  // CARTE « DEMANDER UN PLAN ALIMENTAIRE A UNE IA »
+  // ---------------------------------------------------------------------------
+  // Même montage que le pont des charges, et pour les mêmes raisons : le texte
+  // envoyé est MONTRÉ en entier avant d'être copié, l'entrée se fait par un champ
+  // où l'on colle et jamais par une lecture du presse-papier, et l'appel direct
+  // n'apparaît que si une clé est enregistrée — annoncer un bouton qu'on ne peut
+  // pas utiliser n'aide personne.
+  //
+  // CE QUE CETTE CARTE NE FAIT PAS, ET ELLE LE DIT : enregistrer. Un écran qui
+  // laisse croire qu'il a sauvegardé quelque chose est pire qu'un écran qui ne
+  // sauvegarde pas.
+  // ===========================================================================
+  function iaNutriHtml() {
+    if (!profile || !profile.done) return "";
+    var cr = nutriCreneauxIA(profile);
+    if (!cr.length) return "";
+
+    var entete =
+      '<section class="card">' +
+        '<div class="card-title">Plan alimentaire par une IA</div>' +
+        '<button type="button" class="detail-toggle" data-action="toggle-ia-nutri" aria-expanded="' +
+          (state.iaNutriOuvert ? "true" : "false") + '">' +
+          (state.iaNutriOuvert ? "Masquer ▲" : "Ouvrir le pont ▼") +
+        '</button>';
+
+    if (!state.iaNutriOuvert) {
+      return entete +
+        '<div class="ob-note">L\'appli ne compose plus de repas. Elle sait en revanche ' +
+          'préparer le bilan complet à envoyer à une IA, puis <b>relire ce qu\'elle ' +
+          'répond</b> : ' + cr.length + ' prises attendues, les portions aberrantes ' +
+          'écartées, les chiffres vérifiés.</div>' +
+        '</section>';
+    }
+
+    var avecCle = iaClePrete();
+    var corps =
+      '<div class="ia-note">' +
+        (avecCle
+          ? 'Une clé est enregistrée : l\'appli peut interroger ' + esc(iaFournisseur().label) +
+            ' directement. Le presse-papier reste disponible si tu préfères. '
+          : 'L\'appli ne se connecte à rien. Tu copies le texte ci-dessous, tu le colles ' +
+            'dans l\'appli IA de ton choix, puis tu rapportes sa réponse ici. ') +
+        '<b>Ce texte part vers un service tiers</b> : il est affiché en entier pour que ' +
+        'tu voies exactement ce que tu envoies.' +
+      '</div>';
+
+    if (avecCle) {
+      corps +=
+        '<button type="button" class="ia-btn ia-btn-fort" data-action="ia-nutri-demander"' +
+          (state.iaOccupe ? ' disabled' : '') + '>' +
+          (state.iaOccupe ? '… Demande en cours' : '✦ Demander à ' + esc(iaFournisseur().label)) +
+        '</button>' +
+        '<div class="ia-ou">ou passe par le presse-papier</div>';
+    }
+
+    corps +=
+      '<div class="ia-etape">1 · Copie ta demande</div>' +
+      '<textarea class="ia-zone" id="ia-nutri-prompt" readonly rows="7" ' +
+        'aria-label="Demande de plan alimentaire à copier">' + esc(iaPromptNutrition()) + '</textarea>' +
+      '<button type="button" class="ia-btn" data-action="ia-nutri-copier">⧉ Copier la demande</button>' +
+
+      '<div class="ia-etape">2 · Colle la réponse de l\'IA</div>' +
+      '<textarea class="ia-zone" id="ia-nutri-reponse" rows="5" ' +
+        'placeholder="Colle ici la réponse de l\'IA, telle quelle." ' +
+        'data-action="ia-nutri-saisie" aria-label="Réponse de l\'IA">' +
+        esc(state.iaNutriTexte || "") + '</textarea>' +
+      '<button type="button" class="ia-btn" data-action="ia-nutri-lire">✓ Relire et juger</button>';
+
+    corps += iaNutriResultatHtml();
+
+    corps +=
+      '<div class="nutri-disclaimer">' +
+        'Une IA se trompe avec aplomb, et sur la nourriture plus facilement ' +
+        'qu\'ailleurs : elle ne pèse rien, ne voit pas ce qu\'il y a dans ton ' +
+        'placard, et n\'a aucun moyen de vérifier ce qu\'elle avance. L\'appli ne ' +
+        's\'en remet donc pas à elle — chaque ligne est relue, chiffrée quand elle ' +
+        'peut l\'être, et écartée quand elle est aberrante. Ce qui reste n\'est pas ' +
+        'un avis médical.' +
+      '</div>';
+
+    return entete + corps + '</section>';
+  }
+
+  // Le résultat, séparé de la carte parce qu'il est la seule partie qui bouge, et
+  // parce que c'est lui que la v1.15.0 complétera d'un bouton d'enregistrement.
+  function iaNutriResultatHtml() {
+    if (!state.iaNutriRes) return "";
+    var r = state.iaNutriRes, v = state.iaNutriVal, out = "", k;
+
+    if (r.rien && !r.lignes.length) {
+      out += '<div class="ob-note">L\'IA n\'a pas proposé de plan.</div>';
+    }
+
+    if (v && v.repas.length) {
+      var lignes = "";
+      for (k = 0; k < v.repas.length; k++) {
+        lignes +=
+          '<div class="ana-prop ia-prop">' +
+            '<div class="ana-prop-texte">' + esc(v.repas[k].nom) + ' · ' +
+              esc(v.repas[k].time) + '</div>' +
+            '<div class="ana-prop-raison">' + esc(v.repas[k].item) + '</div>' +
+            '<div class="ana-prop-raison">' + esc(v.repas[k].note) + '</div>' +
+          '</div>';
+      }
+      out += '<div class="ia-resultat"><div class="field-label">' + v.repas.length +
+             ' prise' + (v.repas.length > 1 ? "s" : "") + ' retenue' +
+             (v.repas.length > 1 ? "s" : "") + ' sur ' + v.creneaux + '</div>' +
+             lignes + '</div>';
+    }
+
+    // LE JUGEMENT DE L'APPLI SUR LE PLAN. C'est le travail de cette version, et
+    // c'est nutriBilanPlan qui le rend — la fonction gardée en v1.13.0 pour ce
+    // jour-là. Le plan jugé inclut les compléments, comme celui qui serait écrit.
+    //
+    // ⚠️ IL N'Y A DE VERDICT QUE SUR UN PLAN COMPLET. Voir nutriValiderPlanIA :
+    // juger un plan dont l'appli vient de jeter trois lignes reviendrait à
+    // reprocher à l'utilisateur un trou qu'elle a creusé. Sur un plan incomplet on
+    // DIT qu'on ne juge pas, plutôt que de se taire — un silence se lirait comme
+    // une approbation.
+    if (v && v.bilan && v.bilan.texte) {
+      out += '<div class="nutri-bilan' + (v.bilan.niveau === 2 ? ' nutri-bilan-2' : '') +
+             '">' + esc(v.bilan.texte) + '</div>';
+    } else if (v && !v.complet && (v.repas.length || v.rejets.length)) {
+      out += '<div class="nutri-bilan">L\'appli ne juge pas ce plan : il est ' +
+             'incomplet. Les lignes écartées ci-dessous manquent à la journée, et ' +
+             'un total calculé sans elles ne voudrait rien dire. Redemande un plan ' +
+             'à l\'IA en lui rappelant ce qui a été refusé.</div>';
+    }
+
+    // CE QUE L'IA ANNONCE, NOMMÉ COMME TEL. Il n'est vérifié par rien, donc il
+    // n'est jamais présenté comme un chiffre de l'appli.
+    if (v && v.annonce) {
+      out += '<div class="ob-note">L\'IA annonce ' + frNum(v.annonce.kcal) +
+             ' kcal et ' + v.annonce.prot + ' g de protéines sur ses lignes' +
+             (v.illisibles
+               ? '. L\'appli n\'a pas su chiffrer ' + v.illisibles + ' prise' +
+                 (v.illisibles > 1 ? 's' : '') + ' : ces chiffres-là ne sont ' +
+                 'vérifiés par rien.'
+               : '.') +
+             '</div>';
+    }
+
+    // LES REJETS SONT MONTRÉS, des deux étages, avec leur compte. Les avaler
+    // laisserait croire que l'IA n'a rien proposé alors qu'elle a proposé quelque
+    // chose que le mandat refuse — et c'est précisément ce qu'il faut savoir.
+    var tous = [], i;
+    for (i = 0; i < r.rejets.length; i++) tous.push(r.rejets[i]);
+    if (v) { for (i = 0; i < v.rejets.length; i++) tous.push(v.rejets[i]); }
+    if (tous.length) {
+      var rj = "";
+      for (k = 0; k < tous.length; k++) rj += '<li>' + esc(tous[k]) + '</li>';
+      out +=
+        '<div class="ia-rejets">' +
+          '<div class="field-label">' + tous.length + ' écartée' +
+            (tous.length > 1 ? "s" : "") + '</div>' +
+          '<ul>' + rj + '</ul>' +
+          '<div class="ia-rejets-pourquoi">' +
+            (v && v.absurdes
+              ? 'Dont ' + v.absurdes + ' portion' + (v.absurdes > 1 ? 's' : '') +
+                ' aberrante' + (v.absurdes > 1 ? 's' : '') + '. '
+              : '') +
+            'L\'appli ne s\'en remet pas à l\'IA : chaque ligne est revérifiée contre ' +
+            'tes prises déclarées et contre sa table d\'aliments. Ce qui sort du cadre ' +
+            'est écarté ici.' +
+          '</div>' +
+        '</div>';
+    }
+
+    // ⚠️ v1.14.0 N'ENREGISTRE RIEN, ET C'EST ÉCRIT. Un écran qui laisse croire
+    // qu'il a sauvegardé est pire qu'un écran qui ne sauvegarde pas. Cette phrase
+    // est le seul endroit du fichier qui promet la suite, et c'est le bouton
+    // d'enregistrement de la v1.15.0 qui la remplacera.
+    // ⚠️ LE BOUTON N'APPARAIT QUE SI LE PLAN EST COMPLET, et ce n'est PAS la
+    // protection : nutriEcrirePlanIA recompte les lignes de son cote. Voir son
+    // commentaire — une protection qui ne vit que dans un gabarit protege l'ecran,
+    // pas les donnees.
+    if (v && v.complet) {
+      out +=
+        '<div class="ia-resultat">' +
+          '<button type="button" class="ia-btn ia-btn-fort" data-action="ia-nutri-ecrire">' +
+            '✓ Enregistrer ce plan' +
+          '</button>' +
+          '<div class="ia-rejets-pourquoi">Il <b>remplacera</b> ton plan actuel, comme ' +
+            'un rediagnostic. Tes séances, tes charges et tes pesées ne sont pas ' +
+            'touchées ; les cases de nutrition cochées avant aujourd\'hui ne se ' +
+            'liront plus en face de ce plan, et les journées concernées le diront. ' +
+            'Tu pourras revenir au plan de l\'appli d\'un bouton.</div>' +
+        '</div>';
+    } else if (v && (v.repas.length || v.rejets.length)) {
+      out += '<div class="ob-note"><b>Ce plan n\'est pas enregistrable</b> tant qu\'il ' +
+             'n\'est pas complet : il manque des prises, ou des lignes ont été ' +
+             'écartées. Les cases cochées de ton journal sont repérées par leur ' +
+             'POSITION dans le plan — un plan plus court les ferait toutes ' +
+             'désigner autre chose.</div>';
+    }
+
+    return out;
+  }
+
+  // ===========================================================================
+  // LE DROIT D'ECRIRE — ET SES DEUX VERROUS
+  // ---------------------------------------------------------------------------
+  // LE PLAN REMPLACE LE PLAN, COMME UN REDIAGNOSTIC. Arbitrage du propriétaire de
+  // l'appli : le plan de l'IA ne vit pas à côté dans sa propre carte, il prend la
+  // place du plan. Le mécanisme existe et il est testé depuis la v1.5.0 — on
+  // repose nutriPlanLe, nutriBilan écarte les journées antérieures au lieu de les
+  // mal lire, et render() les étiquette « Ce jour-là, ton plan n'était pas
+  // celui-ci ». On ne crée donc aucun mécanisme ici : on branche un cas de plus
+  // sur celui qu'un rediagnostic emprunte depuis toujours.
+  //
+  // ⚠️ PREMIER VERROU : ON RECOMPTE, ON NE CROIT PAS LE DRAPEAU. `complet` a été
+  // calculé au moment de la LECTURE. Entre la lecture et le clic, le profil a pu
+  // changer — une retouche du nombre de repas dans un autre onglet, un
+  // rediagnostic. Le nombre de lignes est donc recompté contre les créneaux
+  // déclarés À L'INSTANT d'écrire.
+  //
+  // ⚠️ SECOND VERROU : IL VIT DANS L'ÉCRITURE, PAS DANS LE GABARIT. Le bouton
+  // n'apparaît que si le plan est complet — et ça ne suffit pas. C'est la leçon
+  // payée sur nutriCorriger : le crayon était caché pour les lignes de complément,
+  // mais la fonction d'écriture ne testait jamais `n.supp`, et une correction
+  // « 3 portions de kebab » a fini écrite sur la ligne CRÉATINE. Une protection
+  // qui ne vit que dans un gabarit protège l'écran, pas les données.
+  //
+  // POURQUOI LE NOMBRE DE LIGNES EST LA RÈGLE. entry.nutri est indexé par
+  // POSITION : { "0": true, "3": true }. Un plan plus court ou plus long décale
+  // toutes les positions, et chaque journée passée parlerait d'autres lignes que
+  // celles qu'on avait montrées. Reposer nutriPlanLe protège l'HISTORIQUE ; ça ne
+  // rend pas acceptable un plan qui saute le dîner.
+  //
+  // Rend { ecrit, lignes, reportees, perdues, refus }. `refus` non vide veut dire
+  // que RIEN n'a été touché.
+  // ===========================================================================
+  function nutriEcrirePlanIA(v) {
+    var res = { ecrit: false, lignes: 0, reportees: 0, perdues: 0, refus: "" };
+    if (!profile || !profile.done) {
+      res.refus = "Aucun profil actif."; return res;
+    }
+    if (!v || !isArray(v.plan) || !v.plan.length) {
+      res.refus = "Il n'y a aucun plan à enregistrer."; return res;
+    }
+    if (!v.complet) {
+      res.refus = "Ce plan n'est pas complet : il n'est pas enregistrable."; return res;
+    }
+
+    // LE RECOMPTE. On compare les lignes de REPAS aux créneaux déclarés
+    // maintenant, pas à ceux d'il y a cinq minutes.
+    var cr = nutriCreneauxIA(profile), repas = 0, i;
+    for (i = 0; i < v.plan.length; i++) { if (!v.plan[i].supp) repas++; }
+    if (repas !== cr.length) {
+      res.refus = "Ce plan porte " + repas + " prise" + (repas > 1 ? "s" : "") +
+                  " pour " + cr.length + " déclarée" + (cr.length > 1 ? "s" : "") +
+                  " : tes repas ont changé depuis. Redemande un plan.";
+      return res;
+    }
+    if (v.plan.length > MAX_NUTRI_ITEMS) {
+      res.refus = "Ce plan ferait " + v.plan.length + " lignes : le stockage n'en " +
+                  "garde que " + MAX_NUTRI_ITEMS + ".";
+      return res;
+    }
+
+    // ON COPIE AVANT D'ÉCRIRE. `v.plan` vit dans state.iaNutriVal : le poser tel
+    // quel dans le profil ferait deux références sur le même tableau, et une
+    // correction écrite plus tard modifierait aussi ce que la carte du pont
+    // affiche encore.
+    var rep = nutriReporterCorrections(profile.nutriPlan, copieProfonde(v.plan));
+    profile.nutriPlan = rep.plan;
+    profile.nutriPlanLe = todayKey();
+    profile.nutriPlanIA = todayKey();
+    // CE N'EST PAS UNE MIGRATION. Le message de migration explique un changement
+    // que l'appli a décidé seule ; celui-ci a été demandé par un clic, et le
+    // signaler deux fois brouillerait les deux.
+    profile.nutriMigreLe = null;
+    profile.nutriMigreCause = null;
+
+    // `ecrit` n'est pas un détail : quand localStorage refuse — mode privé iOS,
+    // quota plein — le plan vit en mémoire et s'affiche, mais il sera perdu au
+    // rechargement. Même contrat que nutriCorriger : l'appelant le DIT.
+    res.ecrit = persistSettings();
+    applyProfile();
+    res.lignes = repas;
+    res.reportees = rep.reportees;
+    res.perdues = rep.perdues;
+    return res;
+  }
+
+  // --- LE RETOUR ARRIÈRE, GRATUIT ---------------------------------------------
+  // « La correction est rangée à côté de la proposition, jamais à sa place — c'est
+  // ce qui rend le retour arrière gratuit. » Ici la proposition est REMPLACÉE, donc
+  // le retour arrière ne peut pas être gratuit de la même façon : il faut le
+  // reconstruire. Il l'est quand même, parce que buildNutrition est déterministe —
+  // le plan de l'appli se refabrique à l'identique depuis le profil, sans avoir eu
+  // besoin de le garder.
+  //
+  // SANS CE CHEMIN, L'UTILISATEUR EST PIÉGÉ. Un plan d'IA qui ne lui plaît pas,
+  // écrit une fois, ne pourrait plus partir que par un rediagnostic complet — huit
+  // étapes, et un plan d'entraînement reconstruit au passage, ce qui remettrait à
+  // zéro les charges visées ajustées séance après séance. Le prix serait
+  // disproportionné.
+  function nutriRevenirPlanAppli() {
+    var res = { fait: false, reportees: 0, perdues: 0, ecrit: false };
+    if (!profile || !profile.done || !profile.nutriPlanIA) return res;
+    var neuf = null;
+    try { neuf = buildNutrition(profile); } catch (e) { neuf = null; }
+    if (!isArray(neuf)) return res;
+    var rep = nutriReporterCorrections(profile.nutriPlan, neuf);
+    profile.nutriPlan = rep.plan;
+    profile.nutriPlanLe = todayKey();
+    profile.nutriPlanIA = null;
+    res.ecrit = persistSettings();
+    applyProfile();
+    res.fait = true;
+    res.reportees = rep.reportees;
+    res.perdues = rep.perdues;
+    return res;
+  }
+
+  // LE RELECTEUR, EN UN SEUL EXEMPLAIRE. Deux gestes y arrivent — le collage et
+  // l'appel direct — et l'enchainement est le meme : on lit la FORME, puis on
+  // juge le FOND. Les ecrire deux fois aurait laisse l'un des deux oublier le
+  // validateur, et un plan non valide se serait affiche comme un plan valide.
+  function iaNutriRelire() {
+    state.iaNutriRes = iaLireNutrition(state.iaNutriTexte);
+    state.iaNutriVal = nutriValiderPlanIA(profile, state.iaNutriRes);
+  }
+
   // --- Copie vers le presse-papier -------------------------------------------
   // Trois chemins, du plus propre au plus rustique. Le dernier ne peut pas
   // echouer : le texte est deja affiche, il suffit de le selectionner.
   function iaCopier() {
-    var zone = document.getElementById("ia-prompt");
-    var texte = zone ? zone.value : iaPrompt();
+    iaCopierZone("ia-prompt", iaPrompt);
+  }
+
+  // `secours` est une FONCTION, pas une chaine : le texte de repli ne se calcule
+  // que si la zone a disparu du DOM. Le construire a chaque appel referait le
+  // bilan pour rien.
+  function iaCopierZone(id, secours) {
+    var zone = document.getElementById(id);
+    var texte = zone ? zone.value : secours();
 
     function replis() {
       try {
@@ -9955,6 +10925,13 @@
   // bloc peut donc etre injecte avant ou apres la table sans rien casser.
   // ===========================================================================
 
+  // ⚠️ CES TROIS DECLARATIONS SONT VIVANTES DEPUIS LA v1.14.0, ne les retire
+  // pas avec le reste du generateur. NUTRI_SLOTS, SLOT_BY_K et nutriSlotsFor
+  // (plus bas) sont la SEULE source des creneaux que le pont IA nutrition
+  // autorise : le prompt les annonce a l'IA, le validateur les exige d'elle.
+  // C'est ce qui garantit qu'une IA ne decide pas combien de fois on mange —
+  // ca vient de ce que l'utilisateur a declare, et de rien d'autre.
+  //
   // Les creneaux possibles d'une journee. `wk` et `wp` sont les poids de
   // repartition des calories et des proteines : un dejeuner porte plus qu'une
   // collation. `forme` decide de la COMPOSITION (assiette, laitage, en-cas),
@@ -10970,6 +11947,9 @@
   }
 
   // --- Repartition de la journee sur les creneaux ------------------------------
+  // ⚠️ VIVANTE DEPUIS LA v1.14.0 : nutriCreneauxIA l'appelle pour savoir quels
+  // creneaux le pont IA nutrition a le droit de remplir. Voir le commentaire de
+  // NUTRI_SLOTS.
   function nutriSlotsFor(n) {
     var meals = n.meals || 3, out = [], extras = ["pre", "soir"], i = 0, ordre = [], j;
     if (n.breakfast) out.push("pdj");
@@ -11372,8 +12352,9 @@
     }
     return '<div class="pnns-bloc">' +
         '<div class="field-label">Les repères de la semaine</div>' +
-        '<div class="field-hint" style="margin-bottom:10px">Ton plan les tient tout seul : ' +
-          'ils sont déjà dans les prises ci-dessus, tu n\'as rien à compter.</div>' +
+        '<div class="field-hint" style="margin-bottom:10px">L\'appli ne compose plus tes repas — ' +
+          'elle en était incapable sans écrire des assiettes que personne ne mange. Ces repères ' +
+          'sont là pour toi, et pour l\'IA si tu lui demandes un plan.</div>' +
         lignes +
         '<div class="nutri-disclaimer">Repères du Programme national nutrition santé ' +
           '(mangerbouger.fr, Santé publique France), relus à la source le 16 août 2026. ' +
@@ -11816,7 +12797,8 @@
   }
 
   // LE TEXTE D'UNE PRISE, un seul endroit. Il est partage par la composition du
-  // plan et par les remplacants (nutriRemplacants) : deux ecritures separees
+  // plan et, jusqu'a la v1.12.0, par les remplacants du tiroir de correction —
+  // deux ecritures separees
   // auraient diverge des la premiere retouche, et l'utilisateur aurait lu deux
   // grammaires differentes pour la meme assiette sur le meme ecran.
   function nutriTextePrise(r, s, cible, nomSlot) {
@@ -11908,7 +12890,7 @@
     // d'appoint voisines — « Collation 16h » et « Avant la seance 17h30 » —,
     // c'est-a-dire exactement les deux que le releve met en cause.
     //
-    // ctx peut manquer : nutriRemplacants compose une prise isolee, hors
+    // ctx peut manquer : le tiroir de correction composait une prise isolee, hors
     // journee. Sans contexte il n'y a pas de « prise precedente », et la regle
     // se tait — c'est le comportement d'avant, a l'identique.
     if (ctx) ctx.fruitNuPrec = priseEstFruitNu(r);
@@ -12114,9 +13096,9 @@
   }
 
   // --- Note chiffree d'une ligne ----------------------------------------------
-  // Un seul endroit ecrit cette phrase. Elle porte les deux nombres que le reste
-  // de l'appli relira : nutriProtDe() sait encore lire « 46 g prot » dans un plan
-  // v1.3.0 qui n'a pas de champ chiffre.
+  // Un seul endroit ecrit cette phrase, et elle porte les deux nombres que le
+  // reste de l'appli relira — y compris sur un plan d'avant la v1.5.0, ou aucune
+  // ligne n'a de champ chiffre et ou le total ne peut venir que de la note.
   function nutriNote(prot, kcal) {
     var t = "";
     if (prot > 0) t = Math.round(prot) + " g prot";
@@ -12155,123 +13137,27 @@
   var REMPL_KCAL_TENU = 0.97;
   var REMPL_KCAL_PAR_PROT = 15;   // repli d'ordre de grandeur pour un plan v1.3.0
 
-  function nutriRemplacants(ligne, prof, dateKey) {
-    var out = [], k = (ligne && ligne.key && has(SLOT_BY_K, ligne.key)) ? ligne.key : "dej";
-    var s = SLOT_BY_K[k];
-    var cook = !(prof && prof.nutri && prof.nutri.cook === false);
-    // La ligne peut deja porter une correction : c'est ELLE qu'on remplace, pas
-    // la proposition d'origine. Meme regle que partout ailleurs dans le fichier.
-    var e = nutriEffectif(ligne);
-    var cibleP = (typeof e.prot === "number" && e.prot > 0) ? e.prot : 25;
-    var cibleK = (typeof e.kcal === "number" && e.kcal > 0)
-      ? e.kcal : Math.round(cibleP * REMPL_KCAL_PAR_PROT);
-    var dejaLa = String(e.item || "");
-    // CE QUI EST DEJA DANS L'ASSIETTE, par identifiant. La premiere ecriture
-    // comparait le NOM de l'aliment au texte de la ligne : « dinde » se trouve
-    // dans « blanc de dinde », « saumon » dans « saumon fume », « œufs » dans
-    // « œufs durs ». Une ligne de blanc de dinde ecartait donc l'escalope de
-    // dinde des remplacants, c'est-a-dire une case perdue sur cinq, et pour une
-    // raison fausse. alimentDeTexte tranche par le libelle le PLUS LONG.
-    var dejaIds = alimentsDuTexte(dejaLa);
-    // Garniture tiree une fois, avec la graine de la JOURNEE AFFICHEE : le
-    // feculent et le legume proposes sont alors ceux qui accompagnent deja la
-    // prise a l'ecran, et le remplacement ne change que ce qu'on lui demande de
-    // changer. Sans date, on prend celle du jour.
-    var ctx = { cook: cook, dejaVu: {}, sans: null, seance: true,
-                dateKey: DATE_RE.test(String(dateKey)) ? dateKey : todayKey() };
-    // La garniture est tiree avec la cible calorique de la ligne remplacee : un
-    // remplacant doit etre servi comme la prise qu'il remplace, donc avec le
-    // meme vivier de feculents — sinon l'ecran proposerait des pates la ou il a
-    // ecrit des pommes de terre, sans qu'aucune regle ne l'explique.
-    var garn = choisirPourSlot(s, ctx, k, { kcal: cibleK, prot: cibleP });
-    var cand = alimCandidats("prot", s.motif, cook), i, a, c, r, ai, cible, txtR, tous = [];
 
-    for (i = 0; i < cand.length; i++) {
-      a = cand[i];
-      // Deja dans l'assiette : ce n'est pas un remplacant.
-      if (dejaIds.indexOf(a.id) >= 0) continue;
-      // La seconde source suit la garniture, jamais le candidat : proposer « du
-      // thon a la place du thon, avec du thon » n'aurait aucun sens, et une
-      // option calibree sans elle rendrait moins de proteines que la ligne
-      // qu'elle remplace — soit exactement ce que nutriAvis condamnerait.
-      c = { prot: a, leg: garn.leg, fec: garn.fec, gras: garn.gras,
-            fec2: garn.fec2, fruit: garn.fruit,
-            prot2: (garn.prot2 && garn.prot2.id !== a.id) ? garn.prot2 : null };
-      // Meme escalier d'ampleur que la journee (BOUCLE 2), et pour la meme
-      // raison : une prise qui vaut 900 kcal ne se sert pas en portions
-      // courantes. On s'arrete des qu'on tient la cible, on ne gonfle jamais
-      // une assiette qui la tenait deja.
-      r = null;
-      for (ai = 0; ai <= AMP_CRANS.length; ai++) {
-        cible = { prot: cibleP, kcal: cibleK, amp: ai === 0 ? 1 : AMP_CRANS[ai - 1] };
-        r = nutriAjuster(c, cible, s);
-        if (r.kcal >= cibleK * REMPL_KCAL_TENU) break;
-      }
-      txtR = nutriTextePrise(r, s, cible, s.nom);
-      // Second filet contre le remplacant identique. Le premier compare le NOM
-      // de l'aliment au texte de la ligne, et il laisse passer les cas ou les
-      // deux ne s'ecrivent pas pareil : la barre proteinee a pour nom « barres
-      // proteinees » et s'affiche « 1 barre proteinee » au singulier. Comparer
-      // le texte COMPOSE ne depend d'aucune regle d'accord.
-      if (txtR === dejaLa) continue;
-      tous.push({ item: txtR,
-                  note: nutriNote(Math.round(r.prot), Math.round(r.kcal)),
-                  prot: Math.round(r.prot), kcal: Math.round(r.kcal), id: a.id });
-    }
 
-    // ON NE PROPOSE PAS CE QU'ON SE CONDAMNERAIT A SOI-MEME. Le vivier d'un
-    // creneau n'a pas la meme granularite partout : a la collation, ou les
-    // sources vont de 13 a 22 g par portion servable, une cible a 20 g laisse
-    // des options a 14 — soit exactement les 30 % de perte a partir desquels
-    // nutriAvis passe en « Attention ». Les ecarter d'abord, c'est la meme
-    // regle que celle qui juge, appliquee AVANT d'afficher plutot qu'apres.
-    //
-    // Le second passage complete jusqu'a REMPL_MIN quand le vivier ne suffit
-    // pas : mieux vaut trois options dont une critiquable que deux options.
-    // L'avis, lui, continuera de le dire — il n'est pas court-circuite.
-    //
-    // L'INEGALITE EST STRICTE, et ce n'est pas un detail de style : nutriAvis
-    // declenche sur `rP <= -AV_PROT_GRAVE_PCT`, donc BORNE COMPRISE. Une option
-    // a exactement -30 % passait un filtre ecrit avec `>=` et se faisait
-    // condamner juste apres, par la meme constante. Les deux comparaisons
-    // doivent tomber du meme cote de la borne.
-    var seuil = cibleP * (1 - AV_PROT_GRAVE_PCT);
-    for (i = 0; i < tous.length && out.length < REMPL_MAX; i++) {
-      if (tous[i].prot > seuil) out.push(tous[i]);
-    }
-    for (i = 0; i < tous.length && out.length < REMPL_MIN; i++) {
-      if (tous[i].prot < seuil) out.push(tous[i]);
-    }
-    return out;
-  }
-
-  // La liste d'aliments proposee au choix, pour qui veut etre precis.
-  function nutriAlimentsPour(ligne) {
-    var s = ligne && ligne.key ? SLOT_BY_K[ligne.key] : null;
-    var motif = s ? s.motif : "repas";
-    var roles = ["prot", "fec", "fruit"], out = [], r, i, cand, a;
-    for (r = 0; r < roles.length; r++) {
-      cand = alimCandidats(roles[r], roles[r] === "fruit" ? "tout" : motif, true);
-      if (!cand.length && roles[r] === "fec") cand = alimCandidats("fec", "repas", true);
-      for (i = 0; i < cand.length; i++) {
-        a = cand[i];
-        out.push({ id: a.id, label: alimentLabel(a), portion: a.por, gr: a.gPor });
-      }
-    }
-    return out;
-  }
-
-  // Un aliment + un nombre de portions -> une ligne chiffree.
-  function nutriComposerLibre(alimId, portions, ligne) {
-    var a = aliment(alimId), ap, g;
-    if (!a) return null;
-    var np = portions > 0 ? portions : 1;
-    g = Math.round(np * a.nPor * a.gPor);
-    ap = alimentApport(a, g);
-    return { item: alimentTexte(a, g), note: nutriNote(ap.prot, ap.kcal),
-             prot: Math.round(ap.prot), kcal: ap.kcal };
-  }
-
+  // ===========================================================================
+  // CE BLOC EST CONSERVE DELIBEREMENT — NE PAS LE SUPPRIMER
+  // ---------------------------------------------------------------------------
+  // L'ECRAN qui l'appelait est parti en v1.12.0 : le tiroir de correction n'a
+  // plus d'objet quand l'appli ne propose plus de repas. Le MOTEUR, lui, reste,
+  // et il n'a temporairement AUCUN appelant vivant. C'est voulu.
+  //
+  // POURQUOI. alimentLireLibre sait lire un texte alimentaire et dire qu'il est
+  // aberrant — « 3 pizzas », « 500 g de kiwi ». C'est la seule piece de l'appli
+  // qui sache ca, et c'est elle qui deviendra le VALIDATEUR du plan ecrit par
+  // une IA en v1.14.0. Sans elle, l'appli enregistrerait ce qu'une IA a ecrit
+  // sans jamais le regarder : un tuyau, pas une application qui sait ce qu'elle
+  // propose.
+  //
+  // Un validateur sans appelant se fait supprimer par la premiere personne qui
+  // fait du menage. Ce commentaire est sa seule protection, avec test_c_libre —
+  // qui reste vert sans avoir ete touche par le retrait de l'ecran, et c'est
+  // precisement ce qui prouve que moteur et interface etaient bien separes.
+  // ===========================================================================
 
   // ===========================================================================
   // CORRECTION D'UNE PRISE, ET AVIS DE L'APPLI
@@ -12568,7 +13454,8 @@
     var kcal1 = corr ? corr.kcal : null;
 
     // `tete` : à sévérité ÉGALE, cette remarque passe devant les autres.
-    // L'écran n'affiche que les deux premiers points (voir nutriEditHtml) et le
+    // L'écran n'en affichait que les deux premiers points, du temps du tiroir de
+  // correction (retire en v1.12.0), et le
     // tri ne regardait que la sévérité : à égalité, c'est l'ordre d'écriture qui
     // décidait, donc les protéines (blocs 2 et 5) passaient toujours devant les
     // calories (bloc 6). Mesure sur 17 614 franchissements du plancher : la
@@ -12890,8 +13777,16 @@
     var out = { prot: 0, kcal: 0, cible: null, cibleKcal: null,
                 manqueProt: 0, inconnues: 0, corrigees: 0, niveau: AV_OK, texte: "",
                 points: [], niveauKcal: AV_OK, plafondProt: false };
-    if (!prof || !isArray(prof.nutriPlan)) return out;
-    var plan = isArray(liste) && liste.length ? liste : prof.nutriPlan;
+    if (!prof) return out;
+    // LA LISTE PEUT VENIR D'AILLEURS QUE DU PROFIL, et c'est tout l'interet de
+    // ce parametre depuis la v1.14.0 : le plan ecrit par une IA est juge AVANT
+    // d'etre accepte, donc avant d'exister dans le profil. Exiger
+    // prof.nutriPlan rendait un bilan vide — un validateur muet, qui a l'air
+    // d'approuver.
+    var plan = isArray(liste) && liste.length
+                 ? liste
+                 : (isArray(prof.nutriPlan) ? prof.nutriPlan : null);
+    if (!plan) return out;
     var t = nutriTotaux(plan, -1), i;
     out.prot = t.prot; out.kcal = t.kcal; out.inconnues = t.inconnues;
     for (i = 0; i < plan.length; i++) {
@@ -13110,7 +14005,8 @@
   //     visees, parce qu'aucune ligne de la v1.4.1 ne porte le champ `prot` ;
   //   - les lignes de complement ayant perdu leur champ `supp`, elles recevaient
   //     le CRAYON de correction au lieu du bouton de fiche ;
-  //   - et nutriRemplacants, ne trouvant aucune `key`, retombait sur le creneau
+  //   - et le fournisseur de remplacants du tiroir, ne trouvant aucune `key`,
+  //     retombait sur le creneau
   //     « dej » : la ligne « Créatine 3-5 g » se voyait proposer « 1 filet de
   //     poulet + épinards + semoule ».
   //
@@ -13135,6 +14031,31 @@
       if (plan[i] && plan[i].key) return false;
     }
     return true;
+  }
+
+  // LE SECOND DETECTEUR, ET SANS LUI PERSONNE NE RECEVRAIT LE PLAN REDUIT.
+  //
+  // nutriPlanAnterieur ci-dessus reconnait un plan ANCIEN a un seul signe :
+  // aucune de ses lignes ne porte de `key`. C'etait vrai des plans v1.4.1. Ca ne
+  // l'est plus d'AUCUN plan produit depuis la v1.5.0 — mesure sur les plans
+  // natifs : 17 472 lignes, ZERO sans `key`. Ce detecteur est donc
+  // structurellement aveugle a tout ce que l'appli a genere pendant huit
+  // versions, et il ne pouvait pas voir qu'un plan de repas doit maintenant
+  // etre remplace.
+  //
+  // LA PROPRIETE CHOISIE EST DISJOINTE DE LA PREMIERE, a dessein : « ce plan
+  // contient au moins une ligne qui n'est PAS un complement ». Elle est vraie de
+  // 100 % des plans d'avant la v1.13.0 — ils portent tous des repas — et fausse
+  // de 100 % des plans produits apres, qui n'ont que des complements. Elle est
+  // donc IDEMPOTENTE : une fois la migration faite, elle ne se redeclenche
+  // jamais, sans avoir besoin d'un drapeau de plus dans le profil.
+  function nutriPlanReduitAMigrer(plan) {
+    if (!isArray(plan) || !plan.length) return false;
+    var i;
+    for (i = 0; i < plan.length; i++) {
+      if (plan[i] && !plan[i].supp) return true;
+    }
+    return false;
   }
 
   // --- La recomposition -------------------------------------------------------
@@ -13175,8 +14096,33 @@
   // migrer OU quand la recomposition n'a pas abouti — auquel cas on ne touche a
   // RIEN et l'utilisateur retrouve exactement l'ecran d'avant.
   function nutriMigrerPlan(p) {
-    var res = { fait: false, reportees: 0, perdues: 0 };
-    if (!p || !nutriPlanAnterieur(p.nutriPlan)) return res;
+    var res = { fait: false, reportees: 0, perdues: 0, cause: "" };
+    if (!p) return res;
+
+    // ⚠️ DEUX CAUSES, UN SEUL MECANISME — ET LA SECONDE N'ETAIT APPELEE PAR
+    // PERSONNE JUSQU'ICI.
+    //
+    // nutriPlanReduitAMigrer a ete ecrit en v1.13.0, teste idempotent, et inscrit
+    // dans la liste des survivants de la chaine. Il ne figurait qu'UNE fois dans
+    // tout le livrable : sa propre definition. La reduction — trois versions de
+    // travail — n'atteignait donc aucun telephone deja installe.
+    //
+    // MESURE sur le profil reel, plan produit par la v1.10.0, relu par la
+    // v1.14.0 : 8 lignes dont 5 de REPAS, zero ligne sans `key`. Le premier
+    // detecteur repond FAUX (il ne reconnait qu'un plan v1.4.1), le second repond
+    // VRAI, et personne ne l'ecoutait. « Sandwich complet : 2 tranches de pain
+    // complet (80 g) + 2 oeufs (110 g) + 1 tasse de cafe » restait a l'ecran.
+    //
+    // ⚠️ ET LE GARDE-FOU `!p.nutriPlanIA` N'EST PAS UNE PRECAUTION : un plan ecrit
+    // par une IA porte des lignes de repas, donc le second detecteur repond VRAI
+    // sur lui. Sans cette condition, le plan que l'utilisateur vient d'enregistrer
+    // serait ECRASE par le plan de complements au lancement suivant, en silence.
+    // C'est pourquoi le cablage du detecteur et le droit d'ecrire vivent dans la
+    // meme version : separes, le premier detruit le second.
+    var cause = "";
+    if (nutriPlanAnterieur(p.nutriPlan)) cause = "v141";
+    else if (!p.nutriPlanIA && nutriPlanReduitAMigrer(p.nutriPlan)) cause = "reduction";
+    if (!cause) return res;
     // LE FILET. C'est le PREMIER lancement de la nouvelle version sur le
     // telephone de quelqu'un qui a ses vraies donnees dedans. buildNutrition
     // traverse la table d'aliments, le generateur de repas et les cibles ; un
@@ -13186,7 +14132,19 @@
     // vers le plan d'avant, qui s'affichait deja correctement.
     var neuf = null;
     try { neuf = buildNutrition(p); } catch (e) { neuf = null; }
-    if (!isArray(neuf) || !neuf.length) return res;
+    // ⚠️ UN PLAN VIDE N'EST PLUS UN ECHEC, ET LE REFUS D'AVANT OUVRAIT UN TROU.
+    //
+    // La garde testait `!neuf.length` : elle refusait de migrer vers un plan sans
+    // aucune ligne. C'etait juste jusqu'a la v1.12.0, ou un plan vide ne pouvait
+    // venir que d'une construction ratee. Depuis la reduction, un plan vide est le
+    // plan LEGITIME de qui ne coche aucun complement — cleanProfile le dit
+    // explicitement, et `null` reste seul a signifier « jamais genere ».
+    //
+    // Consequence du refus : quelqu'un qui a un plan de repas et aucun complement
+    // aurait garde ses assiettes pour toujours. Le detecteur aurait repondu vrai,
+    // et cette ligne l'aurait renvoye. On ne garde donc que la protection qui
+    // compte, celle contre l'exception et contre un retour d'un autre type.
+    if (!isArray(neuf)) return res;
     // On passe quand meme par le report : un plan v1.4.1 ne porte aucune
     // correction — le champ n'existait pas —, donc il n'y a normalement rien a
     // reporter. Mais c'est le mecanisme qui SAIT compter ce qui ne peut pas
@@ -13200,7 +14158,11 @@
     // seconde dit a l'utilisateur qu'il s'est passe quelque chose.
     p.nutriPlanLe = todayKey();
     p.nutriMigreLe = todayKey();
+    // La cause part avec les dates, et pour la meme raison : elle choisit le texte
+    // affiche, et un texte qui se trompe de cause est pire qu'un silence.
+    p.nutriMigreCause = cause;
     res.fait = true;
+    res.cause = cause;
     res.reportees = rep.reportees;
     res.perdues = rep.perdues;
     nutriMigreAEcrire = true;
@@ -13217,14 +14179,24 @@
   // rendu ». Un message qui disparait tout seul n'a pas ete lu, il a ete rate.
   function nutriMigreHtml() {
     if (!profile || !profile.nutriMigreLe) return "";
+    // DEUX CAUSES, DEUX PREMIERES PHRASES, ET UNE SEULE FIN. Ce qui differe est
+    // CE QUI A ETE RETIRE ; ce qui ne differe pas — et qui est le plus important
+    // des trois paragraphes — est ce qui N'A PAS BOUGE.
+    var quoi = profile.nutriMigreCause === "v141"
+      ? 'Ton plan datait d\'une version ancienne de l\'appli. Il a été refait avec ' +
+        'ce qu\'elle sait faire aujourd\'hui.'
+      : 'Ton plan contenait des repas que l\'appli composait elle-même. Elle ne le ' +
+        'fait plus : c\'était mesuré, pas supposé — elle écrivait régulièrement des ' +
+        'assiettes que personne ne mange.';
     return '<div class="nutri-migre">' +
       '<div class="nutri-migre-t">Ton plan nutrition a été refait</div>' +
+      '<div class="nutri-migre-c">' + quoi + '</div>' +
       '<div class="nutri-migre-c">' +
-        'La nouvelle version chiffre les repas : chaque prise indique maintenant ' +
-        'des <b>quantités d\'aliments</b>, ses protéines et ses calories. Tu peux ' +
-        '<b>corriger</b> une prise quand tu as mangé autre chose, et l\'appli te ' +
-        'donne son avis. Les compléments disent <b>quand, comment et avec quelle ' +
-        'quantité d\'eau</b> les prendre.' +
+        'Ce qui reste est ce qu\'elle sait faire sans rien inventer : <b>quand et ' +
+        'comment prendre tes compléments</b>, et <b>tes deux cibles chiffrées</b>. ' +
+        'Pour un vrai plan alimentaire, ouvre <b>Plan alimentaire par une IA</b> ' +
+        'juste en dessous : l\'appli prépare la demande, relit la réponse, écarte ' +
+        'les portions aberrantes, et enregistre le plan s\'il tient debout.' +
       '</div>' +
       '<div class="nutri-migre-c">' +
         '<b>Tes séances, tes charges et tes pesées ne sont pas touchées.</b> ' +
@@ -13256,175 +14228,6 @@
   // se fait abandonner en trois semaines.
   // ===========================================================================
 
-  // Etat d'edition. Hors profil, hors stockage : un editeur ouvert n'a aucune
-  // raison de survivre a un redemarrage, et le persister obligerait a le valider.
-  //   state.nutriEdit  index de la prise en cours d'edition, ou null
-  //   state.nutriBrut  correction en cours de composition, PAS encore enregistree
-  //                    { item, note, prot, kcal, src, alimId, portions }
-
-  function nutriEditOuvrir(i) {
-    state.nutriEdit = i;
-    var n = NUTRITION[i];
-    // On repart de la correction existante s'il y en a une : rouvrir l'editeur
-    // sur un champ vide donnerait l'impression d'avoir tout perdu.
-    var c = n && n.corr;
-    state.nutriBrut = c
-      ? { item: c.item, note: c.note, prot: c.prot, kcal: c.kcal, src: c.src, alimId: "", portions: 1 }
-      : { item: "", note: "", prot: null, kcal: null, src: "table", alimId: "", portions: 1 };
-    render();
-  }
-
-  function nutriEditFermer() { state.nutriEdit = null; state.nutriBrut = null; render(); }
-
-  // --- Rendu de l'editeur ----------------------------------------------------
-  // Attendu de la brique 1 (table d'aliments) :
-  //   nutriRemplacants(ligne, prof) -> [ { item, note, prot, kcal } ] , 3 a 5 max
-  //   nutriAlimentsPour(ligne)      -> [ { id, label, portion, gr, prot, kcal } ]
-  //   nutriComposer(alimId, portions, ligne) -> { item, note, prot, kcal }
-  // Si l'une manque, l'editeur degrade proprement vers le texte libre : ce bloc
-  // ne suppose jamais que la table existe.
-  function nutriEditHtml(i) {
-    var n = NUTRITION[i];
-    if (!n) return "";
-    var b = state.nutriBrut || {};
-    // typeof, et non « !== null » : un plan v1.3.0 encore en stockage n'a AUCUN
-    // champ chiffre, et n.prot y vaut undefined. Compare a null, undefined
-    // passait le test et la ligne affichait « undefined g prot ».
-    var base = { prot: typeof n.prot === "number" ? n.prot : null,
-                 kcal: typeof n.kcal === "number" ? n.kcal : null };
-    var avis = b.item ? nutriAvis(NUTRITION, i, cleanNutriCorr(b), profile) : null;
-
-    // 1 — la proposition d'origine, TOUJOURS visible. Sans elle, « revenir a la
-    // proposition » demande a l'utilisateur de se souvenir de ce qu'il remplace.
-    //
-    // « proposé » S'ACCORDAIT AVEC LE NOM DU CRENEAU, et trois des sept sont
-    // feminins : « Collation proposé », « Première prise proposé », « Fin
-    // d'après-midi proposé ». Un participe colle a un nom variable ne peut pas
-    // etre juste, et corriger l'accord demanderait de porter le genre de chaque
-    // creneau — une donnee de plus a tenir a jour pour un seul mot. On ecrit
-    // donc une tournure qui ne s'accorde avec RIEN : « proposition » est un
-    // nom, il ne prend le genre de personne. Meme geste que « seul aliment de
-    // la prise », qui a remplace « seule » pour la meme raison.
-    var h = '<div class="nutri-edit">' +
-      '<div class="nutri-edit-base">' + (n.nom ? esc(n.nom) + ' — proposition : ' : 'Proposition : ') +
-        '<b>' + esc(n.item) + '</b>' +
-        (base.prot !== null ? ' · ' + base.prot + ' g prot' : '') +
-        (base.kcal !== null ? ' · ' + frNum(base.kcal) + ' kcal' : '') + '</div>';
-
-    // 2 — les remplacants prets a l'emploi, calibres sur la MEME cible proteique.
-    var remp = (typeof nutriRemplacants === "function") ? nutriRemplacants(n, profile, state.editDate) : [];
-    if (remp.length) {
-      h += '<div class="field-label">À la place, j\'ai pris</div><div class="nutri-choix">';
-      for (var r = 0; r < remp.length; r++) {
-        h += '<button type="button" class="nutri-chip' +
-          (b.item === remp[r].item ? ' nutri-chip-on' : '') + '"' +
-          ' data-action="nutri-choisir" data-n="' + i + '" data-r="' + r + '">' +
-          esc(remp[r].item) + '<span class="nutri-chip-num">' + remp[r].prot + ' g</span></button>';
-      }
-      h += '</div>';
-    }
-
-    // 3 — aliment + quantite, pour qui veut etre precis.
-    var alims = (typeof nutriAlimentsPour === "function") ? nutriAlimentsPour(n) : [];
-    // Le nom de la fonction attendu par le prototype etait `nutriComposer` ;
-    // le generateur livre s'appelle nutriComposerLibre. On ne fait pas d'alias :
-    // un alias est un deuxieme nom pour la meme chose, et le jour ou l'un des
-    // deux bouge, l'autre reste et ment. Le delegue de clic appelle le vrai nom.
-    if (alims.length) {
-      h += '<button type="button" class="detail-toggle" data-action="nutri-plus" data-n="' + i + '">' +
-        (state.nutriPlus ? "Masquer les aliments ▲" : "Choisir un aliment et une quantité ▼") + '</button>';
-      if (state.nutriPlus) {
-        h += '<div class="nutri-choix">';
-        for (var a = 0; a < alims.length; a++) {
-          h += '<button type="button" class="nutri-chip' +
-            (b.alimId === alims[a].id ? ' nutri-chip-on' : '') + '"' +
-            ' data-action="nutri-aliment" data-n="' + i + '" data-a="' + esc(alims[a].id) + '">' +
-            esc(alims[a].label) + '</button>';
-        }
-        h += '</div>';
-        if (b.alimId) {
-          h += '<div class="nutri-choix">';
-          var qts = [0.5, 1, 1.5, 2, 3];
-          for (var q = 0; q < qts.length; q++) {
-            h += '<button type="button" class="nutri-chip' +
-              (b.portions === qts[q] ? ' nutri-chip-on' : '') + '"' +
-              ' data-action="nutri-portions" data-n="' + i + '" data-q="' + qts[q] + '">' +
-              frDec(String(qts[q])) + ' portion' + (qts[q] > 1 ? 's' : '') + '</button>';
-          }
-          h += '</div>';
-        }
-      }
-    }
-
-    // 4 — texte libre, et l'ordre de grandeur EN TAPES, pas au clavier.
-    h += '<div class="field">' +
-      '<label class="field-label" for="nutri-libre-' + i + '">Autre chose</label>' +
-      '<input id="nutri-libre-' + i + '" type="text" autocomplete="off" enterkeyhint="done"' +
-        ' maxlength="90" class="ia-input" data-action="nutri-libre" data-n="' + i + '"' +
-        ' placeholder="ex. kebab poulet" value="' + esc(b.src === "libre" ? b.item : "") + '">' +
-      '</div>';
-    if (b.src === "libre" && b.item) {
-      // CE QUE L'APPLI A COMPRIS, ÉCRIT NOIR SUR BLANC.
-      //
-      // Sans cette ligne, l'estimation est invisible : elle entre dans le bilan
-      // du jour sans que personne ne puisse la vérifier ni la corriger. Or
-      // c'est exactement le reproche d'origine — l'appli affirmait sans montrer
-      // ce sur quoi elle se fondait. Quand la lecture échoue, on le dit là où
-      // la question est posée, à côté du bouton « Je ne sais pas ».
-      //
-      // La classe est celle du bas de l'éditeur, déjà stylée et déjà mesurée par
-      // le banc de contraste : un texte secondaire de plus n'a pas besoin d'une
-      // couleur de plus.
-      var lu = alimentLireLibre(b.item);
-      h += '<div class="nutri-disclaimer">' + esc(lu.reconnu
-        ? "Compris : environ " + frDec(String(lu.prot)) + " g de protéines et " +
-          frNum(lu.kcal) + " kcal."
-        : "Je ne sais pas estimer ça. Sans ordre de grandeur, cette prise ne sera " +
-          "pas comptée dans ton bilan.") + '</div>';
-      h += '<div class="field-label">Combien de protéines, à peu près ?</div><div class="nutri-choix">';
-      var ordres = [ { v: 10, l: "Peu · ~10 g" }, { v: 25, l: "Moyen · ~25 g" },
-                     { v: 40, l: "Beaucoup · ~40 g" }, { v: null, l: "Je ne sais pas" } ];
-      for (var o = 0; o < ordres.length; o++) {
-        h += '<button type="button" class="nutri-chip' +
-          (b.prot === ordres[o].v ? ' nutri-chip-on' : '') + '"' +
-          ' data-action="nutri-ordre" data-n="' + i + '" data-p="' +
-          (ordres[o].v === null ? "" : ordres[o].v) + '">' + ordres[o].l + '</button>';
-      }
-      h += '</div>';
-    }
-
-    // 5 — L'AVIS, en direct, AVANT d'enregistrer. C'est le point : on ne
-    // decouvre pas le verdict apres coup, on le voit pendant qu'on choisit.
-    if (avis) {
-      h += '<div class="nutri-avis nutri-avis-' + avis.niveau + '">' + esc(avis.texte) + '</div>';
-      // L'aveu a une place FIXE, juste sous la phrase principale, et il ne
-      // concourt pas avec les remarques classées. Il ne se rend pas deux fois
-      // quand il EST déjà la phrase principale.
-      if (avis.aveu && avis.aveu !== avis.texte) {
-        h += '<div class="nutri-avis nutri-avis-' + AV_SAVOIR + '">' + esc(avis.aveu) + '</div>';
-      }
-      if (avis.points.length > 1) {
-        h += '<div class="nutri-avis-plus">' + esc(avis.points[1].texte) + '</div>';
-      }
-    }
-
-    // 6 — enregistrer / annuler / revenir. « Enregistrer quand meme » quand
-    // l'avis alerte : le mot dit qu'on a lu l'avertissement et qu'on passe
-    // outre. C'est SON assiette.
-    h += '<div class="nutri-edit-actions">' +
-      '<button type="button" class="btn-primary" data-action="nutri-valider" data-n="' + i + '"' +
-        (cleanNutriCorr(b) ? '' : ' disabled') + '>' +
-        (avis && avis.niveau === 2 ? "Enregistrer quand même" : "Enregistrer") + '</button>' +
-      (n.corr ? '<button type="button" class="btn-ghost" data-action="nutri-retablir" data-n="' + i + '">' +
-        'Revenir à la proposition</button>' : '') +
-      '<button type="button" class="btn-ghost" data-action="nutri-annuler">Annuler</button>' +
-      '</div>' +
-      '<div class="nutri-disclaimer">Des ordres de grandeur, pas une pesée. ' +
-        'L\'appli signale les écarts, elle ne décide pas de ton assiette.</div>' +
-      '</div>';
-    return h;
-  }
-
   // --- Gestes ----------------------------------------------------------------
   // Branches dans les delegues "click", "input" et "change" du livrable, a cote
   // de "toggle-nutri" : voir les tags nutri-gestes, nutri-input et nutri-change
@@ -13453,7 +14256,7 @@
     var estSupp = !!n.supp;
     var ouvertSupp = estSupp && state.suppFiche === n.supp;
     return '<li>' +
-      '<div class="nutrition-row' + (state.nutriEdit === i ? ' nutrition-row-edit' : '') + '">' +
+      '<div class="nutrition-row">' +
         '<button type="button" class="nutrition-item ' + (coche ? "nutrition-item-done" : "") + '"' +
           ' data-action="toggle-nutri" data-n="' + i + '" aria-pressed="' + (coche ? "true" : "false") + '">' +
           '<span class="nutrition-time">' + esc(n.time) + '</span>' +
@@ -13467,294 +14270,10 @@
           ? '<button type="button" class="nutri-edit-btn" data-action="supp-fiche" data-v="' + esc(n.supp) + '"' +
               ' aria-label="Fiche du complément" aria-expanded="' + (ouvertSupp ? "true" : "false") + '">' +
               '?</button>'
-          : '<button type="button" class="nutri-edit-btn" data-action="nutri-corriger" data-n="' + i + '"' +
-              ' aria-label="Corriger cette prise" aria-expanded="' + (state.nutriEdit === i ? "true" : "false") + '">' +
-              '✎</button>') +
+          : '') +
       '</div>' +
       (ouvertSupp ? suppFicheHtml(n.supp) : '') +
-      (state.nutriEdit === i ? nutriEditHtml(i) : '') +
     '</li>';
-  }
-
-  // ===========================================================================
-  // CE QUE LA NUTRITION DIT A L'ENTRAINEMENT
-  // ---------------------------------------------------------------------------
-  // Elle AVERTIT, elle RETIENT une hausse de charge, elle ne reecrit jamais le
-  // programme. Sous-manger empeche de reconstruire ; rien ne justifie pour
-  // autant de modifier un plan sur la foi de cases cochees.
-  //
-  // CE QU'ON MESURE VAUT CE QUE VAUT UN TAP. Ce ne sont pas des assiettes
-  // pesees. Toute la conception en tient compte : la mesure est biaisee VERS LE
-  // HAUT (un jour sans preuve est exclu, jamais compte comme zero), les seuils
-  // sont larges, et le message le dit a l'utilisateur au lieu de le lui cacher.
-  // ===========================================================================
-  var NF_FENETRE   = 14;   // jours mesures, hier inclus, AUJOURD'HUI EXCLU
-  var NF_MIN_DIRE  = 8;    // jours renseignes minimum pour ouvrir la bouche
-  var NF_MIN_FREIN = 10;   // ... et pour retenir une hausse : plus exigeant
-  var NF_MIN_BRAVO = 12;   // ... et pour feliciter : plus exigeant encore
-  var NF_BAS       = 70;   // % de la cible sous lequel l'apport est juge court
-  var NF_BON       = 90;   // % au-dessus duquel il est juge tenu
-  var NF_REPIT     = 14;   // jours de paix apres un « monter quand meme »
-  // % du PLAN coche au-dela duquel le manque n'est plus imputable a
-  // l'utilisateur. Mesure : sur 4 160 profils au journal PARFAIT — quatorze
-  // jours, toutes les cases cochees — 66 etaient freines et 220 s'entendaient
-  // dire « c'est un peu court », uniquement parce que le PLAN lui-meme ne
-  // proposait pas la cible (95 g proposes pour 145 vises a deux creneaux).
-  // L'appli reprochait a l'utilisateur un manque venu de sa propre proposition.
-  // 85 et non 100 : trois cases oubliees sur vingt restent « avoir suivi ».
-  var NF_PLAN_SUIVI = 85;
-
-  // Proteines portees par une ligne du plan.
-  //
-  // LA VALEUR EFFECTIVE, PAS SEULEMENT LA PROPOSITION. Un seul lecteur existait,
-  // et il lisait `l.prot` — ce que l'appli PROPOSE —, sans jamais appeler
-  // nutriEffectif, alors que tout le reste du fichier passe par elle pour lire la
-  // valeur reelle d'une ligne. Consequence mesuree : deux prises corrigees de 50 a
-  // 10 g et de 50 a 5 g, soit 95 g de moins declares par l'utilisateur de sa
-  // propre main, ne bougeaient PAS la couverture. Le geste meme que la refonte
-  // offre — dire ce qu'on a vraiment mange — ne changeait rien au bilan qui
-  // retient les charges.
-  //
-  // DEUX LECTEURS, ET LA DISTINCTION EST TOUT LE SUJET :
-  //   nutriProtDe       la valeur EFFECTIVE — ce que l'utilisateur DECLARE avoir
-  //                     mange. C'est elle qui alimente `protCoche`, donc la
-  //                     couverture, donc le frein.
-  //   nutriProtPropose  la valeur PROPOSEE — ce que l'appli a mis dans
-  //                     l'assiette, correction ignoree. C'est elle qui alimente
-  //                     `protPlan`, la reference de la porte « plan ».
-  //
-  // Les confondre casse l'une ou l'autre moitie du raisonnement. Router les deux
-  // par la proposition, c'est le defaut d'origine : deux prises corrigees de 50 a
-  // 10 g et de 50 a 5 g — 95 g de moins declares de sa propre main — ne bougeaient
-  // PAS la couverture, et le geste meme que la refonte offre ne changeait rien au
-  // bilan qui retient les charges. Router les deux par l'effectif ferait l'erreur
-  // inverse et non moins grave : la porte « plan » verrait le plan RETRECIR a
-  // mesure que l'utilisateur declare manger moins, et l'appli lui repondrait « le
-  // manque vient de la proposition, pas de toi » alors qu'il vient tout juste de
-  // dire le contraire.
-  var NF_PROT_RE = /(\d+)\s*g\s*prot/i;
-  // Le repli par expression reguliere n'est pas une coquetterie : les plans deja
-  // en stockage (v1.3.0 et v1.4.0) n'ont que la note « 35 g prot », et
-  // cleanProfile les laisse passer tels quels. Sans repli, tout utilisateur
-  // existant serait « sans donnee » jusqu'a ce qu'il refasse son diagnostic.
-  function nutriProtLu(prot, note) {
-    if (typeof prot === "number" && prot > 0 && prot < 200) return Math.round(prot);
-    var m = NF_PROT_RE.exec(String(note || ""));
-    return m ? parseInt(m[1], 10) : 0;
-  }
-  function nutriProtDe(l) {
-    if (!l) return 0;
-    var e = nutriEffectif(l);
-    return nutriProtLu(e.prot, e.note);
-  }
-  function nutriProtPropose(l) {
-    if (!l) return 0;
-    return nutriProtLu(l.prot, l.note);
-  }
-
-  function nutriBilan(aujourdhui) {
-    var b = { jours: 0, muets: 0, cible: 0, protPlan: 0, lignes: 0, protCoche: 0,
-              couv: null, couvPlan: null, niveau: "inconnu", freine: false, repit: 0 };
-    if (!profile || !profile.nutriPlan || !profile.nutriPlan.length) return b;
-    // Coupe-circuit assume : c'est un avertissement, pas une tutelle.
-    if (profile.nutri && profile.nutri.frein === false) { b.niveau = "coupe"; return b; }
-    b.cible = nutritionTargets(profile).prot;
-    if (!b.cible) return b;
-
-    // DEUX comptes, et non un. La ligne « proteine en poudre » porte prot = 23 :
-    // sans distinction, une journee ou SEULE la whey est cochee ouvrait une
-    // journee pleine a 16 % de couverture, et le frein retenait des hausses sur
-    // la foi de quatorze journees ou l'utilisateur n'avait rien dit de ce qu'il
-    // avait mange. Le garde-fou « une journee n'est renseignee que si une ligne
-    // CHIFFREE est cochee » etait contourne par les complements eux-memes.
-    // `somme` sert aux TOTAUX (la whey est de la vraie proteine, elle compte des
-    // lors que la journee est ouverte) ; `sommeRepas` sert a OUVRIR la journee
-    // (cocher un complement n'est pas dire ce qu'on a mange).
-    //
-    // CHAQUE JOURNEE A SA COMPOSITION. Depuis que le plan se recompose avec la
-    // date affichee, « ce que le plan proposait » n'est plus un nombre unique :
-    // il faut relire le plan DE CE JOUR-LA pour savoir ce que les cases cochees
-    // valaient. La structure, elle, ne bouge pas — c'est ce qui rend l'index
-    // encore lisible d'un jour a l'autre, et c'est tout ce dont on a besoin ici.
-    var n = Math.min(profile.nutriPlan.length, MAX_NUTRI_ITEMS), i, p, estSupp;
-    var planRef = nutriPlanDuJour(profile, aujourdhui);
-    for (i = 0; i < n; i++) {
-      p = nutriProtPropose(planRef[i]);
-      estSupp = !!(planRef[i] && planRef[i].supp);
-      if (p && !estSupp) b.lignes++;
-    }
-    // Un plan qui ne chiffre que zero ou une ligne de REPAS ne permet aucun
-    // ratio honnete : deux complements et un dejeuner ne font pas une journee
-    // lisible.
-    if (b.lignes < 2) return b;
-
-    // Les cases sont indexees par POSITION dans le plan. Un plan refait decale
-    // toutes les positions : les journees anterieures parlent d'autres lignes et
-    // ne sont pas lisibles. On les ecarte au lieu de les mal lire.
-    var depuis = (profile.nutriPlanLe && DATE_RE.test(profile.nutriPlanLe)) ? profile.nutriPlanLe : null;
-
-    var base = dateFromKey(aujourdhui), j, k, e, nu, somme, sommeRepas;
-    var planJ, protJ, protPlanCumul = 0, z;
-    for (j = 1; j <= NF_FENETRE; j++) {
-      k = fmt(addDays(base, -j));
-      if (depuis && k < depuis) continue;
-      e = state.log[k];
-      nu = (e && e.nutri) ? e.nutri : null;
-      if (!nu) { b.muets++; continue; }
-      planJ = nutriPlanDuJour(profile, k);
-      somme = 0; sommeRepas = 0; protJ = 0;
-      for (i = 0; i < n; i++) {
-        // `protJ` est ce que le PLAN proposait ce jour-la, `z` ce que
-        // l'utilisateur en a EFFECTIVEMENT declare. Les deux se ressemblent tant
-        // qu'aucune correction n'est posee, et c'est justement quand elles
-        // divergent que la distinction compte.
-        protJ += nutriProtPropose(planJ[i]);
-        z = nutriProtDe(planJ[i]);
-        if (nu[i]) { somme += z; if (!(planJ[i] && planJ[i].supp)) sommeRepas += z; }
-      }
-      // Zero proteine cochee et « appli pas ouverte » s'ecrivent pareil en
-      // stockage : aucune cle. Une journee ou seuls des complements sont coches
-      // n'est donc PAS une journee ou l'on sait qu'on a peu mange, c'est une
-      // journee sans preuve. On l'ecarte — et c'est la somme des lignes de
-      // REPAS qui en decide, jamais celle des complements.
-      if (!sommeRepas) { b.muets++; continue; }
-      b.jours++;
-      b.protCoche += somme;
-      protPlanCumul += protJ;
-    }
-
-    if (b.jours < NF_MIN_DIRE) { b.niveau = b.jours ? "maigre" : "inconnu"; return b; }
-    // MOYENNE, et non total : la composition varie d'un jour a l'autre, donc
-    // « ce que le plan propose » est desormais un chiffre moyen sur la fenetre.
-    // C'est ce chiffre-la que la porte « plan » affiche, et il doit rester
-    // comparable a une cible JOURNALIERE.
-    b.protPlan = Math.round(protPlanCumul / b.jours);
-    b.couv = Math.round(100 * b.protCoche / (b.jours * b.cible));
-    // DEUXIEME ratio, et c'est lui qui decide de retenir ou pas : la part de ce
-    // QU'ON LUI A PROPOSE que l'utilisateur a effectivement cochee. Sans lui,
-    // l'appli reproche a quelqu'un qui coche TOUT un manque qui vient du plan.
-    if (b.protPlan > 0) b.couvPlan = Math.round(100 * b.protCoche / (b.jours * b.protPlan));
-
-    if (b.couv < NF_BAS) b.niveau = "bas";
-    else if (b.couv < NF_BON) b.niveau = "court";
-    else b.niveau = (b.jours >= NF_MIN_BRAVO) ? "bon" : "correct";
-
-    // LE MANQUE N'EST PAS LE SIEN. Il a coche l'essentiel de ce que l'appli lui
-    // proposait ; si ca ne suffit pas, c'est la proposition qui est courte. On
-    // ne retient rien, et on le dit autrement — en montrant du doigt le plan,
-    // pas l'assiette. C'est la seule reponse honnete : retenir une hausse ici
-    // reviendrait a punir quelqu'un d'avoir suivi les consignes.
-    //
-    // ET LA PHRASE DOIT ETRE VRAIE. La porte s'ouvrait sans imposer
-    // protPlan < cible, et le message affirmait alors « le plan ne totalise QUE
-    // X g pour Y vises » avec X >= Y — une phrase fausse, sur la carte, tous les
-    // jours. Le cas existe : quelqu'un qui coche 90 % d'un plan qui couvre sa
-    // cible peut rester sous NF_BON. Sans cette condition d'entree, on lui
-    // montrait du doigt une proposition qui n'avait rien a se reprocher.
-    if ((b.niveau === "bas" || b.niveau === "court") &&
-        b.couvPlan !== null && b.couvPlan >= NF_PLAN_SUIVI &&
-        b.protPlan > 0 && b.protPlan < b.cible) {
-      b.niveau = "plan";
-      return b;
-    }
-
-    if (b.niveau !== "bas" || b.jours < NF_MIN_FREIN) return b;
-    var o = (profile.nutriFrein && profile.nutriFrein.outreLe) ? profile.nutriFrein.outreLe : null;
-    if (o && DATE_RE.test(o)) {
-      var reste = NF_REPIT - Math.floor((base - dateFromKey(o)) / 86400000);
-      if (reste > 0) { b.repit = reste; return b; }
-    }
-    b.freine = true;
-    return b;
-  }
-
-  // Le texte accroche a UNE proposition retenue. Court : il est lu sous un
-  // bouton, pas dans un article.
-  // TOUT CE BLOC EST ACCENTUE. Il ne l'etait pas, et c'etait visible : la carte
-  // Analyse affichait « Cote nutrition, tu as coche 115 % de ta cible de
-  // proteines » au milieu d'une appli entierement accentuee, tous les jours,
-  // sous les yeux de l'utilisateur. Le seul message deja correct etait celui de
-  // la porte « plan » ; les cinq autres s'alignent dessus.
-  function nutriFreinTexte(b) {
-    return "Retenu : sur les 14 derniers jours tu as coché " + b.couv +
-           " % de ta cible de protéines (" + b.cible + " g par jour), sur " + b.jours +
-           " jours renseignés. Monter la charge demande plus de reconstruction que " +
-           "ce que ces repères montrent. Ce sont des cases cochées, pas une assiette " +
-           "pesée : si tu manges bien sans cocher, ce chiffre ne veut rien dire.";
-  }
-
-  // Le bloc de constat de la carte Analyse. Rend "" quand il n'y a rien
-  // d'honnete a dire : le silence est une reponse valable.
-  // UNE FELICITATION QUOTIDIENNE N'EN EST PLUS UNE. Le message « bon » sortait
-  // tous les jours, mot pour mot, tant que la couverture tenait : au bout d'une
-  // semaine il fait partie du decor et ne se lit plus, et il occupe la place ou
-  // un vrai constat devrait pouvoir apparaitre. On l'espace a un jour sur
-  // NF_BRAVO_ESPACE. Le choix du jour est DETERMINISTE — le rang du jour depuis
-  // l'epoque, pas un tirage — pour deux raisons : il ne bouge pas entre deux
-  // rendus de la meme journee, et il ne demande RIEN au stockage. Marquer « deja
-  // felicite » dans le profil ferait ecrire en base pour un compliment.
-  var NF_BRAVO_ESPACE = 7;
-  function nutriBravoAujourdhui(aujourdhui) {
-    if (!DATE_RE.test(String(aujourdhui))) return true;
-    var d = dateFromKey(aujourdhui);
-    if (!d || isNaN(d.getTime())) return true;
-    return Math.floor(d.getTime() / 86400000) % NF_BRAVO_ESPACE === 0;
-  }
-
-  function nutriFreinHtml(b, aujourdhui) {
-    if (b.niveau === "coupe" || b.niveau === "inconnu") return "";
-    var t = "";
-    if (b.niveau === "maigre") {
-      t = "Trop peu de jours renseignés côté nutrition (" + b.jours + " sur 14) pour en " +
-          "tirer quoi que ce soit. Rien n'est retenu.";
-    } else if (b.niveau === "bas" && b.repit) {
-      // L'ANCIENNE TOURNURE — « tu es » suivi du participe « outrepasse » —
-      // s'accordait avec l'utilisateur, et le profil porte le sexe : servie a
-      // une utilisatrice, elle etait fausse. Plutot que
-      // d'accorder — ce qui obligerait a passer le sexe jusqu'ici pour un seul
-      // mot, et a recommencer au prochain participe — on tourne la phrase avec
-      // « as choisi de passer outre » : l'infinitif ne s'accorde avec personne.
-      t = "Tes repères nutrition sont bas (" + b.couv + " % de " + b.cible + " g de " +
-          "protéines sur " + b.jours + " jours). Tu as choisi de passer outre : les " +
-          "propositions de charge repassent normalement pendant encore " + b.repit + " jour" +
-          (b.repit > 1 ? "s" : "") + ".";
-    } else if (b.niveau === "bas") {
-      t = "Sur les 14 derniers jours tu as coché " + b.couv + " % de ta cible de protéines (" +
-          b.cible + " g par jour), sur " + b.jours + " jours renseignés. Manquer de " +
-          "protéines ne casse rien tout de suite, mais ça empêche de progresser : le " +
-          "muscle se reconstruit avec ce que tu manges. Tant que ça dure, les " +
-          "propositions de monter en charge sont retenues. Ce sont des cases cochées, " +
-          "pas une assiette pesée — si tu manges bien sans cocher, ce chiffre ne veut " +
-          "rien dire, et tu peux passer outre.";
-    } else if (b.niveau === "plan") {
-      // Garde-fou de RENDU, en plus de la condition d'entree de nutriBilan. La
-      // phrase qui suit affirme « le plan ne totalise QUE X pour Y vises » : elle
-      // n'a le droit de s'ecrire que si X < Y. Deux verrous pour une phrase, parce
-      // qu'une phrase fausse sur la carte coute plus cher qu'un `if` de trop.
-      if (!(b.protPlan > 0 && b.protPlan < b.cible)) return "";
-      // Le seul message qui ne parle PAS de l'utilisateur. Il a coche ce qu'on
-      // lui proposait ; c'est la proposition qui ne va pas au bout, et c'est
-      // elle qu'on lui montre. Rien n'est retenu — il n'y a rien a lui
-      // reprocher.
-      t = "Tu as coché " + b.couvPlan + " % de ce que ton plan propose, sur " + b.jours +
-          " jours : tu suis ce qui est écrit. Mais le plan lui-même ne totalise que " +
-          b.protPlan + " g de protéines pour " + b.cible + " g visés. Le manque vient de " +
-          "la proposition, pas de toi : refais le diagnostic, ou corrige une prise pour " +
-          "l'étoffer. Rien n'est retenu sur tes charges.";
-    } else if (b.niveau === "court") {
-      t = "Sur les 14 derniers jours tu as coché " + b.couv + " % de ta cible de protéines (" +
-          b.cible + " g par jour), sur " + b.jours + " jours renseignés. C'est un peu court " +
-          "sans être alarmant. Rien n'est retenu : c'est un repère, pas un verdict.";
-    } else if (b.niveau === "bon") {
-      if (!nutriBravoAujourdhui(aujourdhui)) return "";
-      t = "Côté nutrition, tu as coché " + b.couv + " % de ta cible de protéines sur " +
-          b.jours + " des 14 derniers jours. C'est régulier, et c'est ce qui rend une " +
-          "hausse de charge tenable. Ça reste des cases cochées, pas une assiette pesée.";
-    } else {
-      return "";   // « correct » : rien de faux, rien a dire non plus
-    }
-    return '<div class="ob-warn ' + (b.niveau === "bas" ? "" : "ob-warn-soft") +
-           '">' + esc(t) + '</div>';
   }
 
   function notify(text, kind) {
@@ -14121,37 +14640,11 @@
     if (action === "toggle-analyse") {
       state.showAnalyse = !state.showAnalyse; render();
 
-    } else if (action === "set-frein") {
-      if (profile && profile.nutri) {
-        var frv = t.getAttribute("data-frein") === "1";
-        if (profile.nutri.frein !== frv) {
-          profile.nutri.frein = frv;
-          if (!persistSettings()) {
-            notify("Réglage non enregistré : le stockage du téléphone refuse d'écrire.", "error");
-          } else {
-            notify(frv
-              ? "La nutrition peut de nouveau retenir une hausse de charge."
-              : "C'est toi qui décides : la nutrition ne retiendra plus aucune hausse.", "info");
-          }
-        }
-      }
-      render();
-
     } else if (action === "allege-annuler") {
       if (profile && profile.allegeLe) {
         profile.allegeLe = null;
         persistSettings();
         notify("Séance complète rétablie.", "info");
-      } else {
-        render();
-      }
-
-    } else if (action === "nutri-outre") {
-      if (profile) {
-        profile.nutriFrein = { outreLe: todayKey() };
-        persistSettings();
-        notify("C'est toi qui décides. Les propositions de charge repassent pendant " +
-               NF_REPIT + " jours.", "info");
       } else {
         render();
       }
@@ -14248,6 +14741,72 @@
 
     } else if (action === "toggle-ia") {
       state.iaOuvert = !state.iaOuvert; render();
+
+    } else if (action === "ia-nutri-ecrire") {
+      var vEcr = state.iaNutriVal;
+      var rEcr = nutriEcrirePlanIA(vEcr);
+      if (rEcr.refus) {
+        notify(rEcr.refus, "warn");
+      } else {
+        // La lecture affichee devient caduque : le plan qu'elle proposait EST
+        // maintenant le plan. La garder a l'ecran laisserait croire qu'il reste
+        // quelque chose a enregistrer, et un second clic reecrirait la meme chose
+        // en reposant nutriPlanLe une fois de plus — donc en re-declarant
+        // illisibles les journees d'hier, pour rien.
+        state.iaNutriRes = null; state.iaNutriVal = null; state.iaNutriTexte = "";
+        state.showNutrition = true;
+        notify(rEcr.ecrit
+                 ? ("Plan enregistr\u00e9 : " + rEcr.lignes + " prise" +
+                    (rEcr.lignes > 1 ? "s" : "") + "." + obPhraseCorrections(rEcr))
+                 : "Plan appliqu\u00e9 \u00e0 l'\u00e9cran, mais le stockage a refus\u00e9 : il sera perdu au rechargement.",
+               rEcr.ecrit ? "ok" : "warn");
+      }
+
+    } else if (action === "nutri-plan-appli") {
+      if (window.confirm("Revenir au plan de l'appli ?\n\nLe plan \u00e9crit par l'IA sera remplac\u00e9 par tes compl\u00e9ments et tes deux cibles.")) {
+        var rRet = nutriRevenirPlanAppli();
+        if (rRet.fait) {
+          notify(rRet.ecrit
+                   ? ("Retour au plan de l'appli." + obPhraseCorrections(rRet))
+                   : "Retour appliqu\u00e9 \u00e0 l'\u00e9cran, mais le stockage a refus\u00e9.",
+                 rRet.ecrit ? "ok" : "warn");
+        } else {
+          notify("Rien \u00e0 annuler : ce plan n'a pas \u00e9t\u00e9 \u00e9crit par une IA.", "info");
+        }
+      } else {
+        render();
+      }
+
+    } else if (action === "toggle-ia-nutri") {
+      state.iaNutriOuvert = !state.iaNutriOuvert; render();
+
+    } else if (action === "ia-nutri-copier") {
+      iaCopierZone("ia-nutri-prompt", iaPromptNutrition);
+
+    } else if (action === "ia-nutri-lire") {
+      // On relit la zone plutot que l'etat : sur iOS, un collage par le menu
+      // systeme ne declenche pas toujours l'evenement input, et l'etat serait
+      // reste vide alors que le texte est bien a l'ecran. Meme piege, meme
+      // parade que « ia-lire ».
+      var zoneNu = document.getElementById("ia-nutri-reponse");
+      if (zoneNu) state.iaNutriTexte = String(zoneNu.value).slice(0, 20000);
+      iaNutriRelire();
+      render();
+
+    } else if (action === "ia-nutri-demander") {
+      if (state.iaOccupe) return;          // pas deux appels en vol, pas deux factures
+      state.iaOccupe = true; render();
+      iaAppelDirect(iaPromptNutrition(), function (texte) {
+        state.iaOccupe = false;
+        state.iaNutriTexte = texte;
+        iaNutriRelire();
+        var nn = state.iaNutriVal ? state.iaNutriVal.repas.length : 0;
+        notify(nn ? (nn + " prise" + (nn > 1 ? "s" : "") + " \u00e0 examiner.")
+                  : "Aucune prise exploitable dans cette r\u00e9ponse.", nn ? "ok" : "info");
+      }, function (msg) {
+        state.iaOccupe = false;
+        notify(msg, "warn");
+      });
 
     } else if (action === "ia-copier") {
       iaCopier();
@@ -14390,17 +14949,15 @@
       render();
 
     } else if (action === "nutri-migre-vu") {
-      if (profile) { profile.nutriMigreLe = null; persistSettings(); }
+      if (profile) {
+        // Les deux partent ENSEMBLE. Garder la cause sans la date laisserait un
+        // champ qui ne decrit plus rien, et le prochain message de migration
+        // pourrait heriter d'une cause perimee.
+        profile.nutriMigreLe = null;
+        profile.nutriMigreCause = null;
+        persistSettings();
+      }
       render();
-
-    } else if (action === "nutri-corriger") {
-      nutriEditOuvrir(parseInt(t.getAttribute("data-n"), 10));
-
-    } else if (action === "nutri-annuler") {
-      nutriEditFermer();
-
-    } else if (action === "nutri-plus") {
-      state.nutriPlus = !state.nutriPlus; render();
 
     } else if (action === "supp-fiche") {
       // Une seule fiche ouverte a la fois, meme regle que state.openExo : sur un
@@ -14408,55 +14965,6 @@
       var sfv = t.getAttribute("data-v");
       state.suppFiche = (state.suppFiche === sfv) ? null : sfv;
       render();
-
-    } else if (action === "nutri-choisir") {
-      var ci = parseInt(t.getAttribute("data-n"), 10);
-      var cr = nutriRemplacants(NUTRITION[ci], profile, state.editDate)[parseInt(t.getAttribute("data-r"), 10)];
-      if (cr) state.nutriBrut = { item: cr.item, note: cr.note, prot: cr.prot, kcal: cr.kcal,
-                                  src: "table", alimId: "", portions: 1 };
-      render();
-
-    } else if (action === "nutri-aliment" || action === "nutri-portions") {
-      var ai = parseInt(t.getAttribute("data-n"), 10), bb = state.nutriBrut || {};
-      if (action === "nutri-aliment") bb.alimId = t.getAttribute("data-a");
-      else bb.portions = cleanNumber(t.getAttribute("data-q"), 0.5, 3, 1) || 1;
-      var comp = nutriComposerLibre(bb.alimId, bb.portions, NUTRITION[ai]);
-      if (comp) { bb.item = comp.item; bb.note = comp.note; bb.prot = comp.prot;
-                  bb.kcal = comp.kcal; bb.src = "table"; }
-      state.nutriBrut = bb; render();
-
-    } else if (action === "nutri-ordre") {
-      var op = t.getAttribute("data-p");
-      if (!state.nutriBrut) state.nutriBrut = { item: "", note: "", src: "libre", alimId: "", portions: 1 };
-      state.nutriBrut.prot = op === "" ? null : parseInt(op, 10);
-      // Sans calories declarees, la ligne reste non chiffree cote kcal : on
-      // n'invente pas un total qui servirait ensuite a freiner un entrainement.
-      state.nutriBrut.kcal = null;
-      state.nutriBrut.note = op === "" ? "non chiffré" : "~" + op + " g prot";
-      render();
-
-    } else if (action === "nutri-valider") {
-      var vi = parseInt(t.getAttribute("data-n"), 10);
-      var vres = nutriCorriger(vi, state.nutriBrut);
-      if (vres && vres.ecrit) {
-        nutriEditFermer();
-        notify("C'est noté. Le plan garde la proposition d'origine à côté.", "ok");
-      } else if (vres) {
-        // Ecrite a l'ecran, PAS en memoire. Le dire est la seule chose honnete :
-        // « c'est note » pour une correction qui disparaitra au rechargement est
-        // exactement le genre de mensonge qu'on ne decouvre que trop tard.
-        nutriEditFermer();
-        notify("Correction affichée, mais NON enregistrée : le stockage du téléphone " +
-               "refuse d'écrire. Elle disparaîtra au prochain démarrage.", "error");
-      } else {
-        notify("Écris d'abord ce que tu as pris.", "error");
-      }
-
-    } else if (action === "nutri-retablir") {
-      if (nutriRetablir(parseInt(t.getAttribute("data-n"), 10))) {
-        nutriEditFermer();
-        notify("Proposition d'origine rétablie.", "info");
-      }
 
     } else if (action === "nutri-tout-retablir") {
       var ktr = nutriToutRetablir();
@@ -14621,15 +15129,14 @@
       if (obnum !== null) obDraft()[action === "ob-weight" ? "startWeight" : "targetWeight"] = obnum;
       return;
     }
-    if (action === "nutri-libre") {
-      var bl = state.nutriBrut || { note: "", prot: null, portions: 1 };
-      bl.item = String(t.value).slice(0, 90); bl.src = "libre";
-      bl.kcal = null; bl.alimId = "";
-      state.nutriBrut = bl;
-      return;
-    }
     if (action === "ia-saisie") {
       state.iaTexte = String(t.value).slice(0, 20000);
+      return;
+    }
+    if (action === "ia-nutri-saisie") {
+      // Pas de render() ici : le clavier se refermerait a chaque frappe. Meme
+      // regle que « ia-saisie » juste au-dessus, et que set-weight plus bas.
+      state.iaNutriTexte = String(t.value).slice(0, 20000);
       return;
     }
     if (action === "ia-cle-saisie" || action === "ia-modele-saisie") {
@@ -14671,13 +15178,6 @@
     } else if (action === "ia-cle-saisie" || action === "ia-modele-saisie") {
       iaLireChamps();
       persistSettings();
-
-    } else if (action === "nutri-libre") {
-      var bc = state.nutriBrut || { note: "", prot: null, portions: 1 };
-      bc.item = String(t.value).slice(0, 90); bc.src = "libre";
-      bc.kcal = null; bc.alimId = "";
-      state.nutriBrut = bc;
-      render();
 
     } else if (action === "set-weight") {
       render();
