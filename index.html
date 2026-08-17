@@ -269,6 +269,35 @@
     letter-spacing: 0.5px; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;
   }
 
+  /* --- LE TITRE-BOUTON D'UNE CARTE REPLIABLE -----------------------------
+     Un <button> et pas un <div> cliquable : c'est un vrai controle, il doit
+     recevoir le focus au clavier et s'annoncer aux lecteurs d'ecran (aria-expanded).
+     Le titre passe en <span> a l'interieur — un <div> dans un <button> est
+     invalide, et le navigateur reconstruit alors le DOM autrement : le clic
+     partirait au mauvais endroit. Le meme piege a deja ete paye sur la ligne de
+     nutrition, ou un bouton se trouvait dans un bouton. */
+  .card-titre {
+    display: flex; align-items: center; gap: 8px; width: 100%;
+    background: transparent; border: 0; padding: 0; margin: 0;
+    text-align: left; min-height: 30px; cursor: pointer;
+  }
+  .card-titre .card-title { margin-bottom: 12px; flex: 1 1 auto; min-width: 0; }
+  /* LE RESUME SURVIT AU REPLIAGE, et c'est sa raison d'etre : il vit DANS le
+     bouton, donc le masquage des freres ne l'atteint pas. Sans lui, replier
+     « Reglages avances » cachait « Cle enregistree · Anthropic », qui est
+     precisement ce qu'on veut savoir sans deplier. */
+  .card-resume {
+    font-size: 12px; font-weight: 600; color:var(--texte-3);
+    margin-bottom: 12px; white-space: nowrap;
+  }
+  .card-chev { font-size: 12px; color:var(--texte-3); margin-bottom: 12px; }
+  /* Une carte repliee masque tout SAUF son titre-bouton. Le corps est bati puis
+     cache : voir l'en-tete de la chaine pour pourquoi ce n'est pas un oubli. */
+  .card-replie > *:not(.card-titre) { display: none; }
+  .card-replie .card-title,
+  .card-replie .card-resume,
+  .card-replie .card-chev { margin-bottom: 0; }
+
   .motivation-card { background:var(--fond-pill-2); border-color:var(--bord-discret); }
   .motivation-head { font-size: 20px; font-weight: 700; color:var(--texte); margin-bottom: 6px; }
   .motivation-sub { font-size: 15px; color:var(--texte-2); line-height: 1.5; }
@@ -943,12 +972,6 @@
   .ana-cible b { color:var(--accent-txt); font-family: ui-monospace, "SF Mono", monospace; font-size: 13px; }
 
   .nutri-disclaimer { font-size: 11px; color:var(--texte-3); margin-top: 10px; line-height: 1.45; }
-  .pnns-bloc { margin-top: 16px; border-top:1px solid var(--sep); padding-top: 14px; }
-  .pnns-ligne { padding: 7px 0; border-bottom:1px solid var(--sep); }
-  .pnns-tete { display:flex; justify-content:space-between; align-items:baseline; gap: 12px; }
-  .pnns-quoi { font-size: 13px; color:var(--texte); }
-  .pnns-val { font-size: 13px; color:var(--texte-1b); text-align:right; }
-  .pnns-detail { font-size: 11px; color:var(--texte-3); margin-top: 3px; line-height: 1.45; }
 </style>
 <script>
 /* Pose le theme avant le premier rendu, pour eviter le clignotement. */
@@ -987,8 +1010,8 @@
   //   MINEUR    : nouvelle fonctionnalité, ou changement de comportement visible
   //   CORRECTIF : correction de bug seule, aucun changement de comportement voulu
   // ===========================================================================
-  var APP_VERSION = "1.16.0";
-  var APP_BUILD = "17 août 2026 (1.16.0)";
+  var APP_VERSION = "1.19.0";
+  var APP_BUILD = "17 août 2026 (1.19.0)";
 
   // NE JAMAIS CHANGER sans écrire une migration : c'est ici que vit l'historique.
   var STORAGE_KEY = "olivier-coach-log";
@@ -4237,7 +4260,6 @@
     editDate: todayKey(),
     editDatePinned: false,
     showExercises: true,
-    showNutrition: true,
     suppFiche: null,      // identifiant du complement dont la fiche est ouverte
     showProgPicker: false,
     chartMode: "both",
@@ -4250,6 +4272,11 @@
     page: "seance",         // "seance" | "annexe"
     pageAnim: null,         // sens du glissement pour le prochain rendu
     storageOk: true,
+    // Cartes OUVERTES, par cle. `true` = ouverte. Une cle absente prend le defaut
+    // de CARTES_FERMEES, ce qui evite d'ecrire neuf entrees au premier lancement.
+    // Persiste : replier six cartes a chaque demarrage couterait plus cher que de
+    // faire defiler, donc un repliage qui ne survit pas ne sert a rien.
+    cartes: {},
     // Version SERVIE quand elle est strictement plus recente que celle qui tourne,
     // sinon null. Jamais persistee : c'est un fait du reseau, pas un reglage, et le
     // relire du stockage afficherait un bandeau perime au lancement suivant, avant
@@ -4261,8 +4288,14 @@
     logRaw: null,         // chaine EXACTE du journal en stockage, vue par cette instance
     notice: null,
     ob: null,             // brouillon du diagnostic, non persisté
-    showAnalyse: false,   // l'analyse ne se calcule qu'une fois la carte ouverte
     iaOuvert: false,      // pont IA replie par defaut : il ne sert pas tous les jours
+    // Les deux sous-blocs de l'assistant. Reintroduits en v1.19.0 : ils avaient
+    // disparu avec les bascules de carte en v1.17.0, mais ceux-la choisissent un
+    // OUTIL entre deux ponts, ils n'economisent pas du scroll. Non persistes : on
+    // ouvre l'outil dont on a besoin, on ne le retrouve pas ouvert trois jours plus
+    // tard.
+    iaNutriOuvert: false,
+    avanceOuvert: false,
     iaTexte: "",          // reponse collee, gardee le temps de la session
     iaRes: null,          // propositions retenues et ecartees apres validation
     iaOccupe: false,      // un appel direct est en cours
@@ -4272,11 +4305,9 @@
     // frequent — au lieu d'un refus global qui n'apprend rien.
     // Rien de tout ca n'est stocke : une reponse d'IA n'a pas a survivre a la
     // session, et v1.14.0 n'ecrit nulle part.
-    iaNutriOuvert: false,
     iaNutriTexte: "",
     iaNutriRes: null,     // sortie de iaLireNutrition (la FORME)
     iaNutriVal: null,     // sortie de nutriValiderPlanIA (le FOND)
-    avanceOuvert: false,  // carte des reglages avances, repliee par defaut
     iaCleVisible: false,  // la cle est masquee tant qu'on ne la modifie pas
     iaAvisCle: ""         // avis rendu DANS la carte, la banniere du haut n'y est pas vue
   };
@@ -4338,7 +4369,17 @@
       var s = JSON.parse(raw);
       if (!s || typeof s !== "object") return;
       if (typeof s.showExercises === "boolean") state.showExercises = s.showExercises;
-      if (typeof s.showNutrition === "boolean") state.showNutrition = s.showNutrition;
+      // VALIDE CONTRE LA LISTE CLOSE, cle par cle. Un objet relu tel quel
+      // laisserait entrer n'importe quel nom depuis un stockage abime, et
+      // carteOuverte lirait alors un etat que personne ne peut plus atteindre.
+      if (s.cartes && typeof s.cartes === "object") {
+        var sc;
+        for (sc = 0; sc < CARTES_REPLIABLES.length; sc++) {
+          if (typeof s.cartes[CARTES_REPLIABLES[sc]] === "boolean") {
+            state.cartes[CARTES_REPLIABLES[sc]] = s.cartes[CARTES_REPLIABLES[sc]];
+          }
+        }
+      }
       if (s.chartMode === "both" || s.chartMode === "raw" || s.chartMode === "trend") {
         state.chartMode = s.chartMode;
       }
@@ -4389,7 +4430,7 @@
     try {
       localStorage.setItem(SETTINGS_KEY, JSON.stringify({
         showExercises: state.showExercises,
-        showNutrition: state.showNutrition,
+        cartes: state.cartes,
         chartMode: state.chartMode,
         chartSpan: state.chartSpan,
         theme: state.theme,
@@ -4948,9 +4989,47 @@
       }
     }
     weightSeries.sort(function (a, b) { return a.date > b.date ? 1 : -1; });
-    var trend = weightTrend(weightSeries, TREND_WINDOW_DAYS);
-    var weightDelta = weightSeries.length
-      ? +(weightSeries[weightSeries.length - 1].poids - START_WEIGHT).toFixed(1) : 0;
+
+    // ⚠️ LE POIDS DECLARE AU DIAGNOSTIC OUVRE LA COURBE, DES LE PREMIER JOUR.
+    //
+    // Demande d'Olivier : « on avait dit qu'on voulait voir le graphe de pesee des
+    // le premier jour ». Ce n'etait pas le cas : la serie ne se construisait qu'a
+    // partir des pesees du JOURNAL, donc a zero pesee la carte n'existait pas du
+    // tout. Le cas « une seule pesee » avait ete repare en v1.9.1 parce que le
+    // silence se lisait comme une perte ; le cas ZERO avait ete oublie.
+    //
+    // ⚠️ CE POINT N'EST PAS UNE MESURE, ET TOUT LE RESTE EN DECOULE. C'est un poids
+    // donne de memoire pendant le diagnostic. Il est donc :
+    //   - dessine CREUX, jamais plein, et la carte dit ce qu'il est ;
+    //   - exclu de la TENDANCE — une tendance lissee est faite de mesures ;
+    //   - exclu du « depuis le depart » — sinon le premier jour annoncerait
+    //     « 0 kg depuis le depart », ce qui est exact et absurde.
+    //
+    // Il n'entre pas si une vraie pesee porte deja cette date ou une date plus
+    // ancienne : une mesure vaut toujours mieux qu'une declaration.
+    var peseesN = weightSeries.length;
+    var declareLe = (profile && typeof profile.createdAt === "string" &&
+                     DATE_RE.test(profile.createdAt)) ? profile.createdAt : null;
+    if (declareLe && START_WEIGHT > 0 &&
+        (!peseesN || weightSeries[0].date > declareLe)) {
+      weightSeries.unshift({ date: declareLe, poids: START_WEIGHT, declare: true });
+    }
+    var aDeclare = weightSeries.length > peseesN;
+
+    // LA TENDANCE NE VOIT QUE LES MESURES. C'est la reserve que j'avais posee sur
+    // ce chantier, et c'est ici qu'elle est neutralisee : un poids de memoire qui
+    // entrerait dans le lissage a sept jours deplacerait le premier segment de la
+    // tendance sans que rien ne le dise.
+    var mesures = [], wsi;
+    for (wsi = 0; wsi < weightSeries.length; wsi++) {
+      if (!weightSeries[wsi].declare) mesures.push(weightSeries[wsi]);
+    }
+    var trend = weightTrend(mesures, TREND_WINDOW_DAYS);
+
+    // LE DELTA SE COMPTE SUR LA DERNIERE MESURE, jamais sur le point declare.
+    var derniereMesure = mesures.length ? mesures[mesures.length - 1] : null;
+    var weightDelta = derniereMesure
+      ? +(derniereMesure.poids - START_WEIGHT).toFixed(1) : 0;
 
     // --- Séance du jour saisi ---
     // ALLÈGEMENT : une propriété de la JOURNÉE, pas du programme. Le plan n'est
@@ -5472,7 +5551,7 @@
       var nvK;
       for (nvK in entryNutri) { if (has(entryNutri, nvK) && entryNutri[nvK]) nutriVieuxN++; }
     }
-    if (state.showNutrition && nutriVieux) {
+    if (nutriVieux) {
       // Ni case, ni coche, ni bouton de correction : rien ici ne peut etre mis en
       // face de ce plan sans mentir. On dit ce qu'on sait, et on s'arrete la.
       nutriListHtml =
@@ -5482,7 +5561,7 @@
           : 'Aucune prise n\'y était cochée.') +
         ' Ces cases désignaient d\'autres lignes : elles ne se lisent plus en face du plan actuel, ' +
         'et rien n\'en est tiré.</div>';
-    } else if (state.showNutrition) {
+    } else {
       // Le rendu d'une ligne vit dans nutriLigneHtml, pas ici : c'est lui qui
       // sait qu'une ligne peut porter une correction, ou une fiche de
       // complement, et qui garantit qu'un plan v1.3.0 sans champ chiffre
@@ -5492,7 +5571,10 @@
         nlh += nutriLigneHtml(NUTRITION[nli], nli, !!entryNutri[nli]);
         if (NUTRITION[nli] && NUTRITION[nli].corr) nlCorr++;
       }
-      nutriListHtml = '<ul class="nutrition-list">' + nlh + '</ul>';
+      nutriListHtml =
+        '<div class="field-hint">Touche une ligne quand tu as pris ton complément : ' +
+          'elle se coche, et la journée s\'en souvient.</div>' +
+        '<ul class="nutrition-list">' + nlh + '</ul>';
       // Le bilan du plan est recalcule a l'affichage, jamais stocke : fige, il
       // deviendrait faux au premier changement de poids ou de correction, sans
       // prevenir. Meme regle que les pastilles chiffrees juste au-dessus.
@@ -5547,8 +5629,13 @@
         '</div>';
     }
     var nutritionHtml =
-      '<section class="card">' +
-        '<div class="card-title">Nutrition ' + (isToday ? "du jour" : "du " + esc(shortDate(editKey))) + '</div>' +
+      carteEntete("nutrition",
+        'Nutrition ' + (isToday ? "du jour" : "du " + esc(shortDate(editKey))),
+        NUTRITION.length
+          ? (nutriVieux
+               ? (nutriVieuxN + " coché" + (nutriVieuxN > 1 ? "es" : "e") + " · autre plan")
+               : (nutriDoneCount + "/" + NUTRITION.length + " pris"))
+          : "aucun complément") +
         nutriMigreHtml() +
         // D'OU VIENT CE PLAN, ET PAR OU EN SORTIR. Sans cette ligne, rien a
         // l'ecran ne distingue un plan ecrit par une IA du plan de l'appli — et le
@@ -5561,50 +5648,77 @@
             '</div>'
           : '') +
         nutriTargetsHtml +
+        // LA MISE EN GARDE SUIT LES CHIFFRES QU'ELLE QUALIFIE. Elle vivait tout en
+        // bas de la carte, derriere la liste et les reperes : personne ne relie une
+        // phrase de bas de carte a deux nombres poses en haut. Elle est desormais
+        // collee a eux.
+        (profile
+          ? '<div class="field-hint">Des repères estimés à partir de ton poids et de ton ' +
+            'volume d\'entraînement, pas une prescription : aucun métabolisme n\'est mesuré ' +
+            'ici. Ajuste d\'après ce que fait la balance sur trois semaines.</div>'
+          : '') +
         // LE CAS VIDE EST TRAITE, et il est frequent : c'est celui de quiconque ne
         // coche aucun complement. Un bouton qui deplie une liste sans rien
         // dedans est un bouton qui se moque de l'utilisateur ; on dit ce qu'il
         // en est, et ou aller pour que ca change.
         (NUTRITION.length
-          ? ('<button type="button" class="detail-toggle" data-action="toggle-nutrition" aria-expanded="' + (state.showNutrition ? "true" : "false") + '">' +
-              (state.showNutrition ? "Masquer" : "Voir les compléments") + ' · ' +
-              (nutriVieux
-                ? (nutriVieuxN + ' coch\u00e9e' + (nutriVieuxN > 1 ? 's' : '') + ' sous un autre plan')
-                : (nutriDoneCount + '/' + NUTRITION.length + ' pris')) +
-              ' ' + (state.showNutrition ? "▲" : "▼") +
-            '</button>' + nutriListHtml)
+          ? nutriListHtml
           : '<div class="ob-note">Tu n\'as coché aucun complément, il n\'y a donc rien à suivre ici. ' +
             'Tes deux repères chiffrés restent au-dessus. Pour en ajouter un, touche ' +
             '<b>Nutrition</b> dans ta carte de profil.</div>') +
-        (profile ? pnnsCarteHtml() : '') +
-        (profile
-          ? '<div class="nutri-disclaimer">Des repères estimés à partir de ton poids et de ton volume d\'entraînement, ' +
-            'pas une prescription : aucun métabolisme n\'est mesuré ici. Ajuste d\'après ce que fait la balance sur trois semaines.' +
-            '<br><br><b>L\'appli ne compose plus tes repas.</b> Elle en était incapable sans écrire ' +
-            'régulièrement des assiettes que personne ne mange — c\'était mesuré, pas supposé. ' +
-            'Ce qu\'elle sait faire sans rien inventer, c\'est te dire quand et comment prendre ' +
-            'tes compléments, et te donner tes deux cibles.</div>'
-          : '') +
+        // LA CARTE DES REPERES ET L'AVEU SONT SORTIS EN v1.18.0.
+        //
+        // Decision d'Olivier, sur capture annotee : « tu peux supprimer tout ce bloc
+        // totalement raye, qui est pejoratif pour l'appli ». Il visait les deux
+        // phrases qui parlaient de l'appli en mal — celle qui la declarait incapable
+        // de composer des assiettes mangeables, et celle qui annoncait ce retrait —
+        // ainsi que la carte qui les portait.
+        //
+        // ⚠️ CES DEUX PHRASES NE SONT PAS RECOPIEES ICI, meme pour memoire : le
+        // garde-fou de fin de chaine refuse le build si elles subsistent, commentaires
+        // compris. Il a mordu sur celui-ci. C'est la troisieme fois de la journee
+        // qu'un commentaire fait echouer un retrait, et les trois fois il avait
+        // raison — une raison se paraphrase, elle ne se cite pas.
+        //
+        // CE QUI RESTE EST LA MISE EN GARDE SUR L'ESTIMATION, et elle a change de
+        // place : elle est passee sous les deux cibles, la ou elle porte. Elle ne
+        // parle pas de l'appli, elle parle de physiologie — aucun metabolisme n'est
+        // mesure ici — et retirer le caveat de deux chiffres caloriques n'etait pas
+        // ce qui etait demande.
       '</section>';
 
     // --- Graphique de poids ---
     var chartHtml = "";
-    // UNE SEULE PESEE : pas de courbe, mais pas de silence non plus. Sans cette
-    // branche, la carte entiere disparaissait et se lisait comme une perte.
-    if (weightSeries.length === 1) {
+    // AUCUNE PESEE : le cadre, pas le silence. La carte existe des le premier jour
+    // et elle porte ce que l'appli SAIT — le poids declare, l'objectif, l'ecart a
+    // couvrir — plus le geste a faire. C'est le cas qui n'existait pas : a zero
+    // pesee, aucune carte de poids ne s'affichait, et l'appli se taisait le jour ou
+    // elle est la plus fragile.
+    //
+    // ⚠️ ON NE TRACE PAS DE COURBE ICI, et ce n'est pas un manque de volonte : un
+    // seul point ne fait pas une ligne. Le point declare ouvre la courbe des la
+    // PREMIERE vraie pesee, ce qui est exactement ce qui etait demande.
+    if (!mesures.length) {
+      var ecartCible = +(START_WEIGHT - TARGET_WEIGHT).toFixed(1);
       chartHtml =
-        '<section class="card">' +
-          '<div class="card-title">⚖️ Poids</div>' +
-          '<div class="total-line">Première pesée : <b>' +
-            frDec(String(weightSeries[0].poids)) + ' kg</b> le ' +
-            esc(shortDate(weightSeries[0].date)) + '</div>' +
-          '<div class="ob-note">Il faut une <b>deuxième pesée</b> pour tracer une courbe : ' +
-            'une tendance sur un seul point n\'existe pas. Pèse-toi une prochaine fois ' +
-            'dans les mêmes conditions — au réveil, avant de manger — et la courbe ' +
-            'apparaîtra ici, avec ta tendance et ta ligne d\'objectif.</div>' +
+        carteEntete("poids", "⚖️ Poids", "aucune pesée") +
+          '<div class="total-line">Départ déclaré : <b>' + frDec(String(START_WEIGHT)) +
+            ' kg</b> · objectif <b>' + frDec(String(TARGET_WEIGHT)) + ' kg</b>' +
+            (ecartCible !== 0
+              ? ' · ' + frDec(String(Math.abs(ecartCible))) + ' kg ' +
+                (ecartCible > 0 ? 'à perdre' : 'à prendre')
+              : '') +
+          '</div>' +
+          '<div class="ob-note">Ces deux chiffres viennent de ton diagnostic : ils sont ' +
+            '<b>déclarés</b>, pas mesurés. <b>Pèse-toi une première fois</b> — au réveil, ' +
+            'avant de manger — et la courbe apparaîtra ici, avec ta ligne d\'objectif. ' +
+            'Il faudra une deuxième pesée pour une tendance : sur un seul point, elle ' +
+            'n\'existe pas.</div>' +
         '</section>';
     }
-    if (weightSeries.length >= 2) {
+    // LA COURBE. Elle s'ouvre des la PREMIERE vraie pesee, parce que le point
+    // declare lui donne son second point — c'est tout l'objet du chantier.
+    if (mesures.length >= 1) {
       var w = 300, h = 150, padX = 10, padY = 16;
 
       // --- Borne basse de l'echelle des dates ------------------------------
@@ -5644,7 +5758,11 @@
       var t1 = dateFromKey(serieVue[serieVue.length - 1].date).getTime();
       var tSpan = (t1 - t0) || 1;
       var showRaw = state.chartMode !== "trend";
-      var showTrend = state.chartMode !== "raw";
+      // ⚠️ LA TENDANCE EXIGE DEUX MESURES, et le point declare n'en est pas une.
+      // Sans cette condition, une premiere pesee affichait un trait de tendance
+      // calcule sur un seul poids — un lissage a sept jours d'un point unique, qui
+      // vaut ce point : une ligne droite qui a l'air d'une information.
+      var showTrend = state.chartMode !== "raw" && mesures.length >= 2;
 
       function xScale(key) { return padX + ((dateFromKey(key).getTime() - t0) / tSpan) * (w - padX * 2); }
       function yScale(v) { return h - padY - ((v - yMin) / ySpan) * (h - padY * 2); }
@@ -5661,6 +5779,16 @@
       var rawSvg = showRaw
         ? '<path d="' + pathOf(serieVue) + '" fill="none" style="stroke:var(--accent)" stroke-width="' + (showTrend ? 1.5 : 2.4) + '" opacity="' + (showTrend ? 0.75 : 1) + '" stroke-linejoin="round"/>' +
           serieVue.map(function (d) {
+            // ⚠️ LE POINT DECLARE EST CREUX, ET CE N'EST PAS COSMETIQUE. Plein, il
+            // se lirait comme une pesee : un poids donne de memoire au diagnostic
+            // prendrait l'apparence d'une mesure faite sur une balance. Le cercle
+            // ouvert le distingue au premier regard, et la phrase sous la courbe le
+            // nomme — les deux, parce qu'une convention graphique que rien
+            // n'explique n'est pas une information.
+            if (d.declare) {
+              return '<circle cx="' + xScale(d.date).toFixed(1) + '" cy="' + yScale(d.poids).toFixed(1) +
+                '" r="' + (rawDotR + 0.8) + '" fill="none" style="stroke:var(--accent)" stroke-width="1.6"/>';
+            }
             return '<circle cx="' + xScale(d.date).toFixed(1) + '" cy="' + yScale(d.poids).toFixed(1) + '" r="' + rawDotR + '" style="fill:var(--accent)"/>';
           }).join("")
         : "";
@@ -5696,6 +5824,15 @@
       // MASQUER SANS LE DIRE N'EST PAS ACCEPTABLE : quand la courbe est bornee,
       // l'ecran ecrit combien de pesees sont hors cadre et depuis quand, et
       // porte le bouton qui les remet. Quand tout tient, il ne dit rien.
+      // ⚠️ ET LA CARTE DIT CE QU'EST LE PREMIER POINT. Le cercle creux le distingue,
+      // cette phrase l'explique. Sans elle, quelqu'un lirait une pesee qu'il n'a
+      // jamais faite — et c'est bien ce que ce point est, un poids declare.
+      var declareNoteHtml = aDeclare
+        ? '<div class="chart-span"><span>Le premier point est le poids que tu as ' +
+            '<b>déclaré</b> au diagnostic, pas une pesée : il est dessiné en cercle ' +
+            'creux, et il ne compte pas dans la tendance.</span></div>'
+        : "";
+
       var chartSpanHtml = "";
       if (chartAnciennes > 0) {
         chartSpanHtml = '<div class="chart-span">' + (chartBorne
@@ -5717,8 +5854,9 @@
       if (showTrend) legend = '<span><i class="legend-swatch" style="background:var(--bleu)"></i> tendance ' + TREND_WINDOW_DAYS + ' j</span>' + legend;
 
       chartHtml =
-        '<section class="card">' +
-          '<div class="card-title">📉 Poids : ' + frDec(weightDelta <= 0 ? weightDelta : "+" + weightDelta) + ' kg depuis le départ</div>' +
+        carteEntete("poids",
+          '📉 Poids : ' + frDec(weightDelta <= 0 ? weightDelta : "+" + weightDelta) + ' kg depuis le départ',
+          mesures.length + " pesée" + (mesures.length > 1 ? "s" : "")) +
           '<div class="chart-modes" role="group" aria-label="Ce qui est affiché sur la courbe">' + modeBtns + '</div>' +
           '<div class="chart-wrap">' +
             '<div class="chart-yaxis" aria-hidden="true">' + yLabels + '</div>' +
@@ -5735,7 +5873,7 @@
             '<span>' + esc(shortDate(serieVue[0].date)) + ' · <b>' + frDec(serieVue[0].poids) + ' kg</b></span>' +
             '<span>' + esc(shortDate(last.date)) + ' · <b>' + frDec(last.poids) + ' kg</b></span>' +
           '</div>' +
-          chartSpanHtml +
+          chartSpanHtml + declareNoteHtml +
           '<div class="chart-legend">' + legend + '</div>' +
         '</section>';
     }
@@ -5778,8 +5916,8 @@
       : "";
 
     var badgesSectionHtml =
-      '<section class="card">' +
-        '<div class="card-title">🏆 Progression</div>' +
+      carteEntete("progression", "🏆 Progression",
+        totalDone + " séance" + (totalDone > 1 ? "s" : "")) +
         statHtml +
         '<div class="badges">' + badgesHtml + '</div>' +
         '<div class="total-line">' +
@@ -5827,8 +5965,9 @@
         ? ", " + profile.nutri.supps.length + " complément" + (profile.nutri.supps.length > 1 ? "s" : "")
         : "");
       profileHtml =
-        '<section class="card">' +
-          '<div class="card-title">👤 Mon profil' + (profile.name ? ' · ' + esc(profile.name) : '') + '</div>' +
+        carteEntete("profil",
+          '👤 Mon profil' + (profile.name ? ' · ' + esc(profile.name) : ''),
+          profile.days.length + " j/sem · " + profile.minutes + " min") +
           '<div class="profile-rows">' +
             pRow("Prénom", profile.name || "non renseigné", "Toi") +
             pRow("Objectif", frDec(profile.startWeight) + " → " + frDec(profile.targetWeight) + " kg", "Poids") +
@@ -5873,8 +6012,8 @@
           THEME_OPTIONS[thi].label + '</button>';
     }
     var themeHtml =
-      '<section class="card">' +
-        '<div class="card-title">Apparence</div>' +
+      carteEntete("apparence", "Apparence",
+        (state.theme === "systeme" ? "système" : (state.theme === "clair" ? "clair" : "sombre"))) +
         '<div class="chart-modes" role="group" aria-label="Thème de l\'application">' + themeBtns + '</div>' +
         '<div class="field-hint" style="margin-top:8px">' +
           (state.theme === "systeme"
@@ -5885,8 +6024,7 @@
       '</section>';
 
     var settingsHtml =
-      '<section class="card settings-card">' +
-        '<div class="card-title">Sauvegarde</div>' +
+      carteEntete("sauvegarde", "Sauvegarde", "", "settings-card") +
         '<div class="field" style="margin-bottom:0">' +
           '<div class="field-label" id="backup-label">' + countKeys(log) + ' jour(s) enregistré(s) sur cet appareil' +
             (profile && profile.done ? ', plus ton profil et ton programme' : '') + '</div>' +
@@ -5920,8 +6058,8 @@
       '<div class="swipe-hint">' + (isAnnexe ? "← glisse vers la droite pour revenir à la séance" : "glisse vers la gauche pour le bilan →") + '</div>';
 
     var pageHtml = isAnnexe
-      ? (nutritionHtml + iaNutriHtml() + chartHtml + badgesSectionHtml + analyseHtml() + profileHtml +
-         themeHtml + iaCleHtml() + settingsHtml + footerHtml)
+      ? (nutritionHtml + iaAssistantHtml() + chartHtml + badgesSectionHtml +
+         analyseHtml() + profileHtml + themeHtml + settingsHtml + footerHtml)
       : (state.bravo === editKey
           ? bravoHtml(editKey, entry, program)
           : headerHtml + heroHtml + motivationHtml + seanceHtml);
@@ -7940,18 +8078,14 @@
   function analyseHtml() {
     if (!profile || !profile.done || !profile.plan) return "";
 
-    var entete =
-      '<div class="card-title">📊 Analyse de tes séances</div>' +
-      '<button type="button" class="detail-toggle" data-action="toggle-analyse" aria-expanded="' +
-        (state.showAnalyse ? "true" : "false") + '">' +
-        (state.showAnalyse ? "Masquer l\'analyse" : "Analyser mes séances") +
-        (state.showAnalyse ? " ▲" : " ▼") + '</button>';
-
-    if (!state.showAnalyse) {
-      return '<section class="card">' + entete + '</section>';
-    }
-
+    // LE TITRE EST L'ENTETE, et le repliage a remplace la bascule « Analyser mes
+    // seances ». Le corps est donc construit inconditionnellement : voir l'en-tete
+    // de la chaine sur ce que ce choix coute et pourquoi il est fait.
     var a = analyser();
+    var entete = carteEntete("analyse", "📊 Analyse de tes séances",
+      a.propositions.length
+        ? (a.propositions.length + " proposition" + (a.propositions.length > 1 ? "s" : ""))
+        : "rien à changer");
     var corps = "";
 
     // --- Ce qui n'est PLUS dans la liste, et pourquoi --------------------------
@@ -8003,7 +8137,7 @@
           'que sur les exercices avec charge : elle n\'a rien à dire sur des kilomètres. ' +
           'Tes sorties se comparent à la précédente dans l\'écran de la séance, et tes ' +
           'kilomètres sont totalisés juste au-dessus.</div>';
-        return '<section class="card">' + entete + horsHtml + corps + '</section>';
+        return entete + horsHtml + corps + '</section>';
       }
       // Exactement ce que demandait le cahier des charges : pas de verdict tant
       // qu'il n'y a pas de quoi en tirer un.
@@ -8035,10 +8169,10 @@
         '<div class="ob-note">Pas encore de quoi conclure. Il faut au moins <b>' + manque +
         ' séances par exercice</b> pour qu\'une tendance veuille dire quelque chose. ' +
         'Reviens quand tu en auras fait quelques-unes de plus. ' +
-        'Tu trouveras alors ici de quoi faire relire ton bilan par une IA : un bouton ' +
-        'qui le copie, et une zone pour rapporter la réponse. Ton abonnement habituel ' +
-        'suffit, il n\'y a rien à installer.</div>';
-      return '<section class="card">' + entete + horsHtml + corps + '</section>';
+        'Pour faire relire ton bilan par une IA, la carte <b>Assistant IA</b> est ' +
+        'plus bas — elle ne t\'attend pas, elle marche dès maintenant. Ton abonnement ' +
+        'habituel suffit, il n\'y a rien à installer.</div>';
+      return entete + horsHtml + corps + '</section>';
     }
 
     // --- Propositions ---------------------------------------------------------
@@ -8081,7 +8215,6 @@
     // page : ce qui se calcule hors ligne se lit d'abord, l'avis extérieur
     // vient en complément. L'inverse ferait passer le moteur pour un lot de
     // consolation.
-    corps += iaHtml();
 
     // --- Journal des ajustements ----------------------------------------------
     if (profile.journal && profile.journal.length) {
@@ -8093,7 +8226,7 @@
       corps += '<div class="ana-bloc"><div class="field-label">Derniers ajustements</div>' + jl + '</div>';
     }
 
-    return '<section class="card">' + entete + horsHtml + corps + '</section>';
+    return entete + horsHtml + corps + '</section>';
   }
 
 
@@ -9168,10 +9301,12 @@
 
     var entete =
       '<div class="ana-bloc">' +
-        '<div class="field-label">Demander un avis à une IA</div>' +
+        '<div class="field-label">Un avis sur mes charges et mon programme</div>' +
         '<button type="button" class="detail-toggle" data-action="toggle-ia" aria-expanded="' +
           (state.iaOuvert ? "true" : "false") + '">' +
-          (state.iaOuvert ? "Masquer le pont IA ▲" : "Ouvrir le pont IA ▼") +
+          (state.iaOuvert
+            ? "Masquer ▲"
+            : "Faire relire mes séances · charges, séries, repos ▼") +
         '</button>';
 
     if (!state.iaOuvert) return entete + '</div>';
@@ -9285,22 +9420,21 @@
     var cr = nutriCreneauxIA(profile);
     if (!cr.length) return "";
 
+    // SOUS-BLOC, plus une carte : voir iaAssistantHtml, qui reunit les trois
+    // morceaux de l'assistant. Le bouton n'est pas un economiseur de scroll — c'est
+    // un CHOIX D'OUTIL entre deux ponts qu'on n'utilise pas en meme temps — et son
+    // libelle dit ce que l'outil fait, ce qui manquait.
     var entete =
-      '<section class="card">' +
-        '<div class="card-title">Plan alimentaire par une IA</div>' +
+      '<div class="ana-bloc">' +
+        '<div class="field-label">Un plan alimentaire pour la journée</div>' +
         '<button type="button" class="detail-toggle" data-action="toggle-ia-nutri" aria-expanded="' +
           (state.iaNutriOuvert ? "true" : "false") + '">' +
-          (state.iaNutriOuvert ? "Masquer ▲" : "Ouvrir le pont ▼") +
+          (state.iaNutriOuvert
+            ? "Masquer ▲"
+            : "Demander un plan · " + cr.length + " prises attendues ▼") +
         '</button>';
 
-    if (!state.iaNutriOuvert) {
-      return entete +
-        '<div class="ob-note">L\'appli ne compose plus de repas. Elle sait en revanche ' +
-          'préparer le bilan complet à envoyer à une IA, puis <b>relire ce qu\'elle ' +
-          'répond</b> : ' + cr.length + ' prises attendues, les portions aberrantes ' +
-          'écartées, les chiffres vérifiés.</div>' +
-        '</section>';
-    }
+    if (!state.iaNutriOuvert) return entete + '</div>';
 
     var avecCle = iaClePrete();
     var corps =
@@ -9348,7 +9482,7 @@
         'un avis médical.' +
       '</div>';
 
-    return entete + corps + '</section>';
+    return entete + corps + '</div>';
   }
 
   // Le résultat, séparé de la carte parce qu'il est la seule partie qui bouge, et
@@ -9591,6 +9725,67 @@
   function iaNutriRelire() {
     state.iaNutriRes = iaLireNutrition(state.iaNutriTexte);
     state.iaNutriVal = nutriValiderPlanIA(profile, state.iaNutriRes);
+  }
+
+  // ===========================================================================
+  // LA CARTE « ASSISTANT IA » — LES TROIS MORCEAUX AU MEME ENDROIT
+  // ---------------------------------------------------------------------------
+  // ⚠️ CE QU'ELLE REPARE, ET C'ETAIT PIRE QU'UN DOUBLE EMPLOI. Les trois morceaux
+  // de l'assistant vivaient dans trois cartes differentes : la clé d'API dans
+  // « Réglages avancés », le pont des charges dans « Analyse de tes séances », le
+  // pont nutrition dans sa propre carte. On configurait dans l'une et on s'en
+  // servait dans les deux autres, sans rien qui relie les trois.
+  //
+  // Et le pont des charges était le plus mal logé : il vivait dans analyseHtml, qui
+  // REND LA MAIN avant d'y arriver quand l'historique compte moins de trois séances
+  // par exercice. Il était donc invisible exactement quand on cherche à quoi l'appli
+  // sert — le propriétaire de l'appli l'a lui-même cherché sans le trouver.
+  //
+  // LE CHAPEAU REPOND AUX TROIS QUESTIONS QU'IL A POSEES, DANS SON ORDRE :
+  // à quoi ça sert, sur quoi le texte envoyé est construit, et ce que l'appli fait
+  // de la réponse collée. Elles étaient toutes les trois sans réponse à l'écran.
+  // ===========================================================================
+  function iaAssistantHtml() {
+    if (!profile || !profile.done) return "";
+
+    var avecCle = iaClePrete();
+    var resume = avecCle ? ("clé · " + iaFournisseur().label) : "presse-papier";
+
+    var chapeau =
+      '<div class="ia-note">' +
+        '<b>À quoi ça sert.</b> L\'appli ne compose pas tes repas et ne juge pas ta ' +
+        'technique : elle ne sait pas le faire sans inventer. Une IA, elle, sait ' +
+        'proposer — mais elle ne sait pas vérifier ce qu\'elle avance. Ici elle ' +
+        'propose, et l\'appli vérifie.' +
+      '</div>' +
+      '<div class="ia-note">' +
+        '<b>Sur quoi le texte envoyé est construit.</b> Ton profil, tes deux cibles ' +
+        'chiffrées, ton programme, tes séances <b>réellement faites</b> — pas celles ' +
+        'que tu as déclarées — et tes compléments déjà au plan. Rien d\'autre : pas ' +
+        'ton prénom. Le texte est <b>affiché en entier</b> avant que tu le copies, ' +
+        'parce qu\'il part chez un service tiers.' +
+      '</div>' +
+      '<div class="ia-note">' +
+        '<b>Ce que l\'appli fait de la réponse.</b> Elle la relit ligne par ligne ' +
+        'contre ton programme, ton matériel et sa table d\'aliments. Une charge à ' +
+        'plus de 20 % d\'écart, un exercice qui n\'est pas au programme, une portion ' +
+        'qui atteint trois fois une portion courante : écartés, <b>comptés et ' +
+        'montrés</b>. Ce qui reste t\'est proposé — rien ne s\'applique tout seul.' +
+      '</div>';
+
+    return carteEntete("ia", "✦ Assistant IA", resume) +
+      chapeau +
+      iaCleHtml() +
+      iaNutriHtml() +
+      iaHtml() +
+      '<div class="nutri-disclaimer">' +
+        'Une IA se trompe avec aplomb. Elle ne te voit pas, ne connaît ni tes ' +
+        'douleurs ni ta technique, ne pèse rien et ne voit pas ce qu\'il y a dans ton ' +
+        'placard. C\'est pour ça que chaque ligne est relue ici, et c\'est la seule ' +
+        'raison pour laquelle on peut la laisser proposer quelque chose. Ses ' +
+        'propositions ne remplacent ni l\'œil d\'un coach ni un avis médical.' +
+      '</div>' +
+    '</section>';
   }
 
   // --- Copie vers le presse-papier -------------------------------------------
@@ -10039,24 +10234,25 @@
   function iaCleHtml() {
     if (!profile || !profile.done) return "";
 
-    var ouvert = state.avanceOuvert;
+    // L'ETAT DE LA CLE VIT DESORMAIS DANS LE RESUME du titre-bouton : il survit au
+    // repliage, ce qui etait tout l'interet de la note de repli qu'on retire.
+    // SOUS-BLOC de l'assistant, plus une carte a part. C'etait le defaut que
+    // signalait Olivier : on saisissait la cle dans « Reglages avances » et on s'en
+    // servait dans deux autres cartes, sans rien qui relie les trois.
     var entete =
-      '<section class="card">' +
-        '<div class="card-title">⚙ Réglages avancés</div>' +
+      '<div class="ana-bloc">' +
+        '<div class="field-label">Ta clé d\'API — facultative</div>' +
         '<button type="button" class="detail-toggle" data-action="toggle-avance" aria-expanded="' +
-          (ouvert ? "true" : "false") + '">' +
-          (ouvert ? "Masquer" : "Clé API pour l\'analyse IA") + (ouvert ? " ▲" : " ▼") +
+          (state.avanceOuvert ? "true" : "false") + '">' +
+          (state.avanceOuvert
+            ? "Masquer ▲"
+            : (iaClePrete()
+                 ? "Clé enregistrée · " + esc(iaFournisseur().label) + " ▼"
+                 : "Aucune clé · l'appli passe par le presse-papier ▼")) +
         '</button>';
 
-    if (!ouvert) {
-      // Un mot sur l'etat, meme replie : sinon on ne sait pas si une cle est
-      // posee sans deplier.
-      return entete +
-        (iaClePrete()
-          ? '<div class="ia-cle-etat">Clé enregistrée · ' + esc(iaFournisseur().label) + '</div>'
-          : '') +
-        '</section>';
-    }
+    if (!state.avanceOuvert) return entete + '</div>';
+
 
     var f = iaFournisseur();
     var opts = "", i;
@@ -10155,7 +10351,7 @@
         '</div>';
     }
 
-    return entete + corps + '</section>';
+    return entete + corps + '</div>';
   }
 
   // ===========================================================================
@@ -12330,50 +12526,27 @@
     return reste ? exclus : [];
   }
 
-  // --- CE QUE L'ECRAN EN DIT ---------------------------------------------------
-  // Les reperes sont affiches PARCE QU'ILS SONT TENUS. Une carte qui reciterait
-  // des recommandations sans que le generateur les serve serait un affichage
-  // decoratif — exactement ce que le proprietaire a refuse pour la confirmation
-  // d'objectif. Chaque ligne dit donc ce que l'appli FAIT, et la derniere dit
-  // honnetement ce qu'elle ne tient qu'en partie.
-  var PNNS_LIGNES = [
-    { t: "Légumes secs", v: "2 fois par semaine",
-      d: "lentilles, pois chiches ou haricots au déjeuner du lundi et au dîner du jeudi" },
-    { t: "Poisson", v: "2 fois par semaine, dont un gras",
-      d: "un poisson gras au dîner du mardi, un poisson au déjeuner du vendredi" },
-    { t: "Féculents complets", v: "au moins une fois par jour",
-      d: "pain, riz, pâtes ou semoule complets, en alternant le déjeuner et le dîner" },
-    { t: "Viande hors volaille", v: "500 g par semaine au maximum",
-      d: "servie deux fois, le reste de la semaine en volaille, poisson, œufs ou légumes secs" },
-    { t: "Charcuterie", v: "150 g par semaine au maximum",
-      d: "une seule fois, et jamais plus de trois tranches" },
-    { t: "Fruits à coque non salés", v: "une petite poignée par jour",
-      d: "amandes ou noix de cajou quand ta collation laisse la place — deux à trois jours sur sept, mesuré" }
-  ];
+  // --- CE QUE L'ECRAN EN DISAIT, ET QUI EST SORTI EN v1.18.0 -------------------
+  // Une table de six lignes et la fonction qui les rendait affichaient ici la carte
+  // « les reperes de la semaine » : six reperes du Programme national nutrition
+  // sante, relus a la source sur mangerbouger.fr le 16 aout 2026. Olivier les a
+  // fait retirer — la carte s'ouvrait sur une phrase qui disait l'appli incapable
+  // de composer des repas, et ce ton lui deplaisait sur l'ecran qu'il regarde tous
+  // les jours.
+  //
+  // ⚠️ LEURS NOMS NE SONT PAS ECRITS ICI, et ce n'est pas une coquetterie : le
+  // garde-fou de fin de chaine refuse le build s'ils subsistent, y compris dans un
+  // commentaire. Il a mordu la — la deuxieme fois dans la meme journee, apres le
+  // meme refus sur le champ d'etat retire en v1.17.0. La raison survit au nom.
+  //
+  // ⚠️ LES SEUILS EUX-MEMES NE SONT PAS PERDUS : les constantes de seuil et les
+  // fonctions de retrecissement du vivier restent plus bas dans le fichier. Elles
+  // ne sont plus lues par personne depuis la reduction de la v1.13.0, et ce menage
+  // est reste mecanique — meme arbitrage que pour le generateur.
+  //
+  // Ce qui est perdu, et il faut le savoir : plus rien a l'ecran ne rappelle les
+  // reperes de sante publique. C'est une decision du proprietaire, pas un oubli.
 
-  function pnnsCarteHtml() {
-    var i, l, lignes = "";
-    for (i = 0; i < PNNS_LIGNES.length; i++) {
-      l = PNNS_LIGNES[i];
-      lignes +=
-        '<div class="pnns-ligne">' +
-          '<div class="pnns-tete"><span class="pnns-quoi">' + esc(l.t) + '</span>' +
-            '<b class="pnns-val">' + esc(l.v) + '</b></div>' +
-          '<div class="pnns-detail">' + esc(l.d) + '</div>' +
-        '</div>';
-    }
-    return '<div class="pnns-bloc">' +
-        '<div class="field-label">Les repères de la semaine</div>' +
-        '<div class="field-hint" style="margin-bottom:10px">L\'appli ne compose plus tes repas — ' +
-          'elle en était incapable sans écrire des assiettes que personne ne mange. Ces repères ' +
-          'sont là pour toi, et pour l\'IA si tu lui demandes un plan.</div>' +
-        lignes +
-        '<div class="nutri-disclaimer">Repères du Programme national nutrition santé ' +
-          '(mangerbouger.fr, Santé publique France), relus à la source le 16 août 2026. ' +
-          'Un repère de plus ne se tient pas dans un générateur et se compte à l\'œil : ' +
-          'au moins 5 fruits et légumes par jour, une portion valant 80 à 100 g.</div>' +
-      '</div>';
-  }
 
   function choisirPourSlot(s, ctx, slotK, cible) {
     var c = {}, kCible = (cible && cible.kcal > 0) ? cible.kcal : 0;
@@ -14197,9 +14370,8 @@
     var quoi = profile.nutriMigreCause === "v141"
       ? 'Ton plan datait d\'une version ancienne de l\'appli. Il a été refait avec ' +
         'ce qu\'elle sait faire aujourd\'hui.'
-      : 'Ton plan contenait des repas que l\'appli composait elle-même. Elle ne le ' +
-        'fait plus : c\'était mesuré, pas supposé — elle écrivait régulièrement des ' +
-        'assiettes que personne ne mange.';
+      : 'Ton plan ne contient plus de repas : il porte désormais tes compléments ' +
+        'et tes deux cibles chiffrées.';
     return '<div class="nutri-migre">' +
       '<div class="nutri-migre-t">Ton plan nutrition a été refait</div>' +
       '<div class="nutri-migre-c">' + quoi + '</div>' +
@@ -14286,6 +14458,70 @@
       '</div>' +
       (ouvertSupp ? suppFicheHtml(n.supp) : '') +
     '</li>';
+  }
+
+  // ===========================================================================
+  // LE REPLIAGE DES CARTES
+  // ---------------------------------------------------------------------------
+  // Demande d'Olivier : « tous les blocs devraient pouvoir être repliés, ce serait
+  // un vrai gain ». Le gain est le SCROLL — l'écran de bilan porte neuf cartes, et
+  // on n'en consulte jamais neuf d'affilée.
+  //
+  // LE TITRE REPLIE, ET IL REMPLACE LES BASCULES INTERNES. Quatre cartes portaient
+  // leur propre bouton d'ouverture qui n'existait QUE pour économiser du scroll —
+  // « Voir les compléments », « Analyser mes séances », « Ouvrir le pont »,
+  // « Clé API ». Les garder à côté du repliage donnerait deux niveaux, deux taps
+  // pour atteindre le plan du jour, et deux états à comprendre par carte.
+  //
+  // ⚠️ LES GESTES DE CONTENU NE SONT PAS DES BASCULES DE SCROLL, et la confusion
+  // se joue à une lettre : `toggle-nutrition` est l'économiseur qui sort,
+  // `toggle-nutri` est le geste de COCHER une prise, fait tous les jours. Restent
+  // aussi toggle-exo, toggle-howto, toggle-done et les deux sélecteurs.
+  // ===========================================================================
+
+  // LA LISTE EST CLOSE, et c'est ce qui protège le stockage : une clé inconnue lue
+  // depuis des réglages abîmés n'entre pas dans l'état. Même discipline que
+  // cleanProfile — tout ce qui vient du disque est validé contre ce qu'on attend.
+  // « ianutri » et « avance » ont fusionne en « ia » en v1.19.0 : les trois morceaux
+  // de l'assistant tiennent dans une seule carte. Une cle disparue de cette liste
+  // n'est plus relue du stockage — la validation cle par cle de loadSettings s'en
+  // charge — donc un etat de repliage perime ne peut pas survivre.
+  var CARTES_REPLIABLES = ["nutrition", "ia", "poids", "progression",
+                           "analyse", "profil", "apparence", "sauvegarde"];
+
+  // FERMEES PAR DEFAUT : celles qu'on ouvre une fois puis plus jamais. Les autres
+  // restent ouvertes — un bilan qui ne montre rien au premier regard n'est plus un
+  // bilan, c'est un sommaire.
+  // L'assistant est FERME par defaut : c'est un outil qu'on va chercher, pas une
+  // information qu'on lit tous les jours. Son resume dit deja l'essentiel — s'il y a
+  // une cle, et chez qui.
+  var CARTES_FERMEES = { apparence: 1, ia: 1, sauvegarde: 1 };
+
+  function carteOuverte(cle) {
+    if (has(state.cartes, cle)) return !!state.cartes[cle];
+    return !has(CARTES_FERMEES, cle);
+  }
+
+  // Rend l'ouverture de la carte ET son titre-bouton. `titre` arrive DÉJÀ échappé
+  // par l'appelant — les titres existants portent leurs propres esc() et les
+  // échapper deux fois afficherait « Mon profil · Olivier &#39; ».
+  //
+  // `resume` est facultatif, et il est la raison pour laquelle ce n'est pas juste
+  // un chevron : replié, il reste lisible. « 4/9 pris », « Clé enregistrée ·
+  // Anthropic », « 3 propositions » se lisent sans déplier.
+  //
+  // `classes` couvre le seul cas particulier du fichier, la carte de sauvegarde,
+  // qui porte une classe de plus.
+  function carteEntete(cle, titre, resume, classes) {
+    var ouverte = carteOuverte(cle);
+    return '<section class="card' + (classes ? " " + classes : "") +
+             (ouverte ? "" : " card-replie") + '">' +
+      '<button type="button" class="card-titre" data-action="replier"' +
+        ' data-c="' + esc(cle) + '" aria-expanded="' + (ouverte ? "true" : "false") + '">' +
+        '<span class="card-title">' + titre + '</span>' +
+        (resume ? '<span class="card-resume">' + esc(resume) + '</span>' : '') +
+        '<span class="card-chev" aria-hidden="true">' + (ouverte ? "▴" : "▾") + '</span>' +
+      '</button>';
   }
 
   function notify(text, kind) {
@@ -14800,10 +15036,7 @@
     if (!t) return;
     var action = t.getAttribute("data-action");
 
-    if (action === "toggle-analyse") {
-      state.showAnalyse = !state.showAnalyse; render();
-
-    } else if (action === "allege-annuler") {
+    if (action === "allege-annuler") {
       if (profile && profile.allegeLe) {
         profile.allegeLe = null;
         persistSettings();
@@ -14905,6 +15138,19 @@
     } else if (action === "toggle-ia") {
       state.iaOuvert = !state.iaOuvert; render();
 
+    } else if (action === "toggle-ia-nutri") {
+      state.iaNutriOuvert = !state.iaNutriOuvert; render();
+
+    } else if (action === "toggle-avance") {
+      // On relit les champs vivants avant de replier : sur iOS, un collage par le
+      // menu systeme ne declenche pas toujours l'evenement input, et « Masquer »
+      // perdrait une cle collee. Meme parade que les autres gestes qui touchent a
+      // la cle.
+      iaLireChamps();
+      state.avanceOuvert = !state.avanceOuvert;
+      persistSettings();
+      render();
+
     } else if (action === "ia-nutri-ecrire") {
       var vEcr = state.iaNutriVal;
       var rEcr = nutriEcrirePlanIA(vEcr);
@@ -14917,7 +15163,16 @@
         // en reposant nutriPlanLe une fois de plus — donc en re-declarant
         // illisibles les journees d'hier, pour rien.
         state.iaNutriRes = null; state.iaNutriVal = null; state.iaNutriTexte = "";
-        state.showNutrition = true;
+        // On OUVRE la carte de nutrition : l'utilisateur doit voir le plan qu'il
+        // vient d'enregistrer. C'est ce que faisait l'ancienne bascule « Voir les
+        // complements », remplacee par le repliage de la carte en v1.17.0.
+        //
+        // ⚠️ Le nom de cet ancien champ d'etat n'est PAS ecrit ici, et ce n'est pas
+        // une coquetterie : le garde-fou de fin de chaine refuse le build s'il
+        // subsiste, y compris dans un commentaire. Il a mordu la, et c'est le meme
+        // refus qui avait attrape des commentaires invoquant le frein retire en
+        // v1.11.0. La raison survit au nom.
+        state.cartes.nutrition = true;
         notify(rEcr.ecrit
                  ? ("Plan enregistr\u00e9 : " + rEcr.lignes + " prise" +
                     (rEcr.lignes > 1 ? "s" : "") + "." + obPhraseCorrections(rEcr))
@@ -14940,8 +15195,6 @@
         render();
       }
 
-    } else if (action === "toggle-ia-nutri") {
-      state.iaNutriOuvert = !state.iaNutriOuvert; render();
 
     } else if (action === "ia-nutri-copier") {
       iaCopierZone("ia-nutri-prompt", iaPromptNutrition);
@@ -15000,11 +15253,19 @@
         render();
       }
 
+    } else if (action === "replier") {
+      // On ne pose que les cles CONNUES : un data-c bricole dans le DOM ne doit pas
+      // grossir l'objet persiste. Meme raison que la validation de loadSettings.
+      var cRep = t.getAttribute("data-c");
+      if (cRep && CARTES_REPLIABLES.indexOf(cRep) >= 0) {
+        state.cartes[cRep] = !carteOuverte(cRep);
+        persistSettings();
+      }
+      render();
+
     } else if (action === "toggle-exercises") {
       state.showExercises = !state.showExercises; persistSettings(); render();
 
-    } else if (action === "toggle-nutrition") {
-      state.showNutrition = !state.showNutrition; persistSettings(); render();
 
     } else if (action === "set-page") {
       setPage(t.getAttribute("data-page"));
