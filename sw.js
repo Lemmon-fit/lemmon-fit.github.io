@@ -4,7 +4,7 @@
 // dans manifest.json. Le nom du cache en découle : changer de version purge
 // donc automatiquement l'ancien cache, ce que "lemmonfit-cache-v1" (figé) ne
 // faisait jamais.
-var VERSION = "1.19.0";
+var VERSION = "1.20.0";
 var CACHE_NAME = "lemmonfit-" + VERSION;
 
 var INDEX_URL = new URL("./index.html", self.location.href).href;

@@ -293,6 +293,15 @@
   .card-chev { font-size: 12px; color:var(--texte-3); margin-bottom: 12px; }
   /* Une carte repliee masque tout SAUF son titre-bouton. Le corps est bati puis
      cache : voir l'en-tete de la chaine pour pourquoi ce n'est pas un oubli. */
+  /* Le resume prend sa propre ligne, le chevron reste sur celle du titre. Voir
+     l'en-tete de la chaine : sans ca, un resume long ecrase le titre au lieu de
+     se couper, parce que lui seul porte nowrap. L'ordre visuel est impose par
+     `order`, l'ordre du DOM restant titre / resume / chevron — c'est le DOM que
+     lit un lecteur d'ecran, et le resume doit y suivre le titre qu'il qualifie. */
+  .card-titre { flex-wrap: wrap; }
+  .card-title { flex: 1 1 auto; min-width: 0; order: 0; }
+  .card-chev  { order: 1; margin-left: auto; }
+  .card-resume { order: 2; flex: 1 0 100%; }
   .card-replie > *:not(.card-titre) { display: none; }
   .card-replie .card-title,
   .card-replie .card-resume,
@@ -428,6 +437,25 @@
     font-family: ui-monospace, "SF Mono", monospace; font-size: 12px; font-weight: 700;
     color:var(--accent-txt); margin-left: auto; flex-shrink: 0;
   }
+  /* Reprendre la serie precedente. Meme colonne que .serie-sub, qu'il remplace
+     tant que la ligne est vide. Bordure en pointilles : c'est une proposition,
+     pas un etat acquis. */
+  .serie-idem {
+    margin-left: auto; flex-shrink: 0; min-height: 36px; padding: 0 8px;
+    background: transparent; border: 1.5px dashed var(--bord-fort); border-radius: 8px;
+    color: var(--texte-2); font-size: 12.5px; font-weight: 700;
+    font-family: ui-monospace, "SF Mono", monospace; white-space: nowrap;
+  }
+  /* ⚠️ CE min-width EST CE QUI FAIT TENIR LA LIGNE, et il a ete mesure au
+     navigateur, pas estime. Un champ de saisie a un `min-width: auto` implicite
+     calcule sur sa taille de contenu par defaut : il REFUSE donc de retrecir,
+     meme dans un conteneur trop etroit. Sur un iPhone de 375 px, la ligne
+     complete — rang, deux champs, les deux unites et le bouton de reprise au
+     pire cas « 107,5 x 12 » — demande 312 px pour 296 disponibles, et le bouton
+     debordait de 18 px. Avec min-width: 0 les champs cedent les quelques pixels
+     manquants, et ils restent tres largement assez larges pour cinq caracteres.
+     Les lignes sans bouton ne subissent aucune pression et gardent leurs 74 px. */
+  .serie-input { min-width: 0; }
 
   .exo-compare {
     display: flex; align-items: baseline; justify-content: space-between; gap: 8px; flex-wrap: wrap;
@@ -1010,8 +1038,8 @@
   //   MINEUR    : nouvelle fonctionnalité, ou changement de comportement visible
   //   CORRECTIF : correction de bug seule, aucun changement de comportement voulu
   // ===========================================================================
-  var APP_VERSION = "1.19.0";
-  var APP_BUILD = "17 août 2026 (1.19.0)";
+  var APP_VERSION = "1.20.0";
+  var APP_BUILD = "17 août 2026 (1.20.0)";
 
   // NE JAMAIS CHANGER sans écrire une migration : c'est ici que vit l'historique.
   var STORAGE_KEY = "olivier-coach-log";
@@ -4296,6 +4324,9 @@
     // tard.
     iaNutriOuvert: false,
     avanceOuvert: false,
+    // La provenance des deux cibles chiffrees, repliee par defaut. Non persistee :
+    // c'est une reponse qu'on lit une fois, pas un reglage.
+    nutriInfo: false,
     iaTexte: "",          // reponse collee, gardee le temps de la session
     iaRes: null,          // propositions retenues et ecartees apres validation
     iaOccupe: false,      // un appel direct est en cours
@@ -4480,6 +4511,16 @@
     return isArray(s) ? s : [];
   }
   function setsDone(entry, exId) { return setsOf(entry, exId).length; }
+
+  // La derniere serie REELLEMENT remplie strictement au-dessus du rang i, ou null.
+  // Voir l'en-tete de la chaine : on remonte, et on exige les deux nombres.
+  function serieAReprendre(arr, i) {
+    var j;
+    for (j = i - 1; j >= 0; j--) {
+      if (arr[j] && arr[j].kg > 0 && arr[j].reps > 0) return arr[j];
+    }
+    return null;
+  }
 
   // Replie les exercices TERMINES de la journee affichee, et rend leur nombre.
   // Appelee par le bouton et par la validation de seance. JAMAIS par une saisie :
@@ -5333,10 +5374,11 @@
             // de séance, un seul couple pour tout l'exercice ne suffit pas.
             var arr = setsOf(entry, ex.id);
             var rows = Math.max(p.total, arr.length);
-            var lines = "", si, s, sub;
+            var lines = "", si, s, sub, idem;
             for (si = 0; si < rows; si++) {
               s = arr[si] || {};
               sub = (s.kg && s.reps) ? (s.kg * s.reps) : 0;
+              idem = (si > 0 && !sub) ? serieAReprendre(arr, si) : null;
               lines +=
                 '<div class="serie-line' + (sub > 0 ? " serie-line-filled" : "") + '">' +
                   '<span class="serie-num" aria-hidden="true">' + (si + 1) + '</span>' +
@@ -5350,7 +5392,20 @@
                     ' placeholder="reps" value="' + esc(s.reps != null ? s.reps : "") + '"' +
                     ' data-action="set-reps" data-ex="' + ex.id + '" data-set="' + si + '"' +
                     ' aria-label="Série ' + (si + 1) + ', répétitions, ' + esc(ex.name) + '">' +
-                  (sub > 0 ? '<span class="serie-sub">' + frNum(sub) + ' kg</span>' : '') +
+                  // LE SOUS-TOTAL OU LE BOUTON, JAMAIS LES DEUX : ils occupent la
+                  // meme place, et une serie deja remplie n'a rien a reprendre.
+                  // Le bouton n'existe pas sur la premiere ligne — il n'y a rien
+                  // au-dessus d'elle, c'est ce qui a ete demande.
+                  (sub > 0
+                    ? '<span class="serie-sub">' + frNum(sub) + ' kg</span>'
+                    : (idem
+                        ? '<button type="button" class="serie-idem" data-action="serie-idem"' +
+                            ' data-ex="' + esc(ex.id) + '" data-set="' + si + '"' +
+                            ' aria-label="Série ' + (si + 1) + ' : reprendre ' +
+                              esc(frDec(idem.kg)) + ' kilos fois ' + idem.reps + ' répétitions">' +
+                            esc(frDec(idem.kg)) + ' × ' + idem.reps +
+                          '</button>'
+                        : '')) +
                 '</div>';
             }
             body = (ex.kgCible
@@ -5571,10 +5626,10 @@
         nlh += nutriLigneHtml(NUTRITION[nli], nli, !!entryNutri[nli]);
         if (NUTRITION[nli] && NUTRITION[nli].corr) nlCorr++;
       }
-      nutriListHtml =
-        '<div class="field-hint">Touche une ligne quand tu as pris ton complément : ' +
-          'elle se coche, et la journée s\'en souvient.</div>' +
-        '<ul class="nutrition-list">' + nlh + '</ul>';
+      // La phrase qui expliquait le geste de cocher est retiree : la ligne se coche
+      // au doigt, la coche apparait, et l'action se decouvre en un essai. C'est le
+      // « blabla » vise par la demande.
+      nutriListHtml = '<ul class="nutrition-list">' + nlh + '</ul>';
       // Le bilan du plan est recalcule a l'affichage, jamais stocke : fige, il
       // deviendrait faux au premier changement de poids ou de correction, sans
       // prevenir. Meme regle que les pastilles chiffrees juste au-dessus.
@@ -5653,9 +5708,15 @@
         // phrase de bas de carte a deux nombres poses en haut. Elle est desormais
         // collee a eux.
         (profile
-          ? '<div class="field-hint">Des repères estimés à partir de ton poids et de ton ' +
-            'volume d\'entraînement, pas une prescription : aucun métabolisme n\'est mesuré ' +
-            'ici. Ajuste d\'après ce que fait la balance sur trois semaines.</div>'
+          ? '<button type="button" class="ia-lien" data-action="nutri-info" aria-expanded="' +
+              (state.nutriInfo ? "true" : "false") + '">' +
+              (state.nutriInfo ? "Masquer" : "D\'où viennent ces deux chiffres ?") +
+            '</button>' +
+            (state.nutriInfo
+              ? '<div class="field-hint">Des repères estimés à partir de ton poids et de ton ' +
+                'volume d\'entraînement, pas une prescription : aucun métabolisme n\'est mesuré ' +
+                'ici. Ajuste d\'après ce que fait la balance sur trois semaines.</div>'
+              : '')
           : '') +
         // LE CAS VIDE EST TRAITE, et il est frequent : c'est celui de quiconque ne
         // coche aucun complement. Un bouton qui deplie une liste sans rien
@@ -5701,7 +5762,7 @@
     if (!mesures.length) {
       var ecartCible = +(START_WEIGHT - TARGET_WEIGHT).toFixed(1);
       chartHtml =
-        carteEntete("poids", "⚖️ Poids", "aucune pesée") +
+        carteEntete("poids", "📉 Courbe de l'évolution", "aucune pesée") +
           '<div class="total-line">Départ déclaré : <b>' + frDec(String(START_WEIGHT)) +
             ' kg</b> · objectif <b>' + frDec(String(TARGET_WEIGHT)) + ' kg</b>' +
             (ecartCible !== 0
@@ -5854,8 +5915,14 @@
       if (showTrend) legend = '<span><i class="legend-swatch" style="background:var(--bleu)"></i> tendance ' + TREND_WINDOW_DAYS + ' j</span>' + legend;
 
       chartHtml =
-        carteEntete("poids",
-          '📉 Poids : ' + frDec(weightDelta <= 0 ? weightDelta : "+" + weightDelta) + ' kg depuis le départ',
+        // ⚠️ « DEPUIS LE DÉPART » RESTE, ET UN BANC L'A EXIGE. Le titre le portait ;
+        // en le remplacant par le nom demande, le resume s'est retrouve a annoncer
+        // un ecart sans dire par rapport a quoi. Depuis la v1.20.0 toutes les
+        // cartes sont fermees au premier affichage : ce resume est TOUT ce qu'on
+        // lit de la carte, il ne peut pas se permettre d'etre ambigu.
+        carteEntete("poids", "📉 Courbe de l'évolution",
+          frDec(weightDelta <= 0 ? weightDelta : "+" + weightDelta) +
+          ' kg depuis le départ · ' +
           mesures.length + " pesée" + (mesures.length > 1 ? "s" : "")) +
           '<div class="chart-modes" role="group" aria-label="Ce qui est affiché sur la courbe">' + modeBtns + '</div>' +
           '<div class="chart-wrap">' +
@@ -5915,15 +5982,15 @@
           'ces mêmes jours : l\'appli ne sait pas ce qui était prévu plus tôt.</div>'
       : "";
 
-    var badgesSectionHtml =
-      carteEntete("progression", "🏆 Progression",
-        totalDone + " séance" + (totalDone > 1 ? "s" : "")) +
+    // LE CORPS SEUL, SANS CARTE NI TITRE-BOUTON. Il ne s'affiche plus dans les
+    // reglages : bravoHtml l'accueille, dans sa propre carte, juste apres la
+    // seance qu'on vient de valider. C'est la que le palier se gagne.
+    var progressionCorpsHtml =
         statHtml +
         '<div class="badges">' + badgesHtml + '</div>' +
         '<div class="total-line">' +
           (firstKey ? "Depuis le " + esc(shortDate(firstKey)) : "Aucune séance enregistrée pour l'instant") +
-        '</div>' + histoNoteHtml +
-      '</section>';
+        '</div>' + histoNoteHtml;
 
     // Sauvegarde descendue en bas : c'est de la maintenance, on y touche une fois
     // par mois. Elle occupait la première place uniquement parce qu'elle
@@ -6024,7 +6091,8 @@
       '</section>';
 
     var settingsHtml =
-      carteEntete("sauvegarde", "Sauvegarde", "", "settings-card") +
+      carteEntete("sauvegarde", "Sauvegarde",
+        countKeys(log) + " jour" + (countKeys(log) > 1 ? "s" : ""), "settings-card") +
         '<div class="field" style="margin-bottom:0">' +
           '<div class="field-label" id="backup-label">' + countKeys(log) + ' jour(s) enregistré(s) sur cet appareil' +
             (profile && profile.done ? ', plus ton profil et ton programme' : '') + '</div>' +
@@ -6058,10 +6126,10 @@
       '<div class="swipe-hint">' + (isAnnexe ? "← glisse vers la droite pour revenir à la séance" : "glisse vers la gauche pour le bilan →") + '</div>';
 
     var pageHtml = isAnnexe
-      ? (nutritionHtml + iaAssistantHtml() + chartHtml + badgesSectionHtml +
-         analyseHtml() + profileHtml + themeHtml + settingsHtml + footerHtml)
+      ? (nutritionHtml + iaAssistantHtml() + chartHtml +
+         profileHtml + themeHtml + settingsHtml + footerHtml)
       : (state.bravo === editKey
-          ? bravoHtml(editKey, entry, program)
+          ? bravoHtml(editKey, entry, program, progressionCorpsHtml)
           : headerHtml + heroHtml + motivationHtml + seanceHtml);
 
     var animCls = state.pageAnim ? " page-from-" + state.pageAnim : "";
@@ -8016,7 +8084,7 @@
 
   // L'ECRAN DE FIN DE SEANCE. Il ne calcule rien de neuf : il relit ce que la
   // journee porte deja, et le dit une fois.
-  function bravoHtml(dateKey, entry, program) {
+  function bravoHtml(dateKey, entry, program, progressionCorps) {
     var kg = sessionTonnage(dateKey, entry), sets = 0, exos = 0, km = 0, k;
     var s = entry && entry.sets ? entry.sets : {};
     for (k in s) {
@@ -8071,21 +8139,34 @@
           ? 'Prochaine séance : ' + esc(longDate(suivant))
           : 'Aucune séance prévue dans les huit prochains jours.') +
       '</div>' +
-      '<button type="button" class="btn-primary" data-action="bravo-fermer">Continuer</button>' +
-    '</section>';
+    '</section>' +
+    // LA PROGRESSION, ICI ET PLUS DANS LES REGLAGES. Demande d'Olivier, repetee :
+    // le palier se gagne en validant une seance, il se lit donc au meme moment.
+    // Le bouton « Continuer » ferme la carte du BAS pour rester le dernier geste
+    // de l'ecran ; s'il n'y a pas de progression a montrer il retombe ici.
+    (progressionCorps
+      ? '<section class="card">' +
+          '<div class="card-title">🏆 Ta progression</div>' +
+          progressionCorps +
+          '<button type="button" class="btn-primary" data-action="bravo-fermer">Continuer</button>' +
+        '</section>'
+      : '<section class="card">' +
+          '<button type="button" class="btn-primary" data-action="bravo-fermer">Continuer</button>' +
+        '</section>');
   }
 
-  function analyseHtml() {
+  // LE CORPS DE L'ANALYSE, SANS SA CARTE. Elle n'ouvre plus la sienne : elle est
+  // rendue en tete du sous-bloc « Mon entraînement », avant ce que l'IA peut
+  // ajouter. Voir l'en-tete de la chaine — ce n'est pas de l'IA, et l'intitule le
+  // dit a l'ecran.
+  //
+  // `a` arrive DEJA CALCULE par l'appelant : analyser() balaie tout le journal, et
+  // le resume du titre de la carte en a besoin lui aussi. Le parametre est
+  // facultatif pour que la fonction reste appelable seule, notamment aux bancs.
+  function analyseCorpsHtml(a) {
     if (!profile || !profile.done || !profile.plan) return "";
-
-    // LE TITRE EST L'ENTETE, et le repliage a remplace la bascule « Analyser mes
-    // seances ». Le corps est donc construit inconditionnellement : voir l'en-tete
-    // de la chaine sur ce que ce choix coute et pourquoi il est fait.
-    var a = analyser();
-    var entete = carteEntete("analyse", "📊 Analyse de tes séances",
-      a.propositions.length
-        ? (a.propositions.length + " proposition" + (a.propositions.length > 1 ? "s" : ""))
-        : "rien à changer");
+    if (!a) a = analyser();
+    var entete = "";
     var corps = "";
 
     // --- Ce qui n'est PLUS dans la liste, et pourquoi --------------------------
@@ -8136,8 +8217,8 @@
           '<div class="ob-note">Ton programme est <b>100 % course</b>. Cette analyse ne porte ' +
           'que sur les exercices avec charge : elle n\'a rien à dire sur des kilomètres. ' +
           'Tes sorties se comparent à la précédente dans l\'écran de la séance, et tes ' +
-          'kilomètres sont totalisés juste au-dessus.</div>';
-        return entete + horsHtml + corps + '</section>';
+          'kilomètres sont totalisés sur l\'écran de fin de séance.</div>';
+        return entete + horsHtml + corps;
       }
       // Exactement ce que demandait le cahier des charges : pas de verdict tant
       // qu'il n'y a pas de quoi en tirer un.
@@ -8169,10 +8250,9 @@
         '<div class="ob-note">Pas encore de quoi conclure. Il faut au moins <b>' + manque +
         ' séances par exercice</b> pour qu\'une tendance veuille dire quelque chose. ' +
         'Reviens quand tu en auras fait quelques-unes de plus. ' +
-        'Pour faire relire ton bilan par une IA, la carte <b>Assistant IA</b> est ' +
-        'plus bas — elle ne t\'attend pas, elle marche dès maintenant. Ton abonnement ' +
-        'habituel suffit, il n\'y a rien à installer.</div>';
-      return entete + horsHtml + corps + '</section>';
+        'Pour faire relire tes séances par une IA, tout est juste en dessous : ça ' +
+        'marche dès maintenant, ton abonnement habituel suffit.</div>';
+      return entete + horsHtml + corps;
     }
 
     // --- Propositions ---------------------------------------------------------
@@ -8226,7 +8306,7 @@
       corps += '<div class="ana-bloc"><div class="field-label">Derniers ajustements</div>' + jl + '</div>';
     }
 
-    return entete + horsHtml + corps + '</section>';
+    return entete + horsHtml + corps;
   }
 
 
@@ -9296,12 +9376,12 @@
   // demande une permission a chaque appel sur iOS et echoue en standalone plus
   // souvent qu'a son tour ; un champ ou l'on colle marche partout, toujours.
   // ===========================================================================
-  function iaHtml() {
+  function iaHtml(a) {
     if (!profile || !profile.done || !profile.plan) return "";
 
     var entete =
       '<div class="ana-bloc">' +
-        '<div class="field-label">Un avis sur mes charges et mon programme</div>' +
+        '<div class="field-label">🏋️ Mon entraînement</div>' +
         '<button type="button" class="detail-toggle" data-action="toggle-ia" aria-expanded="' +
           (state.iaOuvert ? "true" : "false") + '">' +
           (state.iaOuvert
@@ -9314,15 +9394,38 @@
     var prompt = iaPrompt();
     var avecCle = iaClePrete();
 
+    // CE QUE L'APPLI VOIT TOUTE SEULE, EN PREMIER, ET DIT COMME TEL. Gratuit,
+    // immediat, rien ne sort du telephone. L'avis exterieur vient ensuite :
+    // l'inverse ferait passer le moteur de l'appli pour un lot de consolation.
     var corps =
+      '<div class="ia-etape">Ce que l\'appli voit toute seule</div>' +
+      analyseCorpsHtml(a) +
+
+      '<div class="ia-etape">Ce que l\'IA peut ajouter</div>' +
       '<div class="ia-note">' +
+        '<b>Ce qu\'elle peut faire.</b> Relire l\'ensemble de tes séances d\'un coup : ' +
+        'les charges à monter ou à réduire, le nombre de séries, le temps de repos, ' +
+        'et proposer un autre exercice quand celui du plan ne te convient pas.' +
+      '</div>' +
+      '<div class="ia-note">' +
+        '<b>Comment elle le fait.</b> Sur le bilan que l\'appli construit pour elle : ' +
+        'ton programme, ton matériel déclaré et tes séances <b>réellement ' +
+        'enregistrées</b> — pas celles qui étaient prévues. Pas ton prénom. ' +
         (avecCle
-          ? 'Une clé est enregistrée : l\'appli peut interroger ' + esc(iaFournisseur().label) +
-            ' directement. Le presse-papier reste disponible si tu préfères. '
-          : 'L\'appli ne se connecte à rien. Tu copies le texte ci-dessous, tu le colles ' +
-            'dans l\'appli IA de ton choix, puis tu rapportes sa réponse ici. ') +
+          ? 'Ta clé est enregistrée : l\'appli peut interroger ' + esc(iaFournisseur().label) +
+            ' directement, ou tu copies le texte toi-même. '
+          : 'Tu copies le texte, tu le colles dans l\'IA que tu utilises déjà, tu ' +
+            'rapportes sa réponse ici. ') +
         '<b>Ce texte part vers un service tiers</b> : il est affiché en entier pour que ' +
         'tu voies exactement ce que tu envoies.' +
+      '</div>' +
+      '<div class="ia-note">' +
+        '<b>Ce que l\'appli fait de sa réponse.</b> Elle revérifie chaque proposition ' +
+        'contre ton programme et ton matériel. Une charge qui bouge de plus de ' +
+        '<b>20 %</b>, un exercice absent de ton programme, un remplaçant que tu n\'as ' +
+        'pas le matériel pour faire : écartés, <b>comptés et montrés</b>. Ce qui reste ' +
+        's\'affiche en propositions, avec « Appliquer » et « Ignorer » — tu gardes la ' +
+        'main sur chacune.' +
       '</div>';
 
     // Appel direct : proposé EN PREMIER quand une clé existe, parce que c'est
@@ -9334,7 +9437,7 @@
           (state.iaOccupe ? ' disabled' : '') + '>' +
           (state.iaOccupe ? '… Analyse en cours' : '✦ Demander à ' + esc(iaFournisseur().label)) +
         '</button>' +
-        '<div class="ia-ou">ou passe par le presse-papier</div>';
+        '<div class="ia-ou">ou fais-le en copier-coller</div>';
     }
 
     corps +=
@@ -9426,12 +9529,12 @@
     // libelle dit ce que l'outil fait, ce qui manquait.
     var entete =
       '<div class="ana-bloc">' +
-        '<div class="field-label">Un plan alimentaire pour la journée</div>' +
+        '<div class="field-label">🥗 Mon alimentation</div>' +
         '<button type="button" class="detail-toggle" data-action="toggle-ia-nutri" aria-expanded="' +
           (state.iaNutriOuvert ? "true" : "false") + '">' +
           (state.iaNutriOuvert
             ? "Masquer ▲"
-            : "Demander un plan · " + cr.length + " prises attendues ▼") +
+            : "Demander un plan de la journée · " + cr.length + " prises ▼") +
         '</button>';
 
     if (!state.iaNutriOuvert) return entete + '</div>';
@@ -9439,13 +9542,29 @@
     var avecCle = iaClePrete();
     var corps =
       '<div class="ia-note">' +
+        '<b>Ce qu\'elle peut faire.</b> Composer ta journée complète : tes <b>' +
+        cr.length + ' prises</b>, avec de vraies quantités, calées sur les deux ' +
+        'cibles chiffrées de ta carte nutrition.' +
+      '</div>' +
+      '<div class="ia-note">' +
+        '<b>Comment elle le fait.</b> Sur ce que l\'appli lui donne : ton poids, ton ' +
+        'objectif, tes jours d\'entraînement, les horaires de tes prises et les ' +
+        'compléments déjà à ton plan. <b>C\'est l\'appli qui fixe le nombre de ' +
+        'prises</b> — l\'IA les remplit. ' +
         (avecCle
-          ? 'Une clé est enregistrée : l\'appli peut interroger ' + esc(iaFournisseur().label) +
-            ' directement. Le presse-papier reste disponible si tu préfères. '
-          : 'L\'appli ne se connecte à rien. Tu copies le texte ci-dessous, tu le colles ' +
-            'dans l\'appli IA de ton choix, puis tu rapportes sa réponse ici. ') +
+          ? 'Ta clé est enregistrée : l\'appli peut interroger ' + esc(iaFournisseur().label) +
+            ' directement, ou tu copies le texte toi-même. '
+          : 'Tu copies le texte, tu le colles dans l\'IA que tu utilises déjà, tu ' +
+            'rapportes sa réponse ici. ') +
         '<b>Ce texte part vers un service tiers</b> : il est affiché en entier pour que ' +
         'tu voies exactement ce que tu envoies.' +
+      '</div>' +
+      '<div class="ia-note">' +
+        '<b>Ce que l\'appli fait de sa réponse.</b> Elle relit chaque ligne contre sa ' +
+        'table d\'aliments et <b>recalcule les chiffres elle-même</b> : les portions ' +
+        'retenues sont les siennes. Elle t\'affiche le plan, ce qu\'il apporte et ce ' +
+        'qu\'elle a écarté. Tu décides de l\'enregistrer — il remplace alors ton plan ' +
+        'du jour, et un bouton te ramène au plan de l\'appli quand tu veux.' +
       '</div>';
 
     if (avecCle) {
@@ -9454,7 +9573,7 @@
           (state.iaOccupe ? ' disabled' : '') + '>' +
           (state.iaOccupe ? '… Demande en cours' : '✦ Demander à ' + esc(iaFournisseur().label)) +
         '</button>' +
-        '<div class="ia-ou">ou passe par le presse-papier</div>';
+        '<div class="ia-ou">ou fais-le en copier-coller</div>';
     }
 
     corps +=
@@ -9749,41 +9868,40 @@
     if (!profile || !profile.done) return "";
 
     var avecCle = iaClePrete();
-    var resume = avecCle ? ("clé · " + iaFournisseur().label) : "presse-papier";
+
+    // L'ANALYSE EST CALCULEE ICI, UNE FOIS, et descend dans le sous-bloc
+    // entrainement. Elle sert aussi au resume : voir plus bas.
+    var a = (profile.plan) ? analyser() : null;
+
+    // ⚠️ LE RESUME PORTE D'ABORD CE SUR QUOI ON PEUT AGIR. Toutes les cartes sont
+    // fermees au premier affichage depuis la v1.20.0, et l'analyse est passee
+    // derriere DEUX gestes en entrant ici : sans son compte dans le resume, rien a
+    // l'ecran ne dirait qu'il y a quelque chose a regarder dedans. La cle vient
+    // apres — c'est une configuration, pas un resultat.
+    var resume = avecCle ? ("clé · " + iaFournisseur().label) : "sans clé";
+    if (a && a.propositions.length) {
+      resume = a.propositions.length + " proposition" +
+               (a.propositions.length > 1 ? "s" : "") + " · " + resume;
+    }
 
     var chapeau =
       '<div class="ia-note">' +
-        '<b>À quoi ça sert.</b> L\'appli ne compose pas tes repas et ne juge pas ta ' +
-        'technique : elle ne sait pas le faire sans inventer. Une IA, elle, sait ' +
-        'proposer — mais elle ne sait pas vérifier ce qu\'elle avance. Ici elle ' +
-        'propose, et l\'appli vérifie.' +
-      '</div>' +
-      '<div class="ia-note">' +
-        '<b>Sur quoi le texte envoyé est construit.</b> Ton profil, tes deux cibles ' +
-        'chiffrées, ton programme, tes séances <b>réellement faites</b> — pas celles ' +
-        'que tu as déclarées — et tes compléments déjà au plan. Rien d\'autre : pas ' +
-        'ton prénom. Le texte est <b>affiché en entier</b> avant que tu le copies, ' +
-        'parce qu\'il part chez un service tiers.' +
-      '</div>' +
-      '<div class="ia-note">' +
-        '<b>Ce que l\'appli fait de la réponse.</b> Elle la relit ligne par ligne ' +
-        'contre ton programme, ton matériel et sa table d\'aliments. Une charge à ' +
-        'plus de 20 % d\'écart, un exercice qui n\'est pas au programme, une portion ' +
-        'qui atteint trois fois une portion courante : écartés, <b>comptés et ' +
-        'montrés</b>. Ce qui reste t\'est proposé — rien ne s\'applique tout seul.' +
+        'Une IA lit ton profil, ton programme et tes séances <b>réellement faites</b>, ' +
+        'puis te propose des ajustements. L\'appli relit chaque ligne de sa réponse ' +
+        'et ne retient que ce qui tient debout. Tu gardes la main : rien ne ' +
+        's\'applique tout seul.' +
       '</div>';
 
-    return carteEntete("ia", "✦ Assistant IA", resume) +
+    return carteEntete("ia", "✦ Assistant de progression IA", resume) +
       chapeau +
       iaCleHtml() +
       iaNutriHtml() +
-      iaHtml() +
+      iaHtml(a) +
       '<div class="nutri-disclaimer">' +
-        'Une IA se trompe avec aplomb. Elle ne te voit pas, ne connaît ni tes ' +
-        'douleurs ni ta technique, ne pèse rien et ne voit pas ce qu\'il y a dans ton ' +
-        'placard. C\'est pour ça que chaque ligne est relue ici, et c\'est la seule ' +
-        'raison pour laquelle on peut la laisser proposer quelque chose. Ses ' +
-        'propositions ne remplacent ni l\'œil d\'un coach ni un avis médical.' +
+        'Une IA se trompe avec aplomb, et elle ne te voit pas : ni tes douleurs, ni ' +
+        'ta technique, ni ce qu\'il y a dans ton placard. C\'est pour ça que chaque ' +
+        'ligne est relue ici avant de t\'être proposée. Ses propositions ne ' +
+        'remplacent ni l\'œil d\'un coach ni un avis médical.' +
       '</div>' +
     '</section>';
   }
@@ -10156,10 +10274,10 @@
     if (nouveau !== iaReglages.fournisseur) {
       if (iaReglages.cle) {
         iaReglages.cle = "";
-        // Deux situations, deux phrases. « — Aucun (pont presse-papier) — » se
-        // lit comme « je repasse au collage », pas comme « supprime ma clé » :
-        // lui répondre « saisis celle du nouveau » n'aurait aucun sens, il n'y a
-        // pas de nouveau fournisseur.
+        // Deux situations, deux phrases. Choisir l'option qui ne designe AUCUN
+        // fournisseur se lit comme « je reviens au copier-coller », pas comme
+        // « supprime ma clé » : lui répondre « saisis celle du nouveau » n'aurait
+        // aucun sens, il n'y a pas de nouveau fournisseur.
         state.iaAvisCle = nouveau
           ? "Clé effacée : elle appartenait au fournisseur précédent. Saisis celle du nouveau."
           : "Clé effacée : plus aucun fournisseur sélectionné.";
@@ -10248,7 +10366,7 @@
             ? "Masquer ▲"
             : (iaClePrete()
                  ? "Clé enregistrée · " + esc(iaFournisseur().label) + " ▼"
-                 : "Aucune clé · l'appli passe par le presse-papier ▼")) +
+                 : "Sans clé : tu copies, tu colles ▼")) +
         '</button>';
 
     if (!state.avanceOuvert) return entete + '</div>';
@@ -10256,7 +10374,7 @@
 
     var f = iaFournisseur();
     var opts = "", i;
-    opts += '<option value=""' + (iaReglages.fournisseur ? "" : " selected") + '>— Aucun (pont presse-papier) —</option>';
+    opts += '<option value=""' + (iaReglages.fournisseur ? "" : " selected") + '>— Aucun —</option>';
     for (i = 0; i < IA_FOURNISSEURS.length; i++) {
       opts += '<option value="' + esc(IA_FOURNISSEURS[i].v) + '"' +
               (IA_FOURNISSEURS[i].v === iaReglages.fournisseur ? " selected" : "") + '>' +
@@ -10285,12 +10403,15 @@
     // peu trop que pas assez.
     var corps =
       '<div class="ia-note">' +
-        'Le pont presse-papier ne demande <b>rien</b> : il marche avec l\'abonnement IA ' +
-        'que tu as déjà. Tu copies ton bilan, tu le colles dans ton assistant, tu ' +
-        'rapportes la réponse. La clé d\'API ci-dessous est un simple confort — elle ' +
-        'évite les copier-coller en laissant l\'appli interroger l\'IA directement. Elle ' +
-        'se crée sur le site du fournisseur et se paie à l\'usage, environ 3 centimes ' +
-        'par analyse ; ce n\'est pas ton abonnement, ce sont deux produits séparés.' +
+        '<b>Tu n\'as besoin de rien pour commencer.</b> Tu copies ta demande, tu la ' +
+        'colles dans l\'IA que tu utilises déjà, tu rapportes sa réponse ici. Ton ' +
+        'abonnement habituel suffit.' +
+      '</div>' +
+      '<div class="ia-note">' +
+        '<b>La clé, c\'est du confort.</b> Elle supprime les copier-coller : l\'appli ' +
+        'interroge l\'IA directement, d\'un bouton. Elle se crée sur le site du ' +
+        'fournisseur et se paie à l\'usage, environ 3 centimes par demande ; c\'est un ' +
+        'produit distinct de ton abonnement.' +
       '</div>' +
 
       '<div class="field">' +
@@ -14486,16 +14607,25 @@
   // de l'assistant tiennent dans une seule carte. Une cle disparue de cette liste
   // n'est plus relue du stockage — la validation cle par cle de loadSettings s'en
   // charge — donc un etat de repliage perime ne peut pas survivre.
-  var CARTES_REPLIABLES = ["nutrition", "ia", "poids", "progression",
-                           "analyse", "profil", "apparence", "sauvegarde"];
+  // « progression » est partie sur l'ecran de fin de seance et « analyse » a
+  // rejoint le sous-bloc entrainement de l'assistant : six cartes au lieu de huit.
+  // Une cle disparue de cette liste n'est plus relue du stockage — la validation
+  // cle par cle de loadSettings s'en charge — donc un etat de repliage perime ne
+  // peut pas survivre a la mise a jour.
+  var CARTES_REPLIABLES = ["nutrition", "ia", "poids",
+                           "profil", "apparence", "sauvegarde"];
 
-  // FERMEES PAR DEFAUT : celles qu'on ouvre une fois puis plus jamais. Les autres
-  // restent ouvertes — un bilan qui ne montre rien au premier regard n'est plus un
-  // bilan, c'est un sommaire.
-  // L'assistant est FERME par defaut : c'est un outil qu'on va chercher, pas une
-  // information qu'on lit tous les jours. Son resume dit deja l'essentiel — s'il y a
-  // une cle, et chez qui.
-  var CARTES_FERMEES = { apparence: 1, ia: 1, sauvegarde: 1 };
+  // TOUTES FERMEES AU PREMIER AFFICHAGE. Demande d'Olivier : « pour ne pas perdre
+  // le visiteur sur l'ecran ». L'argument d'avant — un bilan qui ne montre rien
+  // n'est plus un bilan — supposait que le titre replie ne disait rien ; il porte
+  // desormais un RESUME par carte, qui est ce qu'on lit d'un coup d'oeil.
+  //
+  // ⚠️ LA LISTE RESTE NOMMEE PLUTOT QU'UN « TOUT FERME » : le jour ou une carte
+  // doit s'ouvrir d'office, elle sort de cette liste, et le mecanisme n'a pas a
+  // etre reecrit. Elle doit rester alignee sur CARTES_REPLIABLES — le controle de
+  // fin de chaine le verifie.
+  var CARTES_FERMEES = { nutrition: 1, ia: 1, poids: 1,
+                         profil: 1, apparence: 1, sauvegarde: 1 };
 
   function carteOuverte(cle) {
     if (has(state.cartes, cle)) return !!state.cartes[cle];
@@ -15141,16 +15271,6 @@
     } else if (action === "toggle-ia-nutri") {
       state.iaNutriOuvert = !state.iaNutriOuvert; render();
 
-    } else if (action === "toggle-avance") {
-      // On relit les champs vivants avant de replier : sur iOS, un collage par le
-      // menu systeme ne declenche pas toujours l'evenement input, et « Masquer »
-      // perdrait une cle collee. Meme parade que les autres gestes qui touchent a
-      // la cle.
-      iaLireChamps();
-      state.avanceOuvert = !state.avanceOuvert;
-      persistSettings();
-      render();
-
     } else if (action === "ia-nutri-ecrire") {
       var vEcr = state.iaNutriVal;
       var rEcr = nutriEcrirePlanIA(vEcr);
@@ -15260,6 +15380,19 @@
       if (cRep && CARTES_REPLIABLES.indexOf(cRep) >= 0) {
         state.cartes[cRep] = !carteOuverte(cRep);
         persistSettings();
+      }
+      render();
+
+    } else if (action === "nutri-info") {
+      state.nutriInfo = !state.nutriInfo; render();
+
+    } else if (action === "serie-idem") {
+      var idemEx = t.getAttribute("data-ex");
+      var idemAt = parseInt(t.getAttribute("data-set"), 10);
+      var idemDe = serieAReprendre(setsOf(currentEntry(), idemEx), idemAt);
+      if (idemDe) {
+        writeSetField(idemEx, idemAt, "kg", String(idemDe.kg));
+        writeSetField(idemEx, idemAt, "reps", String(idemDe.reps));
       }
       render();
 
