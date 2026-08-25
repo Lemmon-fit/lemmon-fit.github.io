@@ -230,8 +230,15 @@ p { text-wrap: pretty; }
    =========================================================================== */
 
 /* pan-y laisse le defilement vertical au navigateur et nous reserve
-   l'horizontale. Sans lui, le glissement lateral se bat avec le scroll. */
-#ecran {
+   l'horizontale. Sans lui, le glissement lateral se bat avec le scroll.
+
+   LA CLASSE EN PLUS DE L'IDENTIFIANT. Pendant un glissement, deux ecrans sont
+   montes cote a cote : le sortant et l'entrant. Un seul peut porter `#ecran`,
+   sans quoi getElementById rendrait le decor a la place du vivant. Les volets
+   du glissement portent donc `.ecran`, et c'est la MEME regle qui les habille —
+   recopier ces valeurs dans une seconde regle serait deux verites a tenir. */
+#ecran,
+.ecran {
   touch-action: pan-y;
   min-height: 100vh;
   padding: calc(4px + env(safe-area-inset-top)) 20px 0;
@@ -239,7 +246,8 @@ p { text-wrap: pretty; }
 
 /* La gouttiere du bas doit degager la nav, sinon le dernier element passe
    dessous et devient intouchable. */
-body.a-nav #ecran {
+body.a-nav #ecran,
+body.a-nav .ecran {
   padding-bottom: calc(56px + 18px + env(safe-area-inset-bottom));
 }
 
@@ -1051,20 +1059,65 @@ body.a-nav .nav { display: flex; }
    =========================================================================== */
 
 /* ---------------------------------------------------------------------------
-   GLISSEMENT — l'ecran qui arrive se voit arriver
+   GLISSEMENT — les deux ecrans suivent le doigt
    ---------------------------------------------------------------------------
-   160 ms : assez pour lire le sens du geste, trop court pour se sentir attendre.
-   Seul l'ecran ENTRANT est anime ; animer aussi le sortant demanderait de garder
-   deux arbres DOM montes en meme temps, avec leurs ecouteurs et leurs chronos.
+   LA PISTE est posee par-dessus la page pendant le geste. Elle porte les deux
+   volets, sortant et entrant, cote a cote, et c'est le JavaScript qui les
+   translate a chaque touchmove — aucune duree ici, le mouvement EST le doigt.
+   Seule la fin de course, au relacher, est une transition (.glisse-fin).
+
+   z-index 30 : SOUS la nav basse, qui est a 40 et reste donc en place pendant
+   tout le geste, comme une barre d'onglets doit le faire.
+
+   pointer-events: none : le doigt continue de viser l'ecran reel, dont le
+   `touch-action: pan-y` reserve l'horizontale. La piste est un decor.
+
+   Le fond est OPAQUE des deux cotes : la piste couvre l'ecran reel, ce qui
+   permet de reconstruire celui-ci derriere elle avant de la retirer. C'est ce
+   qui evite de voir le nouvel ecran se monter.
+   --------------------------------------------------------------------------- */
+.glisse-piste {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  overflow: hidden;
+  pointer-events: none;
+  background: var(--fond);
+}
+
+/* `top` est pose en ligne par le JavaScript : le volet sortant est remonte de
+   la position de defilement, pour montrer ce que l'utilisateur a sous les yeux
+   et pas le haut de l'ecran. L'`overflow: hidden` de la piste coupe le reste. */
+.glisse-volet {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background: var(--fond);
+  will-change: transform;
+}
+
+/* 210 ms : assez pour lire la fin du mouvement, trop court pour se sentir
+   attendre. Elle ne s'ajoute pas au geste, elle le termine. */
+.glisse-fin { transition: transform .21s cubic-bezier(.22,.61,.36,1); }
+
+/* ---------------------------------------------------------------------------
+   L'ENTREE ANIMEE, pour les bascules qui ne viennent pas d'un doigt : nav
+   basse, bancs, et le geste rattrape au relacher quand la piste n'a pas ete
+   montee. Le glissement, lui, porte son propre mouvement de bout en bout.
    --------------------------------------------------------------------------- */
 @keyframes ec-droite { from { transform: translateX(26px); opacity: 0; } to { transform: none; opacity: 1; } }
 @keyframes ec-gauche { from { transform: translateX(-26px); opacity: 0; } to { transform: none; opacity: 1; } }
 .ec-de-droite { animation: ec-droite .16s cubic-bezier(.22,.61,.36,1); }
 .ec-de-gauche { animation: ec-gauche .16s cubic-bezier(.22,.61,.36,1); }
 
-/* Qui demande moins d'animation retrouve le comportement instantane du README. */
+/* Qui demande moins d'animation retrouve le comportement instantane du README.
+   La piste n'est alors jamais montee — le JavaScript le verifie avant de la
+   construire — mais la regle reste, au cas ou le reglage change en cours de
+   route pendant qu'une fin de course est en vol. */
 @media (prefers-reduced-motion: reduce) {
   .ec-de-droite, .ec-de-gauche { animation: none; }
+  .glisse-fin { transition: none; }
 }
 
 /* ---------------------------------------------------------------------------
@@ -1315,6 +1368,69 @@ body.a-nav .nav { display: flex; }
   font-size: 10px; font-weight: 800; letter-spacing: .3px; padding: 2px 7px;
   border-radius: 8px; background: var(--salle-bg); color: var(--salle-fg); margin-left: 6px;
 }
+
+/* ---------------------------------------------------------------------------
+   SORTIES — retour des sous-ecrans, sortie du diagnostic
+   ---------------------------------------------------------------------------
+   Un ecran dont on ne sait pas sortir est un ecran casse. Ces deux boutons ne
+   dependent d'aucun geste : ils restent la quand le glissement ne repond pas.
+   --------------------------------------------------------------------------- */
+.ecran-retour {
+  display: flex; align-items: center; gap: 7px; min-height: 44px;
+  background: transparent; border: 0; padding: 0; margin-top: 4px;
+  font-size: 14.5px; font-weight: 600; color: var(--texte-2);
+}
+.ob-quitter {
+  width: 100%; min-height: 48px; border: 0; background: transparent;
+  color: var(--texte-2); font-size: 13.5px; font-weight: 600;
+  text-decoration: underline; margin-bottom: 20px;
+}
+
+/* ---------------------------------------------------------------------------
+   COMPLEMENTS DE LA NUTRITION — empiles, plus cote a cote
+   ---------------------------------------------------------------------------
+   Le texte long passait PAR-DESSUS le libelle : il vivait dans une colonne en
+   `flex: 0 0 auto`, prevue pour un chiffre court, et refusait de retrecir.
+   --------------------------------------------------------------------------- */
+.nu-supps { list-style: none; margin: 0 0 16px; padding: 0; }
+.nu-supp {
+  display: flex; flex-direction: column; gap: 3px;
+  padding: 12px 0; border-bottom: 1px solid var(--sep);
+}
+.nu-supp:last-child { border-bottom: 0; }
+.nu-supp-n { font-size: 15px; font-weight: 700; color: var(--texte); }
+.nu-supp-w { font-size: 13px; line-height: 1.5; color: var(--texte-1b); }
+
+/* ---------------------------------------------------------------------------
+   PROGRES ET NUTRITION — conformite d'apres les captures d'Olivier
+   --------------------------------------------------------------------------- */
+
+/* En-tete de courbe : ce qu'elle mesure a gauche, l'ecart a droite. */
+.cb-tete {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: 10px; margin-bottom: 3px;
+}
+.cb-lbl {
+  font-size: 11px; font-weight: 700; letter-spacing: .8px; text-transform: uppercase;
+  color: var(--texte-2); line-height: 1.25;
+}
+.cb-ecart {
+  flex: 0 0 auto; white-space: nowrap; font-size: 12px; font-weight: 800;
+  font-family: ui-monospace, "SF Mono", monospace;
+}
+
+/* Carte d'objectif running. */
+.ro-titre { font-size: 16px; font-weight: 800; color: var(--texte); margin-bottom: 3px; letter-spacing: -.2px; }
+
+/* Nutrition : date, cibles en lignes. */
+.nu-date { font-size: 13px; font-weight: 700; color: var(--texte-2); margin-top: 4px; }
+.nu-l {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: 12px; margin-top: 14px;
+}
+.nu-l-t { font-size: 17px; font-weight: 800; color: var(--sombre-texte); }
+.nu-l-v { font-size: 20px; font-weight: 800; color: var(--salle-sur-sombre); white-space: nowrap; }
+.nu-l-s { font-size: 12.5px; color: var(--sombre-texte-3); line-height: 1.5; margin-top: 2px; }
 </style>
 <script>
 (function () {
@@ -7550,6 +7666,34 @@ body.a-nav .nav { display: flex; }
     return n;
   }
 
+  // LA PLUS LONGUE SERIE JAMAIS TENUE. Elle se lit dans le passe, contrairement
+  // a serieCourante() qui remonte depuis aujourd'hui : c'est un record, il ne
+  // se perd pas quand la serie en cours se casse.
+  function serieRecord() {
+    var h = state.hist || [], d = deriver(), i, prevus = {}, parDate = {};
+    if (!h.length || !d.progJours.length) return "—";
+    for (i = 0; i < d.progJours.length; i++) prevus[d.progJours[i].ji] = 1;
+    for (i = 0; i < h.length; i++) parDate[h[i].d] = 1;
+
+    var premiere = null, dd;
+    for (i = 0; i < h.length; i++) {
+      dd = dateDepuisCle(h[i].d);
+      if (dd && (!premiere || dd < premiere)) premiere = dd;
+    }
+    if (!premiere) return "—";
+
+    var cur = new Date(premiere.getTime()), auj = new Date(), n = 0, max = 0, garde = 0;
+    auj.setHours(0, 0, 0, 0);
+    while (cur <= auj && garde++ < 4000) {
+      if (prevus[(cur.getDay() + 6) % 7]) {
+        if (parDate[cleDate(cur)]) { n++; if (n > max) max = n; }
+        else n = 0;
+      }
+      cur.setDate(cur.getDate() + 1);
+    }
+    return max || "—";
+  }
+
   // Assiduite : seances faites sur seances prevues, depuis la premiere trace.
   function assiduite() {
     var d = deriver(), h = state.hist || [], i, prevus = {}, faits = h.length;
@@ -7647,12 +7791,32 @@ body.a-nav .nav { display: flex; }
   // Quels modes la semaine DECLAREE peut produire. Proposer « Distance » a
   // quelqu'un qui ne court pas afficherait une courbe plate a zero, et
   // laisserait croire a une regression.
+  // Chaque mode porte SA teinte et SON libelle. La maquette colore la serie
+  // avec la couleur de sa discipline — bleu en Distance, citron en Tonnage —
+  // et nomme ce qu'elle mesure au-dessus de la courbe. Sans ca, quatre modes
+  // rendaient quatre courbes identiques a l'oeil.
+  var T_SALLE = { trait: "var(--citron-courbe)", aire: "var(--salle-pale)", encre: "var(--citron-encre)" };
+  var T_RUN   = { trait: "var(--run-bg)",        aire: "var(--run-pale)",   encre: "var(--run-encre)" };
+  var T_VERT  = { trait: "var(--vert-bg)",       aire: "var(--vert-pale)",  encre: "var(--vert-encre)" };
+
   function modesDisponibles() {
     var d = deriver(), out = [];
-    if (d.slotsSalle.length) out.push({ v: "tonnage", t: "Tonnage", u: "kg" });
-    if ((state.pesees || []).length) out.push({ v: "poids", t: "Poids", u: "kg" });
-    if (d.slotsRun.length) out.push({ v: "distance", t: "Distance", u: "km" });
-    if (d.slots.length) out.push({ v: "seances", t: "Séances", u: "" });
+    if (d.slotsSalle.length) {
+      out.push({ v: "tonnage", t: "Tonnage", u: "kg",
+                 l: "kilos soulevés par semaine", c: T_SALLE });
+    }
+    if ((state.pesees || []).length) {
+      out.push({ v: "poids", t: "Poids", u: "kg",
+                 l: "ton poids semaine après semaine", c: T_VERT });
+    }
+    if (d.slotsRun.length) {
+      out.push({ v: "distance", t: "Distance", u: "km",
+                 l: "kilomètres courus par semaine", c: T_RUN });
+    }
+    if (d.slots.length) {
+      out.push({ v: "seances", t: "Séances", u: "",
+                 l: "séances faites par semaine", c: T_SALLE });
+    }
     return out;
   }
 
@@ -8119,8 +8283,25 @@ body.a-nav .nav { display: flex; }
       h += '<button type="button" class="ob-prev" data-action="ob-prev">Retour</button>';
     }
     h += '<button type="button" class="ob-next" data-action="ob-next">' +
-         (step >= OB.length - 1 ? "Ouvrir l'appli" : "Continuer") + "</button>";
-    h += "</div></div>";
+         (state.vu ? "Enregistrer" : (step >= OB.length - 1 ? "Ouvrir l'appli" : "Continuer")) +
+         "</button>";
+    h += "</div>";
+
+    // LA SORTIE DU DIAGNOSTIC QUAND ON Y REVIENT POUR CORRIGER UNE REPONSE.
+    //
+    // Signale par Olivier : depuis Moi › Durée par séance, on tombait dans le
+    // diagnostic et il fallait REPONDRE A TOUTES LES ETAPES SUIVANTES pour en
+    // sortir. Le glissement est fige ici — a raison, on ne quitte pas un
+    // questionnaire par erreur — mais rien ne remplacait cette issue.
+    //
+    // La regle : un diagnostic DEJA FAIT (`vu`) se corrige, il ne se refait pas.
+    // Le bouton principal enregistre et rend la main ; le lien du dessous
+    // permet de repartir sans rien changer.
+    if (state.vu) {
+      h += '<button type="button" class="ob-quitter" data-action="ob-quitter">' +
+           "Annuler et revenir</button>";
+    }
+    h += "</div>";
     return h;
   }
 
@@ -8140,10 +8321,28 @@ body.a-nav .nav { display: flex; }
     window.scrollTo(0, 0);
   }
 
+  // UN DIAGNOSTIC DEJA FAIT SE CORRIGE, IL NE SE REFAIT PAS. Quand on arrive
+  // ici depuis une ligne de reglage, valider rend la main tout de suite : on
+  // etait venu changer UNE reponse, pas reprendre les onze etapes.
+  //
+  // « Refaire le diagnostic », depuis Moi, remet `vu` a false et retrouve donc
+  // le parcours complet.
   function obSuivant() {
+    if (state.vu) { obQuitter(true); return; }
     if (state.obStep >= OB.length - 1) { ouvrirLAppli(); return; }
     poser({ obStep: state.obStep + 1 });
     window.scrollTo(0, 0);
+  }
+
+  function obQuitter(enregistre) {
+    var dest = state.retourDe || "moi";
+    // Le plan depend des reponses : on le laisse se rederiver, et on remet la
+    // seance courante dans les clous au cas ou la rotation aurait change.
+    var d = deriver();
+    poser({ ecran: dest, retourDe: "", obStep: 0,
+            seance: (state.seance < SEANCES.length ? state.seance : d.siDepart) });
+    window.scrollTo(0, 0);
+    return enregistre;
   }
 
   function obPrecedent() {
@@ -9028,9 +9227,14 @@ body.a-nav .nav { display: flex; }
     return { pts: out, min: min, max: max };
   }
 
-  function courbeHtml(vals, unite, etiqDepart, etiqFin, ecart) {
+  // `libelle` nomme ce que la courbe mesure (« kilomètres courus par semaine »),
+  // `teinte` la colore. LES DEUX MANQUAIENT : une courbe sans libelle laisse
+  // deviner son sujet, et une courbe toujours citron ne dit pas qu'on a change
+  // de mode. La maquette colore la serie avec la teinte de sa discipline.
+  function courbeHtml(vals, unite, etiqDepart, etiqFin, ecart, libelle, teinte) {
     var c = courbePoints(vals), i, ligne = [], aire = [], dernier;
     if (!c.pts.length) return '<div class="cb-vide">Pas encore de mesure.</div>';
+    teinte = teinte || { trait: "var(--citron-courbe)", aire: "var(--salle-pale)", encre: "var(--citron-encre)" };
 
     for (i = 0; i < c.pts.length; i++) { ligne.push(c.pts[i].x + "," + c.pts[i].y); }
     aire = ligne.slice();
@@ -9038,17 +9242,24 @@ body.a-nav .nav { display: flex; }
     aire.push(c.pts[c.pts.length - 1].x + ",100");
     dernier = c.pts[c.pts.length - 1];
 
-    var h = '<div class="cb">';
-    if (ecart) h += '<div class="cb-ecart">' + esc(ecart) + "</div>";
+    var h = "";
+    // L'EN-TETE : ce que la courbe mesure a gauche, l'ecart a droite, sur la
+    // meme ligne. C'est la disposition de la maquette, et elle evite d'avoir a
+    // deviner l'unite en lisant l'axe.
+    h += '<div class="cb-tete"><span class="cb-lbl">' + esc(libelle || "") + "</span>" +
+         (ecart ? '<span class="cb-ecart" style="color:' + teinte.encre + '">' +
+                  esc(ecart) + "</span>" : "") + "</div>";
+    h += '<div class="cb">';
     h += '<div class="cb-axe"><span class="cb-a-h">' + esc(fmtVal(c.max) + unite) + "</span>" +
          '<span class="cb-a-b">' + esc(fmtVal(c.min) + unite) + "</span></div>";
     h += '<div class="cb-zone">';
     h += '<div class="cb-guide cb-guide-h"></div><div class="cb-guide cb-guide-b"></div>';
     h += '<svg class="cb-svg" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">' +
-         '<polyline class="cb-aire" points="' + aire.join(" ") + '"></polyline>' +
-         '<polyline class="cb-ligne" points="' + ligne.join(" ") + '"' +
+         '<polyline class="cb-aire" points="' + aire.join(" ") + '" fill="' + teinte.aire + '"></polyline>' +
+         '<polyline class="cb-ligne" points="' + ligne.join(" ") + '" stroke="' + teinte.trait + '"' +
          ' vector-effect="non-scaling-stroke"></polyline></svg>';
-    h += '<span class="cb-point" style="left:' + dernier.x + "%;top:" + dernier.y + '%"></span>';
+    h += '<span class="cb-point" style="left:' + dernier.x + "%;top:" + dernier.y +
+         "%;background:" + teinte.trait + '"></span>';
     h += "</div>";
     h += '<div class="cb-pieds"><span class="cb-p">' + esc(etiqDepart) + "</span>" +
          '<span class="cb-p">' + esc(etiqFin) + "</span></div>";
@@ -9262,7 +9473,12 @@ body.a-nav .nav { display: flex; }
 
   function ficheHtml() {
     var nom = state.ficheEx, i, j, h = "", ex = null, seances, vals = [], dates = [];
-    if (!nom) return '<p class="cb-vide">Aucun exercice sélectionné.</p>';
+    // LE RETOUR SE POSE AVANT TOUTE SORTIE ANTICIPEE. Il etait plus bas, donc
+    // une fiche ouverte sans exercice n'avait AUCUNE issue : meme famille de
+    // defaut que le diagnostic dont on ne pouvait pas sortir.
+    var retour = '<button type="button" class="fi-retour" data-action="onglet" ' +
+                 'data-ecran="histo"><span aria-hidden="true">‹</span> Historique</button>';
+    if (!nom) return retour + '<p class="cb-vide">Aucun exercice sélectionné.</p>';
 
     // On cherche la description dans le catalogue de la seance, pas dans le
     // journal : le journal porte ce qui a ete FAIT, le catalogue porte les
@@ -9273,8 +9489,7 @@ body.a-nav .nav { display: flex; }
       }
     }
 
-    h += '<button type="button" class="fi-retour" data-action="onglet" data-ecran="histo">' +
-         '<span aria-hidden="true">‹</span> Historique</button>';
+    h += retour;
     h += '<h1 class="fi-nom">' + esc(nom) + "</h1>";
     if (ex && ex.mat) h += '<div class="fi-mat">' + esc(ex.mat) + "</div>";
 
@@ -9407,12 +9622,15 @@ body.a-nav .nav { display: flex; }
     }
 
     // --- 1. Trois vignettes ---
+    // LIBELLES DE LA MAQUETTE. Les miens disaient « tonnes » et « record kg » :
+    // exacts, mais ils nomment l'UNITE au lieu de ce qu'elle mesure. « soulevés
+    // au total » et « record de streak » disent de quoi il s'agit.
     h += '<div class="vign">';
     h += vignette(hj.length, "séances");
-    if (d.slotsSalle.length) h += vignette(fmtVal(Math.round(tonnage / 100) / 10), "tonnes");
-    else if (d.slotsCours.length) h += vignette(fmtVal(Math.round(heures / 6) / 10), "h de cours");
-    else h += vignette(fmtVal(km), "km");
-    h += vignette(record ? fmtVal(record) : "—", "record kg");
+    if (d.slotsSalle.length) h += vignette(fmtVal(Math.round(tonnage / 100) / 10) + " t", "soulevés au total");
+    else if (d.slotsCours.length) h += vignette(fmtVal(Math.round(heures / 6) / 10) + " h", "de cours au total");
+    else h += vignette(fmtVal(km) + " km", "courus au total");
+    h += vignette(serieRecord(), "record de streak");
     h += "</div>";
 
     if (!modes.length) {
@@ -9436,8 +9654,8 @@ body.a-nav .nav { display: flex; }
     h += courbeHtml(vals, u,
       "Départ · " + fmtVal(depart) + u,
       "Aujourd'hui · " + fmtVal(fin) + u,
-      (delta >= 0 ? "+" : "−") + fmtVal(Math.abs(delta)) + u + " sur 12 semaines",
-      modes[mode].t);
+      (delta >= 0 ? "+ " : "− ") + fmtVal(Math.abs(delta)) + u + " sur 12 sem.",
+      modes[mode].l, modes[mode].c);
     h += "</section>";
 
     // --- 3. La carte Running ---
@@ -9506,32 +9724,43 @@ body.a-nav .nav { display: flex; }
   // EN-TETE « RUNNING », JAMAIS « COURSE A PIED », et un seul bleu dans toute
   // la carte : bordure, barre, chiffres et vignettes partagent les trois memes
   // valeurs. Deux bleus voisins se lisent comme une erreur d'impression.
-  function carteObjectifRunHtml(kmTotal, sortiesTotal) {
-    var h = state.hist || [], i, km = 0, sorties = 0, lundi = lundiDe(new Date()), d, mins = 0;
+  // UNE CARTE D'OBJECTIF, PAS UN RESUME. La mienne recopiait des totaux ; celle
+  // de la maquette pose une CIBLE — tenir trente minutes sans marcher — et
+  // montre ou l'on en est. Un total ne dit pas s'il faut se rejouir.
+  //
+  // L'objectif est mesure sur la PLUS LONGUE sortie des quatre dernieres
+  // semaines, pas sur la derniere : une mauvaise sortie ne doit pas effacer un
+  // record tenu la semaine d'avant.
+  var RUN_CIBLE_MIN = 30;
+
+  function carteObjectifRunHtml(kmTotal) {
+    var h = state.hist || [], i, d, auj = new Date();
+    var pluslongue = 0, plusloin = 0, kmMois = 0, m;
+    auj.setHours(0, 0, 0, 0);
+
     for (i = 0; i < h.length; i++) {
       if (h[i].t !== "run") continue;
       d = dateDepuisCle(h[i].d);
-      if (!d || jourEcart(d, lundi) < 0 || jourEcart(d, lundi) > 6) continue;
-      sorties++;
-      km += nombreOu(h[i].km, 0);
-      mins += nombreOu(h[i].minutes, 0);
+      if (!d || jourEcart(auj, d) > 28 || jourEcart(auj, d) < 0) continue;
+      m = nombreOu(h[i].minutes, 0);
+      if (m > pluslongue) pluslongue = m;
+      if (nombreOu(h[i].km, 0) > plusloin) plusloin = nombreOu(h[i].km, 0);
+      kmMois += nombreOu(h[i].km, 0);
     }
-    var vise = deriver().slotsRun.length;
-    var pct = Math.min(100, vise ? Math.round(sorties / vise * 100) : 0);
+    var pct = Math.min(100, Math.round(pluslongue / RUN_CIBLE_MIN * 100));
 
     return '<section class="run-obj"><div class="ro-t">Running</div>' +
-      '<div class="ro-titre">' + esc(fmtVal(km)) + " km cette semaine</div>" +
-      '<div class="ro-s">' + sorties + " sortie" + (sorties > 1 ? "s" : "") +
-      " sur " + vise + " prévue" + (vise > 1 ? "s" : "") + ". " +
-      (sorties >= vise ? "Le compte y est." : "Il en reste " + (vise - sorties) + ".") + "</div>" +
+      '<div class="ro-titre">Tenir ' + RUN_CIBLE_MIN + " min sans marcher</div>" +
+      '<div class="ro-s">Ta plus longue sortie sans t\'arrêter, sur les quatre ' +
+      "dernières semaines.</div>" +
       '<div class="ro-c"><span class="ro-piste"><span class="ro-barre" style="width:' + pct +
-      '%"></span></span><span class="ro-n num">' + sorties + "/" + vise + "</span></div>" +
+      '%"></span></span><span class="ro-n num">' + Math.round(pluslongue) + " / " +
+      RUN_CIBLE_MIN + " min</span></div>" +
       '<div class="ro-stats">' +
-      '<div class="ro-st"><span class="ro-st-v num">' + esc(fmtVal(kmTotal || 0)) +
-      ' km</span><span class="ro-st-l">depuis le début</span></div>' +
-      '<div class="ro-st"><span class="ro-st-v num">' +
-      (mins ? Math.round(mins) + " min" : "—") +
-      '</span><span class="ro-st-l">cette semaine</span></div></div></section>';
+      '<div class="ro-st"><span class="ro-st-v num">' + esc(fmtVal(kmMois)) +
+      ' km</span><span class="ro-st-l">ce mois-ci</span></div>' +
+      '<div class="ro-st"><span class="ro-st-v num">' + esc(fmtVal(plusloin)) +
+      ' km</span><span class="ro-st-l">ta plus longue sortie</span></div></div></section>';
   }
 
   function badgesHtml(total) {
@@ -9624,7 +9853,10 @@ body.a-nav .nav { display: flex; }
       { t: "Mes exercices", s: nbExercicesActifs() + " retenus", a: "aller-exos" },
       { t: "Durée par séance", s: DUREES[state.obDuree].t, a: "ob-etape", v: "5" },
       { t: "Matériel disponible", s: nbMateriel() + " catégories", a: "ob-etape", v: "6" },
-      { t: "Refaire le diagnostic", s: "Reprend tout depuis le début", a: "ob-etape", v: "0" }
+      // ACTION DISTINCTE de « ob-etape ». Corriger une reponse et reprendre les
+      // onze etapes ne sont pas le meme geste : le premier rend la main tout de
+      // suite, le second redemande tout.
+      { t: "Refaire le diagnostic", s: "Reprend tout depuis le début", a: "ob-refaire" }
     ]);
 
     h += groupeHtml("Assistant IA", [
@@ -10396,18 +10628,51 @@ body.a-nav .nav { display: flex; }
 
     var p = profilDepuisEtat(), t = MOTEUR.nutritionTargets(p), h = "";
 
-    h += '<p class="nu-tete">' + (acts.length
-      ? "Aujourd'hui : " + esc(acts.join(" et "))
-      : "Aujourd'hui : repos") + "</p>";
+    // LE SOUS-TITRE DIT POURQUOI LES CHIFFRES SONT CEUX-LA AUJOURD'HUI. Ma
+    // version se contentait de nommer l'activite ; celle de la maquette relie
+    // l'activite aux reperes, ce qui est toute la raison d'etre de l'ecran.
+    var nomsActs = [], jr2 = null, k2;
+    for (k2 = 0; k2 < d.progJours.length; k2++) { if (d.progJours[k2].ji === auj) jr2 = d.progJours[k2]; }
+    if (jr2) {
+      for (k2 = 0; k2 < jr2.acts.length; k2++) {
+        var aa = jr2.acts[k2];
+        nomsActs.push(aa.t === "salle" ? SEANCES[aa.si].code
+          : (aa.t === "cours" ? (aa.nom || "Cours") : "Running"));
+      }
+    }
+    h += '<div class="nu-date">' + esc(dateLongue(new Date())) + "</div>";
+    h += '<p class="nu-tete">' + (nomsActs.length
+      ? "Jour d'entraînement — " + esc(nomsActs.join(" et ")) +
+        ". Tes repères montent avec le volume."
+      : "Jour de repos. Tes repères tiennent compte de ta semaine, pas de la journée.") + "</p>";
 
+    // LES CIBLES EN LIGNES, CHACUNE AVEC SA JUSTIFICATION. En deux vignettes
+    // cote a cote, elles n'avaient la place de rien expliquer — et un chiffre
+    // sans sa raison ne se verifie pas.
+    var parKilo = Math.round((t.prot / (p.startWeight || 1)) * 10) / 10;
     h += '<section class="carte-sombre"><div class="cs-code">Tes cibles du jour</div>';
     h += '<div class="cs-sur">Ce que tu as réellement mangé n\'est pas encore suivi.</div>';
-    h += '<div class="nu-cibles">' +
-         '<div class="nu-c"><span class="nu-n num">' + t.prot + " g</span><span>protéines</span></div>" +
-         '<div class="nu-c"><span class="nu-n num">' + t.kcal + " kcal</span><span>sur la journée</span></div>" +
-         "</div>";
-    h += '<p class="cs-txt">Estimées depuis ton poids et ton volume d\'entraînement. ' +
-         "Ce sont des repères, pas une prescription.</p></section>";
+    h += '<div class="nu-l"><span class="nu-l-t">Protéines</span>' +
+         '<span class="nu-l-v num">' + t.prot + " g</span></div>";
+    h += '<div class="nu-l-s">environ ' + esc(fmtVal(parKilo)) + " g par kilo de poids de corps</div>";
+    h += '<div class="nu-l"><span class="nu-l-t">Calories</span>' +
+         '<span class="nu-l-v num">' + t.kcal + " kcal</span></div>";
+    h += '<div class="nu-l-s">' + (t.deficit > 0
+      ? "soit " + t.deficit + " kcal sous ton maintien estimé"
+      : (t.deficit < 0 ? "soit " + Math.abs(t.deficit) + " kcal au-dessus de ton maintien estimé"
+                       : "au niveau de ton maintien estimé")) + "</div></section>";
+
+    // LES TROIS VIGNETTES manquaient : elles montrent d'ou sort la cible, en
+    // posant le maintien et l'ecart a cote d'elle.
+    h += '<div class="vign">' +
+         '<div class="vg"><span class="vg-n num">' + t.maintain + '</span>' +
+         '<span class="vg-l">maintien estimé kcal/j</span></div>' +
+         '<div class="vg"><span class="vg-n num">' + t.kcal + '</span>' +
+         '<span class="vg-l">cible pour avancer</span></div>' +
+         '<div class="vg"><span class="vg-n num">' +
+         (t.deficit > 0 ? "− " + t.deficit : (t.deficit < 0 ? "+ " + Math.abs(t.deficit) : "0")) +
+         '</span><span class="vg-l">' + (t.deficit >= 0 ? "déficit" : "surplus") +
+         ' kcal/j</span></div></div>';
 
     h += '<section class="nu-chantier">';
     h += '<div class="nu-ch-tete"><span class="nu-badge">EN CHANTIER</span></div>';
@@ -10428,13 +10693,20 @@ body.a-nav .nav { display: flex; }
 
     h += '<div class="carte-t">Tes compléments</div>';
     var pris = 0;
-    h += '<ul class="mo-liste">';
+    // MISE EN PAGE PROPRE AU COMPLEMENT, PAS CELLE DES LIGNES DE REGLAGE.
+    //
+    // Je reutilisais `.mo-l`, dont la valeur de droite est en `flex: 0 0 auto`
+    // parce qu'elle porte normalement un chiffre court. Ici elle portait le
+    // texte long du complement : il refusait de retrecir et passait PAR-DESSUS
+    // le libelle. Vu par Olivier a l'ecran.
+    //
+    // Le libelle et sa raison sont donc empiles, chacun sur sa ligne.
+    h += '<ul class="nu-supps">';
     for (i = 0; i < MOTEUR.SUPPS.length; i++) {
       if (!state.obSupps[i]) continue;
       pris++;
-      h += '<li><div class="mo-l" style="cursor:default"><span class="mo-n">' +
-           esc(MOTEUR.SUPPS[i].label) + "</span>" +
-           '<span class="mo-s">' + esc(MOTEUR.SUPPS[i].why) + "</span></div></li>";
+      h += '<li class="nu-supp"><span class="nu-supp-n">' + esc(MOTEUR.SUPPS[i].label) + "</span>" +
+           '<span class="nu-supp-w">' + esc(MOTEUR.SUPPS[i].why) + "</span></li>";
     }
     h += "</ul>";
     // L'ETAT VIDE MANQUAIT SA MOITIE UTILE : il constatait l'absence sans dire
@@ -10527,6 +10799,8 @@ body.a-nav .nav { display: flex; }
     // rechargement. Rouvrir l'appli sur une fiche qu'on consultait la veille
     // serait desorientant.
     recherche: "", ficheEx: "",
+    // D'ou l'on est entre dans le diagnostic, pour savoir ou rendre la main.
+    retourDe: "",
     // La reponse collee et sa relecture. EPHEMERES, et volontairement : garder
     // une proposition d'IA d'il y a trois jours la ferait rejouer sur un plan
     // qui a change entre-temps.
@@ -10735,6 +11009,19 @@ body.a-nav .nav { display: flex; }
 
   function estOnglet(e) { return ONGLETS.indexOf(e) >= 0; }
 
+  // LE BOUTON DE RETOUR DES SOUS-ECRANS. La maquette en porte un sur chacun
+  // (« ‹ Moi », « ‹ Historique ») ; je ne l'avais mis que sur la fiche.
+  //
+  // Il ne fait pas que corriger la conformite : c'est la SEULE sortie qui ne
+  // depend pas d'un geste. Olivier s'est retrouve coince faute d'issue visible,
+  // et un ecran dont on ne sait pas sortir est un ecran casse, quel que soit
+  // l'etat du glissement.
+  function retourHtml(e) {
+    if (!has(PARENT, e)) return "";
+    return '<button type="button" class="ecran-retour" data-action="onglet" data-ecran="' +
+           PARENT[e] + '"><span aria-hidden="true">‹</span> ' + esc(TITRES[PARENT[e]]) + "</button>";
+  }
+
   // Sens du prochain rendu : -1 vers la gauche, 1 vers la droite, 0 aucun.
   // Il est consomme par rendre() puis remis a zero, pour qu'un rendu declenche
   // par autre chose qu'un glissement ne rejoue pas l'animation.
@@ -10750,21 +11037,16 @@ body.a-nav .nav { display: flex; }
     window.scrollTo(0, 0);
   }
 
-  // LE GLISSEMENT SE VOIT MAINTENANT.
+  // L'ENTREE ANIMEE, POUR LES CHANGEMENTS QUI NE VIENNENT PAS D'UN DOIGT.
   //
-  // Les ecrans basculaient d'un coup, sans transition : le geste etait pris en
-  // compte mais rien ne le montrait, et le passage se lisait comme un
-  // clignotement. Signale par Olivier a l'usage.
-  //
-  // On n'anime QUE l'ecran qui arrive, pas celui qui part : animer les deux
-  // demanderait de garder l'ancien DOM en vie pendant la transition, donc deux
-  // arbres montes en meme temps, avec leurs ecouteurs et leurs chronos.
-  // Une entree suffit a rendre le sens du geste lisible.
+  // Elle ne sert plus au glissement, qui porte maintenant son propre mouvement
+  // du debut a la fin. Elle reste pour les bascules commandees autrement :
+  // glisser() appele depuis un banc, et le geste rattrape au relacher quand la
+  // piste n'a pas pu etre montee (mouvement reduit).
   //
   // README section 10 dit « les changements d'ecran sont instantanes ». On s'en
-  // ecarte sur retour d'usage : 160 ms ne se paient pas en attente, et le geste
-  // cesse de paraitre rate. Le mouvement est desactive pour qui demande moins
-  // d'animations (prefers-reduced-motion), ou il redevient instantane.
+  // ecarte sur retour d'usage. Le mouvement est desactive pour qui demande
+  // moins d'animations (prefers-reduced-motion), ou il redevient instantane.
   function animerEntree() {
     var n, cls;
     if (!_sens) return;
@@ -10777,30 +11059,285 @@ body.a-nav .nav { display: flex; }
   }
 
   // =========================================================================
-  // GLISSEMENT LATERAL
+  // GLISSEMENT LATERAL — LE DOIGT ENTRAINE L'ECRAN
   // -------------------------------------------------------------------------
-  // Seuils repris tels quels du README section 5 : un geste ne compte que s'il
-  // est BREF, FRANC et NETTEMENT horizontal. Sans le rapport 1,8 entre dx et
-  // dy, un defilement un peu oblique changerait d'onglet.
+  // Ce qu'il y avait avant : touchstart, touchend, et rien entre les deux. Le
+  // geste basculait bien d'onglet, mais RIEN NE SUIVAIT LE DOIGT — l'ecran
+  // sortant ne bougeait jamais et l'ecran entrant arrivait apres coup, 26 px en
+  // 160 ms, soit 7 % de la largeur. Ca se lit comme un on/off, pas comme un
+  // glissement. Olivier l'a signale deux fois.
+  //
+  // Ce qu'il y a maintenant : les deux ecrans sont montes cote a cote dans une
+  // PISTE posee par-dessus la page, et la piste suit le doigt en direct. Au
+  // relacher, elle finit le mouvement si le seuil est franchi et revient en
+  // arriere sinon.
+  //
+  // L'OBJECTION QUE J'AVAIS ECRITE ICI — « garder deux arbres DOM montes, avec
+  // leurs ecouteurs et leurs chronos » — NE TIENT PAS. Tous les evenements
+  // passent par delegation sur `document` (voir la section EVENEMENTS) : un
+  // volet n'emporte aucun ecouteur, il n'y en a jamais eu sur les noeuds. Il ne
+  // restait que deux prises reelles, et elles sont traitees :
+  //   - les identifiants, que getElementById resoudrait sur le decor : les
+  //     volets sont depouilles (voir depouiller) ;
+  //   - le seul chrono qui vit dans le DOM, `chrono-v`, qui n'existe que dans
+  //     le mode entrainement — ou le glissement est fige.
+  //
+  // Seuils. GLISSE_RATIO 1,8 vient du README section 5 : sans lui un
+  // defilement un peu oblique monterait la piste. GLISSE_MS 800 ne sert plus
+  // qu'au rattrapage : un glissement suivi n'a pas de duree maximale, et c'est
+  // volontaire — une limite de duree fait taire les gestes lents sans rien
+  // dire, ce qui est une des pistes du swipe muet sur l'iPhone d'Olivier.
   // =========================================================================
   var GLISSE_MS = 800, GLISSE_DX = 55, GLISSE_RATIO = 1.8;
+  // Deplacement a partir duquel on decide que le geste est horizontal et qu'on
+  // monte la piste. Assez petit pour que l'ecran parte tot sous le doigt.
+  var GLISSE_PRISE = 10;
+  // Part de la largeur au-dela de laquelle on commet le changement...
+  var GLISSE_PART = 0.28;
+  // ... ou vitesse, en pixels par milliseconde, qui le commet aussi. Sans elle,
+  // un petit coup sec — le geste naturel pour changer d'onglet — reviendrait en
+  // arriere alors qu'il etait franc.
+  var GLISSE_VITESSE = 0.45;
+  // Duree de la fin de course, au relacher. Elle ne s'ajoute pas au geste :
+  // elle le termine.
+  var GLISSE_FIN_MS = 210;
+  // Resistance quand il n'y a plus rien de ce cote : l'ecran suit au tiers,
+  // ce qui dit « c'est fini » sans afficher un vide.
+  var GLISSE_BUTEE = 3.2;
 
   var _tx = null, _ty = 0, _tt = 0;
+  // 0 indecis · 1 piste montee, le doigt entraine · -1 abandonne pour ce geste
+  var _pris = 0;
+  var _piste = null, _sortant = null, _entrant = null;
+  var _cible = null, _dir = 0, _larg = 0, _dxCourant = 0;
+  // La fin de course en vol : sa fonction de pose et son minuteur, pour pouvoir
+  // la solder si un nouveau geste part avant qu'elle ne soit arrivee.
+  var _finEnCours = null, _finMinuteur = null;
+  // Receptacle de la lecture de mise en page forcee, voir pisteFinir.
+  var _reflow = 0;
+
+  function reduitMouvement() {
+    try {
+      return !!(window.matchMedia &&
+                window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+    } catch (e) { return false; }
+  }
+
+  // dir vaut 1 pour un doigt qui part vers la DROITE, ce qui ramene vers
+  // l'onglet PRECEDENT, comme une page qu'on repousse. Rend null quand il n'y a
+  // rien a montrer de ce cote : pas de bouclage aux extremites, et depuis un
+  // sous-ecran seul le retour au parent existe.
+  function cibleDe(dir) {
+    var e = state.ecran, i, n;
+    if (FIGES[e]) return null;
+    if (has(PARENT, e)) return dir > 0 ? PARENT[e] : null;
+    i = ONGLETS.indexOf(e);
+    if (i < 0) return null;
+    n = i - dir;
+    if (n < 0 || n >= ONGLETS.length) return null;
+    return ONGLETS[n];
+  }
+
+  // Un volet est un DECOR. Il ne doit repondre a aucune recherche par
+  // identifiant tant qu'il est monte : `ia-prompt`, `run-km` et `run-min`
+  // existent dans des ecrans glissables, et getElementById rend le PREMIER
+  // trouve, pas le vivant.
+  function depouiller(n) {
+    var l, i;
+    if (!n || !n.querySelectorAll) return;
+    if (n.removeAttribute) n.removeAttribute("id");
+    l = n.querySelectorAll("[id]");
+    for (i = 0; i < l.length; i++) { l[i].removeAttribute("id"); }
+  }
+
+  // Un geste qui repart AVANT la fin de course du precedent. Sans ce solde, le
+  // nouveau volet sortant serait le clone de l'ecran d'AVANT la bascule, et la
+  // bascule tomberait dessous : au relacher, l'ecran sauterait. On termine donc
+  // la course en cours tout de suite, et le nouveau geste part d'un etat pose.
+  function solderFin() {
+    var f = _finEnCours;
+    if (!f) return;
+    _finEnCours = null;
+    if (_finMinuteur) { window.clearTimeout(_finMinuteur); _finMinuteur = null; }
+    f();
+  }
+
+  function pisteMonter(dir) {
+    var ec, clone, c;
+    solderFin();
+    ec = document.getElementById("ecran");
+    if (!ec || !document.body) return false;
+
+    _cible = cibleDe(dir);
+    _dir = dir;
+    _dxCourant = 0;
+    _larg = window.innerWidth || document.documentElement.clientWidth || 320;
+
+    _piste = document.createElement("div");
+    _piste.className = "glisse-piste";
+
+    // LE VOLET SORTANT EST UN CLONE, pas l'ecran vivant. Deplacer l'ecran reel
+    // le sortirait de son flux au moment ou la page est defilee, et le
+    // defilement sauterait sous le doigt. Le clone est remonte de la position
+    // de defilement : il montre exactement ce que l'utilisateur a sous les yeux.
+    // La page ne defile pas pendant le geste — `touch-action: pan-y` laisse le
+    // vertical au navigateur, qui l'a deja ecarte puisqu'on est horizontal.
+    clone = ec.cloneNode(true);
+    depouiller(clone);
+    // On repose la classe a la main : le style du chassis tient a `#ecran`, que
+    // depouiller vient de retirer, et une classe d'animation restee accrochee
+    // se rejouerait a l'insertion.
+    clone.className = "ecran";
+    _sortant = document.createElement("div");
+    _sortant.className = "glisse-volet";
+    _sortant.style.top = (-(window.pageYOffset || 0)) + "px";
+    _sortant.appendChild(clone);
+    _piste.appendChild(_sortant);
+
+    if (_cible) {
+      c = corpsDe(_cible);
+      _entrant = document.createElement("div");
+      _entrant.className = "glisse-volet";
+      _entrant.innerHTML = envelopper(c, false);
+      depouiller(_entrant);
+      // Il attend hors champ, du cote d'ou il doit venir. L'ecran entrant sera
+      // pose en haut par aller(), donc il commence en haut.
+      _entrant.style.transform = "translateX(" + (dir > 0 ? -_larg : _larg) + "px)";
+      _piste.appendChild(_entrant);
+    } else {
+      _entrant = null;
+    }
+
+    document.body.appendChild(_piste);
+    return true;
+  }
+
+  function pisteDemonter() {
+    if (_piste && _piste.parentNode) _piste.parentNode.removeChild(_piste);
+    _piste = null; _sortant = null; _entrant = null;
+    _cible = null; _dir = 0; _dxCourant = 0;
+  }
+
+  function pisteSuivre(dx) {
+    var d;
+    if (!_piste) return;
+    d = _cible ? dx : dx / GLISSE_BUTEE;
+    _dxCourant = d;
+    _sortant.style.transform = "translateX(" + d + "px)";
+    if (_entrant) {
+      _entrant.style.transform = "translateX(" + ((_dir > 0 ? -_larg : _larg) + d) + "px)";
+    }
+  }
+
+  // Fin de course. On rend d'abord le nouvel ecran DERRIERE la piste, puis on
+  // retire la piste : elle est opaque et couvre tout, donc on ne voit jamais
+  // l'ecran se reconstruire.
+  function pisteFinir(valide) {
+    var piste = _piste, sortant = _sortant, entrant = _entrant,
+        cible = _cible, dir = _dir, larg = _larg, fait = false, arrivee;
+
+    if (!piste) return;
+    _piste = null; _sortant = null; _entrant = null;
+    _cible = null; _dir = 0; _dxCourant = 0;
+
+    arrivee = valide ? (dir > 0 ? larg : -larg) : 0;
+
+    function poser() {
+      if (fait) return;
+      fait = true;
+      _finEnCours = null;
+      _finMinuteur = null;
+      if (valide && cible) aller(cible, 0);
+      if (piste.parentNode) piste.parentNode.removeChild(piste);
+    }
+    _finEnCours = poser;
+
+    sortant.className = "glisse-volet glisse-fin";
+    if (entrant) entrant.className = "glisse-volet glisse-fin";
+    // Lecture forcee de la mise en page. Sans elle, le navigateur groupe la
+    // pose de la transition et le changement de transform dans le meme lot :
+    // il ne voit qu'un etat, et rien ne s'anime. La valeur ne sert a rien
+    // d'autre qu'a obliger la lecture.
+    _reflow = piste.offsetWidth;
+    sortant.style.transform = "translateX(" + arrivee + "px)";
+    if (entrant) {
+      entrant.style.transform = "translateX(" +
+        (valide ? 0 : (dir > 0 ? -larg : larg)) + "px)";
+    }
+    // Un minuteur plutot que transitionend : quand le doigt relache pile a
+    // l'arrivee, la transition ne demarre pas et l'evenement ne vient jamais.
+    _finMinuteur = window.setTimeout(poser, GLISSE_FIN_MS);
+  }
 
   function tStart(ev) {
     var t = ev.touches && ev.touches[0];
-    if (!t) return;
+    _pris = 0;
+    if (!t) { _tx = null; return; }
+    // Deux doigts, c'est un pincement ou un appui parasite, pas un glissement.
+    if (ev.touches.length > 1) { _tx = null; _pris = -1; return; }
     _tx = t.clientX; _ty = t.clientY; _tt = new Date().getTime();
   }
 
+  function tMove(ev) {
+    var t, dx, dy;
+    if (_tx === null || _pris < 0) return;
+    if (ev.touches && ev.touches.length > 1) { _pris = -1; pisteDemonter(); return; }
+    t = ev.touches && ev.touches[0];
+    if (!t) return;
+    dx = t.clientX - _tx;
+    dy = t.clientY - _ty;
+
+    if (_pris === 0) {
+      // Le vertical gagne d'abord : on ecarte le geste avant meme d'avoir
+      // parcouru la distance de prise, sinon un defilement un peu oblique
+      // monterait la piste et bloquerait la page.
+      if (Math.abs(dy) > GLISSE_PRISE && Math.abs(dx) < Math.abs(dy) * GLISSE_RATIO) {
+        _pris = -1; return;
+      }
+      if (Math.abs(dx) < GLISSE_PRISE) return;
+      if (Math.abs(dx) < Math.abs(dy) * GLISSE_RATIO) { _pris = -1; return; }
+      if (FIGES[state.ecran]) { _pris = -1; return; }
+      // Qui demande moins d'animation ne recoit pas de piste du tout : le geste
+      // est rattrape au relacher, et la bascule reste instantanee.
+      if (reduitMouvement()) { _pris = -1; return; }
+      if (!pisteMonter(dx > 0 ? 1 : -1)) { _pris = -1; return; }
+      _pris = 1;
+    }
+
+    // Le doigt peut repartir de l'autre cote en cours de geste. On remonte
+    // alors la piste avec l'autre voisin, dans la meme image : rien n'est
+    // peint entre les deux.
+    if ((dx > 0 ? 1 : -1) !== _dir && Math.abs(dx) > GLISSE_PRISE) {
+      pisteDemonter();
+      if (!pisteMonter(dx > 0 ? 1 : -1)) { _pris = -1; return; }
+    }
+
+    pisteSuivre(dx);
+  }
+
   function tEnd(ev) {
-    var t, dx, dy, dt;
-    if (_tx === null) return;
+    var t, dx, dy, dt, vit, valide, cible;
+    if (_tx === null && _pris !== 1) { _pris = 0; return; }
     t = ev.changedTouches && ev.changedTouches[0];
     dt = new Date().getTime() - _tt;
-    dx = t ? t.clientX - _tx : 0;
-    dy = t ? t.clientY - _ty : 0;
+    dx = (t && _tx !== null) ? t.clientX - _tx : _dxCourant;
+    dy = (t && _tx !== null) ? t.clientY - _ty : 0;
     _tx = null;
+
+    if (_pris === 1) {
+      _pris = 0;
+      cible = _cible;
+      vit = dt > 0 ? Math.abs(dx) / dt : 0;
+      valide = !!cible && (Math.abs(dx) >= _larg * GLISSE_PART ||
+                           (vit >= GLISSE_VITESSE && Math.abs(dx) >= GLISSE_DX));
+      pisteFinir(valide);
+      return;
+    }
+
+    // RATTRAPAGE. La piste n'a pas ete montee — mouvement reduit, ecran fige,
+    // ou geste ecarte comme vertical puis redresse. On retombe sur la regle
+    // d'avant : bref, franc, nettement horizontal.
+    _pris = 0;
     if (!t) return;
     if (dt > GLISSE_MS) return;
     if (Math.abs(dx) < GLISSE_DX) return;
@@ -10808,22 +11345,19 @@ body.a-nav .nav { display: flex; }
     glisser(dx > 0 ? 1 : -1);
   }
 
-  // dir vaut 1 pour un glissement vers la DROITE (doigt vers la droite), qui
-  // ramene vers l'onglet PRECEDENT, comme une page qu'on repousse.
+  // iOS coupe le geste sur un appel, une notification, un bord de systeme. Sans
+  // ca la piste resterait montee par-dessus l'appli, muette et opaque.
+  function tCancel() {
+    _tx = null;
+    if (_pris === 1) { _pris = 0; pisteFinir(false); return; }
+    _pris = 0;
+  }
+
+  // La bascule sans geste : nav basse, bancs, et le rattrapage ci-dessus.
   function glisser(dir) {
-    var e = state.ecran, i, n;
-    if (FIGES[e]) return;
-    if (has(PARENT, e)) {
-      if (dir > 0) aller(PARENT[e]);
-      return;
-    }
-    i = ONGLETS.indexOf(e);
-    if (i < 0) return;
-    n = i - dir;
-    // Pas de bouclage aux extremites : depuis « Moi », glisser encore ne
-    // renvoie pas sur « Aujourd'hui ».
-    if (n < 0 || n >= ONGLETS.length) return;
-    aller(ONGLETS[n], dir > 0 ? 1 : -1);
+    var c = cibleDe(dir);
+    if (!c) return;
+    aller(c, dir > 0 ? 1 : -1);
   }
 
   // =========================================================================
@@ -10968,94 +11502,81 @@ body.a-nav .nav { display: flex; }
            '</div>';
   }
 
-  // ENVELOPPE. rendreCorps sort par une dizaine de `return` differents, un par
-  // ecran : appeler l'animation depuis chacun d'eux inviterait a en oublier un.
-  // On l'appelle donc UNE fois, ici, apres coup.
-  function rendre() {
-    rendreCorps();
-    animerEntree();
-  }
+  // =========================================================================
+  // LE HTML D'UN ECRAN, SANS LE COMMITTER
+  // -------------------------------------------------------------------------
+  // rendreCorps() sortait par une dizaine de `return` qui ecrivaient chacun
+  // dans racine.innerHTML. On ne pouvait donc demander le HTML que de l'ecran
+  // affiche, et seulement en l'affichant. Le glissement a besoin de l'inverse :
+  // construire l'ecran VOISIN, le poser a cote du sortant, et ne decider qu'au
+  // relacher s'il devient l'ecran courant.
+  //
+  // corpsDe() ne touche a rien. Elle rend un descripteur :
+  //   plein      le HTML complet quand l'ecran pose sa propre enveloppe
+  //              (splash, mode entrainement, enchainement) ; null sinon
+  //   interieur  le contenu du <div id="ecran">, pour tous les autres
+  //   nav        si la nav basse doit etre posee sous l'ecran
+  //
+  // Elle lit `state` mais JAMAIS `state.ecran` : c'est ce qui lui permet de
+  // rendre un ecran qui n'est pas celui affiche. La seule exception est la
+  // sortie de secours du bas, qui appelle echafaudageHtml() — elle est
+  // inatteignable, les quinze ecrans de TITRES ayant chacun sa branche.
+  // =========================================================================
+  function corpsDe(e) {
+    var nav = !NAV_CACHEE[e], titre, bandeau;
 
-  function rendreCorps() {
-    var e, corps, racine, titre;
-
-    appliqueTheme();
-
-    e = state.ecran;
-    racine = document.getElementById("app");
-    if (!racine) return;
-
-    if (e === "splash") {
-      document.body.className = "";
-      racine.innerHTML = splashHtml();
-      return;
-    }
-
-    document.body.className = NAV_CACHEE[e] ? "" : "a-nav";
-
-    if (e === "onb") {
-      racine.innerHTML = '<div id="ecran">' + onboardingHtml() + '</div>';
-      return;
-    }
+    if (e === "splash") return { plein: splashHtml(), interieur: null, nav: false };
 
     // Le mode entrainement et l'enchainement sont des PLEINS ECRANS poses
     // par-dessus : ils ne vivent pas dans la gouttiere commune, et la nav basse
     // n'y a pas sa place. On ne sort que par leurs propres boutons.
-    if (e === "salle") { racine.innerHTML = salleHtml(); return; }
-    if (e === "trans") { racine.innerHTML = transHtml(); return; }
+    if (e === "salle") return { plein: salleHtml(), interieur: null, nav: false };
+    if (e === "trans") return { plein: transHtml(), interieur: null, nav: false };
 
+    if (e === "onb") {
+      return { plein: null, interieur: onboardingHtml(), nav: nav };
+    }
     if (e === "histo") {
-      racine.innerHTML = '<div id="ecran"><h1 class="ecran-titre">Historique</h1>' +
-        histoHtml() + "</div>" + navHtml();
-      return;
+      return { plein: null, nav: nav,
+               interieur: '<h1 class="ecran-titre">Historique</h1>' + histoHtml() };
     }
     if (e === "fiche") {
-      racine.innerHTML = '<div id="ecran">' + ficheHtml() + "</div>" + navHtml();
-      return;
+      return { plein: null, interieur: ficheHtml(), nav: nav };
     }
     if (e === "prog") {
-      racine.innerHTML = '<div id="ecran"><h1 class="ecran-titre">Progrès</h1>' +
-        progHtml() + "</div>" + navHtml();
-      return;
+      return { plein: null, nav: nav,
+               interieur: '<h1 class="ecran-titre">Progrès</h1>' + progHtml() };
     }
     if (e === "ia") {
-      racine.innerHTML = '<div id="ecran"><h1 class="ecran-titre-2">Assistant IA</h1>' +
-        iaHtml() + "</div>" + navHtml();
-      return;
+      return { plein: null, nav: nav,
+               interieur: retourHtml(e) + '<h1 class="ecran-titre-2">Assistant IA</h1>' + iaHtml() };
     }
     if (e === "nutri") {
-      racine.innerHTML = '<div id="ecran"><h1 class="ecran-titre">Nutrition</h1>' +
-        nutriHtml() + "</div>" + navHtml();
-      return;
+      return { plein: null, nav: nav,
+               interieur: '<h1 class="ecran-titre">Nutrition</h1>' + nutriHtml() };
     }
     if (e === "moi") {
-      racine.innerHTML = '<div id="ecran"><h1 class="ecran-titre">Moi</h1>' +
-        moiHtml() + "</div>" + navHtml();
-      return;
+      return { plein: null, nav: nav,
+               interieur: '<h1 class="ecran-titre">Moi</h1>' + moiHtml() };
     }
     if (e === "profil") {
-      racine.innerHTML = '<div id="ecran"><h1 class="ecran-titre-2">Profil</h1>' +
-        profilHtml() + "</div>" + navHtml();
-      return;
+      return { plein: null, nav: nav,
+               interieur: retourHtml(e) + '<h1 class="ecran-titre-2">Profil</h1>' + profilHtml() };
     }
     if (e === "monprog") {
-      racine.innerHTML = '<div id="ecran"><h1 class="ecran-titre-2">Mon programme</h1>' +
-        monProgHtml() + "</div>" + navHtml();
-      return;
+      return { plein: null, nav: nav,
+               interieur: retourHtml(e) + '<h1 class="ecran-titre-2">Mon programme</h1>' + monProgHtml() };
     }
     if (e === "exos") {
-      racine.innerHTML = '<div id="ecran"><h1 class="ecran-titre-2">Mes exercices</h1>' +
-        exosCatalogueHtml() + "</div>" + navHtml();
-      return;
+      return { plein: null, nav: nav,
+               interieur: retourHtml(e) + '<h1 class="ecran-titre-2">Mes exercices</h1>' + exosCatalogueHtml() };
     }
     if (e === "theme") {
-      racine.innerHTML = '<div id="ecran"><h1 class="ecran-titre-2">Apparence</h1>' +
-        themeHtml() + "</div>" + navHtml();
-      return;
+      return { plein: null, nav: nav,
+               interieur: retourHtml(e) + '<h1 class="ecran-titre-2">Apparence</h1>' + themeHtml() };
     }
     if (e === "jour") {
-      racine.innerHTML = '<div id="ecran">' + jourHtml() + "</div>" + navHtml();
-      return;
+      return { plein: null, interieur: jourHtml(), nav: nav };
     }
 
     titre = TITRES[e] || "";
@@ -11063,7 +11584,7 @@ body.a-nav .nav { display: flex; }
     // Historique, a l'etape 5. Il ne remplace PAS la ligne dans la liste : une
     // seance validee doit apparaitre dans l'historique, pas seulement dans un
     // bandeau qu'on ferme et qui emporte la preuve avec lui.
-    var bandeau = "";
+    bandeau = "";
     if (e === "histo" && state.archive) {
       bandeau = '<div class="bandeau-ok"><span class="bo-t">Séance enregistrée' +
                 '<span class="bo-s">' + esc(state.archive) + "</span></span>" +
@@ -11071,15 +11592,38 @@ body.a-nav .nav { display: flex; }
                 ' aria-label="Fermer">✕</button></div>';
     }
 
-    corps = '<div id="ecran">' +
-              '<h1 class="' + (has(PARENT, e) ? "ecran-titre-2" : "ecran-titre") + '">' +
-                esc(titre) + '</h1>' +
-              bandeau +
-              echafaudageHtml() +
-            '</div>' +
-            (NAV_CACHEE[e] ? "" : navHtml());
+    return { plein: null, nav: nav,
+             interieur: '<h1 class="' + (has(PARENT, e) ? "ecran-titre-2" : "ecran-titre") + '">' +
+                          esc(titre) + '</h1>' + bandeau + echafaudageHtml() };
+  }
 
-    racine.innerHTML = corps;
+  // Le meme descripteur, mais monte : l'enveloppe que corpsDe ne pose pas.
+  // Le glissement s'en sert aussi, avec une CLASSE au lieu de l'identifiant,
+  // pour ne jamais avoir deux `#ecran` dans le document.
+  function envelopper(c, avecId) {
+    if (c.plein !== null) return c.plein;
+    return '<div ' + (avecId ? 'id="ecran"' : 'class="ecran"') + '>' + c.interieur + "</div>";
+  }
+
+  // ENVELOPPE. rendre() appelle l'animation d'entree UNE fois, apres coup :
+  // la repartir dans corpsDe inviterait a en oublier une branche.
+  function rendre() {
+    rendreCorps();
+    animerEntree();
+  }
+
+  function rendreCorps() {
+    var e, c, racine;
+
+    appliqueTheme();
+
+    e = state.ecran;
+    racine = document.getElementById("app");
+    if (!racine) return;
+
+    c = corpsDe(e);
+    document.body.className = c.nav ? "a-nav" : "";
+    racine.innerHTML = envelopper(c, true) + (c.nav ? navHtml() : "");
   }
 
   // =========================================================================
@@ -11247,8 +11791,16 @@ body.a-nav .nav { display: flex; }
     if (action === "ia-lire") { iaLireReponse(); return; }
     if (action === "ob-etape") {
       // Chaque ligne du Profil porte SON etape : on y retourne directement au
-      // lieu de rouvrir le diagnostic au debut.
-      poser({ ecran: "onb", obStep: parseInt(n.getAttribute("data-v"), 10) || 0, vu: state.vu });
+      // lieu de rouvrir le diagnostic au debut. Et on RETIENT d'ou l'on vient,
+      // sans quoi on ne saurait pas ou rendre la main.
+      poser({ ecran: "onb", obStep: parseInt(n.getAttribute("data-v"), 10) || 0,
+              retourDe: state.ecran });
+      window.scrollTo(0, 0);
+      return;
+    }
+    if (action === "ob-quitter") { obQuitter(false); return; }
+    if (action === "ob-refaire") {
+      poser({ ecran: "onb", obStep: 0, vu: false, retourDe: "" });
       window.scrollTo(0, 0);
       return;
     }
@@ -11402,8 +11954,14 @@ body.a-nav .nav { display: flex; }
     document.addEventListener("click", onClick, false);
     document.addEventListener("input", onSaisie, false);
     document.addEventListener("change", onChangement, false);
+    // touchmove est PASSIF, comme touchstart : on n'appelle jamais
+    // preventDefault. Ce qui reserve l'horizontale, c'est `touch-action: pan-y`
+    // sur l'ecran, declare en CSS ; un ecouteur non passif ne servirait qu'a
+    // faire attendre le defilement vertical a chaque image.
     document.addEventListener("touchstart", tStart, { passive: true });
+    document.addEventListener("touchmove", tMove, { passive: true });
     document.addEventListener("touchend", tEnd, false);
+    document.addEventListener("touchcancel", tCancel, false);
     window.addEventListener("pagehide", ecrireAvantDeQuitter, false);
 
     // Le systeme peut changer de theme pendant que l'appli est ouverte.
@@ -11446,6 +12004,14 @@ body.a-nav .nav { display: flex; }
     titres: TITRES,
     glisser: glisser,
     aller: aller,
+    // Le glissement, pour les bancs. Sans ces portes, un banc ne peut verifier
+    // que la bascule finale — c'est-a-dire exactement ce qui marchait deja, et
+    // pas le mouvement, qui est tout le sujet.
+    cibleDe: cibleDe,
+    glissePiste: function () { return _piste; },
+    glisseDx: function () { return _dxCourant; },
+    glisseCible: function () { return _cible; },
+    corpsDe: corpsDe,
     ecrireMaintenant: ecrireMaintenant,
     // Derivation. Exposee entiere : un banc doit pouvoir verifier la rotation
     // sans passer par le DOM, sinon il mesure le rendu et pas la regle.
