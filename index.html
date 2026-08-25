@@ -1038,6 +1038,283 @@ body.a-nav .nav { display: flex; }
 }
 .nu-r-t { flex: 1; font-size: 14px; }
 .nu-r-h { font-size: 12.5px; color: var(--texte-2); }
+
+/* ===========================================================================
+   LEMMON FIT v1.22.0 — CORRECTIONS DE FIDELITE
+   ---------------------------------------------------------------------------
+   Ecrit apres le retour d'usage d'Olivier sur la version deposee. Toutes les
+   valeurs sont RELEVEES dans maquette.html, pas choisies.
+
+   Ce fichier vient EN DERNIER dans l'assemblage : il corrige des regles posees
+   plus tot, et l'ordre de cascade est ce qui lui permet de gagner sans qu'on
+   ait a retoucher les fichiers d'origine.
+   =========================================================================== */
+
+/* ---------------------------------------------------------------------------
+   GLISSEMENT — l'ecran qui arrive se voit arriver
+   ---------------------------------------------------------------------------
+   160 ms : assez pour lire le sens du geste, trop court pour se sentir attendre.
+   Seul l'ecran ENTRANT est anime ; animer aussi le sortant demanderait de garder
+   deux arbres DOM montes en meme temps, avec leurs ecouteurs et leurs chronos.
+   --------------------------------------------------------------------------- */
+@keyframes ec-droite { from { transform: translateX(26px); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes ec-gauche { from { transform: translateX(-26px); opacity: 0; } to { transform: none; opacity: 1; } }
+.ec-de-droite { animation: ec-droite .16s cubic-bezier(.22,.61,.36,1); }
+.ec-de-gauche { animation: ec-gauche .16s cubic-bezier(.22,.61,.36,1); }
+
+/* Qui demande moins d'animation retrouve le comportement instantane du README. */
+@media (prefers-reduced-motion: reduce) {
+  .ec-de-droite, .ec-de-gauche { animation: none; }
+}
+
+/* ---------------------------------------------------------------------------
+   PROCHAINE PESEE — le rappel des six autres jours
+   --------------------------------------------------------------------------- */
+.pesee-suite { background: var(--fond-encart); border-radius: 16px; padding: 14px 15px; margin-bottom: 12px; }
+.ps-t { font-size: 11px; font-weight: 800; letter-spacing: 1.1px; text-transform: uppercase; color: var(--texte-2); margin-bottom: 4px; }
+.ps-q { font-size: 14.5px; font-weight: 700; color: var(--texte); }
+.ps-p { font-size: 13px; color: var(--texte-1b); line-height: 1.5; margin-top: 4px; }
+
+/* ---------------------------------------------------------------------------
+   REPRENDRE LA SERIE PRECEDENTE
+   ---------------------------------------------------------------------------
+   Il annonce ce qu'il va ecrire, donc la valeur est aussi grosse que le libelle.
+   Contour plutot qu'aplat : le bouton principal reste « Valider la série ».
+   --------------------------------------------------------------------------- */
+.sa-reprendre {
+  width: 100%; min-height: 56px; border-radius: 14px; margin-top: 4px;
+  border: 1.5px solid var(--sombre-bord); background: transparent;
+  color: var(--sombre-texte-2);
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 0 16px;
+}
+.sa-r-l { font-size: 13.5px; font-weight: 600; }
+.sa-r-v { font-size: 16px; font-weight: 800; color: var(--salle-sur-sombre); white-space: nowrap; }
+
+/* ---------------------------------------------------------------------------
+   FICHE EXERCICE — refaite d'apres la maquette
+   --------------------------------------------------------------------------- */
+.fi-retour {
+  display: flex; align-items: center; gap: 7px; min-height: 44px;
+  background: transparent; border: 0; padding: 0;
+  font-size: 14.5px; font-weight: 600; color: var(--texte-2);
+}
+.fi-nom { margin: 2px 0 3px; font-size: 27px; font-weight: 800; letter-spacing: -.5px; color: var(--texte); }
+.fi-mat { font-size: 13.5px; color: var(--texte-2); margin-bottom: 16px; }
+
+.fi-carte { background: var(--sombre-carte); border-radius: 20px; padding: 17px 18px 15px; margin-bottom: 12px; }
+.fi-haut { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; gap: 12px; }
+.fi-lbl { font-size: 11px; font-weight: 800; letter-spacing: 1.3px; text-transform: uppercase; color: var(--salle-sur-sombre); margin-bottom: 4px; }
+.fi-val { font-size: 30px; font-weight: 700; color: var(--sombre-texte); line-height: 1; white-space: nowrap; }
+.fi-u { font-size: 15px; color: var(--sombre-texte-3); margin-left: 4px; font-weight: 600; }
+.fi-droite { text-align: right; flex: 0 0 auto; }
+.fi-sur { font-size: 11px; color: var(--sombre-texte-3); margin-bottom: 4px; white-space: nowrap; }
+.fi-ecart { font-size: 18px; font-weight: 700; white-space: nowrap; }
+
+/* HISTOGRAMME, pas courbe. Une charge par seance est une valeur discrete. */
+.fi-vals { display: flex; gap: 6px; margin-bottom: 5px; }
+.fi-vals span { flex: 1; min-width: 0; font-size: 10.5px; text-align: center; font-weight: 700; }
+.fi-barres { display: flex; align-items: flex-end; gap: 6px; height: 96px; }
+.fi-b { flex: 1; min-width: 0; border-radius: 5px 5px 2px 2px; display: block; }
+.fi-dates { display: flex; gap: 6px; margin-top: 5px; }
+.fi-dates span { flex: 1; min-width: 0; text-align: center; font-size: 10.5px; color: var(--sombre-texte-3); font-family: ui-monospace, "SF Mono", monospace; }
+
+.fi-sect { font-size: 11px; font-weight: 800; letter-spacing: 1.3px; text-transform: uppercase; color: var(--texte-2); margin: 0 0 9px 4px; }
+.fi-s { background: var(--fond-carte); border: 1px solid var(--bord); border-radius: 16px; padding: 13px 14px; margin-bottom: 9px; }
+.fi-s-h { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
+.fi-s-d { font-size: 14.5px; font-weight: 700; color: var(--texte); white-space: nowrap; }
+.fi-s-v { font-size: 12.5px; font-weight: 700; white-space: nowrap; }
+.fi-sets { display: flex; gap: 6px; }
+.fi-set { flex: 1; text-align: center; padding: 8px 4px; border-radius: 10px; background: var(--fond-encart); border: 1px solid var(--bord-discret); }
+.fi-set-k { display: block; font-size: 13.5px; font-weight: 700; color: var(--texte); }
+.fi-set-r { display: block; font-size: 11px; color: var(--texte-2); margin-top: 2px; }
+
+.fi-tech { background: var(--fond-carte); border: 1px solid var(--bord); border-radius: 18px; padding: 16px; margin-top: 14px; margin-bottom: 20px; }
+.fi-tech-t { font-size: 11px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; color: var(--citron-encre); margin-bottom: 12px; }
+.fi-lines { display: flex; flex-direction: column; gap: 11px; margin-bottom: 14px; }
+.fi-line { display: flex; gap: 10px; align-items: flex-start; }
+.fi-num {
+  flex: 0 0 20px; height: 20px; border-radius: 6px; background: var(--salle-pale);
+  color: var(--salle-encre); font-size: 11px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+}
+.fi-txt { flex: 1; font-size: 13.5px; line-height: 1.5; color: var(--texte-1b); }
+/* LE BOUTON QUI MANQUAIT. Il etait rendu en lien souligne : invisible comme
+   action. La maquette en fait un bouton pleine largeur de 52 px. */
+.fi-video {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  min-height: 52px; border-radius: 13px; border: 1.5px solid var(--texte);
+  color: var(--texte); font-size: 14.5px; font-weight: 700; text-decoration: none;
+}
+.fi-video:hover { color: var(--texte); }
+
+/* ---------------------------------------------------------------------------
+   PROGRES — refait d'apres la maquette
+   --------------------------------------------------------------------------- */
+.vign { display: flex; gap: 9px; margin: 0 0 14px; }
+.vg { flex: 1; text-align: center; padding: 14px 6px; border-radius: 15px; background: var(--fond-carte); border: 1px solid var(--bord); display: flex; flex-direction: column; }
+.vg-n { font-size: 20px; font-weight: 700; color: var(--texte); }
+.vg-l { font-size: 11px; color: var(--texte-2); margin-top: 4px; line-height: 1.3; }
+
+.pr-carte { background: var(--fond-carte); border: 1px solid var(--bord); border-radius: 18px; padding: 16px; margin-bottom: 14px; }
+.pr-modes { display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap; }
+.pr-mode { flex: 1 1 0; min-width: 70px; min-height: 44px; border-radius: 11px; border: 1.5px solid var(--bord-champ); background: transparent; color: var(--texte-1b); font-size: 12.5px; font-weight: 700; }
+.pr-mode-on { background: var(--sombre-carte); border-color: var(--sombre-carte); color: var(--salle-bg); }
+
+/* La courbe vit maintenant DANS la carte : axe en colonne flex a gauche, zone
+   a droite. Mon montage precedent la posait a nu avec un axe en absolu. */
+.cb { position: relative; margin: 0; padding-left: 0; display: block; }
+.cb-ecart { position: static; display: block; text-align: right; font-size: 12px; font-weight: 800; color: var(--texte-2); white-space: nowrap; margin-bottom: 3px; }
+.cb-axe { position: static; width: auto; display: flex; flex-direction: column; justify-content: space-between; float: left; padding: 2px 9px 12px 0; }
+.cb-a-h, .cb-a-b { font-size: 10.5px; color: var(--texte-3); white-space: nowrap; }
+.cb-zone { position: relative; height: 142px; margin-top: 0; overflow: hidden; }
+.cb-guide { border-top: 1px dashed var(--bord-discret); }
+.cb-point { border-color: var(--fond-carte); }
+.cb-pieds { clear: both; margin-top: 6px; }
+.cb-p { font-size: 11.5px; color: var(--texte-2); }
+
+.run-obj { background: var(--fond-carte); border: 1.5px solid var(--run-bg); border-radius: 18px; padding: 16px; margin: 0 0 14px; }
+.ro-t { font-size: 11px; font-weight: 800; letter-spacing: 1.3px; text-transform: uppercase; color: var(--run-encre); margin-bottom: 11px; }
+.ro-c { display: flex; align-items: center; gap: 10px; margin: 0 0 14px; }
+.ro-n { font-size: 13px; font-weight: 700; color: var(--run-encre); flex: 0 0 auto; }
+.ro-s { font-size: 13px; color: var(--texte-1b); line-height: 1.5; }
+.ro-piste { flex: 1; height: 9px; border-radius: 5px; background: var(--run-pale); overflow: hidden; }
+.ro-barre { display: block; height: 100%; border-radius: 5px; background: var(--run-bg); }
+.ro-stats { display: flex; gap: 9px; }
+.ro-st { flex: 1; text-align: center; padding: 12px 6px; border-radius: 13px; background: rgba(31,109,192,.07); border: 1px solid var(--run-pale); }
+.ro-st-v { display: block; font-size: 18px; font-weight: 700; color: var(--run-encre); }
+.ro-st-l { display: block; font-size: 11px; color: var(--texte-1b); margin-top: 4px; line-height: 1.3; }
+
+.pr-stagne { background: var(--sombre-carte); border-radius: 18px; padding: 16px 17px; margin-bottom: 14px; }
+.pr-st-t { font-size: 11px; font-weight: 800; letter-spacing: 1.3px; text-transform: uppercase; color: var(--salle-sur-sombre); margin-bottom: 7px; }
+.pr-st-p { font-size: 14.5px; line-height: 1.55; color: var(--sombre-texte-b); margin-bottom: 14px; }
+.pr-st-b { width: 100%; min-height: 56px; border-radius: 14px; border: 0; background: var(--salle-bg); color: var(--salle-fg); font-size: 15.5px; font-weight: 800; }
+
+.pr-recs { background: var(--fond-carte); border: 1px solid var(--bord); border-radius: 18px; padding: 16px 16px 6px; margin-bottom: 14px; }
+.pr-recs-t { font-size: 12px; font-weight: 800; letter-spacing: 1.1px; text-transform: uppercase; color: var(--texte-1b); margin-bottom: 14px; }
+.pr-rec { margin-bottom: 14px; }
+.pr-rec-h { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; gap: 10px; }
+.pr-rec-n { font-size: 14.5px; font-weight: 700; color: var(--texte); }
+.pr-rec-v { font-size: 13px; font-weight: 700; color: var(--texte); white-space: nowrap; }
+.pr-rec-b { display: flex; align-items: center; gap: 9px; }
+.pr-piste { flex: 1; height: 8px; border-radius: 4px; background: var(--fond-encart); overflow: hidden; }
+.pr-barre { display: block; height: 100%; border-radius: 4px; background: var(--salle-bg); }
+.pr-gain { font-size: 12px; font-weight: 700; flex: 0 0 auto; white-space: nowrap; }
+
+.bdg { display: flex; gap: 9px; margin-bottom: 20px; }
+.bd { flex: 1; text-align: center; padding: 14px 6px; border-radius: 15px; border: 1.5px solid var(--bord); background: var(--fond-carte); display: flex; flex-direction: column; }
+.bd-on { background: var(--salle-pale); border-color: var(--salle-bg); }
+.bd-n { font-size: 22px; line-height: 1; font-weight: 800; color: var(--texte-3); }
+.bd-on .bd-n { color: var(--salle-encre); }
+.bd-l { font-size: 11.5px; font-weight: 700; color: var(--texte-2); margin-top: 7px; line-height: 1.3; }
+.bd-on .bd-l { color: var(--salle-encre); }
+
+/* ---------------------------------------------------------------------------
+   MOI — carte d'identite sombre, groupes a separateurs
+   --------------------------------------------------------------------------- */
+.moi-carte { display: flex; align-items: center; gap: 12px; background: var(--sombre-carte); border-radius: 18px; padding: 14px; margin-bottom: 14px; }
+.moi-photo { position: relative; width: 60px; height: 60px; flex: 0 0 60px; border-radius: 18px; overflow: hidden; display: block; }
+.moi-img { display: block; width: 100%; height: 100%; background-size: cover; background-position: center; }
+.moi-init { width: 100%; height: 100%; background: var(--salle-bg); display: flex; align-items: center; justify-content: center; font-size: 23px; font-weight: 800; color: var(--salle-fg); }
+.moi-cap { position: absolute; inset: auto 0 0 0; height: 20px; background: rgba(16,15,13,.72); color: var(--sombre-texte); font-size: 10.5px; font-weight: 800; letter-spacing: .4px; text-align: center; line-height: 20px; }
+.moi-file { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; }
+.moi-ident { flex: 1; min-height: 60px; background: transparent; border: 0; text-align: left; padding: 0; display: flex; flex-direction: column; justify-content: center; min-width: 0; }
+.moi-nom { display: block; font-size: 18px; font-weight: 800; color: var(--sombre-texte); }
+.moi-sous { display: block; font-size: 13px; color: var(--sombre-texte-3); margin-top: 2px; }
+.moi-chev { width: 44px; height: 44px; flex: 0 0 44px; border-radius: 50%; border: 0; background: transparent; color: var(--salle-sur-sombre); font-size: 20px; }
+.moi-retirer { width: 100%; min-height: 46px; margin: -6px 0 14px; border-radius: 12px; border: 1.5px dashed var(--texte-3c); background: transparent; color: var(--texte-1b); font-size: 13.5px; font-weight: 600; text-decoration: none; }
+.moi-note { font-size: 12px; color: var(--texte-3); margin: 0 0 16px; line-height: 1.5; }
+
+.mo-g { margin-bottom: 14px; }
+.mo-g-t { font-size: 11px; font-weight: 800; letter-spacing: 1.3px; text-transform: uppercase; color: var(--texte-2); margin: 0 0 8px 4px; }
+.mo-g-c { background: var(--fond-carte); border: 1px solid var(--bord); border-radius: 16px; padding: 0 16px; }
+.mo-l {
+  display: flex; align-items: center; gap: 12px; width: 100%; min-height: 54px;
+  background: transparent; border: 0; border-bottom: 1px solid var(--sep);
+  text-align: left; color: var(--texte); padding: 8px 0; margin: 0; border-radius: 0;
+  position: relative;
+}
+.mo-g-c > .mo-l:last-child { border-bottom: 0; }
+.mo-n { flex: 1; font-size: 15px; font-weight: 600; color: var(--texte); min-width: 0; }
+.mo-s { font-size: 13px; color: var(--texte-2); flex: 0 0 auto; }
+.mo-c { font-size: 16px; color: var(--texte-2); flex: 0 0 auto; }
+.mo-fmt { display: block; font-size: 11.5px; font-weight: 400; color: var(--texte-3); margin-top: 2px; }
+.mo-l-msg { cursor: default; }
+.mo-l-msg .mo-n { color: var(--vert-encre); font-weight: 700; }
+
+/* ---------------------------------------------------------------------------
+   NUTRITION — horizon et reserve
+   --------------------------------------------------------------------------- */
+.nu-horizon { background: var(--vert-pale-b); border-radius: 16px; padding: 15px 16px; margin-bottom: 12px; }
+.nu-h-t { font-size: 11px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; color: var(--vert-encre-b); margin-bottom: 7px; }
+.nu-h-p { font-size: 14.5px; line-height: 1.55; color: var(--texte); }
+.nu-reperes { background: var(--fond-encart); border-radius: 14px; padding: 13px 14px; font-size: 12.5px; line-height: 1.6; color: var(--texte-1b); margin-bottom: 12px; }
+.nu-reperes b { color: var(--texte); }
+
+/* ---------------------------------------------------------------------------
+   PASSE DE FIDELITE — tailles ramenees dans l'echelle de la maquette
+   ---------------------------------------------------------------------------
+   Relevees en comparant la signature de chaque section du gabarit avec le
+   rendu mesure de la v1.22.0. Ce ne sont pas des preferences : ces quatre
+   valeurs n'existent NULLE PART dans la maquette, et une echelle qui compte
+   deja 27 paliers n'a pas besoin d'un 28e.
+   --------------------------------------------------------------------------- */
+.sem-ok { font-size: 9.5px; }        /* 9px : hors echelle, le plancher est 9,5 */
+.cal-h { font-size: 10.5px; }        /* 10px : la maquette ecrit 10,5 partout */
+.nu-n { font-size: 18px; }           /* 21px : absent, l'ecran Nutrition va a 18 */
+.hi-chev { font-size: 16px; }        /* 20px : les chevrons de la maquette font 16 */
+
+/* ---------------------------------------------------------------------------
+   PASSE PAR LES TEXTES — styles des blocs repris de la maquette
+   ---------------------------------------------------------------------------
+   Trente ecarts releves en cherchant, dans le rendu, chaque libelle litteral
+   de la maquette. Les tailles ci-dessous sont celles de sa source.
+   --------------------------------------------------------------------------- */
+.creneaux-t {
+  font-size: 11px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase;
+  color: var(--texte-2); margin: 0 0 8px 2px;
+}
+.cs-libre-s { font-size: 12.5px; color: var(--sombre-texte-3); line-height: 1.5; margin-bottom: 8px; }
+.run-t { font-size: 16px; font-weight: 800; color: var(--sombre-texte); margin-top: 12px; }
+
+.mp-ia-t { font-size: 16px; font-weight: 800; color: var(--salle-sur-sombre); letter-spacing: -.2px; }
+
+.th-note {
+  background: var(--fond-encart); border-radius: 14px; padding: 13px 14px;
+  font-size: 12.5px; line-height: 1.6; color: var(--texte-1b); margin: 4px 0 20px;
+}
+
+.mo-v-h { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 4px; }
+.mo-v-t { font-size: 15.5px; font-weight: 800; color: var(--texte); }
+.mo-v-n { font-size: 13.5px; font-weight: 700; color: var(--texte); }
+.mo-pied {
+  text-align: center; font-size: 12px; color: var(--texte-2);
+  padding: 2px 0 4px; margin-bottom: 18px;
+}
+
+.dg-t { font-size: 15.5px; font-weight: 800; color: var(--texte); margin-bottom: 4px; }
+.dg-t-rouge { color: var(--danger); margin-bottom: 5px; }
+/* Le premier temps est CREUX, le second plein : l'aplat rouge est reserve au
+   geste qui efface vraiment. */
+.dg-btn-creux { background: transparent; border: 1.5px solid var(--danger); color: var(--danger); }
+.dg-annuler { width: 100%; margin-top: 8px; }
+
+.mo-avert {
+  background: var(--fond-encart); border-radius: 14px; padding: 13px 14px;
+  font-size: 12.5px; line-height: 1.6; color: var(--texte-1b); margin-top: 10px;
+}
+.mo-avert b { color: var(--texte); }
+
+/* Le bloc des cinq seances, sur la carte du jour. */
+.cs-toutes-t {
+  font-size: 10.5px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase;
+  color: var(--sombre-texte-3); margin: 18px 0 4px;
+}
+.cs-toutes-s { font-size: 12.5px; color: var(--sombre-texte-3); line-height: 1.5; margin-bottom: 6px; }
+.cs-auj {
+  font-size: 10px; font-weight: 800; letter-spacing: .3px; padding: 2px 7px;
+  border-radius: 8px; background: var(--salle-bg); color: var(--salle-fg); margin-left: 6px;
+}
 </style>
 <script>
 (function () {
@@ -8032,7 +8309,11 @@ body.a-nav .nav { display: flex; }
   // ne sont pas un choix, ils sont du bruit.
   function selecteurCreneauHtml(acts) {
     if (acts.length < 2) return "";
-    var h = '<div class="creneaux" role="group" aria-label="Choisir le créneau">', i, a, dd, fait;
+    // LE TITRE MANQUAIT. Deux boutons sans en-tete ne disent pas ce qu'ils
+    // sont : on les prend pour un filtre. La maquette les annonce.
+    var h = '<div class="creneaux-t">Deux séances aujourd\'hui</div>';
+    h += '<div class="creneaux" role="group" aria-label="Choisir le créneau">';
+    var i, a, dd, fait;
     for (i = 0; i < acts.length; i++) {
       a = acts[i];
       dd = DISC[a.t];
@@ -8065,9 +8346,30 @@ body.a-nav .nav { display: flex; }
          (fait ? "Refaire la séance" : "Démarrer la séance") + "</button>";
     h += '<button type="button" class="cs-lien" data-action="autre-seance">Faire une autre séance</button>';
 
+    // LE BLOC DES CINQ SEANCES MANQUAIT ENTIEREMENT. Je l'avais remplace par un
+    // bouton qui fait defiler la rotation : on ne voit alors qu'une seance a la
+    // fois, et on ne sait pas ce qu'on rate. La maquette les montre TOUTES avec
+    // leur jour prevu a droite — et c'est ce jour-la qui rend le choix
+    // informe : prendre la seance de vendredi aujourd'hui, c'est savoir qu'il
+    // faudra faire autre chose vendredi.
+    h += '<div class="cs-toutes-t">Les cinq séances de ton programme</div>';
+    h += '<div class="cs-toutes-s">Le jour prévu est indiqué à droite. Si tu prends ' +
+         "celle d'un autre jour, tu sauras quoi faire ce jour-là.</div>";
+    h += '<ul class="cs-exos">';
+    var d = deriver(), s2, jourDeS;
+    for (i = 0; i < SEANCES.length; i++) {
+      jourDeS = d.jourDe(i);
+      h += '<li><button type="button" class="cs-exo" data-action="choisir-seance" data-i="' + i + '">' +
+           '<span class="cs-exo-n">' + esc(SEANCES[i].code) +
+           (i === a.si ? ' <span class="cs-auj">aujourd\'hui</span>' : "") + "</span>" +
+           '<span class="cs-exo-d">' + esc(jourDeS || "hors rotation") + "</span></button></li>";
+    }
+    h += "</ul>";
+
     // ORDRE LIBRE : toucher un exercice demarre DESSUS. Sans ca, il faudrait
     // traverser la seance pour atteindre le troisieme mouvement.
     h += '<div class="cs-libre-t">Ordre libre</div>';
+    h += '<div class="cs-libre-s">Touche un exercice pour démarrer la séance dessus.</div>';
     h += '<ul class="cs-exos">';
     for (i = 0; i < ex.length; i++) {
       h += '<li><button type="button" class="cs-exo" data-action="ouvrir-exo" data-i="' + i + '">' +
@@ -8083,9 +8385,15 @@ body.a-nav .nav { display: flex; }
     var fait = !!state.actFaits[a.ji + "-" + a.k];
     var h = '<section class="carte-sombre carte-cours">';
     h += '<div class="cs-code">' + esc(a.nom || "Cours collectif") + "</div>";
-    h += '<div class="cs-sur">' + esc(NATURES[a.nat].t) +
+    h += '<div class="cs-sur">' + esc(NATURES[a.nat].t) + " · prévu aujourd'hui" +
          ' <span class="cs-pill num">' + a.min + " min</span></div>";
-    h += '<p class="cs-txt">Ton coach mène la séance. Tu la valides en sortant.</p>';
+    // UNE FOIS VALIDE, LA CARTE LE DIT ET DIT CE QUE CA COMPTE. Ma version se
+    // contentait de cocher le bouton : rien ne confirmait que le cours entrait
+    // dans la serie et dans l'assiduite, ce qui est justement la question qu'on
+    // se pose en validant un cours qu'on n'a pas fait dans l'appli.
+    h += '<p class="cs-txt">' + (fait
+      ? "Cours validé. Il compte dans ta série et dans ton assiduité."
+      : "Ton coach mène la séance. Tu la valides en sortant.") + "</p>";
     h += '<button type="button" class="cs-cta cs-cta-cours"' +
          ' data-action="valider-act" data-ji="' + a.ji + '" data-k="' + a.k + '">' +
          (fait ? "✓ Cours validé" : "J'ai fait le cours") + "</button>";
@@ -8098,7 +8406,12 @@ body.a-nav .nav { display: flex; }
     var fait = !!state.actFaits[a.ji + "-" + a.k], i;
     var h = '<section class="carte-sombre carte-run">';
     h += '<div class="cs-code">Running</div>';
-    h += '<div class="cs-sur">' + esc(LIEUX[a.lieu].t) + "</div>";
+    h += '<div class="cs-sur">' + esc(LIEUX[a.lieu].t) + " · prévue aujourd'hui</div>";
+    // LE TITRE DE SAISIE ET SA PHRASE MANQUAIENT. Deux champs nus n'expliquent
+    // pas qu'on les remplit AU RETOUR : la sortie est declarative, elle ne se
+    // chronometre pas dans l'appli.
+    h += '<div class="run-t">' + (fait ? "Sortie notée" : "Note ta sortie") + "</div>";
+    h += '<p class="cs-txt">Au retour, deux chiffres suffisent.</p>';
     h += '<div class="run-champs">';
     h += '<div class="run-c"><label class="run-l" for="run-km">Distance</label>' +
          '<input id="run-km" class="run-in num" type="text" inputmode="decimal" placeholder="0,0"' +
@@ -8120,6 +8433,12 @@ body.a-nav .nav { display: flex; }
     h += '<button type="button" class="cs-cta cs-cta-run"' +
          ' data-action="valider-act" data-ji="' + a.ji + '" data-k="' + a.k + '">' +
          (fait ? "✓ Sortie enregistrée" : "Enregistrer la sortie") + "</button>";
+    // LA MEME PORTE DE SORTIE QUE SUR LA CARTE DE COURS. Elle manquait ici :
+    // un jour de running ne laissait aucun moyen de basculer sur de la fonte,
+    // alors qu'un jour de cours l'offrait. Deux cartes qui font le meme metier
+    // doivent offrir les memes issues.
+    h += '<button type="button" class="cs-lien" data-action="autre-seance">' +
+         "Faire une séance en salle à la place</button>";
     return h + "</section>";
   }
 
@@ -8131,18 +8450,24 @@ body.a-nav .nav { display: flex; }
     }
     if (!prochain && d.progJours.length) prochain = d.progJours[0];
 
+    // TEXTES REPRIS DE LA MAQUETTE, mot pour mot. Ma version disait « Repos »
+    // et une phrase de mon cru : trois libelles de moins, et le ton n'etait pas
+    // le meme. La maquette explique POURQUOI c'est un jour de repos, au lieu de
+    // le constater.
     var h = '<section class="carte-repos">';
-    h += '<div class="cr-t">Repos</div>';
+    h += '<div class="cr-t">Jour de repos</div>';
     if (prochain) {
       var quoi = prochain.vide ? "rien de déclaré"
         : (prochain.acts[0].t === "salle" ? SEANCES[prochain.acts[0].si].code
           : DISC[prochain.acts[0].t].court);
-      h += '<p class="cr-p">Prochaine séance ' + esc(prochain.nom.toLowerCase()) +
-           " · <b>" + esc(quoi) + "</b></p>";
+      h += '<p class="cr-p">Rien de prévu aujourd\'hui. Prochaine séance : ' +
+           esc(prochain.nom.toLowerCase()) + " · <b>" + esc(quoi) + "</b>" +
+           ". La récupération fait partie du programme — mais tu peux prendre " +
+           "une séance d'avance ci-dessous.</p>";
       h += '<button type="button" class="cr-btn" data-action="autre-seance">' +
            "Prendre une séance d'avance</button>";
     } else {
-      h += '<p class="cr-p">Aucun jour d\'entraînement déclaré.</p>';
+      h += '<p class="cr-p">Rien de prévu aujourd\'hui.</p>';
     }
     return h + "</section>";
   }
@@ -8160,19 +8485,49 @@ body.a-nav .nav { display: flex; }
       (pris > 1 ? "s" : "") + "</span></button>";
   }
 
-  // La pesee n'apparait QUE le jour choisi au diagnostic. Un rendez-vous qui se
-  // rappelle tous les jours n'est plus un rendez-vous.
+  // TROIS ETATS, PAS DEUX. Ma premiere version ne rendait RIEN hors du jour de
+  // pesee : l'ecran se terminait sur la nutrition et le rendez-vous
+  // disparaissait six jours sur sept. La maquette montre un rappel « Prochaine
+  // pesée », et c'est lui qui fait tenir le rendez-vous — un rendez-vous qu'on
+  // ne voit jamais n'en est pas un.
+  //
+  //   1. le jour dit, pas encore faite  -> la carte de saisie
+  //   2. le jour dit, deja faite        -> l'accuse de reception
+  //   3. les autres jours               -> le rappel
   function cartePeseeHtml() {
-    if (jourIndexAujourdhui() !== state.obPeseeJour) return "";
+    var auj = jourIndexAujourdhui();
+
+    if (auj !== state.obPeseeJour) {
+      var dans = (state.obPeseeJour - auj + 7) % 7;
+      var quand = JOURS[state.obPeseeJour] + ", " +
+                  PESEE_MOMENTS[state.obPeseeMoment].t.toLowerCase();
+      return '<section class="pesee-suite">' +
+        '<div class="ps-t">Prochaine pesée</div>' +
+        '<div class="ps-q">' + esc(quand) + "</div>" +
+        '<div class="ps-p">Une seule fois par semaine, dans ' + dans + " jour" +
+        (dans > 1 ? "s" : "") + ". Se peser tous les jours ne mesure que l'eau " +
+        "et le contenu de l'estomac.</div></section>";
+    }
+
+    // ETAT « NOTEE » : la maquette laisse une porte de sortie, « Corriger », au
+    // lieu de figer la journee. Se peser deux fois de suite en cinq minutes est
+    // banal, et bloquer la saisie obligerait a attendre sept jours pour
+    // rectifier un chiffre tape de travers.
     var h = '<section class="carte">';
-    h += '<div class="carte-t">Pesée de la semaine</div>';
     if (state.peseeFaite) {
-      h += '<p class="cr-p">Notée. Prochaine dans sept jours.</p>';
+      h += '<div class="carte-t">Pesée notée</div>';
+      h += '<p class="cr-p">Prochaine dans sept jours, ' +
+           esc(PESEE_MOMENTS[state.obPeseeMoment].t.toLowerCase()) + ".</p>";
+      h += '<button type="button" class="cr-btn" data-action="pesee-corriger">Corriger</button>';
       return h + "</section>";
     }
-    h += '<p class="cr-p">' + esc(PESEE_MOMENTS[state.obPeseeMoment].t) +
-         ", comme d'habitude. Les mêmes conditions à chaque fois, sinon la courbe " +
-         "mesure autre chose que ton poids.</p>";
+    h += '<div class="carte-t">Pesée de la semaine</div>';
+    // LA PHRASE DE LA MAQUETTE DIT POURQUOI, avec un ordre de grandeur. La
+    // mienne se contentait d'une consigne ; celle-ci donne la raison de la
+    // consigne, ce qui la rend tenable.
+    h += '<p class="cr-p">Une pesée ne vaut que comparée à la précédente. ' +
+         "Change une seule condition et le chiffre bouge de 300 g à 1 kg — assez " +
+         "pour croire à une progression qui n'existe pas.</p>";
     h += '<ul class="pesee-cond">';
     for (var i = 0; i < PESEE_COND.length; i++) {
       h += "<li>" + esc(PESEE_COND[i].t) + "</li>";
@@ -8182,7 +8537,7 @@ body.a-nav .nav { display: flex; }
          ' placeholder="0,0" value="' + esc(state.obPoids) + '" data-action="ob-poids">' +
          '<span class="run-u">kg</span></div>';
     h += '<button type="button" class="cs-cta cs-cta-clair" data-action="pesee-faite">' +
-         "Noter ma pesée</button>";
+         "Noter mon poids</button>";
     return h + "</section>";
   }
 
@@ -8397,6 +8752,30 @@ body.a-nav .nav { display: flex; }
       h += stepper("kg-pas", state.kg, exo.unite === "min" ? "" : " kg", "Charge");
       h += stepper("reps-pas", state.reps, exo.unite ? " " + exo.unite : " reps",
                    exo.unite === "min" ? "Durée" : "Répétitions");
+
+      // REPRENDRE LA SERIE PRECEDENTE, EN UN TOUCHER.
+      //
+      // Fonctionnalite de la v1.20.0, perdue au passage : la maquette n'a
+      // aucun ecran de mode entrainement, donc elle ne pouvait pas la porter,
+      // et je ne l'ai pas retrouvee tout seul. Signalee par Olivier a l'usage.
+      //
+      // LE BOUTON ANNONCE CE QU'IL VA ECRIRE. « 65 × 8 » plutot que
+      // « Refaire » : on sait avant de toucher, et on ne decouvre pas la
+      // valeur apres coup. Il n'existe JAMAIS sur la premiere serie, faute de
+      // precedente a reprendre.
+      //
+      // Il ECRIT vraiment, par le meme chemin que la saisie a la main : le
+      // tonnage, l'historique et la fiche d'exercice le comptent comme une
+      // serie ordinaire, parce que c'en est une.
+      if (faites > 0) {
+        var prec = f[state.tIdx][faites - 1];
+        h += '<button type="button" class="sa-reprendre" data-action="reprendre-serie">' +
+             '<span class="sa-r-l">Comme la précédente</span>' +
+             '<span class="sa-r-v num">' + esc(String(prec.kg).replace(".", ",")) +
+             (exo.unite === "min" ? "" : " kg") + " × " + prec.reps +
+             (exo.unite ? " " + exo.unite : "") + "</span></button>";
+      }
+
       h += '<button type="button" class="sa-valider" data-action="valider-serie">' +
            "Valider la série</button>";
     }
@@ -8851,6 +9230,36 @@ body.a-nav .nav { display: flex; }
   /* -------------------------------------------------------------------------
      FICHE EXERCICE
      ------------------------------------------------------------------------- */
+  /* -------------------------------------------------------------------------
+     LA FICHE EST REFAITE D'APRES LA MAQUETTE, apres retour d'usage d'Olivier.
+     -------------------------------------------------------------------------
+     Ma premiere version reutilisait la courbe partagee avec l'ecran Progres.
+     La maquette, elle, montre un HISTOGRAMME : ici les valeurs sont discretes,
+     une charge par seance, et non une grandeur relevee dans le temps. Une
+     barre par seance se compare d'un coup d'oeil ; une ligne suggere une
+     continuite entre deux seances qui n'existe pas.
+
+     Et il manquait le bouton « Voir la technique ». Il etait rendu en lien
+     souligne, pas en bouton de 52 px, donc invisible comme action.
+     ------------------------------------------------------------------------- */
+
+  // La couleur d'une barre dit son rapport a la precedente : monte, tient,
+  // baisse. Sans elle, six barres de meme teinte demandent de comparer des
+  // hauteurs a l'oeil.
+  function barreCouleur(v, prec) {
+    if (prec === null) return { c: "var(--sombre-barre)", t: "var(--sombre-texte-3)" };
+    if (v > prec) return { c: "var(--salle-bg)", t: "var(--salle-bg)" };
+    if (v < prec) return { c: "var(--cours-bg)", t: "var(--cours-sur-sombre)" };
+    return { c: "var(--sombre-bord)", t: "var(--sombre-texte-2)" };
+  }
+
+  function verdictDe(v, prec) {
+    if (prec === null) return { t: "première fois", c: "var(--texte-2)" };
+    if (v > prec) return { t: "+ " + fmtVal(v - prec) + " kg", c: "var(--vert-encre)" };
+    if (v < prec) return { t: "− " + fmtVal(prec - v) + " kg", c: "var(--cours-encre)" };
+    return { t: "identique", c: "var(--texte-2)" };
+  }
+
   function ficheHtml() {
     var nom = state.ficheEx, i, j, h = "", ex = null, seances, vals = [], dates = [];
     if (!nom) return '<p class="cb-vide">Aucun exercice sélectionné.</p>';
@@ -8864,84 +9273,145 @@ body.a-nav .nav { display: flex; }
       }
     }
 
-    h += '<div class="fi-nom">' + esc(nom) + "</div>";
+    h += '<button type="button" class="fi-retour" data-action="onglet" data-ecran="histo">' +
+         '<span aria-hidden="true">‹</span> Historique</button>';
+    h += '<h1 class="fi-nom">' + esc(nom) + "</h1>";
     if (ex && ex.mat) h += '<div class="fi-mat">' + esc(ex.mat) + "</div>";
 
-    // La SEULE sortie reseau de l'application, et c'est un lien, pas un appel.
-    h += '<a class="fi-video" target="_blank" rel="noopener noreferrer" href="' +
-         "https://www.youtube.com/results?search_query=" +
-         encodeURIComponent(nom + " technique musculation") + '">Voir la technique en vidéo</a>';
-
     seances = seancesDeExercice(nom, 6);
-    h += '<div class="carte-t" style="margin-top:20px">Charge sur les ' +
-         (seances.length > 1 ? seances.length + " dernières séances" : "séances") + "</div>";
-    if (seances.length < 2) {
-      h += '<p class="cb-vide">Il faut au moins deux séances pour tracer une courbe.</p>';
-    } else {
-      for (i = 0; i < seances.length; i++) { vals.push(seances[i].kg); dates.push(dateCourte(seances[i].d)); }
-      h += '<div class="fi-vals">';
-      for (i = 0; i < vals.length; i++) h += '<span class="num">' + esc(fmtVal(vals[i])) + "</span>";
+    for (i = 0; i < seances.length; i++) { vals.push(seances[i].kg); dates.push(dateCourte(seances[i].d)); }
+
+    // --- La carte sombre : charge de travail et histogramme ---
+    if (seances.length) {
+      var derniere = vals[vals.length - 1], premiere = vals[0];
+      var ecart = derniere - premiere;
+      var maxi = 0;
+      for (i = 0; i < vals.length; i++) { if (vals[i] > maxi) maxi = vals[i]; }
+
+      h += '<section class="fi-carte">';
+      h += '<div class="fi-haut"><div>' +
+           '<div class="fi-lbl">Ta charge de travail</div>' +
+           '<div class="fi-val num">' + esc(fmtVal(derniere)) + '<span class="fi-u">kg</span></div></div>';
+      if (seances.length > 1) {
+        h += '<div class="fi-droite"><div class="fi-sur">sur 3 mois</div>' +
+             '<div class="fi-ecart num" style="color:' +
+             (ecart > 0 ? "var(--vert-bg-b)" : (ecart < 0 ? "var(--cours-sur-sombre)" : "var(--sombre-texte-3)")) +
+             '">' + (ecart > 0 ? "+ " : (ecart < 0 ? "− " : "")) + esc(fmtVal(Math.abs(ecart))) + " kg</div></div>";
+      }
       h += "</div>";
-      h += courbeHtml(vals, " kg", dates[0], dates[dates.length - 1], "");
+
+      // HISTOGRAMME, pas courbe : une charge par seance est une valeur
+      // DISCRETE. Une ligne suggererait une continuite entre deux seances qui
+      // n'existe pas. Les barres sont calees sur le maximum de la periode.
+      var prec = null, col;
+      h += '<div class="fi-vals">';
+      for (i = 0; i < vals.length; i++) {
+        col = barreCouleur(vals[i], prec);
+        h += '<span class="num" style="color:' + col.t + '">' + esc(fmtVal(vals[i])) + "</span>";
+        prec = vals[i];
+      }
+      h += "</div>";
+      prec = null;
+      h += '<div class="fi-barres">';
+      for (i = 0; i < vals.length; i++) {
+        col = barreCouleur(vals[i], prec);
+        h += '<span class="fi-b" style="height:' +
+             Math.max(8, Math.round((vals[i] / (maxi || 1)) * 100)) + "%;background:" + col.c + '"></span>';
+        prec = vals[i];
+      }
+      h += "</div>";
       h += '<div class="fi-dates">';
       for (i = 0; i < dates.length; i++) h += "<span>" + esc(dates[i]) + "</span>";
-      h += "</div>";
-    }
-
-    if (ex && ex.lines && ex.lines.length) {
-      h += '<div class="carte-t" style="margin-top:20px">Comment le faire</div><ul class="fi-lines">';
-      for (i = 0; i < ex.lines.length; i++) h += "<li>" + esc(ex.lines[i]) + "</li>";
-      h += "</ul>";
-    }
-
-    h += '<div class="carte-t" style="margin-top:20px">Tes séries</div>';
-    if (!seances.length) {
-      h += '<p class="cb-vide">Aucune série enregistrée.</p>';
+      h += "</div></section>";
     } else {
-      h += '<ul class="hi-liste">';
-      for (i = seances.length - 1; i >= 0; i--) {
-        h += '<li><div class="hi-l hi-l-fixe"><span class="hi-txt">' +
-             '<span class="hi-n">' + esc(dateCourte(seances[i].d)) + "</span>" +
-             '<span class="hi-d">';
-        for (j = 0; j < seances[i].sets.length; j++) {
-          h += (j ? " · " : "") + esc(fmtVal(seances[i].sets[j].kg)) + " × " + seances[i].sets[j].reps;
-        }
-        h += "</span></span></div></li>";
-      }
-      h += "</ul>";
+      h += '<p class="cb-vide">Aucune séance enregistrée avec cet exercice.</p>';
     }
-    return h;
+
+    // --- Séance par séance ---
+    if (seances.length) {
+      h += '<div class="fi-sect">Séance par séance</div>';
+      var pv = null;
+      for (i = seances.length - 1; i >= 0; i--) {
+        pv = i > 0 ? seances[i - 1].kg : null;
+        var vd = verdictDe(seances[i].kg, pv);
+        h += '<div class="fi-s"><div class="fi-s-h"><span class="fi-s-d">' +
+             esc(dateCourte(seances[i].d)) + "</span>" +
+             '<span class="fi-s-v" style="color:' + vd.c + '">' + esc(vd.t) + "</span></div>";
+        h += '<div class="fi-sets">';
+        for (j = 0; j < seances[i].sets.length; j++) {
+          h += '<span class="fi-set"><span class="fi-set-k num">' +
+               esc(fmtVal(seances[i].sets[j].kg)) + "</span>" +
+               '<span class="fi-set-r">' + seances[i].sets[j].reps + " reps</span></span>";
+        }
+        h += "</div></div>";
+      }
+    }
+
+    // --- Technique, et le bouton qui manquait ---
+    h += '<section class="fi-tech"><div class="fi-tech-t">Technique</div>';
+    if (ex && ex.lines && ex.lines.length) {
+      h += '<div class="fi-lines">';
+      for (i = 0; i < ex.lines.length; i++) {
+        h += '<div class="fi-line"><span class="fi-num" aria-hidden="true">' + (i + 1) + "</span>" +
+             '<span class="fi-txt">' + esc(ex.lines[i]) + "</span></div>";
+      }
+      h += "</div>";
+    } else {
+      h += '<p class="cb-vide">Pas de mémo écrit pour cet exercice.</p>';
+    }
+    // LA SEULE SORTIE RESEAU DE L'APPLICATION, et c'est un lien, pas un appel.
+    // Il etait rendu en lien souligne : invisible comme action. La maquette en
+    // fait un bouton de 52 px, et c'est celui-la qu'Olivier cherchait.
+    h += '<a class="fi-video" target="_blank" rel="noopener noreferrer" href="' +
+         "https://www.youtube.com/results?search_query=" +
+         encodeURIComponent(nom + " technique musculation") +
+         '"><span aria-hidden="true">▶</span> Voir une vidéo de ce mouvement</a>';
+    return h + "</section>";
   }
 
   /* -------------------------------------------------------------------------
      PROGRES
      ------------------------------------------------------------------------- */
+  /* -------------------------------------------------------------------------
+     PROGRES — REFAIT D'APRES LA MAQUETTE, apres retour d'usage d'Olivier.
+     -------------------------------------------------------------------------
+     Ma premiere version avait quatre blocs, la maquette en a SEPT, et la
+     courbe elle-meme etait mal montee : posee a nu au lieu d'etre dans sa
+     carte, avec son axe en positionnement absolu au lieu d'une colonne flex,
+     et son point de fin cale a gauche au lieu de la droite.
+
+     Manquaient entierement : la carte sombre « Ton programme stagne ? » avec
+     son appel a l'assistant, et la carte « Tes records » avec ses barres.
+     ------------------------------------------------------------------------- */
   function progHtml() {
-    var modes = modesDisponibles(), h = "", i, mode, vals, d = deriver();
-    var hj = state.hist || [], tonnage = 0, record = 0, s, j;
+    var modes = modesDisponibles(), h = "", i, j, k, mode, vals, d = deriver();
+    var hj = state.hist || [], tonnage = 0, record = 0, s, heures = 0, km = 0, sorties = 0;
+    var recs = {}, ordre = [];
 
     for (i = 0; i < hj.length; i++) {
       s = hj[i];
-      if (s.t === "salle") {
-        tonnage += s.tonnage || 0;
-        if (s.ex) {
-          for (j = 0; j < s.ex.length; j++) {
-            for (var k = 0; k < s.ex[j].sets.length; k++) {
-              if (s.ex[j].sets[k].kg > record) record = s.ex[j].sets[k].kg;
-            }
-          }
+      if (s.t === "cours") { heures += s.min || 0; continue; }
+      if (s.t === "run") { sorties++; km += nombreOu(s.km, 0); continue; }
+      tonnage += s.tonnage || 0;
+      if (!s.ex) continue;
+      for (j = 0; j < s.ex.length; j++) {
+        if (s.ex[j].unite === "min") continue;
+        for (k = 0; k < s.ex[j].sets.length; k++) {
+          var kg = s.ex[j].sets[k].kg;
+          if (kg > record) record = kg;
+          if (!recs[s.ex[j].nom]) { recs[s.ex[j].nom] = { max: kg, min: kg }; ordre.push(s.ex[j].nom); }
+          if (kg > recs[s.ex[j].nom].max) recs[s.ex[j].nom].max = kg;
+          if (kg < recs[s.ex[j].nom].min) recs[s.ex[j].nom].min = kg;
         }
       }
     }
 
+    // --- 1. Trois vignettes ---
     h += '<div class="vign">';
     h += vignette(hj.length, "séances");
-    // La deuxieme vignette suit ce que la semaine declaree PRODUIT : annoncer
-    // « 0 kg soulevé » a quelqu'un qui ne fait que des cours serait exact et
-    // inutile.
-    if (d.slotsSalle.length) h += vignette(Math.round(tonnage / 1000 * 10) / 10, "tonnes");
-    else if (d.slotsCours.length) h += vignette(heuresDeCours(), "h de cours");
-    else h += vignette(d.slotsRun.length, "sorties/sem");
+    if (d.slotsSalle.length) h += vignette(fmtVal(Math.round(tonnage / 100) / 10), "tonnes");
+    else if (d.slotsCours.length) h += vignette(fmtVal(Math.round(heures / 6) / 10), "h de cours");
+    else h += vignette(fmtVal(km), "km");
     h += vignette(record ? fmtVal(record) : "—", "record kg");
     h += "</div>";
 
@@ -8949,7 +9419,13 @@ body.a-nav .nav { display: flex; }
       return h + '<p class="cb-vide">Déclare tes jours pour voir tes courbes.</p>';
     }
 
+    // --- 2. La carte de courbe ---
     mode = state.modeChart < modes.length ? state.modeChart : 0;
+    vals = serieHebdo(modes[mode].v);
+    var depart = vals[0], fin = vals[vals.length - 1], delta = fin - depart;
+    var u = modes[mode].u ? " " + modes[mode].u : "";
+
+    h += '<section class="pr-carte">';
     h += '<div class="pr-modes" role="group" aria-label="Choisir la série">';
     for (i = 0; i < modes.length; i++) {
       h += '<button type="button" class="pr-mode' + (i === mode ? " pr-mode-on" : "") + '"' +
@@ -8957,25 +9433,69 @@ body.a-nav .nav { display: flex; }
            ' data-action="mode-chart" data-v="' + i + '">' + esc(modes[i].t) + "</button>";
     }
     h += "</div>";
+    h += courbeHtml(vals, u,
+      "Départ · " + fmtVal(depart) + u,
+      "Aujourd'hui · " + fmtVal(fin) + u,
+      (delta >= 0 ? "+" : "−") + fmtVal(Math.abs(delta)) + u + " sur 12 semaines",
+      modes[mode].t);
+    h += "</section>";
 
-    vals = serieHebdo(modes[mode].v);
-    var depart = vals[0], fin = vals[vals.length - 1], delta = fin - depart;
-    // AUCUN NUMERO DE SEMAINE : ils n'apportent rien. On nomme les deux bouts.
-    h += courbeHtml(vals, modes[mode].u ? " " + modes[mode].u : "",
-      "Départ · " + fmtVal(depart) + (modes[mode].u ? " " + modes[mode].u : ""),
-      "Aujourd'hui · " + fmtVal(fin) + (modes[mode].u ? " " + modes[mode].u : ""),
-      (delta >= 0 ? "+" : "−") + fmtVal(Math.abs(delta)) +
-        (modes[mode].u ? " " + modes[mode].u : "") + " sur 12 semaines");
+    // --- 3. La carte Running ---
+    if (d.slotsRun.length) h += carteObjectifRunHtml(km, sorties);
 
-    if (d.slotsRun.length) h += carteObjectifRunHtml();
+    // --- 4. « Ton programme stagne ? » ---
+    if (d.slotsSalle.length) h += carteStagnationHtml();
+
+    // --- 5. Tes records ---
+    if (d.slotsSalle.length && ordre.length) {
+      h += '<section class="pr-recs"><div class="pr-recs-t">Tes records</div>';
+      ordre.sort(function (a, b) { return recs[b].max - recs[a].max; });
+      var plafond = recs[ordre[0]].max || 1;
+      for (i = 0; i < ordre.length && i < 5; i++) {
+        var r = recs[ordre[i]], gain = r.max - r.min;
+        h += '<div class="pr-rec"><div class="pr-rec-h">' +
+             '<span class="pr-rec-n">' + esc(ordre[i]) + "</span>" +
+             '<span class="pr-rec-v num">' + esc(fmtVal(r.max)) + " kg</span></div>" +
+             '<div class="pr-rec-b"><span class="pr-piste"><span class="pr-barre" style="width:' +
+             Math.max(4, Math.round((r.max / plafond) * 100)) + '%"></span></span>' +
+             '<span class="pr-gain num" style="color:' +
+             (gain > 0 ? "var(--vert-encre)" : "var(--texte-3)") + '">' +
+             (gain > 0 ? "+ " + fmtVal(gain) + " kg" : "—") + "</span></div></div>";
+      }
+      h += "</section>";
+    }
+
+    // --- 6. Paliers ---
     h += badgesHtml(hj.length);
     return h;
+  }
+
+  // LA CARTE QUI APPELLE L'ASSISTANT. Elle ne s'affiche QUE si le journal
+  // montre vraiment une stagnation : proposer de demander de l'aide a quelqu'un
+  // qui progresse serait au mieux inutile, au pire decourageant.
+  function carteStagnationHtml() {
+    var c = chargesRecentes(), i, nom, x, bloque = null;
+    for (i = 0; i < c.ordre.length; i++) {
+      nom = c.ordre[i];
+      x = c.par[nom];
+      if (x.stagne >= 2 && (!bloque || x.stagne > c.par[bloque].stagne)) bloque = nom;
+    }
+    if (!bloque) return "";
+    x = c.par[bloque];
+    return '<section class="pr-stagne">' +
+      '<div class="pr-st-t">Ton programme stagne ?</div>' +
+      '<div class="pr-st-p">Le <b>' + esc(bloque.toLowerCase()) + "</b> est bloqué à " +
+      esc(fmtVal(x.der)) + " kg depuis " + (x.stagne + 1) + " séances. " +
+      "Ton assistant peut relire tes charges et proposer quoi changer.</div>" +
+      '<button type="button" class="pr-st-b" data-action="aller-ia">' +
+      "Demander une amélioration de mon programme à mon IA</button></section>";
   }
 
   function vignette(v, l) {
     return '<div class="vg"><span class="vg-n num">' + esc(String(v)) + "</span>" +
            '<span class="vg-l">' + esc(l) + "</span></div>";
   }
+
 
   function heuresDeCours() {
     var h = state.hist || [], i, m = 0;
@@ -8986,22 +9506,32 @@ body.a-nav .nav { display: flex; }
   // EN-TETE « RUNNING », JAMAIS « COURSE A PIED », et un seul bleu dans toute
   // la carte : bordure, barre, chiffres et vignettes partagent les trois memes
   // valeurs. Deux bleus voisins se lisent comme une erreur d'impression.
-  function carteObjectifRunHtml() {
-    var h = state.hist || [], i, km = 0, sorties = 0, lundi = lundiDe(new Date()), d;
+  function carteObjectifRunHtml(kmTotal, sortiesTotal) {
+    var h = state.hist || [], i, km = 0, sorties = 0, lundi = lundiDe(new Date()), d, mins = 0;
     for (i = 0; i < h.length; i++) {
       if (h[i].t !== "run") continue;
       d = dateDepuisCle(h[i].d);
       if (!d || jourEcart(d, lundi) < 0 || jourEcart(d, lundi) > 6) continue;
       sorties++;
       km += nombreOu(h[i].km, 0);
+      mins += nombreOu(h[i].minutes, 0);
     }
     var vise = deriver().slotsRun.length;
+    var pct = Math.min(100, vise ? Math.round(sorties / vise * 100) : 0);
+
     return '<section class="run-obj"><div class="ro-t">Running</div>' +
-      '<div class="ro-c"><span class="ro-n num">' + esc(fmtVal(km)) + " km</span>" +
-      '<span class="ro-s">' + sorties + " sortie" + (sorties > 1 ? "s" : "") +
-      " sur " + vise + " prévue" + (vise > 1 ? "s" : "") + " cette semaine</span></div>" +
-      '<div class="ro-piste"><span class="ro-barre" style="width:' +
-      Math.min(100, vise ? Math.round(sorties / vise * 100) : 0) + '%"></span></div></section>';
+      '<div class="ro-titre">' + esc(fmtVal(km)) + " km cette semaine</div>" +
+      '<div class="ro-s">' + sorties + " sortie" + (sorties > 1 ? "s" : "") +
+      " sur " + vise + " prévue" + (vise > 1 ? "s" : "") + ". " +
+      (sorties >= vise ? "Le compte y est." : "Il en reste " + (vise - sorties) + ".") + "</div>" +
+      '<div class="ro-c"><span class="ro-piste"><span class="ro-barre" style="width:' + pct +
+      '%"></span></span><span class="ro-n num">' + sorties + "/" + vise + "</span></div>" +
+      '<div class="ro-stats">' +
+      '<div class="ro-st"><span class="ro-st-v num">' + esc(fmtVal(kmTotal || 0)) +
+      ' km</span><span class="ro-st-l">depuis le début</span></div>' +
+      '<div class="ro-st"><span class="ro-st-v num">' +
+      (mins ? Math.round(mins) + " min" : "—") +
+      '</span><span class="ro-st-l">cette semaine</span></div></div></section>';
   }
 
   function badgesHtml(total) {
@@ -9025,18 +9555,32 @@ body.a-nav .nav { display: flex; }
   // transparent en absolute inset 0. C'est ce montage, et lui seul, qui ouvre
   // la photothèque du telephone au premier toucher : un bouton qui appelle
   // .click() sur un input cache est bloque par Safari hors geste direct.
+  // LA CARTE D'IDENTITE EST SOMBRE, ET LE PSEUDO EST UN BOUTON.
+  //
+  // Ma premiere version posait le nom en texte mort : rien ne menait a Profil,
+  // alors que la maquette en fait la porte d'entree. Signale par Olivier.
+  // Deux zones cliquables, le bloc nom et le chevron, parce qu'on vise l'un ou
+  // l'autre selon la main.
   function photoHtml() {
-    var h = '<div class="moi-tete">';
-    h += '<label class="moi-photo"' + (state.photo ? ' style="background-image:url(' + state.photo + ')"' : "") + '>';
-    h += state.photo ? "" : '<span class="moi-photo-i" aria-hidden="true">＋</span>';
+    var init = (state.obPrenom || "?").charAt(0).toUpperCase();
+    var h = '<div class="moi-carte">';
+    h += '<label class="moi-photo">';
+    h += state.photo
+      ? '<span class="moi-img" role="img" aria-label="Photo de profil" style="background-image:url(' + state.photo + ')"></span>'
+      : '<span class="moi-init" aria-hidden="true">' + esc(init) + "</span>";
+    h += '<span class="moi-cap" aria-hidden="true">Photo</span>';
     h += '<input type="file" accept="image/*" class="moi-file" data-action="photo-choisir"' +
          ' aria-label="Choisir une photo de profil"></label>';
-    h += '<div class="moi-ident"><div class="moi-nom">' + esc(state.obPrenom || "Toi") + "</div>";
-    h += '<div class="moi-sous">' + esc(resumeProfilCourt()) + "</div>";
+    h += '<button type="button" class="moi-ident" data-action="aller-profil">' +
+         '<span class="moi-nom">' + esc(state.obPrenom || "Toi") + "</span>" +
+         '<span class="moi-sous">' + esc(resumeProfilCourt()) + "</span></button>";
+    h += '<button type="button" class="moi-chev" data-action="aller-profil"' +
+         ' aria-label="Ouvrir mon profil">›</button>';
+    h += "</div>";
     if (state.photo) {
-      h += '<button type="button" class="moi-retirer" data-action="photo-retirer">Retirer la photo</button>';
+      h += '<button type="button" class="moi-retirer" data-action="photo-retirer">' +
+           "Retirer la photo</button>";
     }
-    h += "</div></div>";
     // ON LE DIT. Un blob n'entre pas dans localStorage : la photo disparait au
     // rechargement. Laisser l'utilisateur le decouvrir lui ferait croire a un
     // bug, alors que c'est une limite assumee.
@@ -9051,17 +9595,25 @@ body.a-nav .nav { display: flex; }
            fmtVal(p.startWeight) + " → " + fmtVal(p.targetWeight) + " kg";
   }
 
+  // UN GROUPE = UN TITRE HORS CARTE, PUIS UNE SEULE CARTE A SEPARATEURS.
+  //
+  // Ma premiere version faisait une carte bordee PAR LIGNE : trois lignes
+  // donnaient trois cartes empilees, et l'ecran se lisait comme une liste de
+  // blocs sans lien. La maquette regroupe les lignes d'un meme sujet dans une
+  // carte unique, separees par un filet. C'est ce qui fait qu'un groupe se lit
+  // comme un groupe. Signale par Olivier sur le bloc Assistant IA.
   function groupeHtml(titre, lignes) {
-    var h = '<div class="carte-t">' + esc(titre) + '</div><ul class="mo-liste">', i, l;
+    var h = '<div class="mo-g"><div class="mo-g-t">' + esc(titre) + '</div>' +
+            '<div class="mo-g-c">', i, l;
     for (i = 0; i < lignes.length; i++) {
       l = lignes[i];
-      h += '<li><button type="button" class="mo-l" data-action="' + l.a + '"' +
+      h += '<button type="button" class="mo-l" data-action="' + l.a + '"' +
            (l.v !== undefined ? ' data-v="' + esc(l.v) + '"' : "") + ">" +
            '<span class="mo-n">' + esc(l.t) + "</span>" +
-           (l.s ? '<span class="mo-s">' + esc(l.s) + "</span>" : "") +
-           '<span class="hi-chev" aria-hidden="true">›</span></button></li>';
+           (l.s ? '<span class="mo-s num">' + esc(l.s) + "</span>" : "") +
+           '<span class="mo-c" aria-hidden="true">›</span></button>';
     }
-    return h + "</ul>";
+    return h + "</div></div>";
   }
 
   function moiHtml() {
@@ -9083,35 +9635,43 @@ body.a-nav .nav { display: flex; }
       { t: "Apparence", s: ["Clair", "Sombre", "Système"][state.theme], a: "aller-theme" }
     ]);
 
-    h += '<div class="carte-t">Données</div>';
-    h += '<ul class="mo-liste"><li><button type="button" class="mo-l" data-action="exporter">' +
+    h += '<div class="mo-g"><div class="mo-g-t">Données</div><div class="mo-g-c">';
+    h += '<button type="button" class="mo-l" data-action="exporter">' +
          '<span class="mo-n">Exporter journal<span class="mo-fmt">format JSON</span></span>' +
-         '<span class="hi-chev" aria-hidden="true">›</span></button></li>';
+         '<span class="mo-c" aria-hidden="true">›</span></button>';
     // L'IMPORT MANQUAIT. Le README exige « export / import JSON du journal »,
     // mais aucun des dix prompts ne l'a commande : il est tombe entre l'etape 6,
     // qui ne demandait que l'export, et la recette, qui le teste au parcours 11.
     // Meme montage que la photo : un <label> qui contient l'input file.
-    h += '<li><label class="mo-l" style="position:relative">' +
+    h += '<label class="mo-l mo-l-file">' +
          '<span class="mo-n">Importer un journal<span class="mo-fmt">' +
          "remplace tout ce qui est enregistré</span></span>" +
-         '<span class="hi-chev" aria-hidden="true">›</span>' +
+         '<span class="mo-c" aria-hidden="true">›</span>' +
          '<input type="file" accept="application/json,.json" class="moi-file"' +
-         ' data-action="importer" aria-label="Choisir un fichier de journal"></label></li>';
+         ' data-action="importer" aria-label="Choisir un fichier de journal"></label>';
     if (state.importMsg) {
-      h += '<li><div class="mo-l" style="cursor:default"><span class="mo-n">' +
-           esc(state.importMsg) + "</span></div></li>";
+      h += '<div class="mo-l mo-l-msg"><span class="mo-n">' + esc(state.importMsg) + "</span></div>";
     }
-    h += "</ul>";
+    h += "</div></div>";
 
     // Carte version. « Recharger la derniere version » vide le cache et
     // reprend le fichier en ligne : pour ceux qui ont deja le lien en ecran
     // d'accueil, c'est la seule facon de sortir d'une version en cache.
-    h += '<section class="carte"><div class="carte-t">Version</div>';
-    h += '<p class="cr-p">Version installée <b class="num">v' + esc(APP_VERSION) + "</b></p>";
+    // LE PARAGRAPHE MANQUAIT, et c'est lui qui rend le bouton comprehensible :
+    // sans explication, « recharger » ressemble a un rafraichissement de page,
+    // alors qu'il va chercher une version publiee depuis.
+    h += '<section class="carte"><div class="mo-v-h"><span class="mo-v-t">Version installée</span>' +
+         '<span class="mo-v-n num">v' + esc(APP_VERSION) + "</span></div>";
+    h += '<p class="cr-p">Ton téléphone garde l\'appli en mémoire pour qu\'elle s\'ouvre ' +
+         "hors-ligne. Si j'ai publié des nouveautés, ce bouton va les chercher.</p>";
     h += '<button type="button" class="cr-btn" data-action="recharger-maj">' +
          "Recharger la dernière version</button></section>";
 
     h += resetHtml();
+
+    // La ligne de pied. Elle tient en une phrase ce que l'appli promet sur les
+    // donnees, a l'endroit ou l'on vient justement les gerer.
+    h += '<div class="mo-pied num">Lemmon Fit · hors-ligne · aucune donnée envoyée</div>';
     return h;
   }
 
@@ -9119,25 +9679,28 @@ body.a-nav .nav { display: flex; }
   // definitif derriere un seul bouton finit toujours par etre declenche par
   // accident, et il n'y a pas de corbeille.
   function resetHtml() {
+    // LES DEUX ETATS PRENNENT LES TEXTES DE LA MAQUETTE. Le premier expliquait
+    // seulement son titre chez moi ; celui-ci dit ce qui part ET ou l'appli
+    // retombe. Le second listait en puces ; la maquette l'ecrit en phrase, ce
+    // qui se lit plus vite au moment ou l'on hesite.
     var h = '<section class="carte carte-danger">';
     if (!state.resetDemande) {
-      h += '<div class="carte-t" style="color:var(--danger)">Réinitialiser mes données</div>';
-      h += '<button type="button" class="dg-btn" data-action="reset-demander">' +
+      h += '<div class="dg-t">Réinitialiser mes données</div>';
+      h += '<p class="cr-p">Efface le diagnostic, le programme, l\'historique et les ' +
+           "réglages gardés sur cet appareil. L'appli repart à son premier lancement.</p>";
+      h += '<button type="button" class="dg-btn dg-btn-creux" data-action="reset-demander">' +
            "Réinitialiser mes données</button></section>";
       return h;
     }
-    h += '<div class="carte-t" style="color:var(--danger)">Confirmer l\'effacement</div>';
-    h += '<p class="cr-p">Ce qui disparaît définitivement :</p>';
-    h += '<ul class="dg-liste"><li>ton diagnostic et ton programme</li>' +
-         "<li>toutes tes séances enregistrées</li><li>tes pesées</li>" +
-         "<li>tes exercices retirés et ajoutés</li></ul>";
-    h += '<p class="cr-p"><b>Il n\'y a pas de corbeille.</b> Exporte ton journal ' +
-         "d'abord si tu veux en garder une copie.</p>";
-    h += '<div class="dg-actions">' +
-         '<button type="button" class="dg-annuler" data-action="reset-annuler">Annuler</button>' +
-         '<button type="button" class="dg-btn" data-action="reset-confirmer">Oui, tout effacer</button>' +
-         "</div></section>";
-    return h;
+    h += '<div class="dg-t dg-t-rouge">Tout effacer, vraiment ?</div>';
+    h += '<p class="cr-p">Ce qui disparaît : ton diagnostic, ton programme de la semaine, ' +
+         "tes cours et tes sorties, ton historique, ta pesée et ta photo.</p>";
+    h += '<p class="cr-p">C\'est définitif, il n\'y a pas de corbeille. Exporte ton ' +
+         "journal d'abord si tu veux le garder.</p>";
+    h += '<button type="button" class="dg-btn" data-action="reset-confirmer">' +
+         "Oui, tout effacer</button>";
+    h += '<button type="button" class="dg-annuler" data-action="reset-annuler">Annuler</button>';
+    return h + "</section>";
   }
 
   function nbExercicesActifs() {
@@ -9167,6 +9730,10 @@ body.a-nav .nav { display: flex; }
     for (i = 0; i < d.slotsCours.length; i++) cours.push(d.slotsCours[i].a.nom || "Cours");
     for (i = 0; i < d.slotsRun.length; i++) run.push(d.slotsRun[i].nom.slice(0, 3));
 
+    // LE SOUS-TITRE MANQUAIT. Il dit a quoi servent ces reponses, donc pourquoi
+    // les corriger change quelque chose.
+    h += '<p class="ob-lead">Tout ce que le programme et les repères caloriques ' +
+         "utilisent pour se calculer.</p>";
     h += groupeHtml("Toi", [
       { t: "Prénom", s: state.obPrenom || "non renseigné", a: "ob-etape", v: "0" },
       { t: "Âge", s: state.obAge ? state.obAge + " ans" : "non renseigné", a: "ob-etape", v: "0" },
@@ -9190,9 +9757,38 @@ body.a-nav .nav { display: flex; }
       { t: "Compléments", s: nbSupps() + " retenus", a: "ob-etape", v: "8" },
       { t: "Habitudes", s: resumeHabitudes(), a: "ob-etape", v: "8" }
     ]);
-    h += groupeHtml("Données", [
-      { t: "Exporter journal", s: (state.hist || []).length + " séances", a: "exporter" }
-    ]);
+    // LE GROUPE « MES DONNEES » VIT ICI, PAS DANS MOI. C'est la maquette qui le
+    // place sur le Profil, avec le poids du journal, les deux sens de
+    // l'echange, et l'avertissement sur le remplacement. Je l'avais reduit a
+    // une ligne d'export perdue dans l'ecran Moi.
+    var journal = state.hist || [], octets = 0;
+    try { octets = JSON.stringify(journal).length; } catch (e) {}
+    var taille = octets > 1024 ? Math.round(octets / 1024) + " Ko" : octets + " o";
+
+    h += '<div class="mo-g"><div class="mo-g-t">Mes données</div><div class="mo-g-c">';
+    h += '<div class="mo-l mo-l-msg"><span class="mo-n">Ton journal</span>' +
+         '<span class="mo-s num">' + journal.length + " séances · " + taille + "</span></div>";
+    h += '<button type="button" class="mo-l" data-action="exporter">' +
+         '<span class="mo-n">Exporter le journal<span class="mo-fmt">format JSON</span></span>' +
+         '<span class="mo-c" aria-hidden="true">›</span></button>';
+    h += '<label class="mo-l mo-l-file">' +
+         '<span class="mo-n">Importer une sauvegarde<span class="mo-fmt">' +
+         "fichier JSON exporté par l'appli</span></span>" +
+         '<span class="mo-c" aria-hidden="true">›</span>' +
+         '<input type="file" accept="application/json,.json" class="moi-file"' +
+         ' data-action="importer" aria-label="Choisir un fichier de journal"></label>';
+    if (state.importMsg) {
+      h += '<div class="mo-l mo-l-msg"><span class="mo-n">' + esc(state.importMsg) + "</span></div>";
+    }
+    if (state.dernierExport) {
+      h += '<div class="mo-l mo-l-msg"><span class="mo-n">Dernier export :</span>' +
+           '<span class="mo-s num">' + esc(dateCourte(state.dernierExport)) + "</span></div>";
+    }
+    h += "</div>";
+    h += '<div class="mo-avert"><b>Attention</b> — un import <b>remplace</b> le journal ' +
+         "existant. Tout vit dans ce téléphone : rien ne part sur un serveur, donc rien " +
+         "ne revient si tu le perds.</div>";
+    h += "</div>";
     return h;
   }
 
@@ -9249,8 +9845,14 @@ body.a-nav .nav { display: flex; }
       h += "</section>";
     }
 
-    h += '<section class="carte-sombre"><div class="cs-sub">Ton programme te semble mal calibré ? ' +
-         "Ton assistant peut le relire et proposer des ajustements.</div>" +
+    // TEXTE DE LA MAQUETTE. Le mien annoncait le service, le sien annonce la
+    // QUESTION : « trop simple, trop dur, mal reparti » sont les trois doutes
+    // qu'on a devant son propre programme, et les nommer vaut mieux que de
+    // proposer une « amelioration » qui ne dit pas de quoi.
+    h += '<section class="carte-sombre">' +
+         '<div class="mp-ia-t">Un avis extérieur</div>' +
+         '<div class="cs-txt">Trop simple, trop dur, mal réparti ? L\'appli prépare la ' +
+         "question à partir de tes charges et de tes quatre dernières semaines.</div>" +
          '<button type="button" class="cs-cta" data-action="aller-ia">' +
          "Demander une amélioration de mon programme à mon IA</button></section>";
     return h;
@@ -9312,9 +9914,9 @@ body.a-nav .nav { display: flex; }
      ------------------------------------------------------------------------- */
   function exosCatalogueHtml() {
     var c = MOTEUR.CATALOG, i, h = "", on, actifs = nbExercicesActifs();
-    h += '<p class="ob-lead">Décoche ce que tu ne veux jamais voir proposé. ' +
-         '<b class="num">' + actifs + "</b> exercices sur <b class=\"num\">" + c.length +
-         "</b> sont retenus.</p>";
+    h += '<p class="ob-lead">Décoche ce que tu ne veux plus voir. Le programme se ' +
+         'réécrit avec ce qui reste. <b class="num">' + actifs + '</b> sur <b class="num">' +
+         c.length + "</b> retenus.</p>";
     h += '<ul class="mo-liste">';
     for (i = 0; i < c.length; i++) {
       on = !state.exclus[i];
@@ -9335,7 +9937,14 @@ body.a-nav .nav { display: flex; }
       { t: "Clair", s: "Lisible en salle éclairée", sw: "#f7f3ea" },
       { t: "Sombre", s: "Le thème d'origine", sw: "#100f0d" },
       { t: "Système", s: "Suit le réglage du téléphone", sw: "" }
-    ], i, h = '<ul class="mo-liste">';
+    ], i, h = "";
+    // DEUX PARAGRAPHES MANQUAIENT. Le premier borne ce que le reglage change —
+    // le mode entrainement reste sombre quoi qu'il arrive. Le second est le
+    // recapitulatif d'accessibilite : il dit ce qui est TENU dans les deux
+    // themes, ce qui evite d'avoir a l'essayer pour le savoir.
+    h += '<p class="ob-lead">Ne concerne que les écrans de consultation. Le mode ' +
+         "entraînement reste sombre : plein écran, la nuit comme en salle.</p>";
+    h += '<ul class="mo-liste">';
     for (i = 0; i < opts.length; i++) {
       h += '<li><button type="button" class="ob-case' + (state.theme === i ? " ob-case-on" : "") + '"' +
            ' aria-pressed="' + (state.theme === i ? "true" : "false") + '"' +
@@ -9345,7 +9954,11 @@ body.a-nav .nav { display: flex; }
            '<span class="ob-case-txt"><span class="ob-case-t">' + esc(opts[i].t) + "</span>" +
            '<span class="ob-case-s">' + esc(opts[i].s) + "</span></span></button></li>";
     }
-    return h + "</ul>";
+    h += "</ul>";
+    h += '<p class="th-note">Toutes les cibles tactiles font au moins 44 px et aucun ' +
+         "texte n'est sous 4,5:1 de contraste, dans les deux thèmes. Le plus petit " +
+         "texte fait 10,5 px, et seuls des libellés en capitales y descendent.</p>";
+    return h;
   }
 
   /* -------------------------------------------------------------------------
@@ -9380,6 +9993,9 @@ body.a-nav .nav { display: flex; }
       a.click();
       document.body.removeChild(a);
       window.setTimeout(function () { try { window.URL.revokeObjectURL(url); } catch (e) {} }, 1000);
+      // LA DATE DU DERNIER EXPORT MANQUAIT. C'est la seule facon de savoir si
+      // sa sauvegarde date d'hier ou de trois mois, et donc ce qu'on perdrait.
+      poser({ dernierExport: cleDate(new Date()) });
     } catch (e) {}
   }
 
@@ -9778,7 +10394,7 @@ body.a-nav .nav { display: flex; }
     for (i = 0; i < d.progJours.length; i++) { if (d.progJours[i].ji === auj) jr = d.progJours[i]; }
     if (jr) { for (i = 0; i < jr.acts.length; i++) acts.push(DISC[jr.acts[i].t].t); }
 
-    var t = MOTEUR.nutritionTargets(profilDepuisEtat()), h = "";
+    var p = profilDepuisEtat(), t = MOTEUR.nutritionTargets(p), h = "";
 
     h += '<p class="nu-tete">' + (acts.length
       ? "Aujourd'hui : " + esc(acts.join(" et "))
@@ -9796,8 +10412,12 @@ body.a-nav .nav { display: flex; }
     h += '<section class="nu-chantier">';
     h += '<div class="nu-ch-tete"><span class="nu-badge">EN CHANTIER</span></div>';
     h += '<div class="carte-t">Les prises</div>';
+    // TEXTE COMPLET DE LA MAQUETTE. J'en avais garde la premiere moitie : elle
+    // dit que rien n'est mesure, mais pas que les repas affiches SONT un
+    // exemple. Sans cette seconde moitie, on les prend pour un plan.
     h += '<p class="cr-p">Cocher un repas ne mesure rien : l\'appli n\'a pas de base ' +
-         "d'aliments derrière.</p>";
+         "d'aliments derrière. Cette partie attend une vraie référence " +
+         "nutritionnelle — d'ici là, les repas ci-dessous sont un exemple, pas un suivi.</p>";
     h += '<ul class="nu-repas">';
     for (i = 0; i < REPAS.length; i++) {
       h += '<li class="nu-r"><span class="nu-box" aria-hidden="true"></span>' +
@@ -9817,10 +10437,40 @@ body.a-nav .nav { display: flex; }
            '<span class="mo-s">' + esc(MOTEUR.SUPPS[i].why) + "</span></div></li>";
     }
     h += "</ul>";
-    if (!pris) h += '<p class="cb-vide">Aucun complément retenu au diagnostic.</p>';
+    // L'ETAT VIDE MANQUAIT SA MOITIE UTILE : il constatait l'absence sans dire
+    // ou la corriger. Celui de la maquette nomme l'etape a rouvrir.
+    if (!pris) {
+      h += '<p class="cr-p">Tu n\'as retenu aucun complément au diagnostic. ' +
+           "Rien n'est ajouté à ton plan — reviens sur l'étape Habitudes si tu " +
+           "changes d'avis.</p>";
+    }
+
+    // L'HORIZON MANQUAIT, et c'est le seul bloc qui relie les cibles a une
+    // date. Sans lui, l'ecran annonce deux nombres sans dire ou ils menent.
+    // Signale par Olivier a l'usage.
+    //
+    // Les valeurs sortent de nutritionTargets : la maquette les ecrit en dur
+    // (78,4 -> 75 kg en 11 semaines, 460 kcal), ce qui ne vaut que pour son
+    // profil d'exemple.
+    if (t.weeks && t.deficit) {
+      var parSem = Math.round((Math.abs(t.deficit) * 7 / 7700) * 100) / 100;
+      h += '<section class="nu-horizon"><div class="nu-h-t">Horizon</div>' +
+           '<div class="nu-h-p">À ce rythme, <b>' + esc(fmtVal(p.startWeight)) + " → " +
+           esc(fmtVal(p.targetWeight)) + " kg en " + t.weeks + " semaines</b>. Le " +
+           (t.losing ? "déficit" : "surplus") + " est de " + Math.abs(t.deficit) +
+           " kcal par jour, soit environ " + esc(fmtVal(parSem)) + " kg par semaine.</div></section>";
+    }
+
+    // Le meme avertissement que l'etape 10 du diagnostic, aux memes mots : deux
+    // formulations differentes pour la meme reserve donneraient l'impression
+    // que ce ne sont pas les memes chiffres.
+    h += '<div class="nu-reperes">Ces chiffres sont des <b>repères</b>, pas une ' +
+         "prescription. Ils sortent d'une estimation à partir de ton poids et de ton " +
+         "volume d'entraînement, sans mesurer ton métabolisme. Ajuste-les d'après ce " +
+         "que fait la balance sur trois semaines.</div>";
 
     h += '<button type="button" class="cs-cta cs-cta-clair" data-action="aller-ia-nutri">' +
-         "Demander un plan repas à mon IA</button>";
+         "Demander un plan repas à une IA</button>";
     return h;
   }
 
@@ -9915,6 +10565,9 @@ body.a-nav .nav { display: flex; }
     // HISTO, identiques pour tout le monde.
     hist: [],
     pesees: [],
+    // Date du dernier export. Persistee : savoir si sa sauvegarde date d'hier
+    // ou de trois mois, c'est savoir ce qu'on perdrait.
+    dernierExport: "",
     // Retire = sorti de cette seance a la main. Ajoute = repris alors que la
     // duree l'avait ecarte. Les deux sont des DECISIONS de l'utilisateur, pas
     // du generateur : elles survivent a un changement de duree de seance.
@@ -9932,7 +10585,7 @@ body.a-nav .nav { display: flex; }
     "obSexe", "obObjectif", "obPratique", "obDuree", "obJours", "obEquip", "obGear",
     "obHalt", "obRefus", "obPetitDej", "obCollation", "obCuisine", "obAlcool",
     "obPeseeJour", "obPeseeMoment", "peseeFaite", "obSupps", "obAct", "actFaits",
-    "hist", "pesees",
+    "hist", "pesees", "dernierExport",
     "obRetires", "obAjouts",
     "runKm", "runMin", "runLieu",
     "faits", "tIdx", "kg", "reps", "phase", "demarre", "finiIdx"];
@@ -10082,13 +10735,45 @@ body.a-nav .nav { display: flex; }
 
   function estOnglet(e) { return ONGLETS.indexOf(e) >= 0; }
 
-  function aller(e) {
+  // Sens du prochain rendu : -1 vers la gauche, 1 vers la droite, 0 aucun.
+  // Il est consomme par rendre() puis remis a zero, pour qu'un rendu declenche
+  // par autre chose qu'un glissement ne rejoue pas l'animation.
+  var _sens = 0;
+
+  function aller(e, sens) {
     if (!has(TITRES, e)) return;
+    _sens = sens || 0;
     state.ecran = e;
     state.picker = false;
     ecrire();
     rendre();
     window.scrollTo(0, 0);
+  }
+
+  // LE GLISSEMENT SE VOIT MAINTENANT.
+  //
+  // Les ecrans basculaient d'un coup, sans transition : le geste etait pris en
+  // compte mais rien ne le montrait, et le passage se lisait comme un
+  // clignotement. Signale par Olivier a l'usage.
+  //
+  // On n'anime QUE l'ecran qui arrive, pas celui qui part : animer les deux
+  // demanderait de garder l'ancien DOM en vie pendant la transition, donc deux
+  // arbres montes en meme temps, avec leurs ecouteurs et leurs chronos.
+  // Une entree suffit a rendre le sens du geste lisible.
+  //
+  // README section 10 dit « les changements d'ecran sont instantanes ». On s'en
+  // ecarte sur retour d'usage : 160 ms ne se paient pas en attente, et le geste
+  // cesse de paraitre rate. Le mouvement est desactive pour qui demande moins
+  // d'animations (prefers-reduced-motion), ou il redevient instantane.
+  function animerEntree() {
+    var n, cls;
+    if (!_sens) return;
+    // Glisser vers la GAUCHE (_sens = -1) amene l'ecran suivant, qui entre donc
+    // par la droite. L'inverse pour l'autre sens.
+    cls = _sens < 0 ? "ec-de-droite" : "ec-de-gauche";
+    _sens = 0;
+    n = document.getElementById("ecran");
+    if (n && n.classList) n.classList.add(cls);
   }
 
   // =========================================================================
@@ -10138,7 +10823,7 @@ body.a-nav .nav { display: flex; }
     // Pas de bouclage aux extremites : depuis « Moi », glisser encore ne
     // renvoie pas sur « Aujourd'hui ».
     if (n < 0 || n >= ONGLETS.length) return;
-    aller(ONGLETS[n]);
+    aller(ONGLETS[n], dir > 0 ? 1 : -1);
   }
 
   // =========================================================================
@@ -10283,7 +10968,15 @@ body.a-nav .nav { display: flex; }
            '</div>';
   }
 
+  // ENVELOPPE. rendreCorps sort par une dizaine de `return` differents, un par
+  // ecran : appeler l'animation depuis chacun d'eux inviterait a en oublier un.
+  // On l'appelle donc UNE fois, ici, apres coup.
   function rendre() {
+    rendreCorps();
+    animerEntree();
+  }
+
+  function rendreCorps() {
     var e, corps, racine, titre;
 
     appliqueTheme();
@@ -10480,6 +11173,12 @@ body.a-nav .nav { display: flex; }
       poser({ coursQuitte: true, seance: (state.seance + 1) % SEANCES.length });
       return;
     }
+    // Choisir NOMMEMENT une seance dans la liste des cinq, au lieu de faire
+    // defiler a l'aveugle.
+    if (action === "choisir-seance") {
+      poser({ coursQuitte: true, seance: parseInt(n.getAttribute("data-i"), 10) || 0 });
+      return;
+    }
     if (action === "ouvrir-exo") { ouvrirExercice(parseInt(n.getAttribute("data-i"), 10)); return; }
     if (action === "valider-act") {
       validerActivite(parseInt(n.getAttribute("data-ji"), 10), parseInt(n.getAttribute("data-k"), 10));
@@ -10492,9 +11191,25 @@ body.a-nav .nav { display: flex; }
       return;
     }
     if (action === "pesee-faite") { noterPesee(); return; }
+    // « Corriger » rouvre la saisie du jour. Se peser deux fois de suite est
+    // banal ; figer la journee obligerait a attendre sept jours pour rectifier
+    // un chiffre tape de travers.
+    if (action === "pesee-corriger") { poser({ peseeFaite: false }); return; }
 
     // --- Mode entrainement ---
     if (action === "valider-serie") { validerSerie(); return; }
+    // Reprendre la precedente : on pose les deux valeurs, PUIS on valide par le
+    // meme chemin que la saisie a la main. Ecrire directement dans `faits`
+    // court-circuiterait le passage en repos et la detection de fin
+    // d'exercice, et la serie ne compterait pas comme les autres.
+    if (action === "reprendre-serie") {
+      var fr = faitsOu()[state.tIdx], pr = fr && fr.length ? fr[fr.length - 1] : null;
+      if (!pr) return;
+      state.kg = pr.kg;
+      state.reps = pr.reps;
+      validerSerie();
+      return;
+    }
     if (action === "kg-pas") {
       // Le pas suit l'unite : 2,5 kg sur une barre, 1 minute sur un bloc
       // chronometre. Un pas unique obligerait a taper huit fois pour monter de
@@ -10521,6 +11236,7 @@ body.a-nav .nav { display: flex; }
     if (action === "mode-chart") { poser({ modeChart: parseInt(n.getAttribute("data-v"), 10) }); return; }
 
     // --- Branche Moi ---
+    if (action === "aller-profil") { aller("profil"); return; }
     if (action === "aller-monprog") { aller("monprog"); return; }
     if (action === "aller-exos") { aller("exos"); return; }
     if (action === "aller-theme") { aller("theme"); return; }
