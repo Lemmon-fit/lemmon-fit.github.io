@@ -312,10 +312,28 @@ body.a-nav .nav { display: flex; }
   gap: 22px;
   z-index: 100;
 }
+/* LE CONTOUR DE LA VIGNETTE DU SPLASH.
+   ---------------------------------------------------------------------------
+   Il se lisait comme un autocollant mal decoupe, et Olivier l'a signale.
+
+   LA CAUSE, MESUREE. Le PNG ne contient pas que sa tuile : il porte autour
+   d'elle un POURTOUR OPAQUE de 6 %, gris bleute. Sur la ligne mediane la
+   luminance vaut 34 a 42 jusqu'a x=30, puis retombe a 28 dans la tuile. Le fond
+   du splash, lui, est a 15. Ce pourtour ressortait donc nettement, et le
+   `border-radius: 26px` le coupait A UN RAYON QUI N'EST PAS CELUI DE LA TUILE
+   dessinee dedans : il restait un croissant de gris clair dans chaque angle.
+
+   LA CORRECTION. On recadre le pourtour a l'affichage — 6,5 % de chaque cote,
+   soit 33 px sur 512, juste au-dela du liseré sombre qui borde la tuile — et on
+   arrondit sur la tuile elle-meme. La boite est agrandie d'autant pour que la
+   vignette garde sa taille vue : 120 px de boite pour 104 px visibles.
+
+   L'IMAGE N'EST PAS TOUCHEE. Elle sert aussi d'icone au manifeste, et le splash
+   doit continuer d'afficher le logo avec son nom. */
 .splash-logo {
-  width: 104px;
-  height: 104px;
-  border-radius: 26px;
+  width: 120px;
+  height: 120px;
+  clip-path: inset(6.5% round 20%);
   display: block;
 }
 .splash-mot {
