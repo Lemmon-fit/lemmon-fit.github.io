@@ -458,6 +458,43 @@ body.a-nav .nav { display: flex; }
 }
 .ob-select-libre { border-style: dashed; }
 
+/* LA DUREE A SOI, sous les quatre reperes. Elle est separee par un filet :
+   c'est la meme question, mais une autre facon d'y repondre, et sans le filet
+   le champ se lisait comme une question de plus. */
+.ob-duree-libre {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--sep);
+}
+.ob-duree-aide {
+  font-size: 12.5px;
+  color: var(--texte-2);
+  margin-top: 6px;
+}
+
+/* LE LIEN D'AJOUT D'UNE DEUXIEME SEANCE.
+   Il remplace un menu vide en pointilles sous chaque jour deja rempli : sept
+   jours coches donnaient sept menus « rien » a lire et a ecarter. Un lien dit
+   ce qu'il fait et ne prend qu'une ligne.
+   L'encre citron est celle de l'onglet actif de la nav : #6b5b00 sur le fond
+   clair, #f4d912 sur le sombre, tous deux tres au-dessus de 4,5:1.
+   La cible de 44 px vient du padding et non d'une hauteur fixe, pour que le
+   libelle puisse passer sur deux lignes sur un petit ecran sans deborder. */
+.ob-ajout-seance {
+  display: block;
+  width: 100%;
+  min-height: 44px;
+  margin-top: 6px;
+  padding: 11px 2px;
+  border: 0;
+  background: transparent;
+  color: var(--citron-encre);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 800;
+  text-align: left;
+}
+
 .ob-cours {
   border: 1.5px solid var(--cours-pale); background: var(--fond-carte);
   border-left: 4px solid var(--cours-bg);
@@ -498,10 +535,86 @@ body.a-nav .nav { display: flex; }
 .ob-case-t { font-size: 14.5px; font-weight: 700; }
 .ob-case-s { font-size: 12px; color: var(--texte-2); }
 
-.ob-sess { border: 1px solid var(--bord); border-radius: 13px; padding: 12px 13px; margin-bottom: 10px; }
-.ob-sess-t { font-size: 13px; font-weight: 800; margin-bottom: 2px; }
-.ob-sess-s { font-size: 12px; color: var(--texte-2); margin-bottom: 8px; }
-.ob-sess-pill { font-size: 10.5px; font-weight: 800; padding: 2px 8px; border-radius: 20px; }
+.ob-sess { border: 1px solid var(--bord); border-radius: 13px; padding: 0 13px; margin-bottom: 10px; }
+/* Ouverte, la journee se distingue de ses voisines repliees. */
+.ob-sess-on { background: var(--fond-encart); }
+/* La ligne repliee EST le bouton : toute la largeur est cliquable, pas
+   seulement le chevron. 56 px, au-dessus des 44 px reglementaires. */
+.ob-sess-h {
+  width: 100%; min-height: 56px; padding: 10px 0;
+  display: flex; align-items: center; gap: 10px;
+  border: 0; background: transparent; font-family: inherit; text-align: left;
+}
+.ob-sess-c { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.ob-sess-t { font-size: 13.5px; font-weight: 800; color: var(--texte); }
+.ob-sess-s { font-size: 12px; color: var(--texte-2); }
+.ob-sess-ch { flex: 0 0 auto; font-size: 13px; color: var(--texte-3); }
+.ob-sess-pill {
+  flex: 0 0 auto; min-width: 56px; text-align: center;
+  font-size: 10.5px; font-weight: 800; padding: 4px 8px; border-radius: 20px;
+}
+.ob-sess-p { font-size: 13px; color: var(--texte-1b); line-height: 1.5; margin: 0 0 12px; }
+
+/* « Non merci » sur une ligne d'exercice. Discret tant qu'il n'a pas servi,
+   marque une fois le refus pose : la ligne reste visible et annonce son
+   remplacant, au lieu de disparaitre sans dire ce qui la remplace. */
+.ob-non {
+  flex: 0 0 auto; min-height: 40px; padding: 0 12px;
+  border-radius: 10px;
+  border: 1.5px solid var(--bord-fort);
+  background: transparent;
+  color: var(--texte-2);
+  font-family: inherit; font-size: 12.5px; font-weight: 700;
+}
+.ob-non-on { border-color: var(--cours-bg); background: var(--cours-pale); color: var(--cours-encre); }
+.ob-exo-c { flex: 1; display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.ob-exo-r { font-size: 11.5px; color: var(--cours-encre); }
+.ob-prog-pied { font-size: 13px; color: var(--texte-1b); line-height: 1.55; margin: 14px 0 0; }
+/* LES INTITULES DE SECTION DE L'ETAPE HABITUDES. « QUELQUES HABITUDES »,
+   « ALCOOL », « COMPLÉMENTS » : ils decoupent un ecran qui pose quatre
+   questions de nature differente et se lisait comme une seule liste. */
+.ob-sect {
+  font-size: 11px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase;
+  color: var(--texte-2); margin: 22px 0 8px;
+}
+
+/* Les trois habitudes en JETONS. Trois questions binaires ne meritent pas
+   trois cartes pleine largeur ; le premier prend la ligne parce que son
+   libelle est le plus long. 48 px de haut, cible tactile tenue. */
+.ob-hab { display: flex; flex-wrap: wrap; gap: 8px; }
+.ob-h {
+  flex: 1 1 auto; min-height: 48px; padding: 0 14px;
+  border-radius: 12px;
+  border: 1.5px solid var(--bord-fort);
+  background: var(--fond-carte);
+  color: var(--texte-1b);
+  font-family: inherit; font-size: 14px; font-weight: 700;
+}
+.ob-h-large { flex-basis: 100%; }
+.ob-h-on { background: var(--salle-bg); border-color: var(--salle-bg); color: var(--salle-fg); }
+.ob-h-c { font-weight: 800; }
+
+/* LES QUATRE CONDITIONS DE PESEE. Elles vivaient dans PESEE_COND et ne
+   servaient que sur l'accueil, le jour de la pesee. Elles manquaient ici, au
+   moment ou l'on CHOISIT son rendez-vous, donc au moment ou elles peuvent
+   encore changer la reponse. Fond sombre comme la maquette : c'est un encart
+   de mise en garde, pas une question de plus. */
+.cond {
+  background: var(--sombre-fond);
+  border-radius: 16px;
+  padding: 16px;
+  margin-top: 20px;
+}
+.cond-t {
+  font-size: 11px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase;
+  color: var(--salle-sur-sombre); margin-bottom: 10px;
+}
+.cond-l {
+  font-size: 14.5px; color: var(--sombre-texte); line-height: 1.5;
+  padding: 5px 0;
+}
+.cond-p { font-size: 13.5px; color: var(--sombre-texte-3); line-height: 1.5; margin: 10px 0 0; }
+
 .ob-exos { list-style: none; margin: 0; padding: 0; }
 .ob-exo {
   display: flex; align-items: center; gap: 8px; min-height: 44px;
@@ -587,6 +700,93 @@ body.a-nav .nav { display: flex; }
 .cs-code { font-size: 26px; font-weight: 800; letter-spacing: -.4px; color: var(--salle-sur-sombre); }
 .carte-cours .cs-code { color: var(--cours-sur-sombre); }
 .carte-run .cs-code { color: var(--run-sur-sombre); }
+/* L'EN-TETE DE LA CARTE DU JOUR. « SÉANCE PULL · prévue jeudi » sur une ligne
+   discrete : le gros titre, en dessous, est ce que la seance TRAVAILLE. Le code
+   seul en gros ne disait pas ce qu'on allait faire. */
+.cs-haut { font-size: 11.5px; font-weight: 800; letter-spacing: 1.1px; text-transform: uppercase; }
+.cs-haut .cs-code { color: var(--salle-sur-sombre); font-size: 11.5px; }
+.cs-quand { color: var(--sombre-texte-3); font-weight: 700; }
+
+/* Les deux boutons sous l'appel principal. En BLOC et non en lien souligne :
+   un lien souligne se lit comme du texte, defaut deja corrige ailleurs. */
+.cs-btn {
+  width: 100%; min-height: 54px; margin-top: 10px;
+  border-radius: 14px;
+  border: 1.5px solid var(--sombre-bord);
+  background: transparent;
+  color: var(--sombre-texte);
+  font-family: inherit; font-size: 15px; font-weight: 700;
+}
+/* Le retour a l'activite prevue porte le bleu du running, comme la maquette :
+   c'est une sortie, pas une action de meme rang que « Démarrer ». */
+.cs-btn-run { border-color: var(--run-bg); color: #7db2ea; }
+
+/* L'ENCART DES CINQ SEANCES, HORS de la carte sombre.
+   Clair et borde de citron, comme la maquette : c'est un CHOIX, pas le contenu
+   de la seance du jour. Les trois blocs se distinguaient mal quand ils etaient
+   tous noirs. */
+.cs-toutes {
+  background: var(--fond-carte);
+  border: 1.5px solid var(--salle-bg);
+  border-radius: 18px;
+  padding: 16px;
+  margin-bottom: 12px;
+}
+.cs-toutes-t {
+  font-size: 11px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase;
+  color: var(--texte-2);
+}
+.cs-toutes-s { font-size: 13px; color: var(--texte-1b); line-height: 1.5; margin-top: 4px; }
+.cs-liste { list-style: none; margin: 10px 0 0; padding: 0; }
+.cs-liste li { border-bottom: 1px solid var(--sep); }
+.cs-liste li:last-child { border-bottom: 0; }
+.cs-s {
+  width: 100%; min-height: 60px; padding: 10px 0;
+  display: flex; align-items: center; gap: 11px;
+  border: 0; background: transparent; font-family: inherit; text-align: left;
+}
+.cs-s-p {
+  flex: 0 0 auto; min-width: 58px; text-align: center;
+  background: var(--salle-pale); color: var(--salle-encre);
+  font-size: 10px; font-weight: 800; letter-spacing: .4px;
+  padding: 5px 8px; border-radius: 8px;
+}
+.cs-s-c { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.cs-s-n { font-size: 14.5px; font-weight: 700; color: var(--texte); }
+.cs-s-d { font-size: 12px; color: var(--texte-2); }
+.cs-s-j {
+  flex: 0 0 auto; display: flex; align-items: center; gap: 6px;
+  font-size: 12px; font-weight: 700; color: var(--texte-2); white-space: nowrap;
+}
+.cs-s-e { font-size: 17px; color: var(--texte-3); }
+
+/* CHANGER D'ACTIVITE POUR AUJOURD'HUI. Les trois disciplines permutent dans
+   les trois sens ; seul le cours pouvait devenir une seance de salle. */
+.remp { margin-bottom: 12px; }
+/* LE RETOUR A CE QUI ETAIT PREVU. Bleu, comme la maquette, et pleine largeur :
+   c'est une SORTIE, elle doit se trouver sans chercher. */
+.remp-retour {
+  width: 100%; min-height: 52px; margin-bottom: 14px;
+  border-radius: 13px;
+  border: 1.5px solid var(--run-bg);
+  background: transparent;
+  color: var(--run-encre);
+  font-family: inherit; font-size: 15px; font-weight: 700;
+}
+.remp-t {
+  font-size: 11px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase;
+  color: var(--texte-3); margin-bottom: 8px;
+}
+.remp-b { display: flex; gap: 8px; flex-wrap: wrap; }
+.remp-x {
+  flex: 1 1 auto; min-height: 48px; padding: 0 12px;
+  border-radius: 12px;
+  border: 1.5px solid var(--bord-fort);
+  background: var(--fond-carte);
+  color: var(--texte-1b);
+  font-family: inherit; font-size: 13.5px; font-weight: 700;
+}
+
 .cs-sur { font-size: 12.5px; color: var(--sombre-texte-3); margin-top: 2px; display: flex; align-items: center; gap: 8px; }
 .cs-pill { background: var(--sombre-pastille); border-radius: 20px; padding: 2px 9px; font-size: 11px; font-weight: 800; }
 .cs-sub { font-size: 14px; color: var(--sombre-texte-2); margin-top: 6px; }
@@ -688,6 +888,245 @@ body.a-nav .nav { display: flex; }
   background: var(--salle-bg); color: var(--salle-fg); font-size: 16px; font-weight: 800;
 }
 .sa-lien { width: 100%; min-height: 48px; border: 0; background: transparent; color: var(--sombre-texte-3); font-size: 13.5px; text-decoration: underline; margin-top: 10px; }
+
+/* LES DEUX BOUTONS DU BAS DU MODE ENTRAINEMENT — « Comment faire ? » et
+   « Changer d'exercice ». La maquette les pose cote a cote, a parts egales,
+   sous la carte de validation. Ils remplacent un lien souligne qui se lisait
+   comme du texte et pas comme une action.
+   52 px de haut : au-dessus des 44 px reglementaires, et le geste se fait a
+   bout de bras entre deux series. */
+.sa-actions { display: flex; gap: 10px; margin-top: 14px; }
+.sa-act {
+  flex: 1 1 0;
+  min-height: 52px;
+  border-radius: 13px;
+  border: 1.5px solid var(--sombre-bord);
+  background: transparent;
+  color: var(--sombre-texte);
+  font-family: inherit;
+  font-size: 14.5px;
+  font-weight: 700;
+  padding: 0 8px;
+}
+/* Ouvert, le bouton porte la couleur de la seance : on voit lequel des deux
+   a produit le panneau qui vient de s'ouvrir en dessous. */
+.sa-act-on { border-color: var(--salle-sur-sombre); color: var(--salle-sur-sombre); }
+
+.sa-tech { margin-top: 12px; }
+.sa-tech-l {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--sombre-texte-2);
+  padding: 9px 0;
+  border-bottom: 1px solid var(--sombre-pastille);
+}
+.sa-tech-n {
+  flex: 0 0 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--sombre-pastille);
+  color: var(--salle-sur-sombre);
+  font-size: 11.5px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1px;
+}
+.sa-tech-vide { color: var(--sombre-texte-3); font-size: 14px; }
+/* LA SEULE SORTIE RESEAU DE L'APPLICATION, et c'est un lien, pas un appel. */
+.sa-tech-video {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 52px;
+  margin-top: 12px;
+  border-radius: 13px;
+  border: 1.5px solid var(--sombre-bord);
+  color: var(--sombre-texte);
+  font-size: 14.5px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+/* ===========================================================================
+   MODE ENTRAINEMENT — LE DESIGN DE LA MAQUETTE
+   ---------------------------------------------------------------------------
+   Ces ecrans sont TOUJOURS sombres, quel que soit le theme : les jetons
+   --sombre-* sont fixes, et les quelques valeurs litterales ci-dessous le sont
+   pour la meme raison. Il n'y a pas de variante claire a tenir.
+   =========================================================================== */
+
+/* --- L'en-tete partage par les trois ecrans ------------------------------- */
+.sa-rond {
+  min-width: 44px; min-height: 44px; flex: 0 0 44px;
+  border-radius: 50%;
+  border: 1.5px solid var(--sombre-bord);
+  background: transparent;
+  color: var(--sombre-texte-2);
+  font-size: 17px; line-height: 1;
+  display: flex; align-items: center; justify-content: center;
+}
+.sa-pos { flex: 1; font-size: 14px; font-weight: 700; color: var(--sombre-texte-2); }
+.sa-pos b { color: var(--sombre-texte); font-weight: 800; }
+
+/* La barre d'avancement de la SEANCE, pas de l'exercice : series faites sur
+   series prevues. Fine, parce qu'elle informe sans reclamer l'attention. */
+.sa-barre {
+  height: 4px; border-radius: 2px;
+  background: var(--sombre-pastille);
+  margin: -6px 0 18px;
+  overflow: hidden;
+}
+.sa-barre-v { display: block; height: 100%; background: var(--salle-bg); border-radius: 2px; }
+
+/* --- La fiche de l'exercice ---------------------------------------------- */
+.sa-muscle {
+  font-size: 11px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase;
+  color: var(--salle-sur-sombre); margin-bottom: 4px;
+}
+
+/* Une pastille par serie prevue. Faite, elle porte sa valeur ; a venir, un
+   tiret. On lit ce qui reste sans compter. */
+.sa-pastilles { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0 16px; }
+.sa-past {
+  min-width: 62px; min-height: 52px;
+  border-radius: 12px;
+  border: 1.5px solid var(--sombre-bord);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 2px; padding: 4px 8px;
+}
+.sa-past-r { font-size: 11px; font-weight: 800; color: var(--sombre-texte-3); }
+.sa-past-v { font-size: 13px; font-weight: 700; color: var(--sombre-texte-2); }
+.sa-past-ok { border-color: var(--salle-sur-sombre); }
+.sa-past-ok .sa-past-r,
+.sa-past-ok .sa-past-v { color: var(--salle-sur-sombre); }
+
+/* La carte de saisie : le rang de la serie, la derniere fois, les deux
+   molettes et la validation dans un MEME cadre. A plat, ces quatre elements ne
+   se lisaient pas comme une seule question. */
+.sa-carte {
+  border-radius: 18px;
+  background: var(--sombre-pastille);
+  padding: 14px;
+  margin-bottom: 14px;
+}
+.sa-carte-h {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: 10px; flex-wrap: wrap; margin-bottom: 12px;
+}
+.sa-serie { font-size: 15px; font-weight: 800; color: var(--sombre-texte); }
+.sa-dernier { font-size: 12.5px; color: var(--sombre-texte-3); }
+.sa-steppers { display: flex; gap: 10px; }
+.sa-steppers .st { flex: 1 1 0; min-width: 0; }
+
+.sa-annuler {
+  width: 100%; min-height: 48px; margin-top: 12px;
+  border-radius: 13px;
+  border: 1.5px dashed var(--sombre-bord);
+  background: transparent;
+  color: var(--sombre-texte-3);
+  font-family: inherit; font-size: 14px; font-weight: 700;
+}
+
+/* --- Le repos : un ecran a lui ------------------------------------------- */
+.sa-repos-l {
+  font-size: 11px; font-weight: 800; letter-spacing: 1.4px; text-transform: uppercase;
+  color: var(--sombre-texte-3); text-align: center; margin-top: 18px;
+}
+.sa-anneau { position: relative; width: 200px; max-width: 62vw; margin: 12px auto 22px; }
+.sa-anneau svg { display: block; width: 100%; height: auto; transform: rotate(-90deg); }
+.sa-anneau-fond { fill: none; stroke: var(--sombre-pastille); stroke-width: 12; }
+/* L'arc se vide dans le sens horaire. La transition suit le decompte a la
+   seconde : sans elle, l'anneau saute par crans. */
+.sa-anneau-arc {
+  fill: none; stroke: var(--salle-bg); stroke-width: 12; stroke-linecap: round;
+  transition: stroke-dashoffset 1s linear;
+}
+.sa-anneau-c {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+}
+.sa-anneau-v { font-size: 44px; font-weight: 800; color: var(--salle-sur-sombre); line-height: 1.1; }
+.sa-anneau-s { font-size: 13px; color: var(--sombre-texte-3); }
+
+.sa-ensuite-l {
+  font-size: 11px; font-weight: 800; letter-spacing: 1.4px; text-transform: uppercase;
+  color: var(--sombre-texte-3); text-align: center;
+}
+.sa-ensuite-n { font-size: 21px; font-weight: 800; color: var(--sombre-texte); text-align: center; margin-top: 4px; }
+.sa-ensuite-d { font-size: 13.5px; color: var(--sombre-texte-3); text-align: center; margin-top: 2px; }
+.sa-repos-btns { display: flex; gap: 10px; margin-top: 22px; }
+.sa-repos-btns .sa-act { flex: 0 0 38%; }
+.sa-valider-court { flex: 1; margin-top: 0; }
+
+/* --- Fin d'exercice ------------------------------------------------------ */
+/* Le bloc vert accuse reception de ce qui vient d'etre fait AVANT d'annoncer
+   la suite. L'ecran s'ouvrait sur « Fin de l'exercice » en titre, ce qui parle
+   deja du suivant. */
+.tr-fait {
+  display: flex; align-items: center; gap: 13px;
+  background: #1c2a1c;
+  border: 1px solid #2f4a2f;
+  border-radius: 16px;
+  padding: 14px 15px;
+  margin-bottom: 22px;
+}
+.tr-fait-p {
+  flex: 0 0 38px; width: 38px; height: 38px; border-radius: 50%;
+  background: #7bb26a; color: #10240d;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 19px; font-weight: 800;
+}
+.tr-fait-c { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.tr-fait-l {
+  font-size: 10.5px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase;
+  color: #9ccf8c;
+}
+.tr-fait-n { font-size: 17px; font-weight: 800; color: var(--sombre-texte); }
+.tr-fait-d { font-size: 13px; color: #9ccf8c; }
+
+.tr-s { font-size: 14px; color: var(--sombre-texte-3); line-height: 1.5; margin: 4px 0 16px; }
+.tr-s b { color: var(--sombre-texte-2); }
+
+.tr-a-r {
+  flex: 0 0 30px; width: 30px; height: 30px; border-radius: 9px;
+  background: var(--sombre-pastille); color: var(--salle-sur-sombre);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 800;
+}
+.tr-a-c { display: flex; flex-direction: column; gap: 1px; flex: 1; min-width: 0; text-align: left; }
+.tr-a-e { font-size: 12.5px; font-weight: 700; color: #9ccf8c; white-space: nowrap; }
+
+/* --- Seance terminee ----------------------------------------------------- */
+.fin-rond {
+  width: 84px; height: 84px; border-radius: 50%;
+  background: var(--salle-bg); color: var(--salle-fg);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 40px; font-weight: 800;
+  margin: 26px auto 18px;
+}
+.fin-s { font-size: 14.5px; color: var(--sombre-texte-3); text-align: center; margin: 0 0 18px; }
+.fin-cl { font-size: 11.5px; color: var(--sombre-texte-3); }
+.fin-bouge-t {
+  font-size: 11px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase;
+  color: var(--sombre-texte-3); margin: 20px 0 6px;
+}
+.fin-bouge { list-style: none; margin: 0 0 18px; padding: 0; }
+.fin-bouge li {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 12px 14px; border-radius: 13px;
+  background: var(--sombre-pastille);
+  margin-bottom: 8px;
+}
+.fin-b-n { font-size: 14.5px; color: var(--sombre-texte); }
+/* Le vert dit la hausse. Il ne sert QUE quand il y a eu hausse : une ligne
+   n'existe pas si rien n'a bouge, donc il n'y a jamais de « + 0 kg ». */
+.fin-b-v { font-size: 14px; font-weight: 800; color: #9ccf8c; white-space: nowrap; }
 .sa-quitter { width: 100%; min-height: 52px; border-radius: 13px; border: 1.5px solid var(--sombre-bord); background: transparent; color: var(--sombre-texte-2); font-size: 15px; }
 .sa-vide { color: var(--sombre-texte-3); }
 .sa-faites { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 16px; }
@@ -735,6 +1174,14 @@ body.a-nav .nav { display: flex; }
 .bandeau-ok {
   background: var(--vert-pale-b); border: 1px solid var(--vert-bord); border-radius: 14px;
   padding: 12px 14px; margin-bottom: 12px; display: flex; align-items: center; gap: 10px;
+}
+/* LE ROND VERT A COCHE. Un accusé de réception se voit avant de se lire ; le
+   bandeau s'ouvrait sur du texte. */
+.bo-p {
+  flex: 0 0 32px; width: 32px; height: 32px; border-radius: 50%;
+  background: var(--vert-bg); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 17px; font-weight: 800;
 }
 .bo-t { flex: 1; font-size: 14px; font-weight: 700; color: var(--vert-encre-b); }
 .bo-s { font-size: 12.5px; color: var(--texte-1b); display: block; font-weight: 400; }
@@ -814,6 +1261,23 @@ body.a-nav .nav { display: flex; }
   font-size: 10px; font-weight: 800; letter-spacing: .4px; padding: 4px 8px;
   border-radius: 8px; flex: 0 0 auto; min-width: 52px; text-align: center;
 }
+
+/* LA PASTILLE DE DATE DES SEANCES RECENTES.
+   Elle remplace la pastille qui repetait le code deja present dans le titre.
+   Le fond PLEIN de la discipline, pas sa teinte pale : c'est lui qui permet de
+   balayer la liste et de voir d'un coup ce qui etait de la salle, un cours ou
+   une sortie, sans lire une seule ligne.
+   Carre de 46 px, donc au-dessus des 44 px de cible tactile, meme si c'est la
+   ligne entiere qui est cliquable. */
+.hi-jour {
+  flex: 0 0 auto;
+  width: 46px; min-height: 46px;
+  border-radius: 12px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 1px; padding: 4px 2px;
+}
+.hi-j-n { font-size: 15px; font-weight: 800; line-height: 1; }
+.hi-j-m { font-size: 9px; font-weight: 800; letter-spacing: .4px; text-transform: uppercase; }
 .hi-txt { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .hi-n { font-size: 14.5px; font-weight: 700; }
 .hi-d { font-size: 12px; color: var(--texte-2); }
@@ -1047,6 +1511,46 @@ body.a-nav .nav { display: flex; }
 .nu-r-t { flex: 1; font-size: 14px; }
 .nu-r-h { font-size: 12.5px; color: var(--texte-2); }
 
+/* ---------------------------------------------------------------------------
+   LES CHANGEMENTS PROPOSES PAR L'ASSISTANT
+   ---------------------------------------------------------------------------
+   Une carte par changement, decidee separement. Avant, c'etait une liste en
+   lecture seule, et l'ecran disait lui-meme que rien n'avait ete applique.
+
+   Le filet bleu a gauche est celui de la maquette. Il distingue une carte qui
+   ATTEND UNE DECISION d'une carte qui informe : les secondes n'en ont pas.
+   --------------------------------------------------------------------------- */
+.ia-props { margin-bottom: 6px; }
+.ia-prop {
+  border: 1px solid var(--bord);
+  border-left: 4px solid var(--run-bg);
+  border-radius: 14px;
+  background: var(--fond-carte);
+  padding: 14px 15px;
+  margin-bottom: 10px;
+}
+.ia-prop-t { font-size: 15.5px; font-weight: 800; color: var(--texte); line-height: 1.3; }
+.ia-prop-r { font-size: 13.5px; color: var(--texte-1b); line-height: 1.5; margin-top: 4px; }
+.ia-prop-b { display: flex; gap: 10px; margin-top: 12px; }
+/* Les deux boutons ne pesent PAS pareil, et c'est voulu : appliquer est
+   l'action, ignorer est la sortie. 52 px, comme partout ailleurs. */
+.ia-appl, .ia-ign {
+  flex: 1 1 0;
+  min-height: 52px;
+  border-radius: 13px;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 800;
+  padding: 0 8px;
+}
+.ia-appl { border: 0; background: var(--salle-bg); color: var(--salle-fg); }
+.ia-ign {
+  border: 1.5px solid var(--bord-fort);
+  background: transparent;
+  color: var(--texte-1b);
+  font-weight: 700;
+}
+
 /* ===========================================================================
    LEMMON FIT v1.22.0 — CORRECTIONS DE FIDELITE
    ---------------------------------------------------------------------------
@@ -1124,6 +1628,29 @@ body.a-nav .nav { display: flex; }
    PROCHAINE PESEE — le rappel des six autres jours
    --------------------------------------------------------------------------- */
 .pesee-suite { background: var(--fond-encart); border-radius: 16px; padding: 14px 15px; margin-bottom: 12px; }
+
+/* ---------------------------------------------------------------------------
+   LE POIDS DU MOMENT
+   ---------------------------------------------------------------------------
+   L'ecran disait QUAND se peser sans jamais dire OU l'on en est. La valeur est
+   grosse parce que c'est ce qu'on vient chercher ; la date reste discrete, a
+   droite, parce qu'elle qualifie sans qu'on ait a la lire.
+   --------------------------------------------------------------------------- */
+.poids-c {
+  background: var(--fond-carte);
+  border: 1px solid var(--bord);
+  border-radius: 18px;
+  padding: 14px 16px;
+  margin-bottom: 12px;
+}
+.poids-h { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.poids-l {
+  font-size: 11px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase;
+  color: var(--texte-3);
+}
+.poids-q { font-size: 12.5px; color: var(--texte-2); text-align: right; }
+.poids-v { font-size: 32px; font-weight: 800; color: var(--texte); line-height: 1.1; margin-top: 2px; }
+.poids-u { font-size: 15px; font-weight: 700; color: var(--texte-2); margin-left: 5px; }
 .ps-t { font-size: 11px; font-weight: 800; letter-spacing: 1.1px; text-transform: uppercase; color: var(--texte-2); margin-bottom: 4px; }
 .ps-q { font-size: 14.5px; font-weight: 700; color: var(--texte); }
 .ps-p { font-size: 13px; color: var(--texte-1b); line-height: 1.5; margin-top: 4px; }
@@ -1211,6 +1738,17 @@ body.a-nav .nav { display: flex; }
 
 .pr-carte { background: var(--fond-carte); border: 1px solid var(--bord); border-radius: 18px; padding: 16px; margin-bottom: 14px; }
 .pr-modes { display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap; }
+
+/* L'ONGLET POIDS SANS AUCUNE PESEE. Il dit qu'il n'y a rien a tracer et ou
+   aller le noter, plutot que de dessiner une ligne horizontale au poids
+   declare, qui se lirait comme douze semaines sans le moindre progres. */
+.pr-attente {
+  background: var(--fond-encart);
+  border-radius: 14px;
+  padding: 16px;
+}
+.pr-attente-t { font-size: 14.5px; font-weight: 800; color: var(--texte); }
+.pr-attente-p { font-size: 13.5px; color: var(--texte-1b); line-height: 1.5; margin: 6px 0 0; }
 .pr-mode { flex: 1 1 0; min-width: 70px; min-height: 44px; border-radius: 11px; border: 1.5px solid var(--bord-champ); background: transparent; color: var(--texte-1b); font-size: 12.5px; font-weight: 700; }
 .pr-mode-on { background: var(--sombre-carte); border-color: var(--sombre-carte); color: var(--salle-bg); }
 
@@ -7005,7 +7543,7 @@ body.a-nav .nav { display: flex; }
         "Buste presque vertical pour cibler les triceps, penché pour les pectoraux.",
         "Descends jusqu'à ce que les coudes forment un angle droit, pas plus bas.",
         "Épaules basses, ne remonte pas les trapèzes vers les oreilles." ] },
-      { nom: "Triceps à la corde", mat: "Poulie haute, corde", muscle: "Triceps", n: 3, kg: 15, reps: 14, last: "15 kg × 14", remp: "Extensions nuque haltère", lines: [
+      { nom: "Triceps à la corde", mat: "Poulie haute, corde", muscle: "Triceps", n: 3, kg: 15, reps: 14, last: "15 kg × 14", remp: "Extension nuque haltère", lines: [
         "Coudes collés au buste et immobiles : seuls les avant-bras bougent.",
         "Écarte les deux brins de la corde en fin d'extension.",
         "Contrôle la remontée, ne laisse pas la charge tirer le bras." ] },
@@ -7014,6 +7552,44 @@ body.a-nav .nav { display: flex; }
         "Serre les fessiers et rentre légèrement le bassin : le bas du dos ne creuse pas.",
         "Respire normalement, ne bloque pas.",
         "Erreur fréquente : fessiers en l'air. Mieux vaut 20 secondes correctes que 60 mal tenues." ] }
+    ,
+      { nom: "Développé poitrine machine", mat: "Machine chest press", muscle: "Pectoraux", n: 4, kg: 35, reps: 10, last: "35 kg × 10", remp: "Bench press léger", lines: [
+        "Règle le siège pour que les poignées arrivent à hauteur de poitrine, pas d'épaules.",
+        "Dos entièrement plaqué au dossier pendant toute la série.",
+        "Ne verrouille pas les coudes en fin de poussée.",
+        "Erreur fréquente : siège trop bas, ce qui transforme le mouvement en développé incliné pour les épaules." ] },
+      { nom: "Développé incliné haltères", mat: "Deux haltères, banc inclinable", muscle: "Pectoraux", n: 3, kg: 12, reps: 9, last: "12 kg × 9", remp: "Pompes prise large", lines: [
+        "Banc à 30°, pas plus : au-delà ce sont les épaules qui prennent le travail.",
+        "Même trajectoire que le développé couché, un peu plus haut sur la poitrine.",
+        "Erreur fréquente : cambrer pour aider, ce qui ramène le travail sur le bas des pectoraux." ] },
+      { nom: "Développé épaules machine", mat: "Machine à développé épaules", muscle: "Épaules", n: 3, kg: 20, reps: 10, last: "20 kg × 10", remp: "Développé épaules élastique", lines: [
+        "Siège réglé pour que les poignées soient au niveau des épaules au départ.",
+        "Dos plaqué, pieds au sol.",
+        "Ne verrouille pas les coudes en haut." ] },
+      { nom: "Pompes", mat: "Aucun matériel", muscle: "Pectoraux", n: 3, kg: 0, reps: 12, last: "12 reps", remp: "Pompes surélevées", lines: [
+        "Mains un peu plus larges que les épaules, corps en planche des talons à la tête.",
+        "Serre les fessiers et gaine le ventre : le bassin ne doit pas s'affaisser.",
+        "Coudes à 45°, pas perpendiculaires au buste.",
+        "Erreur fréquente : descendre la tête seule. C'est la poitrine qui doit approcher du sol." ] },
+      { nom: "Croisé élastique bas vers haut", mat: "Élastique ancré bas, derrière toi", muscle: "Pectoraux", n: 3, kg: 0, reps: 14, last: "14 reps", remp: "Écartés élastique", lines: [
+        "Ancre l'élastique au ras du sol derrière toi, une poignée dans chaque main.",
+        "Bras presque tendus, monte les mains en diagonale jusqu'à les croiser devant la poitrine.",
+        "Cette trajectoire prend le bas des pectoraux, que les écartés à hauteur de poitrine laissent de côté.",
+        "Descends en retenant plutôt que de laisser l'élastique ramener les bras." ] },
+      { nom: "Pompes diamant", mat: "Aucun matériel", muscle: "Triceps", n: 3, kg: 0, reps: 12, last: "12 reps", remp: "Dips sur banc", lines: [
+        "Mains jointes sous la poitrine, index et pouces formant un triangle.",
+        "Coudes serrés le long du corps pendant la descente.",
+        "Si c'est trop dur, pose les mains sur un support surélevé." ] },
+      { nom: "Élévations latérales", mat: "Deux haltères légers", muscle: "Épaules", n: 3, kg: 6, reps: 14, last: "6 kg × 14", remp: "Élévations latérales élastique", lines: [
+        "Buste très légèrement penché en avant, coudes à peine fléchis.",
+        "Monte jusqu'à l'horizontale, pas plus haut : au-delà c'est le trapèze qui prend le relais.",
+        "Mène le mouvement par les coudes, pas par les mains.",
+        "Erreur fréquente : trop lourd, on balance le buste. C'est un exercice léger." ] },
+      { nom: "Oiseau (deltoïde arrière)", mat: "Deux haltères légers", muscle: "Épaules arrière", n: 2, kg: 5, reps: 15, last: "5 kg × 15", remp: "Oiseau à l'élastique", lines: [
+        "Buste penché à 45° ou assis poitrine sur les cuisses, dos droit.",
+        "Ouvre les bras sur les côtés, coudes très légèrement fléchis.",
+        "Serre les omoplates en fin de mouvement.",
+        "Souvent négligé, c'est pourtant ce qui équilibre des épaules dominées par le développé." ] }
     ]},
     { code: "PULL", sub: "Dos / Biceps", exos: [
       { nom: "Warm-up vélo", mat: "Vélo droit, cardio", muscle: "Échauffement", n: 1, kg: 0, reps: 6, unite: "min", last: "6 min", remp: "Échauffement articulaire", lines: [
@@ -7033,18 +7609,53 @@ body.a-nav .nav { display: flex; }
         "Tire le coude vers la hanche, pas vers l'épaule.",
         "Ne fais pas tourner le buste pour gagner de l'amplitude.",
         "Erreur fréquente : dos arrondi. Regarde le sol un mètre devant toi." ] },
-      { nom: "Biceps curl haltères", mat: "Deux haltères", muscle: "Biceps", n: 3, kg: 12, reps: 11, last: "12 kg × 11", remp: "Curl à la poulie basse", lines: [
+      { nom: "Biceps curl haltères", mat: "Deux haltères", muscle: "Biceps", n: 3, kg: 12, reps: 11, last: "12 kg × 11", remp: "Curl barre", lines: [
         "Coudes collés au buste pendant toute la montée.",
         "Contrôle la descente sur environ trois secondes.",
         "Ne balance pas le buste : si tu dois t'aider, la charge est trop lourde." ] },
-      { nom: "Curl concentration", mat: "Un haltère, assis", muscle: "Biceps", n: 2, kg: 10, reps: 13, last: "10 kg × 13", remp: "Curl marteau haltères", lines: [
+      { nom: "Curl concentration", mat: "Un haltère, assis", muscle: "Biceps", n: 2, kg: 10, reps: 13, last: "10 kg × 13", remp: "Curl élastique", lines: [
         "Coude calé contre l'intérieur de la cuisse, bras immobile.",
         "Monte sans à-coup, marque un temps en haut.",
         "Charge légère : c'est un exercice de fin de séance." ] },
-      { nom: "Crunch décliné", mat: "Banc décliné", muscle: "Abdominaux", n: 3, kg: 0, reps: 14, last: "14 reps", remp: "Machine à abdominaux", lines: [
+      { nom: "Crunch décliné", mat: "Banc décliné", muscle: "Abdominaux", n: 3, kg: 0, reps: 14, last: "14 reps", remp: "Machine crunch", lines: [
         "Enroule la colonne, ne tire pas sur la nuque.",
         "Souffle en montant, expire complètement en haut.",
         "Descends sans relâcher complètement entre deux répétitions." ] }
+    ,
+      { nom: "Rowing barre", mat: "Barre chargée", muscle: "Dos", n: 4, kg: 40, reps: 8, last: "40 kg × 8", remp: "Rowing élastique", lines: [
+        "Buste penché à 45° environ, genoux légèrement fléchis, dos PLAT.",
+        "Tire la barre vers le nombril, coudes le long du corps.",
+        "Le buste ne se redresse pas pendant la série.",
+        "Erreur fréquente : arrondir le bas du dos. Réduis la charge, c'est le mouvement le plus risqué de la liste." ] },
+      { nom: "Rowing inversé", mat: "Une table solide, ou une barre basse", muscle: "Dos", n: 3, kg: 0, reps: 12, last: "12 reps", remp: "Tirage à la serviette", lines: [
+        "Allongé sous la table, mains sur le bord, corps en planche talons au sol.",
+        "Tire la poitrine vers le bord de la table, coudes le long du corps.",
+        "Plus le corps est horizontal, plus c'est dur : plie les genoux pour alléger.",
+        "Vérifie la stabilité de la table avant de mettre ton poids dessus." ] },
+      { nom: "Tirage poitrine léger", mat: "Poulie haute, barre large", muscle: "Dos", n: 3, kg: 30, reps: 12, last: "30 kg × 12", remp: "Tirage vertical élastique", lines: [
+        "Même technique que le tirage poitrine, avec une charge nettement plus légère.",
+        "Sur une séance de consolidation, cherche la sensation musculaire, pas la performance." ] },
+      { nom: "Pull-over élastique", mat: "Élastique ancré haut, à hauteur de porte", muscle: "Dos", n: 3, kg: 0, reps: 15, last: "15 reps", remp: "Traction assistée élastique", lines: [
+        "Ancre l'élastique en haut d'une porte, recule d'un pas et penche légèrement le buste en avant.",
+        "Bras presque tendus, ramène les mains vers les cuisses en gardant les coudes verrouillés.",
+        "Le mouvement vient des grands dorsaux : si les coudes plient, ce sont les bras qui travaillent.",
+        "Le seul tirage vertical praticable sans barre de traction, une fois le tirage vertical classique déjà au programme." ] },
+      { nom: "Tirage inversé en supination", mat: "Une table solide, ou une barre basse", muscle: "Biceps", n: 3, kg: 0, reps: 10, last: "10 reps", remp: "Curl barre", lines: [
+        "Même position que le tirage inversé, mais paumes tournées vers toi.",
+        "Cette prise met les biceps en première ligne, plus que le dos.",
+        "Plus le corps est horizontal, plus c'est dur : plie les genoux pour alléger.",
+        "C'est le seul travail de biceps sérieux possible sans aucun matériel." ] },
+      { nom: "Biceps curl léger", mat: "Deux haltères légers", muscle: "Biceps", n: 3, kg: 8, reps: 14, last: "8 kg × 14", remp: "Curl élastique", lines: [
+        "Même technique que le curl classique, charge modeste.",
+        "Sur une séance de consolidation, cherche le volume, pas la charge." ] },
+      { nom: "Crunch", mat: "Aucun matériel", muscle: "Abdominaux", n: 3, kg: 0, reps: 15, last: "15 reps", remp: "Machine crunch", lines: [
+        "Genoux fléchis, mains croisées sur la poitrine.",
+        "Décolle seulement les omoplates : ce n'est pas un redressement complet.",
+        "Erreur fréquente : tirer sur la nuque avec les mains derrière la tête." ] },
+      { nom: "Mountain climbers", mat: "Aucun matériel", muscle: "Ceinture", n: 3, kg: 0, reps: 20, last: "20 reps", remp: "Planche latérale", lines: [
+        "Position de pompe, ramène alternativement un genou vers la poitrine.",
+        "Le bassin reste bas, il ne monte pas à chaque répétition.",
+        "Rythme soutenu mais contrôlé." ] }
     ]},
     { code: "LEGS", sub: "Jambes, moteur de la perte", exos: [
       { nom: "Warm-up stepper", mat: "Stepper ou escalier mécanique", muscle: "Échauffement", n: 1, kg: 0, reps: 6, unite: "min", last: "6 min", remp: "Warm-up vélo", lines: [
@@ -7055,7 +7666,7 @@ body.a-nav .nav { display: flex; }
         "Pieds à largeur d'épaules au milieu du plateau, dos et bassin plaqués.",
         "Ne verrouille pas les genoux en fin de poussée.",
         "Descends jusqu'à 90° au genou, pas plus si le bassin décolle." ] },
-      { nom: "Squat goblet", mat: "Un haltère ou une kettlebell", muscle: "Quadriceps", n: 3, kg: 20, reps: 10, last: "20 kg × 10", remp: "Fentes haltères", lines: [
+      { nom: "Squat goblet", mat: "Un haltère ou une kettlebell", muscle: "Quadriceps", n: 3, kg: 20, reps: 10, last: "20 kg × 10", remp: "Fentes", lines: [
         "Haltère tenu verticalement contre la poitrine, coudes vers le bas.",
         "Descends entre les talons, buste droit, genoux dans l'axe des pieds.",
         "Pousse le sol avec tout le pied pour remonter." ] },
@@ -7063,7 +7674,7 @@ body.a-nav .nav { display: flex; }
         "Règle le dossier pour que le genou soit dans l'axe de rotation.",
         "Marque un temps d'arrêt en haut, jambe tendue sans à-coup.",
         "Descends lentement : c'est là que le muscle travaille le plus." ] },
-      { nom: "Machine abduction", mat: "Machine à abduction (écarter)", muscle: "Hanches", n: 2, kg: 30, reps: 14, last: "30 kg × 14", remp: "Abduction élastique", lines: [
+      { nom: "Machine abduction", mat: "Machine à abduction (écarter)", muscle: "Hanches", n: 2, kg: 30, reps: 14, last: "30 kg × 14", remp: "Pont fessier", lines: [
         "Dos plaqué au dossier, mains sur les poignées.",
         "Écarte sans à-coup, reviens en contrôlant.",
         "Amplitude confortable, pas maximale." ] },
@@ -7071,12 +7682,53 @@ body.a-nav .nav { display: flex; }
         "Monte le plus haut possible sur la pointe des pieds, marque une seconde.",
         "Descends jusqu'à l'étirement complet du talon.",
         "Genoux tendus mais pas verrouillés." ] }
+    ,
+      { nom: "Soulevé de terre roumain", mat: "Barre chargée", muscle: "Ischio-jambiers", n: 4, kg: 50, reps: 9, last: "50 kg × 9", remp: "Good morning élastique", lines: [
+        "Jambes presque tendues, genoux légèrement déverrouillés et FIXES.",
+        "Pousse les hanches vers l'arrière, la barre glisse le long des cuisses.",
+        "Descends jusqu'à sentir l'étirement des ischios, pas plus bas.",
+        "Erreur fréquente : arrondir le bas du dos en cherchant à descendre plus. C'est la limite d'amplitude, pas un objectif." ] },
+      { nom: "Hip thrust", mat: "Un banc ou un canapé, un haltère", muscle: "Fessiers", n: 3, kg: 30, reps: 12, last: "30 kg × 12", remp: "Pont fessier", lines: [
+        "Haut du dos appuyé sur le banc, pieds à plat, haltère sur le pli des hanches.",
+        "Monte le bassin jusqu'à ce que le corps forme une ligne des genoux aux épaules.",
+        "Rentre le menton et regarde devant toi, pas au plafond.",
+        "Erreur fréquente : hyperextension en haut. Serre les fessiers, ne cambre pas." ] },
+      { nom: "Montées sur banc", mat: "Un banc, une marche haute ou une chaise stable", muscle: "Fessiers", n: 3, kg: 0, reps: 12, last: "12 reps", remp: "Squat au poids de corps", lines: [
+        "Pied entier posé sur le support, à hauteur de genou environ.",
+        "Monte en poussant sur la jambe du dessus, sans t'aider d'une impulsion du pied au sol.",
+        "Redescends en contrôlant, ne saute pas." ] },
+      { nom: "Leg press léger", mat: "Presse à cuisses", muscle: "Quadriceps", n: 3, kg: 40, reps: 12, last: "40 kg × 12", remp: "Squat goblet léger", lines: [
+        "Même technique que le leg press, charge nettement allégée.",
+        "Séance de consolidation : on entretient, on ne cherche pas le maximum." ] },
+      { nom: "Leg curl machine", mat: "Machine à ischio-jambiers", muscle: "Ischio-jambiers", n: 3, kg: 30, reps: 12, last: "30 kg × 12", remp: "Leg curl élastique", lines: [
+        "Axe de la machine aligné avec l'axe du genou.",
+        "Ramène les talons vers les fessiers sans décoller le bassin.",
+        "Contrôle le retour, ne laisse pas la charge redescendre seule." ] },
+      { nom: "Leg curl nordique assisté", mat: "Un point pour bloquer les chevilles, un coussin sous les genoux", muscle: "Ischio-jambiers", n: 3, kg: 0, reps: 8, last: "8 reps", remp: "Leg curl en glissé", lines: [
+        "À genoux, chevilles bloquées, corps droit des genoux à la tête.",
+        "Descends le buste vers l'avant AUSSI LENTEMENT que possible, en retenant.",
+        "Rattrape-toi avec les mains au sol puis repousse pour remonter.",
+        "Très exigeant : commence par 3 répétitions et n'ajoute qu'ensuite. Fortes courbatures les premières fois." ] },
+      { nom: "Extension quadriceps une jambe", mat: "Machine à extension de jambes", muscle: "Quadriceps", n: 3, kg: 15, reps: 12, last: "15 kg × 12", remp: "Chaise contre le mur", lines: [
+        "Une seule jambe à la fois, la charge divisée par un peu plus de deux.",
+        "Axe de la machine aligné avec le genou, bassin bien calé dans le dossier.",
+        "Commence par la jambe la plus faible et donne à l'autre le même nombre de répétitions, pas plus.",
+        "C'est l'exercice qui montre un déséquilibre entre les deux jambes : l'extension à deux le cache." ] },
+      { nom: "Mollets sur une jambe", mat: "Une marche, une main au mur", muscle: "Mollets", n: 2, kg: 0, reps: 12, last: "12 reps", remp: "Mollets à l'élastique", lines: [
+        "Une seule jambe sur la marche, l'autre pied croisé derrière la cheville.",
+        "Une main au mur pour l'équilibre, pas pour te tirer vers le haut.",
+        "Descends le talon lentement jusqu'à l'étirement complet avant de remonter.",
+        "Autant de répétitions à droite qu'à gauche, en commençant par le côté faible." ] },
+      { nom: "Machine adduction", mat: "Machine à adduction (resserrer)", muscle: "Hanches", n: 2, kg: 35, reps: 14, last: "35 kg × 14", remp: "Hip thrust élastique", lines: [
+        "Dos plaqué, réglage d'écartement de départ modéré.",
+        "Resserre en contrôlant, retiens le retour.",
+        "Erreur fréquente : partir d'un écartement extrême, l'adducteur est un muscle facile à claquer." ] }
     ]},
     { code: "HIIT", sub: "Rameur Tabata + abdos", exos: [
       { nom: "Warm-up marche", mat: "Tapis de marche", muscle: "Échauffement", n: 1, kg: 0, reps: 4, unite: "min", last: "4 min", remp: "Échauffement articulaire", lines: [
         "Marche franche, sans pente au début.",
         "Quatre minutes suffisent avant du HIIT : le but est de lancer la circulation." ] },
-      { nom: "Rameur HIIT tabata", mat: "Rameur", muscle: "Cardio", n: 8, kg: 0, reps: 20, unite: "s", last: "20 s explosion", remp: "Vélo elliptique en intervalles", lines: [
+      { nom: "Rameur HIIT tabata", mat: "Rameur", muscle: "Cardio", n: 8, kg: 0, reps: 20, unite: "s", last: "20 s explosion", remp: "Vélo HIIT", lines: [
         "Ordre du mouvement : jambes, puis buste, puis bras. Retour dans l'ordre inverse.",
         "20 secondes à fond, 40 secondes de récupération, sans descendre du rameur.",
         "Si la puissance chute de plus d'un tiers, arrête la série." ] },
@@ -7092,6 +7744,44 @@ body.a-nav .nav { display: flex; }
         "Coude sous l'épaule, corps aligné de la cheville à la tête.",
         "Bassin haut : ne laisse pas la hanche descendre vers le sol.",
         "Même durée des deux côtés, même si un côté est plus faible." ] }
+    ,
+      { nom: "HIIT poids de corps", mat: "Aucun matériel", muscle: "Cardio", n: 4, kg: 0, reps: 2, unite: "min", last: "2 min", remp: "Vélo HIIT", lines: [
+        "Alterne : montées de genoux, jumping jacks, squats sautés, mountain climbers.",
+        "30 secondes d'effort franc, 30 secondes de vraie récupération.",
+        "Enlève les sauts si les articulations protestent : monte les genoux sur place à la place." ] },
+      { nom: "Corde à sauter", mat: "Une corde à sauter", muscle: "Cardio", n: 4, kg: 0, reps: 1, unite: "min", last: "1 min", remp: "Marche rapide", lines: [
+        "Sauts bas, la corde passe à peine sous les pieds.",
+        "Le mouvement vient des poignets, pas des épaules.",
+        "Réception sur l'avant du pied, genoux souples.",
+        "Exigeant pour les mollets : commence court." ] },
+      { nom: "Vélo", mat: "Vélo", muscle: "Cardio", n: 3, kg: 0, reps: 6, unite: "min", last: "6 min", remp: "Marche rapide", lines: [
+        "Allure à laquelle tu peux dire une phrase courte, pas une conversation.",
+        "Cadence de pédalage régulière, résistance moyenne plutôt que forte.",
+        "Prends la durée comme objectif, pas la distance." ] },
+      { nom: "Rameur", mat: "Rameur", muscle: "Cardio", n: 2, kg: 0, reps: 6, unite: "min", last: "6 min", remp: "Marche rapide", lines: [
+        "Jambes, buste, bras à l'aller. Bras, buste, jambes au retour.",
+        "La puissance vient des jambes, pas des bras.",
+        "Dos droit, ne t'arrondis jamais pour aller chercher plus loin." ] },
+      { nom: "Vélo elliptique", mat: "Vélo elliptique", muscle: "Cardio", n: 3, kg: 0, reps: 5, unite: "min", last: "5 min", remp: "Marche rapide", lines: [
+        "Buste droit, ne t'appuie pas de tout ton poids sur les poignées.",
+        "Pousse aussi avec les jambes en arrière, pas seulement en avant.",
+        "Sans impact : utile si les genoux se rappellent à toi." ] },
+      { nom: "Crunch", mat: "Aucun matériel", muscle: "Abdominaux", n: 3, kg: 0, reps: 15, last: "15 reps", remp: "Crunch décliné", lines: [
+        "Genoux fléchis, mains croisées sur la poitrine.",
+        "Décolle seulement les omoplates : ce n'est pas un redressement complet.",
+        "Erreur fréquente : tirer sur la nuque avec les mains derrière la tête." ] },
+      { nom: "Hollow hold", mat: "Aucun matériel", muscle: "Ceinture", n: 3, kg: 0, reps: 30, unite: "s", last: "30 s", remp: "Gainage abdo", lines: [
+        "Allongé sur le dos, bas du dos PLAQUÉ au sol, épaules et jambes décollées.",
+        "Bras tendus derrière la tête si tu peux tenir la position lombaire.",
+        "Dès que le bas du dos décolle, remonte les jambes : c'est ça le curseur." ] },
+      { nom: "Mountain climbers", mat: "Aucun matériel", muscle: "Ceinture", n: 3, kg: 0, reps: 20, last: "20 reps", remp: "Gainage abdo", lines: [
+        "Position de pompe, ramène alternativement un genou vers la poitrine.",
+        "Le bassin reste bas, il ne monte pas à chaque répétition.",
+        "Rythme soutenu mais contrôlé." ] },
+      { nom: "Abdo combo : crunch + relevés", mat: "Aucun matériel", muscle: "Abdominaux", n: 3, kg: 0, reps: 12, last: "12 reps", remp: "Relevés de jambes au sol", lines: [
+        "Enchaîne sans repos : 12 crunchs puis 12 relevés de jambes.",
+        "Compte une série pour l'ensemble.",
+        "Sur une séance de consolidation, l'objectif est le volume, pas l'intensité." ] }
     ]},
     { code: "FULL BODY", sub: "Consolidation légère", exos: [
       { nom: "Warm-up vélo allongé", mat: "Vélo allongé (semi-couché)", muscle: "Échauffement", n: 1, kg: 0, reps: 6, unite: "min", last: "6 min", remp: "Warm-up vélo", lines: [
@@ -7117,6 +7807,47 @@ body.a-nav .nav { display: flex; }
         "Un crunch, puis un relevé de jambes, sans poser les pieds.",
         "Douze enchaînements par série.",
         "Souffle à chaque montée." ] }
+    ,
+      { nom: "Squat goblet léger", mat: "Un haltère léger", muscle: "Quadriceps", n: 3, kg: 12, reps: 12, last: "12 kg × 12", remp: "Squat bulgare", lines: [
+        "Même technique que le squat goblet, avec un poids modeste.",
+        "L'objectif est le mouvement et la circulation, pas la charge." ] },
+      { nom: "Soulevé de terre roumain haltères", mat: "Deux haltères", muscle: "Ischio-jambiers", n: 3, kg: 20, reps: 12, last: "20 kg × 12", remp: "Good morning élastique", lines: [
+        "Même mouvement qu'à la barre, haltères devant les cuisses.",
+        "Dos plat, épaules basses et serrées en arrière.",
+        "Le mouvement vient de la hanche, pas du dos." ] },
+      { nom: "Développé poitrine machine", mat: "Machine chest press", muscle: "Pectoraux", n: 3, kg: 30, reps: 12, last: "30 kg × 12", remp: "Développé élastique au sol", lines: [
+        "Règle le siège pour que les poignées arrivent à hauteur de poitrine, pas d'épaules.",
+        "Dos entièrement plaqué au dossier pendant toute la série.",
+        "Ne verrouille pas les coudes en fin de poussée.",
+        "Erreur fréquente : siège trop bas, ce qui transforme le mouvement en développé incliné pour les épaules." ] },
+      { nom: "Tirage horizontal (seated row)", mat: "Poulie basse, poignée en V", muscle: "Dos", n: 3, kg: 30, reps: 12, last: "30 kg × 12", remp: "Tirage à la serviette", lines: [
+        "Genoux légèrement fléchis, dos droit, buste quasiment vertical.",
+        "Tire vers le nombril en serrant les omoplates.",
+        "Contrôle le retour sans laisser les épaules partir loin en avant.",
+        "Erreur fréquente : balancer le buste d'avant en arrière pour lancer la charge." ] },
+      { nom: "Fentes", mat: "Aucun matériel, haltères en option", muscle: "Jambes", n: 3, kg: 0, reps: 12, last: "12 reps", remp: "Montées sur banc", lines: [
+        "Grand pas en avant, descends le genou arrière vers le sol sans le cogner.",
+        "Buste droit, le genou avant reste au-dessus de la cheville.",
+        "Compte les répétitions par jambe.",
+        "Erreur fréquente : pas trop court, le genou avant dépasse largement l'orteil." ] },
+      { nom: "Hip thrust élastique", mat: "Élastique large en travers des hanches, un canapé ou un lit bas", muscle: "Fessiers", n: 3, kg: 0, reps: 15, last: "15 reps", remp: "Pont fessier", lines: [
+        "Haut du dos calé sur le bord du canapé, pieds à plat, élastique en travers des hanches et tenu au sol par les mains.",
+        "Monte les hanches jusqu'à l'alignement genoux-hanches-épaules, sans cambrer le bas du dos.",
+        "Marque une seconde en haut en serrant les fessiers.",
+        "Menton rentré et regard vers les genoux : c'est ce qui empêche de compenser par les lombaires." ] },
+      { nom: "Élévations latérales élastique", mat: "Élastique fin, sous les pieds", muscle: "Épaules", n: 3, kg: 0, reps: 15, last: "15 reps", remp: "Élévations frontales élastique", lines: [
+        "Debout sur l'élastique, une poignée dans chaque main le long du corps.",
+        "Monte les bras sur les côtés jusqu'à l'horizontale.",
+        "L'élastique se durcit en fin de mouvement, là où le muscle est le plus fort : c'est idéal ici." ] },
+      { nom: "Y-T-W au sol", mat: "Aucun matériel, un tapis si le sol est dur", muscle: "Épaules arrière", n: 2, kg: 0, reps: 12, last: "12 reps", remp: "Oiseau à l'élastique", lines: [
+        "À plat ventre, front au sol, bras tendus devant : dessine un Y en décollant les bras, puis un T bras sur les côtés, puis un W coudes pliés.",
+        "Décolle par les omoplates, pas par les mains. L'amplitude est courte, c'est normal.",
+        "Garde le menton rentré et le regard au sol : ne relève pas la tête.",
+        "Le seul travail d'épaules arrière sérieux possible sans matériel, et le meilleur contrepoids aux pompes." ] },
+      { nom: "Relevés de jambes au sol", mat: "Aucun matériel", muscle: "Abdominaux", n: 2, kg: 0, reps: 12, last: "12 reps", remp: "Crunch", lines: [
+        "Allongé sur le dos, mains sous les fessiers pour protéger le bas du dos.",
+        "Jambes tendues, descends lentement sans toucher le sol.",
+        "Si le bas du dos décolle, plie les genoux." ] }
     ]}
   ];
 
@@ -7281,6 +8012,22 @@ body.a-nav .nav { display: flex; }
     { t: "1 h 15", s: "8 exercices, volume élevé" }
   ];
 
+  // Minutes reelles derriere chaque entree de DUREES. Le libelle « 1 h 15 » ne
+  // se parse pas ; cette table est la traduction.
+  //
+  // ELLE VIT ICI, a cote de DUREES, et plus dans le bloc du diagnostic : la
+  // regle qui calcule le nombre d'exercices en a besoin, et la page de
+  // controle de la derivation n'assemble que les catalogues et la derivation.
+  // Laissee dans le diagnostic, elle aurait manque a cette page.
+  var OB_DUREE_MIN = [30, 45, 60, 75];
+
+  // Le controle que le commentaire d'origine annoncait « plus bas » n'existait
+  // nulle part. Le voici : les deux tables se lisent par le MEME index, donc
+  // une entree ajoutee a l'une sans l'autre rendrait une duree indefinie.
+  if (DUREES.length !== OB_DUREE_MIN.length) {
+    throw new Error("DUREES et OB_DUREE_MIN doivent avoir la meme longueur.");
+  }
+
   // La ROTATION du programme. Les journees ne portent pas de jour : c'est
   // l'etape Rythme qui les affecte, sinon une seance resterait proposee un jour
   // que l'utilisateur vient de decocher.
@@ -7290,9 +8037,14 @@ body.a-nav .nav { display: flex; }
     { nom: "Poids", titre: "Où tu en es, où tu vas", sous: "Ces deux nombres calculent tes repères caloriques.", type: "champs",
       champs: [{ l: "Poids actuel", v: "78,4 kg" }, { l: "Poids cible", v: "75,0 kg" }] },
     { nom: "Objectif", titre: "Tu cherches quoi ?", sous: "Ça décide du déficit ou du surplus appliqué.", type: "chips", single: "obObjectif",
-      chips: [{ t: "Perdre du gras", s: "Déficit plafonné à 500 kcal" },
+      // « quotidien » ajoute a la demande d'Olivier : le plafond se lisait comme
+      // un total, alors que c'est bien un ecart PAR JOUR. Verifie dans le
+      // moteur avant de l'ecrire : nutritionTargets calcule un maintien
+      // journalier, en retire le deficit, et multiplie l'ecart par 7 pour
+      // l'horizon hebdomadaire.
+      chips: [{ t: "Perdre du gras", s: "Déficit quotidien plafonné à 500 kcal" },
               { t: "Maintenir", s: "Calories au niveau du maintien" },
-              { t: "Prendre du muscle", s: "Surplus plafonné à 400 kcal" }] },
+              { t: "Prendre du muscle", s: "Surplus quotidien plafonné à 400 kcal" }] },
     { nom: "Pratique", titre: "Tu en es où avec la musculation ?", sous: "Ça fixe le volume de départ et la vitesse de progression.", type: "chips", single: "obPratique",
       chips: [{ t: "Je débute", s: "Moins de 3 mois" },
               { t: "Je reprends", s: "J'ai déjà pratiqué, arrêté depuis" },
@@ -7353,12 +8105,99 @@ body.a-nav .nav { display: flex; }
     return (new Date().getDay() + 6) % 7;
   }
 
+  // =========================================================================
+  // LA DUREE D'UNE SEANCE EN SALLE
+  // -------------------------------------------------------------------------
+  // Elle vient soit d'une des quatre entrees de DUREES, soit du champ libre de
+  // l'etape 6, ou l'on tape ses propres minutes. UN SEUL endroit la calcule :
+  // le nombre d'exercices, le libelle affiche sur l'accueil et dans Moi, et le
+  // pont vers le moteur en dependent tous, et trois lectures separees
+  // finiraient par ne plus dire la meme chose.
+  //
+  // `obDuree` GARDE SON SENS D'INDEX, et `obDureeLibre` s'ajoute a cote. Faire
+  // porter les minutes a `obDuree` aurait relu les « 1 » deja enregistres sur
+  // les telephones comme « une minute ».
+  // =========================================================================
+  var DUREE_MIN = 20, DUREE_MAX = 180;
+
+  // Rend les minutes du champ libre, ou 0 s'il est vide, illisible ou hors
+  // bornes. En dessous de 20 min il ne reste pas de seance a construire ;
+  // au-dela de 180 min le nombre d'exercices demande depasse de loin ce que le
+  // catalogue contient, et l'ecran promettrait ce qu'il ne peut pas tenir.
+  //
+  // ⚠️ NE PAS SE CONTENTER DE RETIRER CE QUI N'EST PAS UN CHIFFRE. C'est ce que
+  // faisait la premiere version, et « 1h30 » y devenait 130 minutes : le
+  // double de ce qui etait ecrit, sans un mot. On lit donc les heures au lieu
+  // de les effacer, et tout ce qui ne rentre dans aucune des deux formes est
+  // refuse plutot que devine.
+  function dureeLibreValide() {
+    var brut = state.obDureeLibre, m, v;
+    if (brut === undefined || brut === null) return 0;
+    brut = String(brut).trim().toLowerCase().replace(/\s+/g, "");
+    if (brut === "") return 0;
+
+    // « 90 », « 90min », « 90minutes »
+    m = /^(\d{1,3})(min(ute)?s?)?$/.exec(brut);
+    if (m) { v = parseInt(m[1], 10); }
+    else {
+      // « 1h30 », « 1h », « 1h00 », « 2h05 »
+      m = /^(\d{1,2})h(\d{1,2})?$/.exec(brut);
+      if (!m) return 0;
+      v = parseInt(m[1], 10) * 60 + (m[2] ? parseInt(m[2], 10) : 0);
+    }
+    if (isNaN(v) || v < DUREE_MIN || v > DUREE_MAX) return 0;
+    return v;
+  }
+
+  function dureeMinutes() {
+    return dureeLibreValide() || OB_DUREE_MIN[state.obDuree] || 45;
+  }
+
+  function dureeLibelle() {
+    var v = dureeLibreValide(), h, m;
+    if (!v) return DUREES[state.obDuree] ? DUREES[state.obDuree].t : "45 minutes";
+    if (v < 60) return v + " minutes";
+    h = Math.floor(v / 60);
+    m = v % 60;
+    return m ? h + " h " + (m < 10 ? "0" + m : m) : h + " h";
+  }
+
   // Nombre d'exercices de TRAVAIL, echauffement non compris. Les libelles de
   // DUREES annoncent un de plus (4, 6, 7, 8) parce qu'ils comptent
   // l'echauffement, qui est toujours la.
+  //
+  // LES QUATRE DUREES PROPOSEES SONT DES REPERES CHOISIS, PAS UNE FORMULE :
+  // 30 min tient 3 exercices, 45 en tient 5, 60 en tient 6, 75 en tient 7. La
+  // marche de 30 a 45 vaut deux exercices, les suivantes un seul. Aucune
+  // formule simple ne passe par ces quatre points ; on INTERPOLE donc entre
+  // eux plutot que d'inventer une regle qui les contredirait, et au-dela de
+  // 75 min on prolonge la derniere pente, un exercice par quart d'heure.
+  //
+  // ⚠️ CE NOMBRE EST UNE DEMANDE, PAS UNE PROMESSE. `exosDe` s'arrete a ce que
+  // la seance CONTIENT : PUSH et PULL ont 6 exercices de travail, LEGS 5,
+  // HIIT 4, FULL BODY 16. Une seance longue n'en sort donc pas davantage, et
+  // c'etait deja vrai avant le champ libre — a 1 h 15 l'ecran annonce
+  // « 8 exercices » alors qu'un jour LEGS en donne 6.
+  var DUREE_ANCRES = [[30, 3], [45, 5], [60, 6], [75, 7]];
+
+  function nbTravailPour(minutes) {
+    var i, a, b;
+    if (!(minutes > 0)) return 5;
+    a = DUREE_ANCRES[0];
+    if (minutes <= a[0]) return Math.max(1, Math.round(a[1] * minutes / a[0]));
+    for (i = 1; i < DUREE_ANCRES.length; i++) {
+      a = DUREE_ANCRES[i - 1];
+      b = DUREE_ANCRES[i];
+      if (minutes <= b[0]) {
+        return Math.round(a[1] + (b[1] - a[1]) * (minutes - a[0]) / (b[0] - a[0]));
+      }
+    }
+    b = DUREE_ANCRES[DUREE_ANCRES.length - 1];
+    return Math.round(b[1] + (minutes - b[0]) / 15);
+  }
+
   function nbTravail() {
-    var n = [3, 5, 6, 7][state.obDuree];
-    return typeof n === "number" ? n : 5;
+    return nbTravailPour(dureeMinutes());
   }
 
   // -------------------------------------------------------------------------
@@ -7500,6 +8339,16 @@ body.a-nav .nav { display: flex; }
   // C'est ce qui fait survivre les decisions de l'utilisateur a un changement
   // de duree de seance : le generateur propose, l'utilisateur tranche, et le
   // generateur ne reecrit pas la decision.
+  // Copie de surface d'un exercice du catalogue, augmentee de son rang et de sa
+  // cle de refus. Une copie, parce que SEANCES est une constante partagee.
+  function copieExo(e, rang, code) {
+    var o = {}, k;
+    for (k in e) { if (has(e, k)) o[k] = e[k]; }
+    o.rang = rang;
+    o.cle = code + "-" + rang;
+    return o;
+  }
+
   function exosDe(idx) {
     var S = SEANCES[idx] || SEANCES[0], gardes = [], i, cle, e, refuse, out = [], rang;
 
@@ -7514,17 +8363,68 @@ body.a-nav .nav { display: flex; }
       e = gardes[i].e;
       rang = gardes[i].rang;
       refuse = !!state.obRefus[S.code + "-" + rang];
-      if (!refuse) { out.push(e); continue; }
+      if (!refuse) {
+        // UNE COPIE, JAMAIS L'OBJET DU CATALOGUE. SEANCES est une constante
+        // partagee par tous les ecrans ; rendre ses objets tels quels invitait
+        // a ecrire dedans, et une ecriture y serait devenue la nouvelle
+        // reference pour tout le monde, sans passer par l'etat.
+        //
+        // La copie porte en plus `rang` et `cle`, dont l'ecran du programme a
+        // besoin pour proposer « Non merci » sur la BONNE ligne : les refus
+        // sont indexes par rang, pas par nom.
+        out.push(copieExo(e, rang, S.code));
+        continue;
+      }
       // Un exercice refuse cede la place a son remplacant. Le materiel et les
       // consignes sont vides parce qu'ils decrivaient l'exercice d'origine :
       // les garder afficherait la fiche du mouvement qu'on vient d'ecarter.
       out.push({
         nom: e.remp, remplace: e.nom, mat: "", lines: [],
         muscle: e.muscle, n: e.n, kg: e.kg, reps: e.reps,
-        unite: e.unite, last: e.last, remp: e.remp
+        unite: e.unite, last: e.last, remp: e.remp,
+        rang: rang, cle: S.code + "-" + rang, refuse: true
       });
     }
-    return out;
+    return appliquerPlanIA(out);
+  }
+
+  // =========================================================================
+  // LES CHANGEMENTS ACCEPTES DE L'ASSISTANT
+  // -------------------------------------------------------------------------
+  // Ils s'appliquent ICI, au seul endroit qui fabrique la liste d'exercices
+  // d'une seance. Pose plus loin, une charge aurait change sans que le nombre
+  // de series suive, et l'ecran de fin aurait compte un tonnage sur des series
+  // que la seance ne prescrivait pas.
+  //
+  // `state.iaPlan` est indexe par NOM AFFICHE, parce que c'est ce que porte la
+  // liste ici. La conversion depuis l'identifiant du moteur se fait une seule
+  // fois, au moment d'appliquer (voir block_ia.js).
+  //
+  // La page de controle de la derivation n'a pas ce champ dans son etat : le
+  // garde le laisse passer sans rien changer.
+  // =========================================================================
+  function appliquerPlanIA(liste) {
+    var maj = state.iaPlan, i, k, m, o, sortie = [];
+    if (!maj) return liste;
+    for (i = 0; i < liste.length; i++) {
+      m = has(maj, liste[i].nom) ? maj[liste[i].nom] : null;
+      if (!m) { sortie.push(liste[i]); continue; }
+      o = {};
+      for (k in liste[i]) { if (has(liste[i], k)) o[k] = liste[i][k]; }
+      // On ne touche PAS a `last` : il raconte la derniere seance faite, pas ce
+      // qui est prescrit. Le reecrire ferait dire au passe ce qu'il n'a pas ete.
+      if (m.kg) o.kg = m.kg;
+      if (m.n) o.n = m.n;
+      if (m.repos) o.repos = m.repos;
+      if (m.remp && m.remp.nom) {
+        o.remplace = o.nom;
+        o.nom = m.remp.nom;
+        o.mat = m.remp.mat || "";
+        o.lines = m.remp.lines || [];
+      }
+      sortie.push(o);
+    }
+    return sortie;
   }
 
   // Le vivier du bouton « Ajouter un exercice » : exactement ce que la duree a
@@ -7801,13 +8701,26 @@ body.a-nav .nav { display: flex; }
 
   function modesDisponibles() {
     var d = deriver(), out = [];
+    // LE POIDS EST LA PREMIERE CHOSE QU'ON VIENT REGARDER, et son onglet
+    // disparaissait tant qu'aucune pesee n'etait notee. Il s'affichait donc
+    // exactement quand on en avait le moins besoin : au debut. Signale par
+    // Olivier.
+    //
+    // Il suffit maintenant d'un poids declare au diagnostic, ce que tout le
+    // monde a. Sans pesee, l'ecran ne dessine PAS de courbe plate : il dit
+    // qu'il n'y a rien a tracer et ou aller le noter. Une ligne horizontale au
+    // poids declare se lirait comme douze semaines sans le moindre progres.
+    if ((state.pesees || []).length || nombreOu(state.obPoids, 0) > 0) {
+      out.push({ v: "poids", t: "Poids", u: "kg",
+                 l: "ton poids semaine après semaine", c: T_VERT });
+    }
+    // EN PREMIER, comme la maquette, et parce que c'est ce qu'on vient
+    // regarder. `modeChart` est un INDICE enregistre : le reordonnancement
+    // designera donc une autre serie une fois, chez qui avait deja choisi un
+    // onglet. Sans consequence, un toucher remet le bon.
     if (d.slotsSalle.length) {
       out.push({ v: "tonnage", t: "Tonnage", u: "kg",
                  l: "kilos soulevés par semaine", c: T_SALLE });
-    }
-    if ((state.pesees || []).length) {
-      out.push({ v: "poids", t: "Poids", u: "kg",
-                 l: "ton poids semaine après semaine", c: T_VERT });
     }
     if (d.slotsRun.length) {
       out.push({ v: "distance", t: "Distance", u: "km",
@@ -7818,6 +8731,186 @@ body.a-nav .nav { display: flex; }
                  l: "séances faites par semaine", c: T_SALLE });
     }
     return out;
+  }
+
+  /* =========================================================================
+     LES REPERES CALORIQUES — LE MODELE
+     -------------------------------------------------------------------------
+     CE QU'IL Y AVAIT AVANT, ET POURQUOI IL A CHANGE.
+
+     Le moteur de la v1.21.0 calcule un maintien journalier ainsi :
+
+         maintien = poids x (28 + nombre de jours d'entrainement)
+
+     Deux choses n'y entrent pas, et Olivier les a relevees a la revue :
+       - LA MORPHOLOGIE. Seul le poids compte. Taille et age sont demandes au
+         diagnostic et ne servent a rien ici ; le sexe ne sert que de plancher.
+       - LA NATURE ET LA DUREE DE L'EFFORT. Un jour de pilates et un jour de
+         cross training valent exactement la meme chose : une unite de plus.
+         La duree du cours est enregistree, elle ne sert qu'a l'affichage.
+
+     CE MODELE-CI FAIT ENTRER LES DEUX, en trois termes :
+
+       1. METABOLISME DE BASE, par Mifflin-St Jeor. Quatre entrees : poids,
+          taille, age, sexe. C'est la que passe la morphologie.
+       2. VIE COURANTE = metabolisme de base x 1,30. Volontairement bas :
+          l'entrainement est compte a part, et un facteur d'activite plus
+          genereux le compterait deux fois.
+       3. ENTRAINEMENT, SEANCE PAR SEANCE, sur la semaine, puis rapporte au
+          jour. C'est la que passent la nature et la duree.
+
+     ---------------------------------------------------------------------
+     D'OU VIENNENT LES CHIFFRES
+
+     Les MET sont des valeurs de reference du Compendium of Physical
+     Activities : un MET vaut la depense au repos, et une activite a 6 MET
+     coute six fois cela. La conversion usuelle est
+
+         kcal = MET x poids(kg) x heures
+
+     LA MORPHOLOGIE ENTRE DONC UNE SECONDE FOIS ICI, par le poids : a effort
+     egal, un corps plus lourd depense davantage.
+
+     ⚠️ CE SONT DES MOYENNES DE POPULATION, PAS UNE MESURE. Deux personnes au
+     meme cours de zumba ne depensent pas la meme chose : l'intensite reelle,
+     l'efficacite gestuelle et le niveau d'entrainement font varier le chiffre
+     sans que l'appli puisse le savoir. Les ecrans continuent donc de dire
+     « reperes », jamais « depense mesuree ».
+
+     ⚠️ CE BLOC N'EST PAS LE MOTEUR. Le moteur reste greffe VERBATIM de la
+     v1.21.0 et reste rejouable par greffer_moteur.py ; l'y retoucher aurait
+     ete efface au prochain rejeu. Verifie avant d'ecrire ce bloc :
+     `nutritionTargets` n'est appelee NULLE PART a l'interieur du moteur, elle
+     ne l'est que par l'interface. La remplacer ici suffit donc a changer le
+     modele partout, sans laisser le moteur travailler sur l'ancien.
+
+     Les regles d'aval — deficit, surplus, plancher, proteines, horizon —
+     sont REPRISES du moteur a l'identique, et c'est delibere : seul le
+     maintien change. Elles sont commentees une a une plus bas pour qu'on voie
+     qu'elles disent la meme chose que lui.
+     ========================================================================= */
+
+  // Le cout d'un effort, en MET. Cinq valeurs, parce que l'appli ne connait
+  // que cinq sortes de seances. Une table de plusieurs centaines d'activites
+  // n'aurait rien a decrire de plus : le diagnostic ne propose pas de choisir
+  // parmi des centaines.
+  var MET_SALLE = 5.0;          // musculation, effort modere a soutenu
+  var MET_COURS = [7.5, 6.0, 3.0];  // index de NATURES : Cardio, Renforcement, Mobilite
+
+  // LE RUNNING SE COMPTE EN DISTANCE, PAS EN DUREE. Le cout d'une course est
+  // a peu pres proportionnel aux kilometres et peu sensible a l'allure :
+  // environ 1 kcal par kilo et par kilometre. Courir 8 km coute a peu pres
+  // autant en une heure qu'en cinquante minutes ; c'est la distance qui paie.
+  var KCAL_PAR_KG_ET_KM = 1.0;
+
+  // Quand aucune sortie n'a encore ete enregistree, il faut bien partir de
+  // quelque chose. 6 km, et l'allure de repli sert a convertir des minutes en
+  // kilometres quand une sortie a ete notee sans distance.
+  var RUN_KM_DEFAUT = 6;
+  var RUN_MIN_PAR_KM = 6;
+
+  var FACTEUR_VIE_COURANTE = 1.30;
+
+  // -------------------------------------------------------------------------
+  // METABOLISME DE BASE — Mifflin-St Jeor
+  // -------------------------------------------------------------------------
+  // Retenue plutot que Harris-Benedict : plus recente, et plus juste sur les
+  // profils qui s'ecartent de la moyenne, ce qui est precisement le cas ou
+  // l'ancienne formule de l'appli se trompait le plus.
+  function mbDeBase(poids, taille, age, sexeFeminin) {
+    var v = 10 * poids + 6.25 * taille - 5 * age + (sexeFeminin ? -161 : 5);
+    return v > 0 ? v : 0;
+  }
+
+  // Les kilometres d'une sortie type, lus dans le JOURNAL de l'utilisateur
+  // plutot que supposes : ses propres sorties disent mieux que nous ce qu'il
+  // court. On prend la mediane des cinq dernieres, moins sensible qu'une
+  // moyenne a une sortie longue isolee.
+  function kmHabituelsRunning() {
+    var h = state.hist || [], vals = [], i, km, m;
+    for (i = h.length - 1; i >= 0 && vals.length < 5; i--) {
+      if (h[i].t !== "run") continue;
+      km = parseFloat(String(h[i].km).replace(",", "."));
+      if (!isNaN(km) && km > 0) { vals.push(km); continue; }
+      m = parseFloat(String(h[i].minutes).replace(",", "."));
+      if (!isNaN(m) && m > 0) vals.push(m / RUN_MIN_PAR_KM);
+    }
+    if (!vals.length) return RUN_KM_DEFAUT;
+    vals.sort(function (a, b) { return a - b; });
+    return vals[Math.floor(vals.length / 2)];
+  }
+
+  // Ce que coute UNE seance, en kilocalories.
+  function kcalSeance(a, poids) {
+    var met;
+    if (!a) return 0;
+    if (a.t === "run") return KCAL_PAR_KG_ET_KM * poids * kmHabituelsRunning();
+    if (a.t === "cours") {
+      met = MET_COURS[a.nat] !== undefined ? MET_COURS[a.nat] : MET_COURS[1];
+      return met * poids * ((a.min || 60) / 60);
+    }
+    // Salle : la duree est celle repondue au diagnostic, champ libre compris.
+    return MET_SALLE * poids * (dureeMinutes() / 60);
+  }
+
+  // La depense d'entrainement de la SEMAINE, creneau par creneau. On parcourt
+  // `slots` et pas `progJours` : deux seances le meme jour comptent deux fois,
+  // alors que l'ancien modele ne comptait le jour qu'une seule.
+  function depenseHebdo(poids) {
+    var d = deriver(), total = 0, i;
+    for (i = 0; i < d.slots.length; i++) total += kcalSeance(d.slots[i].a, poids);
+    return total;
+  }
+
+  // -------------------------------------------------------------------------
+  // LES CIBLES
+  // -------------------------------------------------------------------------
+  // Meme forme de retour que MOTEUR.nutritionTargets, pour que les ecrans qui
+  // l'appelaient n'aient qu'un nom a changer.
+  function ciblesNutrition() {
+    var poids = nombreOu(state.obPoids, 80);
+    var cible = nombreOu(state.obPoidsCible, 75);
+    var taille = nombreOu(state.obTaille, 175);
+    var age = nombreOu(state.obAge, 35);
+    var feminin = state.obSexe === 1;
+
+    var base = mbDeBase(poids, taille, age, feminin);
+    var vie = base * FACTEUR_VIE_COURANTE;
+    var sport = depenseHebdo(poids) / 7;
+    // Arrondi a la dizaine, comme le moteur : afficher 2 547 kcal donnerait a
+    // une estimation la precision d'une mesure.
+    var maintain = Math.round((vie + sport) / 10) * 10;
+
+    var losing = cible < poids;
+    var gaining = cible > poids;
+    // Deficit de 20 %, plafonne a 500 kcal. Repris du moteur.
+    var deficit = losing ? Math.min(500, Math.round(maintain * 0.2)) : 0;
+    // Surplus de 15 %, plafonne a 400 kcal. Repris du moteur : au-dela, la
+    // part de gras prise augmente sans que le muscle suive.
+    var surplus = gaining ? Math.min(400, Math.round(maintain * 0.15)) : 0;
+    var plancher = feminin ? 1400 : 1600;
+    var kcal = Math.max(plancher, maintain - deficit + surplus);
+    var bute = losing && (maintain - deficit) < plancher;
+
+    // Proteines calees sur le poids le PLUS BAS des deux. Repris du moteur.
+    var prot = Math.round((Math.min(poids, cible) * 1.8) / 5) * 5;
+
+    // Horizon dans les deux sens. 7 700 kcal valent environ un kilo.
+    var ecart = losing ? deficit : surplus;
+    var semaines = ecart > 0
+      ? Math.ceil((Math.abs(poids - cible) * 7700) / (ecart * 7)) : null;
+
+    return {
+      maintain: maintain, kcal: kcal,
+      deficit: maintain - kcal,
+      surplus: kcal - maintain,
+      prot: prot, floored: bute, weeks: semaines,
+      losing: losing, gaining: gaining,
+      // Le detail du modele, pour les bancs et pour l'ecran Nutrition : sans
+      // lui, on ne pourrait verifier que le total, pas ce qui le compose.
+      mb: Math.round(base), vieCourante: Math.round(vie),
+      sportParJour: Math.round(sport), hebdo: Math.round(sport * 7)
+    };
   }
 
   /* =========================================================================
@@ -7838,12 +8931,15 @@ body.a-nav .nav { display: flex; }
     { v: "run",   t: "Running" }
   ];
 
-  // Minutes reelles derriere chaque entree de DUREES. Le libelle « 1 h 15 » ne
-  // se parse pas ; cette table est la traduction, et elle a la meme longueur
-  // que DUREES, ce qu'un controle verifie plus bas.
-  var OB_DUREE_MIN = [30, 45, 60, 75];
+  // OB_DUREE_MIN a demenage a cote de DUREES, dans les catalogues : la regle
+  // du nombre d'exercices en a besoin, et la page de controle de la derivation
+  // n'assemble pas ce bloc-ci.
 
   var OB_SEXES = ["Homme", "Femme"];
+
+  // Les trois reponses de la maquette sur l'alcool. `obAlcool` est un INDICE
+  // dans cette liste, et son defaut vaut 1, « De temps en temps ».
+  var OB_ALCOOL = ["Jamais", "De temps en temps", "Souvent"];
 
   // -------------------------------------------------------------------------
   // LE PONT VERS LE MOTEUR
@@ -7888,7 +8984,7 @@ body.a-nav .nav { display: flex; }
       sex: state.obSexe === 1 ? "f" : "h",
       startWeight: nombreOu(state.obPoids, 80),
       targetWeight: nombreOu(state.obPoidsCible, 75),
-      minutes: OB_DUREE_MIN[state.obDuree] || 45,
+      minutes: dureeMinutes(),
       days: jours,
       dayKinds: kinds,
       discipline: nSalle && nCourse ? "mixte" : (nCourse && !nSalle ? "course" : "muscu"),
@@ -7982,6 +9078,30 @@ body.a-nav .nav { display: flex; }
     return h;
   }
 
+  // Les jours dont le deuxieme creneau a ete ouvert a la main. Une CHAINE
+  // plutot qu'un objet, pour rester sur la forme de `obJourOuvert` et
+  // `ajoutOuvert` voisins, et bornee par des virgules des deux cotes pour
+  // qu'un indice ne se trouve pas dans un autre.
+  function secondOuvert(ji) {
+    return (state.obSecondOuvert || "").indexOf("," + ji + ",") >= 0;
+  }
+
+  // Refuser un exercice, ou le remettre. On RECOPIE la table au lieu d'ecrire
+  // dedans : `state.obRefus` est enregistre tel quel, et le muter en place
+  // sauterait la comparaison qui decide d'un rendu.
+  function basculerRefus(cle) {
+    var maj = {}, k;
+    if (!cle) return;
+    for (k in state.obRefus) { if (has(state.obRefus, k) && k !== cle) maj[k] = state.obRefus[k]; }
+    if (!state.obRefus[cle]) maj[cle] = 1;
+    poser({ obRefus: maj });
+  }
+
+  function basculerSecond(ji) {
+    var s = state.obSecondOuvert || ",", cle = "," + ji + ",";
+    poser({ obSecondOuvert: s.indexOf(cle) >= 0 ? s.replace(cle, ",") : s + ji + "," });
+  }
+
   function etapeJoursHtml() {
     var h = "", i, d, j, acts, k;
 
@@ -8009,39 +9129,78 @@ body.a-nav .nav { display: flex; }
       for (k = 0; k < acts.length; k++) {
         if (k > 0) h += '<div class="ob-rang">2e séance du jour</div>';
         h += selectSlotHtml(j.ji, k, acts[k], false);
+        // L'ENCART DU COURS SUIT SON CRENEAU.
+        //
+        // Il etait rassemble tout en bas de l'etape, apres les sept jours : on
+        // choisissait « cours collectif » le mardi, et le champ qui demande son
+        // nom apparaissait a un ecran de defilement de la. Le titre du jour
+        // dans l'encart etait alors la seule facon de savoir de quel jour il
+        // parlait. Demande d'Olivier a la revue.
+        //
+        // On passe `acts[k].k` et non l'indice de boucle : c'est le rang du
+        // creneau dans `obAct`, celui que majCours ecrira. Ils coincident
+        // aujourd'hui, la derivation ne filtrant rien, mais c'est le rang qui
+        // fait foi.
+        if (acts[k].t === "cours") h += blocCoursHtml(j.ji, acts[k].k, acts[k]);
       }
-      // LE CRENEAU LIBRE N'APPARAIT QUE SI LE PREMIER EST REMPLI, et il est en
-      // pointilles : il n'attend rien, il est offert.
+      // LA DEUXIEME SEANCE NE S'OUVRE QUE SI ON LA DEMANDE.
+      //
+      // Avant, remplir le premier creneau faisait apparaitre sous chaque jour
+      // un second menu vide, en pointilles. Sept jours coches donnaient sept
+      // menus « rien » a lire et a ecarter, et l'ecran se perdait dans ses
+      // propres champs. Demande d'Olivier a la revue.
+      //
+      // Le menu du PREMIER creneau, lui, reste toujours visible : c'est la
+      // question posee par l'etape, pas une option.
       if (acts.length < 2) {
-        if (acts.length === 1) h += '<div class="ob-rang">2e séance du jour</div>';
-        h += selectSlotHtml(j.ji, acts.length, null, true);
+        if (acts.length === 0) {
+          h += selectSlotHtml(j.ji, 0, null, true);
+        } else if (secondOuvert(j.ji)) {
+          h += '<div class="ob-rang">2e séance du jour</div>';
+          h += selectSlotHtml(j.ji, acts.length, null, true);
+        } else {
+          // Le libelle reprend « 2e seance », le meme mot que le rang affiche
+          // une fois le creneau ouvert : deux ecritures pour la meme chose
+          // feraient hesiter. Pas de « aujourd'hui » : on regle un jour de la
+          // semaine, pas la journee en cours.
+          h += '<button type="button" class="ob-ajout-seance" data-action="ob-second"' +
+               ' data-ji="' + j.ji + '">+ Ajouter une 2e séance</button>';
+        }
       }
       h += "</div>";
     }
 
-    for (i = 0; i < d.slotsCours.length; i++) {
-      h += blocCoursHtml(d.slotsCours[i].ji, d.slotsCours[i].a.k, d.slotsCours[i].a);
-    }
     return h;
   }
 
   // -------------------------------------------------------------------------
   // LES AUTRES TYPES D'ETAPE
   // -------------------------------------------------------------------------
-  function champHtml(id, libelle, valeur, action, suffixe, texte) {
+  // `exemple` remplit le champ vide d'une valeur grise. Il est arrive avec le
+  // retrait des unites du libelle : sans « (cm) » ni valeur, plus rien ne
+  // disait s'il fallait taper 178 ou 1,78. Un nombre nu suffit a le dire, et
+  // il vaut mieux qu'un « 178 cm » qu'on serait tente de recopier tel quel
+  // dans un champ qui n'attend qu'un nombre.
+  function champHtml(id, libelle, valeur, action, suffixe, texte, exemple) {
     return '<div class="ob-champ"><label class="ob-champ-l" for="' + id + '">' + esc(libelle) +
       (suffixe ? " (" + esc(suffixe) + ")" : "") + "</label>" +
       '<input id="' + id + '" class="ob-input' + (texte ? " ob-input-txt" : "") + '"' +
       ' type="text"' + (texte ? "" : ' inputmode="decimal"') + ' autocomplete="off"' +
+      (exemple ? ' placeholder="' + esc(exemple) + '"' : "") +
       ' value="' + esc(valeur) + '" data-action="' + action + '"></div>';
   }
 
   function etapeChampsHtml(step) {
     var h = "";
     if (step === 0) {
+      // PAS D'UNITE ENTRE PARENTHESES SUR CETTE ETAPE. Olivier a barre
+      // « (ans) » a la revue ; la maquette ne met d'unite sur aucun des trois
+      // libelles de l'etape 1, elle la porte dans la valeur du champ.
+      // « (cm) » part avec, sans quoi la meme etape aurait deux ecritures.
+      // L'etape 2 (poids) garde les siennes tant qu'elle n'est pas revue.
       h += champHtml("ob-prenom", "Prénom", state.obPrenom, "ob-prenom", "", true);
-      h += champHtml("ob-age", "Âge", state.obAge, "ob-age", "ans");
-      h += champHtml("ob-taille", "Taille", state.obTaille, "ob-taille", "cm");
+      h += champHtml("ob-age", "Âge", state.obAge, "ob-age", "", false, "38");
+      h += champHtml("ob-taille", "Taille", state.obTaille, "ob-taille", "", false, "178");
       h += '<div class="ob-champ"><span class="ob-champ-l">Tu es</span><div class="ob-natures">';
       for (var i = 0; i < OB_SEXES.length; i++) {
         h += '<button type="button" class="ob-nature' + (state.obSexe === i ? " ob-nature-on" : "") +
@@ -8071,16 +9230,41 @@ body.a-nav .nav { display: flex; }
   }
 
   function etapeDureeHtml() {
-    var h = '<div class="ob-chips">', i, on;
+    var h = '<div class="ob-chips">', i, on, libre = dureeLibreValide(), n;
     for (i = 0; i < DUREES.length; i++) {
-      on = state.obDuree === i;
+      // Un des quatre reperes n'est allume que si le champ libre est vide :
+      // sinon deux reponses seraient cochees en meme temps pour une seule
+      // question.
+      on = !libre && state.obDuree === i;
       h += '<button type="button" class="ob-chip' + (on ? " ob-chip-on" : "") + '"' +
            ' aria-pressed="' + (on ? "true" : "false") + '"' +
            ' data-action="ob-single" data-cle="obDuree" data-v="' + i + '">' +
            "<span>" + esc(DUREES[i].t) + "</span>" +
            '<span class="ob-chip-s">' + esc(DUREES[i].s) + "</span></button>";
     }
-    return h + "</div>";
+    h += "</div>";
+
+    // LA DUREE A SOI. Demande d'Olivier : 50 min, 130 min, ce que dure vraiment
+    // sa seance. Le champ prend la main sur les quatre reperes des qu'il porte
+    // un nombre tenable ; le vider les rend actifs.
+    h += '<div class="ob-champ ob-duree-libre">' +
+         '<label class="ob-champ-l" for="ob-duree-libre">Ou la durée que tu as vraiment</label>' +
+         '<input id="ob-duree-libre" class="ob-input" type="text" inputmode="numeric"' +
+         ' autocomplete="off" placeholder="50" value="' + esc(state.obDureeLibre) + '"' +
+         ' aria-describedby="ob-duree-aide" data-action="ob-duree-libre">' +
+         '<div class="ob-duree-aide" id="ob-duree-aide">';
+    if (libre) {
+      n = nbTravailPour(libre) + 1;
+      // « jusqu'a » et pas un compte ferme : exosDe s'arrete a ce que la seance
+      // contient, et les plus courtes en ont moins que les longues n'en
+      // demandent. Annoncer un nombre sec ferait promettre a l'ecran ce que le
+      // catalogue ne peut pas tenir.
+      h += esc(dureeLibelle() + " · jusqu'à " + n + " exercices, échauffement compris");
+    } else {
+      h += "En minutes. À partir de " + DUREE_MIN + ", et jusqu'à " + DUREE_MAX + ".";
+    }
+    h += "</div></div>";
+    return h;
   }
 
   function caseHtml(action, i, on, titre, sous) {
@@ -8117,63 +9301,159 @@ body.a-nav .nav { display: flex; }
     return h;
   }
 
+  // =========================================================================
+  // ETAPE 8 — LE PROGRAMME, REPLIE PAR DEFAUT
+  // -------------------------------------------------------------------------
+  // Il s'affichait entierement deplie : cinq journees et leurs quarante et
+  // quelques exercices d'un coup, sur un ecran ou l'on vient VERIFIER un plan,
+  // pas le lire ligne a ligne. La maquette montre une ligne compacte par
+  // journee, avec sa pastille de discipline, son volume et un chevron, et on
+  // ouvre celle qu'on veut inspecter. Demande d'Olivier.
+  //
+  // `obJourOuvert` existait dans les defauts depuis le debut sans etre lu
+  // nulle part : il attendait ce repli. UNE seule journee ouverte a la fois,
+  // sinon on retombe sur l'ecran a tout deplier.
+  //
+  // « NON MERCI » PAR EXERCICE, l'autre manque. `obRefus` est lu par la
+  // derivation depuis toujours, mais AUCUN ecran ne l'ecrivait : le refus etait
+  // une regle sans porte d'entree. Le bouton la fournit, et la ligne refusee
+  // reste visible en annoncant son remplacant, plutot que de disparaitre sans
+  // dire ce qui la remplace.
+  // =========================================================================
   function etapeProgrammeHtml() {
-    var d = deriver(), h = "", i, j, ex, k, dd;
+    var d = deriver(), h = "", i, j, ex, k, dd, ouvert, total = 0, journees = 0;
     if (!d.slots.length) {
       return '<p class="ob-lead">Aucune activité déclarée. Reviens à l\'étape Rythme.</p>';
     }
+
     for (i = 0; i < d.slots.length; i++) {
       j = d.slots[i];
       dd = DISC[j.a.t];
-      h += '<div class="ob-sess" style="border-left:4px solid ' + dd.bd + '">';
-      h += '<div class="ob-sess-t">' + esc(j.nom) + (j.a.k > 0 ? " · 2e séance" : "") +
-           ' <span class="ob-sess-pill" style="background:' + dd.pale + ";color:" + dd.encre + '">' +
-           esc(dd.court) + "</span></div>";
-      if (j.a.t === "salle") {
-        h += '<div class="ob-sess-s">' + esc(SEANCES[j.a.si].code) + " · " +
-             esc(SEANCES[j.a.si].sub) + "</div>";
-        ex = exosDe(j.a.si);
-        h += '<ul class="ob-exos">';
-        for (k = 0; k < ex.length; k++) {
-          h += '<li class="ob-exo"><span class="ob-exo-n">' + esc(ex[k].nom) + "</span>" +
-               '<span class="ob-exo-d">' + esc(ex[k].n + " × " + ex[k].reps +
-               (ex[k].unite ? " " + ex[k].unite : "")) + "</span></li>";
+      ouvert = state.obJourOuvert === j.a.cle;
+      ex = j.a.t === "salle" ? exosDe(j.a.si) : [];
+      if (j.a.t === "salle") { total += ex.length; journees++; }
+
+      h += '<div class="ob-sess' + (ouvert ? " ob-sess-on" : "") +
+           '" style="border-left:4px solid ' + dd.bd + '">';
+
+      // LA LIGNE REPLIEE. Elle porte tout ce qu'il faut pour decider si on
+      // l'ouvre : le jour, la discipline, et le volume.
+      h += '<button type="button" class="ob-sess-h" aria-expanded="' + (ouvert ? "true" : "false") +
+           '" data-action="ob-jour-ouvrir" data-cle="' + esc(j.a.cle) + '">' +
+           '<span class="ob-sess-pill" style="background:' + dd.pale + ";color:" + dd.encre + '">' +
+           esc(j.a.t === "salle" ? SEANCES[j.a.si].code : dd.court) + "</span>" +
+           '<span class="ob-sess-c"><span class="ob-sess-t">' + esc(j.nom) +
+           (j.a.k > 0 ? " · 2e séance" : "") + "</span>" +
+           '<span class="ob-sess-s">' + esc(resumeSlot(j.a, ex)) + "</span></span>" +
+           '<span class="ob-sess-ch" aria-hidden="true">' + (ouvert ? "▴" : "▾") + "</span>" +
+           "</button>";
+
+      if (ouvert) {
+        if (j.a.t === "salle") {
+          h += '<ul class="ob-exos">';
+          for (k = 0; k < ex.length; k++) {
+            h += '<li class="ob-exo"><span class="ob-exo-c">' +
+                 '<span class="ob-exo-n">' + esc(ex[k].nom) + "</span>" +
+                 '<span class="ob-exo-d num">' + esc(ex[k].n + " × " + ex[k].reps +
+                 (ex[k].unite ? " " + ex[k].unite : "")) + "</span>" +
+                 (ex[k].remplace
+                   ? '<span class="ob-exo-r">remplace ' + esc(ex[k].remplace) + "</span>"
+                   : "") +
+                 "</span>";
+            // L'ECHAUFFEMENT NE SE REFUSE PAS : il est toujours la, par regle,
+            // et un bouton sans effet vaut moins que pas de bouton.
+            if (ex[k].rang > 0) {
+              h += '<button type="button" class="ob-non' + (ex[k].refuse ? " ob-non-on" : "") +
+                   '" data-action="ob-refuser" data-cle="' + esc(ex[k].cle) + '">' +
+                   (ex[k].refuse ? "Remis" : "Non merci") + "</button>";
+            }
+            h += "</li>";
+          }
+          h += "</ul>";
+        } else if (j.a.t === "cours") {
+          h += '<p class="ob-sess-p">Ton coach mène la séance. Tu la valides en sortant.</p>';
+        } else {
+          h += '<p class="ob-sess-p">Tu notes la distance et la durée au retour.</p>';
         }
-        h += "</ul>";
-      } else if (j.a.t === "cours") {
-        h += '<div class="ob-sess-s">' + esc(j.a.nom || "Cours") + " · " +
-             esc(NATURES[j.a.nat].t) + " · " + j.a.min + " min</div>";
-        h += '<p class="ob-lead" style="margin:0;font-size:13px">Ton coach mène la séance. ' +
-             'Tu la valides en sortant.</p>';
-      } else {
-        h += '<div class="ob-sess-s">' + esc(LIEUX[j.a.lieu].t) + "</div>";
-        h += '<p class="ob-lead" style="margin:0;font-size:13px">Tu notes la distance et la durée ' +
-             'au retour.</p>';
       }
       h += "</div>";
+    }
+
+    // LE PIED DE PAGE DE LA MAQUETTE. Il dit le volume total et ou revenir
+    // dessus plus tard : refuser un exercice n'est pas une decision a prendre
+    // une fois pour toutes le jour du diagnostic.
+    if (journees) {
+      h += '<p class="ob-prog-pied"><span class="num">' + total + "</span> exercices sur " +
+           '<span class="num">' + journees + "</span> journée" + (journees > 1 ? "s" : "") +
+           ", échauffements compris. Refuse ce qui ne te va pas maintenant, ou plus tard " +
+           "depuis Moi › Mes exercices : le programme se réécrit avec ce qui reste.</p>";
     }
     return h;
   }
 
+  // Ce qu'une journee annonce quand elle est repliee.
+  function resumeSlot(a, ex) {
+    if (a.t === "salle") {
+      return SEANCES[a.si].sub + " · " + ex.length + " exercices · " +
+             dureeLibelle().replace(" minutes", " min");
+    }
+    if (a.t === "cours") {
+      return (a.nom || "Cours") + " · " + NATURES[a.nat].t + " · " + a.min + " min";
+    }
+    return "Running · " + LIEUX[a.lieu].t;
+  }
+
   function etapeNutriHtml() {
     var h = "", i, on;
+    // LES TROIS HABITUDES SONT DES JETONS, PAS DES CARTES.
+    //
+    // Elles etaient rendues en cartes pleine largeur, titre plus sous-titre :
+    // trois blocs pour trois questions binaires, la ou la maquette pose trois
+    // jetons qui tiennent sur deux lignes. Et le libelle est a la PREMIERE
+    // PERSONNE, comme la maquette : on repond de soi, on ne coche pas une
+    // rubrique.
     var HAB = [
-      { c: "obPetitDej", t: "Petit-déjeuner", s: "Tu manges le matin" },
-      { c: "obCollation", t: "Collation", s: "Une prise entre les repas" },
-      { c: "obCuisine", t: "Tu cuisines", s: "Plutôt que d'acheter tout prêt" }
+      { c: "obPetitDej", t: "Je petit-déjeune", large: true },
+      { c: "obCollation", t: "J'ajoute une collation" },
+      { c: "obCuisine", t: "Je cuisine" }
     ];
-    h += '<div class="ob-liste">';
+    h += '<div class="ob-sect">Quelques habitudes</div>';
+    h += '<div class="ob-hab">';
     for (i = 0; i < HAB.length; i++) {
-      h += '<button type="button" class="ob-case' + (state[HAB[i].c] ? " ob-case-on" : "") + '"' +
-           ' aria-pressed="' + (state[HAB[i].c] ? "true" : "false") + '"' +
+      on = !!state[HAB[i].c];
+      h += '<button type="button" class="ob-h' + (on ? " ob-h-on" : "") +
+           (HAB[i].large ? " ob-h-large" : "") + '"' +
+           ' aria-pressed="' + (on ? "true" : "false") + '"' +
            ' data-action="ob-bascule" data-cle="' + HAB[i].c + '">' +
-           '<span class="ob-case-box" aria-hidden="true">✓</span>' +
-           '<span class="ob-case-txt"><span class="ob-case-t">' + esc(HAB[i].t) + "</span>" +
-           '<span class="ob-case-s">' + esc(HAB[i].s) + "</span></span></button>";
+           '<span class="ob-h-c" aria-hidden="true">' + (on ? "✓ " : "") + "</span>" +
+           esc(HAB[i].t) + "</button>";
     }
     h += "</div>";
 
-    h += '<h2 class="ob-titre" style="font-size:17px;margin-top:20px">Ce que tu prends</h2>';
+    // L'ALCOOL N'AVAIT AUCUNE INTERFACE. `obAlcool` etait declare dans les
+    // defauts et enregistre parmi les cles sauvees, mais aucun ecran ne le
+    // demandait et aucune regle ne le lisait : une reponse fantome.
+    // Il est demande ici, comme dans la maquette, ET il compte : le prompt
+    // nutrition le transmet. Poser la question sans s'en servir aurait ete
+    // pire que ne pas la poser.
+    h += '<div class="ob-sect">Alcool</div>';
+    h += '<div class="ob-natures">';
+    for (i = 0; i < OB_ALCOOL.length; i++) {
+      on = state.obAlcool === i;
+      h += '<button type="button" class="ob-nature' + (on ? " ob-nature-on" : "") +
+           '" style="' + (on ? "background:var(--salle-bg);border-color:var(--salle-bg);color:var(--salle-fg)" : "") + '"' +
+           ' aria-pressed="' + (on ? "true" : "false") + '"' +
+           ' data-action="ob-single" data-cle="obAlcool" data-v="' + i + '">' +
+           esc(OB_ALCOOL[i]) + "</button>";
+    }
+    h += "</div>";
+
+    // « Compléments », le mot de la maquette, et la phrase qui dit ce que
+    // cocher DECLENCHE. « Ce que tu prends » nommait la rubrique sans dire ce
+    // qu'elle produit.
+    h += '<div class="ob-sect">Compléments</div>';
+    h += '<p class="ob-lead">Coche ce que tu prends, ou ce que tu veux prendre. ' +
+         "L'appli ajoutera la ligne au plan et comptera ses macros.</p>";
     h += '<div class="ob-liste">';
     for (i = 0; i < MOTEUR.SUPPS.length; i++) {
       on = !!state.obSupps[i];
@@ -8204,6 +9484,20 @@ body.a-nav .nav { display: flex; }
            esc(PESEE_MOMENTS[i].t) + "</button>";
     }
     h += "</div></div>";
+
+    // LE BLOC DES CONDITIONS MANQUAIT ENTIEREMENT a cette etape.
+    //
+    // Les quatre conditions vivent dans PESEE_COND depuis le debut et servent
+    // deja sur l'accueil, le jour de la pesee. Elles n'etaient nulle part ici,
+    // au moment ou l'on CHOISIT son rendez-vous : c'est pourtant la que savoir
+    // dans quelles conditions se peser change la reponse qu'on donne.
+    h += '<section class="cond"><div class="cond-t">Les mêmes conditions, chaque fois</div>';
+    for (i = 0; i < PESEE_COND.length; i++) {
+      h += '<div class="cond-l">' + esc(PESEE_COND[i]) + "</div>";
+    }
+    h += '<p class="cond-p">Change une seule de ces conditions et le chiffre bouge de ' +
+         "300 g à 1 kg, plus que ce qu'une semaine de déficit fait vraiment.</p>";
+    h += "</section>";
     return h;
   }
 
@@ -8214,7 +9508,7 @@ body.a-nav .nav { display: flex; }
     var d = deriver(), p = profilDepuisEtat(), out = [], i, noms = [];
 
     if (step === 9) {
-      var t = MOTEUR.nutritionTargets(p);
+      var t = ciblesNutrition();
       out.push({ l: "Maintien estimé", v: t.maintain + " kcal/j" });
       out.push({ l: "Cible pour avancer", v: t.kcal + " kcal/j" });
       out.push({ l: "Protéines", v: t.prot + " g/j" });
@@ -8254,18 +9548,27 @@ body.a-nav .nav { display: flex; }
 
     // Chaque pastille vit DANS un bouton de 44 px. La barre reste fine a
     // l'oeil, mais la cible tactile fait la taille reglementaire.
+    // Les pastilles ne montrent que les etapes VISIBLES : une pastille qu'on ne
+    // peut pas atteindre laisserait croire qu'on a saute une reponse.
+    var vis = etapesVisibles(), rang = vis.indexOf(step);
+    if (rang < 0) rang = 0;
+
     h += '<div class="ob-dots" role="group" aria-label="Progression du diagnostic">';
-    for (i = 0; i < OB.length; i++) {
-      cls = i === step ? "ob-dot ob-dot-on" : (i < step ? "ob-dot ob-dot-past" : "ob-dot");
-      h += '<button type="button" class="ob-dot-btn" data-action="ob-aller" data-v="' + i + '"' +
-           ' aria-label="Étape ' + (i + 1) + ", " + esc(OB[i].nom) + '"' +
-           ' aria-current="' + (i === step ? "step" : "false") + '">' +
+    for (i = 0; i < vis.length; i++) {
+      cls = vis[i] === step ? "ob-dot ob-dot-on" : (i < rang ? "ob-dot ob-dot-past" : "ob-dot");
+      h += '<button type="button" class="ob-dot-btn" data-action="ob-aller" data-v="' + vis[i] + '"' +
+           ' aria-label="Étape ' + (i + 1) + ", " + esc(OB[vis[i]].nom) + '"' +
+           ' aria-current="' + (vis[i] === step ? "step" : "false") + '">' +
            '<span class="' + cls + '"></span></button>';
     }
     h += "</div>";
 
-    h += '<div class="ob-step-label">Étape ' + (step + 1) + " sur " + OB.length +
-         " · " + esc(ob.nom) + "</div>";
+    // LA PREMIERE ETAPE SEULE NE PORTE PAS SON NOM. Demande d'Olivier a la
+    // revue : « Toi » redisait le titre juste en dessous, « On commence par
+    // toi ». Les autres etapes le gardent, parce que la leur ajoute quelque
+    // chose : « Objectif » sous « Tu cherches quoi ? ».
+    h += '<div class="ob-step-label">Étape ' + (rang + 1) + " sur " + vis.length +
+         (rang > 0 ? " · " + esc(ob.nom) : "") + "</div>";
     h += '<h1 class="ob-titre">' + esc(ob.titre) + "</h1>";
     h += '<p class="ob-lead">' + esc(ob.sous) + "</p>";
 
@@ -8283,7 +9586,7 @@ body.a-nav .nav { display: flex; }
       h += '<button type="button" class="ob-prev" data-action="ob-prev">Retour</button>';
     }
     h += '<button type="button" class="ob-next" data-action="ob-next">' +
-         (state.vu ? "Enregistrer" : (step >= OB.length - 1 ? "Ouvrir l'appli" : "Continuer")) +
+         (state.vu ? "Enregistrer" : (rang >= vis.length - 1 ? "Ouvrir l'appli" : "Continuer")) +
          "</button>";
     h += "</div>";
 
@@ -8329,8 +9632,9 @@ body.a-nav .nav { display: flex; }
   // le parcours complet.
   function obSuivant() {
     if (state.vu) { obQuitter(true); return; }
-    if (state.obStep >= OB.length - 1) { ouvrirLAppli(); return; }
-    poser({ obStep: state.obStep + 1 });
+    var suiv = etapeApres(state.obStep);
+    if (suiv === null) { ouvrirLAppli(); return; }
+    poser({ obStep: suiv });
     window.scrollTo(0, 0);
   }
 
@@ -8346,8 +9650,56 @@ body.a-nav .nav { display: flex; }
   }
 
   function obPrecedent() {
-    poser({ obStep: Math.max(0, state.obStep - 1) });
+    var prec = etapeAvant(state.obStep);
+    poser({ obStep: prec === null ? 0 : prec });
     window.scrollTo(0, 0);
+  }
+
+  // =========================================================================
+  // LES ETAPES QUI NE SE POSENT PAS A TOUT LE MONDE
+  // -------------------------------------------------------------------------
+  // « Combien de temps pour une séance en salle ? » et « Tu t'entraînes où,
+  // avec quoi ? » n'ont aucun sens pour qui ne declare que des cours
+  // collectifs ou des sorties running : on demanderait le temps passe dans un
+  // endroit ou l'on ne met jamais les pieds, puis le materiel qu'on y trouve.
+  // Signale par Olivier a la revue.
+  //
+  // LES ETAPES NE SONT PAS RETIREES DE `OB`, ELLES SONT SAUTEES. Retirer une
+  // entree decalerait tous les index, et ceux-ci sont ecrits en dur dans les
+  // raccourcis de Moi (« Durée par séance » vise l'etape 5). Un tableau qui
+  // change de longueur selon les reponses ferait pointer ces raccourcis
+  // ailleurs, sans que rien ne le signale.
+  //
+  // Le compteur « Étape X sur Y » compte les etapes VISIBLES, pas les onze :
+  // annoncer onze etapes et n'en traverser que neuf se remarque tout de suite.
+  // =========================================================================
+  function aDeLaSalle() {
+    return deriver().slotsSalle.length > 0;
+  }
+
+  function etapePertinente(i) {
+    var ob = OB[i];
+    if (!ob) return false;
+    if (ob.type === "duree" || ob.type === "materiel") return aDeLaSalle();
+    return true;
+  }
+
+  function etapesVisibles() {
+    var out = [], i;
+    for (i = 0; i < OB.length; i++) { if (etapePertinente(i)) out.push(i); }
+    return out;
+  }
+
+  function etapeApres(i) {
+    var j;
+    for (j = i + 1; j < OB.length; j++) { if (etapePertinente(j)) return j; }
+    return null;
+  }
+
+  function etapeAvant(i) {
+    var j;
+    for (j = i - 1; j >= 0; j--) { if (etapePertinente(j)) return j; }
+    return null;
   }
 
   /* =========================================================================
@@ -8534,36 +9886,70 @@ body.a-nav .nav { display: flex; }
     var ex = exosDe(a.si), i, series = 0, fait = !!state.actFaits[a.ji + "-" + a.k];
     for (i = 0; i < ex.length; i++) series += ex[i].n;
 
+    // LA CARTE SOMBRE NE PORTE PLUS QUE LA SEANCE DU JOUR ET SES TROIS BOUTONS.
+    //
+    // Elle contenait aussi la liste des cinq seances et la liste des exercices :
+    // trois choses de nature differente dans un seul bloc noir, qu'on parcourait
+    // en se demandant ou l'une finissait. La maquette sort la liste des cinq
+    // seances dans son PROPRE encart clair, borde de citron.
+    //
+    // L'en-tete suit aussi la maquette : « SÉANCE PULL · prévue jeudi » sur une
+    // ligne discrete, et le vrai titre est ce que la seance travaille.
+    var d = deriver(), jourPrevu = d.jourDe(a.si);
     var h = '<section class="carte-sombre">';
-    h += '<div class="cs-code">' + esc(SEANCES[a.si].code) + "</div>";
-    h += '<div class="cs-sur">prévue aujourd\'hui</div>';
+    h += '<div class="cs-haut"><span class="cs-code">Séance ' + esc(SEANCES[a.si].code) + "</span>" +
+         '<span class="cs-quand"> · ' +
+         esc(jourPrevu ? "prévue " + jourPrevu : "hors rotation") + "</span></div>";
     h += '<div class="cs-sub">' + esc(SEANCES[a.si].sub) + "</div>";
     h += '<div class="cs-det"><span class="num">' + ex.length + "</span> exercices · " +
          '<span class="num">' + series + '</span> séries · <span class="num">' +
-         esc(DUREES[state.obDuree].t.replace(" minutes", " min")) + "</span></div>";
+         esc(dureeLibelle().replace(" minutes", " min")) + "</span></div>";
     h += '<button type="button" class="cs-cta" data-action="demarrer-seance">' +
          (fait ? "Refaire la séance" : "Démarrer la séance") + "</button>";
-    h += '<button type="button" class="cs-lien" data-action="autre-seance">Faire une autre séance</button>';
 
-    // LE BLOC DES CINQ SEANCES MANQUAIT ENTIEREMENT. Je l'avais remplace par un
-    // bouton qui fait defiler la rotation : on ne voit alors qu'une seance a la
-    // fois, et on ne sait pas ce qu'on rate. La maquette les montre TOUTES avec
-    // leur jour prevu a droite — et c'est ce jour-la qui rend le choix
-    // informe : prendre la seance de vendredi aujourd'hui, c'est savoir qu'il
-    // faudra faire autre chose vendredi.
-    h += '<div class="cs-toutes-t">Les cinq séances de ton programme</div>';
-    h += '<div class="cs-toutes-s">Le jour prévu est indiqué à droite. Si tu prends ' +
-         "celle d'un autre jour, tu sauras quoi faire ce jour-là.</div>";
-    h += '<ul class="cs-exos">';
-    var d = deriver(), s2, jourDeS;
-    for (i = 0; i < SEANCES.length; i++) {
-      jourDeS = d.jourDe(i);
-      h += '<li><button type="button" class="cs-exo" data-action="choisir-seance" data-i="' + i + '">' +
-           '<span class="cs-exo-n">' + esc(SEANCES[i].code) +
-           (i === a.si ? ' <span class="cs-auj">aujourd\'hui</span>' : "") + "</span>" +
-           '<span class="cs-exo-d">' + esc(jourDeS || "hors rotation") + "</span></button></li>";
+    // LES DEUX AUTRES BOUTONS DE LA MAQUETTE, en bloc et non en lien souligne.
+    // « Fermer la liste » replie l'encart des cinq seances ; « Revenir au cours
+    // du jour » n'existe QUE si l'on a effectivement remplace l'activite prevue,
+    // sinon il proposerait de revenir a l'endroit ou l'on se trouve deja.
+    h += '<button type="button" class="cs-btn" data-action="basculer-liste">' +
+         (state.listeFermee ? "Voir les cinq séances" : "Fermer la liste") + "</button>";
+    // « Revenir au ... du jour » n'est PAS ici : il vit avec le bloc de
+    // remplacement, sous toutes les cartes. Pose ici, il disparaissait des
+    // qu'on remplacait par un running ou un cours, et il n'y avait plus aucune
+    // issue pour revenir a ce qui etait prevu. Trouve en le mesurant.
+    h += "</section>";
+
+    // L'ENCART DES CINQ SEANCES, HORS DE LA CARTE SOMBRE.
+    //
+    // La maquette les montre TOUTES avec leur jour prevu a droite, et c'est ce
+    // jour-la qui rend le choix informe : prendre la seance de vendredi
+    // aujourd'hui, c'est savoir qu'il faudra faire autre chose vendredi.
+    if (!state.listeFermee) {
+      h += '<section class="cs-toutes">';
+      h += '<div class="cs-toutes-t">Les cinq séances de ton programme</div>';
+      h += '<div class="cs-toutes-s">Le jour prévu est indiqué à droite. Si tu prends ' +
+           "celle d'un autre jour, tu sauras quoi faire ce jour-là.</div>";
+      h += '<ul class="cs-liste">';
+      var jourDeS, exS, faitS;
+      for (i = 0; i < SEANCES.length; i++) {
+        jourDeS = d.jourDe(i);
+        exS = exosDe(i);
+        faitS = i === a.si && fait;
+        h += '<li><button type="button" class="cs-s" data-action="choisir-seance" data-i="' + i + '">' +
+             '<span class="cs-s-p">' + esc(SEANCES[i].code) + "</span>" +
+             '<span class="cs-s-c"><span class="cs-s-n">' + esc(SEANCES[i].sub) + "</span>" +
+             '<span class="cs-s-d num">' + exS.length + " exercices · " +
+             esc(dureeLibelle().replace(" minutes", " min")) + "</span></span>" +
+             '<span class="cs-s-j">' + esc(jourDeS || "hors rotation") +
+             '<span class="cs-s-e" aria-hidden="true">' + (faitS ? "✓" : "›") + "</span></span>" +
+             "</button></li>";
+      }
+      h += "</ul></section>";
     }
-    h += "</ul>";
+
+    // La liste des exercices garde sa carte sombre a elle : c'est le contenu de
+    // la seance du jour, pas un choix de seance.
+    h += '<section class="carte-sombre">';
 
     // ORDRE LIBRE : toucher un exercice demarre DESSUS. Sans ca, il faudrait
     // traverser la seance pour atteindre le troisieme mouvement.
@@ -8596,8 +9982,8 @@ body.a-nav .nav { display: flex; }
     h += '<button type="button" class="cs-cta cs-cta-cours"' +
          ' data-action="valider-act" data-ji="' + a.ji + '" data-k="' + a.k + '">' +
          (fait ? "✓ Cours validé" : "J'ai fait le cours") + "</button>";
-    h += '<button type="button" class="cs-lien" data-action="autre-seance">' +
-         "Faire une séance en salle à la place</button>";
+    // Le lien « Faire une séance en salle à la place » est remplacé par le bloc
+    // commun des trois disciplines, pose sous la carte par jourHtml.
     return h + "</section>";
   }
 
@@ -8635,9 +10021,8 @@ body.a-nav .nav { display: flex; }
     // LA MEME PORTE DE SORTIE QUE SUR LA CARTE DE COURS. Elle manquait ici :
     // un jour de running ne laissait aucun moyen de basculer sur de la fonte,
     // alors qu'un jour de cours l'offrait. Deux cartes qui font le meme metier
-    // doivent offrir les memes issues.
-    h += '<button type="button" class="cs-lien" data-action="autre-seance">' +
-         "Faire une séance en salle à la place</button>";
+    // doivent offrir les memes issues. C'est maintenant le bloc commun des
+    // trois disciplines qui s'en charge, pose sous la carte par jourHtml.
     return h + "</section>";
   }
 
@@ -8675,7 +10060,7 @@ body.a-nav .nav { display: flex; }
   // NUTRITION ET PESEE
   // -------------------------------------------------------------------------
   function resumeNutritionHtml() {
-    var t = MOTEUR.nutritionTargets(profilDepuisEtat()), i, pris = 0;
+    var t = ciblesNutrition(), i, pris = 0;
     for (i = 0; i < state.obSupps.length; i++) { if (state.obSupps[i]) pris++; }
     return '<button type="button" class="carte-lien" data-action="onglet" data-ecran="nutri">' +
       '<span class="cl-t">Nutrition du jour</span>' +
@@ -8693,6 +10078,32 @@ body.a-nav .nav { display: flex; }
   //   1. le jour dit, pas encore faite  -> la carte de saisie
   //   2. le jour dit, deja faite        -> l'accuse de reception
   //   3. les autres jours               -> le rappel
+  // LE POIDS DU MOMENT. Ce bloc manquait entierement.
+  //
+  // L'ecran passait directement des repas a « Prochaine pesée » : il disait
+  // QUAND se peser sans jamais dire OU l'on en est. C'est pourtant le chiffre
+  // qu'on vient chercher. Signale par Olivier.
+  //
+  // La valeur affichee est la DERNIERE PESEE, pas le poids du diagnostic, et la
+  // ligne de droite dit de quand elle date. Sans pesee, on le dit : afficher le
+  // poids declare sous l'etiquette « poids » laisserait croire a une mesure.
+  function cartePoidsHtml() {
+    var pes = state.pesees || [], derniere = pes.length ? pes[pes.length - 1] : null;
+    var d = derniere ? dateDepuisCle(derniere.d) : null;
+    var valeur = derniere ? derniere.kg : nombreOu(state.obPoids, 0);
+    if (!valeur) return "";
+
+    var quand = d
+      ? "dernière pesée " + JOURS_LONGS[(d.getDay() + 6) % 7] + " " + d.getDate()
+      : "poids déclaré au diagnostic";
+
+    return '<section class="poids-c">' +
+      '<div class="poids-h"><span class="poids-l">Poids</span>' +
+      '<span class="poids-q">' + esc(quand) + "</span></div>" +
+      '<div class="poids-v num">' + esc(fmtVal(valeur)) +
+      '<span class="poids-u">kg</span></div></section>';
+  }
+
   function cartePeseeHtml() {
     var auj = jourIndexAujourdhui();
 
@@ -8743,18 +10154,83 @@ body.a-nav .nav { display: flex; }
   // -------------------------------------------------------------------------
   // ASSEMBLAGE
   // -------------------------------------------------------------------------
+  // Ce que la journee prevoyait AVANT remplacement. Sert a nommer le bouton de
+  // retour : « Revenir au cours du jour », « ... au running du jour ».
+  function activitePrevue() {
+    var d = deriver(), auj = jourIndexAujourdhui(), i, jr = null;
+    for (i = 0; i < d.progJours.length; i++) { if (d.progJours[i].ji === auj) jr = d.progJours[i]; }
+    if (!jr || !jr.acts.length) return null;
+    return jr.acts[state.slotAuj < jr.acts.length ? state.slotAuj : 0];
+  }
+
+  function libelleActivitePrevue() {
+    var a = activitePrevue();
+    if (!a) return "programme";
+    if (a.t === "cours") return "cours";
+    if (a.t === "run") return "running";
+    return "programme";
+  }
+
+  // L'ACTIVITE DE REMPLACEMENT DU JOUR.
+  //
+  // Elle n'est pas declaree au diagnostic : c'est un choix PONCTUEL, valable
+  // pour aujourd'hui seulement, qui ne touche pas au programme de la semaine.
+  // Un cours improvise n'a ni nom ni nature declares, d'ou les valeurs neutres.
+  function actRemplacement(auj) {
+    if (state.remplaceJour === "run") {
+      return { t: "run", lieu: 0, ji: auj, k: 0, cle: auj + "-0", ponctuel: true };
+    }
+    if (state.remplaceJour === "cours") {
+      return { t: "cours", nom: "Cours collectif", min: 60, nat: 1,
+               ji: auj, k: 0, cle: auj + "-0", ponctuel: true };
+    }
+    return { t: "salle", si: state.seance, ji: auj, k: 0, cle: auj + "-0", ponctuel: true };
+  }
+
+  // REMPLACER L'ACTIVITE DU JOUR, DANS LES TROIS SENS.
+  //
+  // On ne pouvait echanger qu'un cours contre une seance de salle. L'inverse
+  // n'existait pas, et le running non plus : declarer trois disciplines et
+  // n'en laisser permuter qu'une etait arbitraire. Demande d'Olivier.
+  function remplacerHtml(actuel) {
+    var opts = [
+      { t: "salle", l: "Une séance en salle" },
+      { t: "cours", l: "Un cours collectif" },
+      { t: "run",   l: "Un running" }
+    ], h = "", i;
+    h += '<section class="remp">';
+
+    // LE RETOUR VIT ICI, PAS DANS LA CARTE DE SALLE.
+    //
+    // Il y etait, et il disparaissait des qu'on remplacait par un running ou un
+    // cours : on tombait alors dans un ecran sans issue vers ce qui etait
+    // prevu. Mesure avant de le corriger. Ici, il est sous TOUTES les cartes,
+    // donc il existe quelle que soit la discipline de remplacement.
+    if (state.remplaceJour) {
+      h += '<button type="button" class="remp-retour" data-action="reprendre-prevu">' +
+           "Revenir au " + esc(libelleActivitePrevue()) + " du jour</button>";
+    }
+
+    h += '<div class="remp-t">À la place, aujourd\'hui</div>';
+    h += '<div class="remp-b">';
+    for (i = 0; i < opts.length; i++) {
+      if (opts[i].t === actuel) continue;
+      h += '<button type="button" class="remp-x" data-action="remplacer-jour" data-t="' +
+           opts[i].t + '">' + esc(opts[i].l) + "</button>";
+    }
+    return h + "</div></section>";
+  }
+
   function actiteDuJour() {
     var d = deriver(), auj = jourIndexAujourdhui(), i, jr = null;
     for (i = 0; i < d.progJours.length; i++) { if (d.progJours[i].ji === auj) jr = d.progJours[i]; }
 
-    // « Faire une autre seance » remplace l'activite du jour par une seance de
-    // salle choisie a la main. Le drapeau est necessaire : sans lui, la carte
-    // continuerait d'afficher le cours du jour, et l'utilisateur ne verrait pas
-    // ce qu'il vient de demander. Il retombe des qu'on change de creneau ou de
-    // jour, parce que c'est un choix ponctuel, pas un reglage.
-    if (state.coursQuitte) {
-      return { jour: jr, acts: jr ? jr.acts : [],
-               act: { t: "salle", si: state.seance, ji: auj, k: 0, cle: auj + "-0" } };
+    // Le remplacement du jour prend la main sur ce qui etait prevu. Le drapeau
+    // est necessaire : sans lui, la carte continuerait d'afficher l'activite
+    // prevue, et on ne verrait pas ce qu'on vient de demander. Il retombe des
+    // qu'on change de creneau ou de jour, parce que c'est un choix ponctuel.
+    if (state.remplaceJour) {
+      return { jour: jr, acts: jr ? jr.acts : [], act: actRemplacement(auj) };
     }
 
     if (!jr || jr.vide) return { jour: jr, acts: [], act: null };
@@ -8787,7 +10263,13 @@ body.a-nav .nav { display: flex; }
     else if (du.act.t === "cours") h += carteCoursHtml(du.act);
     else h += carteRunHtml(du.act);
 
+    // LE BLOC DE REMPLACEMENT, COMMUN AUX TROIS DISCIPLINES. Il ne s'affiche
+    // que s'il y a une activite a remplacer : un jour de repos propose deja de
+    // prendre une seance d'avance, ce qui n'est pas un remplacement.
+    if (du.act) h += remplacerHtml(du.act.t);
+
     h += resumeNutritionHtml();
+    h += cartePoidsHtml();
     h += cartePeseeHtml();
     return h;
   }
@@ -8864,7 +10346,15 @@ body.a-nav .nav { display: flex; }
               phase: reste ? "transition" : "fin",
               ecran: reste ? "trans" : "salle" });
     } else {
-      poser({ faits: faits, phase: "repos", repos: state.repos || REPOS_DEFAUT });
+      // `reposTotal` retient la duree de DEPART du repos. L'anneau en a besoin
+      // pour dessiner une proportion : sans elle, ajouter 30 s ferait remonter
+      // l'arc au-dela du tour complet.
+      // Le repos PROPRE A L'EXERCICE gagne quand il y en a un. Il vient d'un
+      // changement accepte de l'assistant (« Repos porté à 2 min sur les
+      // barres ») : l'appliquer sans que le decompte suive n'aurait rien
+      // change de ce qu'on vit entre deux series.
+      var r = exo.repos || state.repos || REPOS_DEFAUT;
+      poser({ faits: faits, phase: "repos", repos: r, reposTotal: r });
     }
   }
 
@@ -8910,16 +10400,114 @@ body.a-nav .nav { display: flex; }
       '<button type="button" class="st-b" data-action="' + action + '" data-d="-1"' +
       ' aria-label="Diminuer ' + esc(libelle) + '">−</button>' +
       '<div class="st-v num">' + esc(String(val).replace(".", ",")) +
-      '<span class="st-u">' + esc(unite) + "</span></div>" +
+      (unite ? '<span class="st-u">' + esc(unite) + "</span>" : "") + "</div>" +
       '<button type="button" class="st-b" data-action="' + action + '" data-d="1"' +
       ' aria-label="Augmenter ' + esc(libelle) + '">+</button></div></div>';
+  }
+
+  // Un nombre a la francaise : virgule decimale, jamais le point.
+  function fmtNb(v) { return String(v).replace(".", ","); }
+
+  // Les milliers separes par une espace, comme la maquette ecrit « 1 360 ».
+  // Une espace INSECABLE : sans elle, « 1 360 kg » peut se couper en fin de
+  // ligne et le 1 se retrouve seul au-dessus de 360.
+  function millier(n) {
+    var s = String(Math.abs(Math.round(n))), out = "", i, c = 0;
+    for (i = s.length - 1; i >= 0; i--) {
+      out = s.charAt(i) + out;
+      c++;
+      if (c % 3 === 0 && i > 0) out = " " + out;
+    }
+    return (n < 0 ? "-" : "") + out;
+  }
+
+  // Ce que vaut une serie, ecrit comme l'appli l'ecrit partout ailleurs. Un
+  // exercice chronometre n'a pas de charge : « 6 min », et surtout pas
+  // « 0 kg × 6 ».
+  function libelleSerie(kg, reps, exo) {
+    if (exo.unite === "min") return reps + " min";
+    return fmtNb(kg) + " kg × " + reps;
+  }
+
+  // Avancement de la SEANCE ENTIERE, series faites sur series prevues. La
+  // maquette en fait une barre fine sous l'en-tete : on sait ou l'on en est
+  // sans avoir a compter les exercices restants.
+  function avancementSeance() {
+    var ex = exosCourants(), f = faitsOu(), i, faites = 0, prevues = 0;
+    for (i = 0; i < ex.length; i++) {
+      prevues += ex[i].n;
+      faites += f[i] ? f[i].length : 0;
+    }
+    return prevues ? Math.round(faites * 100 / prevues) : 0;
+  }
+
+  // L'EN-TETE, PARTAGE PAR LES TROIS ECRANS DU MODE ENTRAINEMENT.
+  //
+  // La maquette y met quatre choses : la croix qui quitte, une fleche qui
+  // revient a la liste des exercices, le rang de l'exercice dans la seance, et
+  // le chrono. Dessous, une barre fine porte l'avancement.
+  //
+  // Le code de la seance (« PUSH ») n'y figure plus : il occupait la place du
+  // rang, et c'est le rang qui dit ou l'on en est. Le code reste lisible sur
+  // l'ecran d'ou l'on vient et sur celui de fin.
+  function enteteSalleHtml(rang, total) {
+    var h = '<div class="sa-haut">';
+    h += '<button type="button" class="sa-rond" data-action="quitter-seance"' +
+         ' aria-label="Quitter la séance">✕</button>';
+    h += '<button type="button" class="sa-rond" data-action="aller-trans"' +
+         ' aria-label="Revenir à la liste des exercices">‹</button>';
+    h += '<div class="sa-pos">' +
+         (rang > 0 ? 'Exercice <b class="num">' + rang + '</b> / <b class="num">' + total + "</b>" : "") +
+         "</div>";
+    h += '<div class="sa-chrono num" id="chrono-v">' + esc(mmss(state.chrono)) + "</div>";
+    h += "</div>";
+    h += '<div class="sa-barre"><span class="sa-barre-v" style="width:' +
+         avancementSeance() + '%"></span></div>';
+    return h;
+  }
+
+  // L'ANNEAU DU REPOS. Il dit une PROPORTION avant de dire un chiffre : on voit
+  // qu'il reste un quart du temps sans avoir lu « 0:22 ».
+  //
+  // Trace en SVG et pas en conic-gradient : le degrade conique n'est pas anime
+  // et se rend mal sur les Safari un peu anciens, ce qui est exactement le parc
+  // vise par une PWA iPhone.
+  function anneauReposHtml() {
+    var tot = state.reposTotal > 0 ? state.reposTotal : REPOS_DEFAUT;
+    var reste = state.repos < 0 ? 0 : state.repos;
+    var part = tot > 0 ? Math.min(1, reste / tot) : 0;
+    var R = 78, C = 2 * Math.PI * R;
+    var h = '<div class="sa-anneau">';
+    h += '<svg viewBox="0 0 180 180" aria-hidden="true">';
+    h += '<circle class="sa-anneau-fond" cx="90" cy="90" r="' + R + '"></circle>';
+    h += '<circle class="sa-anneau-arc" cx="90" cy="90" r="' + R + '"' +
+         ' stroke-dasharray="' + C.toFixed(1) + '"' +
+         ' stroke-dashoffset="' + (C * (1 - part)).toFixed(1) + '"></circle>';
+    h += "</svg>";
+    h += '<div class="sa-anneau-c">' +
+         '<div class="sa-anneau-v num">' + esc(mmss(reste)) + "</div>" +
+         '<div class="sa-anneau-s">souffle</div></div>';
+    return h + "</div>";
+  }
+
+  // ANNULER LA DERNIERE SERIE SAISIE. Elle n'existait pas : une valeur validee
+  // par erreur restait dans le tonnage et dans l'historique sans aucun moyen de
+  // la reprendre. On retire la derniere serie de l'exercice COURANT et on
+  // repose les steppers sur ses valeurs, pour pouvoir la resaisir aussitot.
+  function annulerSerie() {
+    var f0 = faitsOu(), faits, d;
+    if (!f0[state.tIdx] || !f0[state.tIdx].length) return;
+    faits = copierFaits(f0);
+    d = faits[state.tIdx].pop();
+    poser({ faits: faits, phase: "set",
+            kg: d ? d.kg : state.kg, reps: d ? d.reps : state.reps });
   }
 
   // -------------------------------------------------------------------------
   // L'ECRAN
   // -------------------------------------------------------------------------
   function salleHtml() {
-    var ex = exosCourants(), exo = ex[state.tIdx], f = faitsOu();
+    var ex = exosCourants(), exo = ex[state.tIdx], f = faitsOu(), i, d;
     if (!exo) return '<div class="salle"><p class="sa-vide">Aucun exercice.</p>' +
       '<button type="button" class="sa-quitter" data-action="quitter-seance">Quitter</button></div>';
 
@@ -8928,67 +10516,145 @@ body.a-nav .nav { display: flex; }
     var faites = f[state.tIdx] ? f[state.tIdx].length : 0;
     var h = '<div class="salle">';
 
-    h += '<div class="sa-haut">';
-    h += '<button type="button" class="sa-x" data-action="quitter-seance" aria-label="Quitter la séance">✕</button>';
-    h += '<div class="sa-code">' + esc(SEANCES[state.seance].code) + "</div>";
-    h += '<div class="sa-chrono num" id="chrono-v">' + esc(mmss(state.chrono)) + "</div>";
-    h += "</div>";
+    h += enteteSalleHtml(state.tIdx + 1, ex.length);
 
+    // ---- LE REPOS A SON PROPRE ECRAN ----
+    // Il ne s'ajoute plus sous la fiche de l'exercice : pendant le repos, il
+    // n'y a qu'une chose a savoir, c'est le temps qui reste et ce qui vient
+    // apres. Les trois boutons « −15 s / Passer / +15 s » deviennent les deux
+    // de la maquette : allonger, ou repartir.
+    if (state.phase === "repos") {
+      h += '<div class="sa-repos-l">Repos</div>';
+      h += anneauReposHtml();
+      h += '<div class="sa-ensuite-l">Ensuite</div>';
+      h += '<div class="sa-ensuite-n">' + esc(exo.nom) + "</div>";
+      h += '<div class="sa-ensuite-d num">Série ' + (faites + 1) + " · " +
+           esc(libelleSerie(state.kg, state.reps, exo)) + "</div>";
+      h += '<div class="sa-repos-btns">';
+      h += '<button type="button" class="sa-act" data-action="repos-regler" data-d="30">+ 30 s</button>';
+      h += '<button type="button" class="sa-valider sa-valider-court"' +
+           ' data-action="repos-passer">C\'est reparti</button>';
+      h += "</div>";
+      return h + "</div>";
+    }
+
+    // ---- LA SERIE ----
+    h += '<div class="sa-muscle">' + esc(exo.muscle || "") + "</div>";
     h += '<div class="sa-exo">' + esc(exo.nom) + "</div>";
     h += '<div class="sa-mat">' + esc(exo.mat || "") + "</div>";
-    h += '<div class="sa-serie">Série <b class="num">' + (faites + 1) + "</b> sur <b class=\"num\">" +
-         exo.n + "</b></div>";
 
-    if (state.phase === "repos") {
-      h += '<div class="sa-repos"><div class="sa-repos-l">Repos</div>' +
-           '<div class="sa-repos-v num">' + esc(mmss(state.repos)) + "</div>" +
-           '<div class="sa-repos-r">' +
-           '<button type="button" class="sa-repos-b" data-action="repos-regler" data-d="-15">−15 s</button>' +
-           '<button type="button" class="sa-repos-b" data-action="repos-passer">Passer</button>' +
-           '<button type="button" class="sa-repos-b" data-action="repos-regler" data-d="15">+15 s</button>' +
-           "</div></div>";
-    } else {
-      h += stepper("kg-pas", state.kg, exo.unite === "min" ? "" : " kg", "Charge");
-      h += stepper("reps-pas", state.reps, exo.unite ? " " + exo.unite : " reps",
-                   exo.unite === "min" ? "Durée" : "Répétitions");
+    // LES PASTILLES DE SERIE, une par serie prevue. Celles qui sont faites
+    // portent leur valeur, les autres un tiret : on voit ce qui reste d'un coup
+    // d'oeil, sans lire une phrase. Elles remplacent la rangee de jetons qui
+    // vivait tout en bas de l'ecran, loin de la question qu'elle documentait.
+    h += '<div class="sa-pastilles">';
+    for (i = 0; i < exo.n; i++) {
+      d = f[state.tIdx] ? f[state.tIdx][i] : null;
+      h += '<div class="sa-past' + (d ? " sa-past-ok" : "") + '">' +
+           '<span class="sa-past-r">S' + (i + 1) + "</span>" +
+           '<span class="sa-past-v num">' +
+           (d ? esc(exo.unite === "min" ? d.reps + " min" : fmtNb(d.kg) + "×" + d.reps) : "—") +
+           "</span></div>";
+    }
+    h += "</div>";
 
-      // REPRENDRE LA SERIE PRECEDENTE, EN UN TOUCHER.
-      //
-      // Fonctionnalite de la v1.20.0, perdue au passage : la maquette n'a
-      // aucun ecran de mode entrainement, donc elle ne pouvait pas la porter,
-      // et je ne l'ai pas retrouvee tout seul. Signalee par Olivier a l'usage.
-      //
-      // LE BOUTON ANNONCE CE QU'IL VA ECRIRE. « 65 × 8 » plutot que
-      // « Refaire » : on sait avant de toucher, et on ne decouvre pas la
-      // valeur apres coup. Il n'existe JAMAIS sur la premiere serie, faute de
-      // precedente a reprendre.
-      //
-      // Il ECRIT vraiment, par le meme chemin que la saisie a la main : le
-      // tonnage, l'historique et la fiche d'exercice le comptent comme une
-      // serie ordinaire, parce que c'en est une.
-      if (faites > 0) {
-        var prec = f[state.tIdx][faites - 1];
-        h += '<button type="button" class="sa-reprendre" data-action="reprendre-serie">' +
-             '<span class="sa-r-l">Comme la précédente</span>' +
-             '<span class="sa-r-v num">' + esc(String(prec.kg).replace(".", ",")) +
-             (exo.unite === "min" ? "" : " kg") + " × " + prec.reps +
-             (exo.unite ? " " + exo.unite : "") + "</span></button>";
-      }
+    // LA CARTE DE SAISIE. La maquette enferme dans un meme cadre le rang de la
+    // serie, ce qui a ete fait la derniere fois, les deux molettes et le bouton
+    // de validation. Repartis a plat, ces quatre elements ne se lisaient pas
+    // comme UNE question.
+    h += '<div class="sa-carte">';
+    h += '<div class="sa-carte-h">' +
+         '<span class="sa-serie">Série <b class="num">' + (faites + 1) +
+         '</b> sur <b class="num">' + exo.n + "</b></span>";
+    if (exo.last) {
+      h += '<span class="sa-dernier">Dernière fois : <span class="num">' +
+           esc(exo.last) + "</span></span>";
+    }
+    h += "</div>";
 
-      h += '<button type="button" class="sa-valider" data-action="valider-serie">' +
-           "Valider la série</button>";
+    h += '<div class="sa-steppers">';
+    h += stepper("kg-pas", state.kg, exo.unite === "min" ? "" : "kg", "Charge");
+    h += stepper("reps-pas", state.reps, exo.unite ? exo.unite : "reps",
+                 exo.unite === "min" ? "Durée" : "Répétitions");
+    h += "</div>";
+
+    // REPRENDRE LA SERIE PRECEDENTE, EN UN TOUCHER.
+    //
+    // Fonctionnalite de la v1.20.0, perdue au passage : la maquette n'a
+    // aucun ecran de mode entrainement, donc elle ne pouvait pas la porter,
+    // et je ne l'ai pas retrouvee tout seul. Signalee par Olivier a l'usage.
+    //
+    // LE BOUTON ANNONCE CE QU'IL VA ECRIRE. « 65 kg × 8 » plutot que
+    // « Refaire » : on sait avant de toucher, et on ne decouvre pas la
+    // valeur apres coup. Il n'existe JAMAIS sur la premiere serie, faute de
+    // precedente a reprendre.
+    //
+    // Il ECRIT vraiment, par le meme chemin que la saisie a la main : le
+    // tonnage, l'historique et la fiche d'exercice le comptent comme une
+    // serie ordinaire, parce que c'en est une.
+    if (faites > 0) {
+      var prec = f[state.tIdx][faites - 1];
+      h += '<button type="button" class="sa-reprendre" data-action="reprendre-serie">' +
+           '<span class="sa-r-l">Comme la précédente</span>' +
+           '<span class="sa-r-v num">' + esc(libelleSerie(prec.kg, prec.reps, exo)) +
+           "</span></button>";
     }
 
-    if (faites) {
-      h += '<div class="sa-faites">';
-      for (var i = 0; i < f[state.tIdx].length; i++) {
-        h += '<span class="sa-f num">' + esc(String(f[state.tIdx][i].kg).replace(".", ",")) +
-             " × " + f[state.tIdx][i].reps + "</span>";
+    // LE BOUTON DE VALIDATION ANNONCE LUI AUSSI CE QU'IL ECRIT. « Valider
+    // 40 kg × 8 » et non « Valider la série » : la valeur se lit avant le
+    // geste, pas apres.
+    h += '<button type="button" class="sa-valider" data-action="valider-serie">Valider ' +
+         esc(libelleSerie(state.kg, state.reps, exo)) + "</button>";
+    h += "</div>";
+
+    // LES DEUX BOUTONS DU BAS.
+    //
+    // La maquette les pose cote a cote sous la carte de validation, et Olivier
+    // a dit « Comment faire ? » non negociable. Ils remplacent le lien souligne
+    // « Voir les autres exercices », qui se lisait comme du texte et pas comme
+    // une action — le meme defaut qu'avait le bouton video de la fiche.
+    //
+    // « Changer d'exercice » mene a l'ecran d'enchainement, ou l'on choisit le
+    // mouvement suivant. C'est l'action que portait le lien : elle change ce
+    // qu'on fait maintenant, elle ne touche pas au programme.
+    h += '<div class="sa-actions">';
+    h += '<button type="button" class="sa-act' + (state.tech ? " sa-act-on" : "") + '"' +
+         ' aria-expanded="' + (state.tech ? "true" : "false") + '"' +
+         ' aria-controls="sa-tech" data-action="basculer-tech">Comment faire ?</button>';
+    h += '<button type="button" class="sa-act" data-action="aller-trans">Changer d\'exercice</button>';
+    h += "</div>";
+
+    // LE MEMO, replie par defaut. Il sort des `lines` de l'exercice, les memes
+    // que la fiche : une seule source, pas une seconde redaction a tenir.
+    if (state.tech) {
+      h += '<section class="sa-tech" id="sa-tech">';
+      if (exo.lines && exo.lines.length) {
+        for (var t = 0; t < exo.lines.length; t++) {
+          h += '<div class="sa-tech-l"><span class="sa-tech-n" aria-hidden="true">' + (t + 1) +
+               "</span><span>" + esc(exo.lines[t]) + "</span></div>";
+        }
+      } else {
+        // Ce cas existe pour de vrai : un exercice refuse est remplace par son
+        // equivalent, et le remplacant n'emporte pas les consignes de celui
+        // qu'il remplace. On le dit, au lieu d'afficher un bloc vide.
+        h += '<p class="sa-tech-vide">Pas de mémo écrit pour cet exercice.</p>';
       }
-      h += "</div>";
+      h += '<a class="sa-tech-video" target="_blank" rel="noopener noreferrer" href="' +
+           "https://www.youtube.com/results?search_query=" +
+           encodeURIComponent(exo.nom + " technique musculation") +
+           '"><span aria-hidden="true">▶</span> Voir une vidéo de ce mouvement</a>';
+      h += "</section>";
     }
 
-    h += '<button type="button" class="sa-lien" data-action="aller-trans">Voir les autres exercices</button>';
+    // ANNULER, EN NOMMANT CE QUI SERA ANNULE. « Annuler la série 1 » et non
+    // « Annuler la dernière série » : on sait laquelle part avant de toucher,
+    // comme pour les deux autres boutons de cet ecran. Il n'apparait que s'il
+    // y a quelque chose a annuler.
+    if (faites > 0) {
+      h += '<button type="button" class="sa-annuler" data-action="annuler-serie">' +
+           "Annuler la série " + faites + "</button>";
+    }
+
     return h + "</div>";
   }
 
@@ -9000,37 +10666,58 @@ body.a-nav .nav { display: flex; }
       if (f[i].length < ex[i].n && i !== state.finiIdx) { suivant = i; break; }
     }
 
-    var h = '<div class="salle">';
-    h += '<div class="sa-haut"><button type="button" class="sa-x" data-action="quitter-seance"' +
-         ' aria-label="Quitter la séance">✕</button>' +
-         '<div class="sa-code">' + esc(SEANCES[state.seance].code) + "</div>" +
-         '<div class="sa-chrono num">' + esc(mmss(state.chrono)) + "</div></div>";
+    var reste = 0, fini = ex[state.finiIdx];
+    for (i = 0; i < ex.length; i++) { if (f[i].length < ex[i].n) reste++; }
 
-    h += '<div class="tr-t">Fin de l\'exercice</div>';
-    if (ex[state.finiIdx]) {
-      h += '<div class="tr-fini">' + esc(ex[state.finiIdx].nom) + " · " +
-           '<span class="num">' + f[state.finiIdx].length + "</span> séries</div>";
+    var h = '<div class="salle">';
+    h += enteteSalleHtml(state.finiIdx + 1, ex.length);
+
+    // LE BLOC VERT. Il manquait entierement : l'ecran s'ouvrait sur « Fin de
+    // l'exercice » en titre, ce qui annonce la suite au lieu de fermer ce qui
+    // vient d'etre fait. La maquette accuse reception d'abord, en vert, avec le
+    // nom de l'exercice et le nombre de series tenues.
+    if (fini) {
+      h += '<section class="tr-fait">' +
+           '<span class="tr-fait-p" aria-hidden="true">✓</span>' +
+           '<span class="tr-fait-c">' +
+           '<span class="tr-fait-l">Exercice terminé</span>' +
+           '<span class="tr-fait-n">' + esc(fini.nom) + "</span>" +
+           '<span class="tr-fait-d num">' + f[state.finiIdx].length + " série" +
+           (f[state.finiIdx].length > 1 ? "s" : "") + "</span></span></section>";
     }
+
+    h += '<div class="tr-t">On enchaîne avec quoi ?</div>';
+    h += '<p class="tr-s">' + (reste > 0
+      ? "Il reste <b class=\"num\">" + reste + "</b> exercice" + (reste > 1 ? "s" : "") +
+        " dans cette séance. Prends celui que la machine libre te permet."
+      : "Tous les exercices sont faits. Tu peux terminer la séance.") + "</p>";
 
     if (suivant >= 0) {
       h += '<button type="button" class="tr-suivant" data-action="ouvrir-exo" data-i="' + suivant + '">' +
-           '<span class="tr-s-l">Ensuite</span>' +
+           '<span class="tr-s-l">Prévu ensuite</span>' +
            '<span class="tr-s-n">' + esc(ex[suivant].nom) + "</span>" +
-           '<span class="tr-s-d num">' + esc(ex[suivant].n + " × " + ex[suivant].reps +
-           (ex[suivant].unite ? " " + ex[suivant].unite : "")) + "</span></button>";
+           '<span class="tr-s-d num">' + esc(ex[suivant].n + " série" +
+           (ex[suivant].n > 1 ? "s" : "") + " · " +
+           libelleSerie(ex[suivant].kg, ex[suivant].reps, ex[suivant])) + "</span></button>";
     }
 
-    h += '<div class="tr-autres-t">Ou reprends celui que tu veux</div><ul class="tr-liste">';
+    // LA LISTE N'Y REMET PAS CELUI QUI EST DEJA PROPOSE AU-DESSUS. Le voir deux
+    // fois a deux endroits ferait hesiter sur ce qui les distingue.
+    h += '<div class="tr-autres-t">Ou prends-en un autre</div><ul class="tr-liste">';
     for (i = 0; i < ex.length; i++) {
+      if (i === suivant) continue;
       e = ex[i];
       n = f[i].length;
       h += '<li><button type="button" class="tr-a' + (n >= e.n ? " tr-a-fini" : "") + '"' +
            ' data-action="ouvrir-exo" data-i="' + i + '">' +
-           '<span class="tr-a-n">' + esc(e.nom) + "</span>" +
-           '<span class="tr-a-d num">' + n + "/" + e.n + (n >= e.n ? " ✓" : "") + "</span></button></li>";
+           '<span class="tr-a-r num" aria-hidden="true">' + (i + 1) + "</span>" +
+           '<span class="tr-a-c"><span class="tr-a-n">' + esc(e.nom) + "</span>" +
+           '<span class="tr-a-d num">' + esc(e.n + " × " + e.reps +
+           (e.unite ? " " + e.unite : (e.kg ? " " + fmtNb(e.kg) + " kg" : ""))) + "</span></span>" +
+           '<span class="tr-a-e">' + (n >= e.n ? "✓ fait" : "") + "</span></button></li>";
     }
     h += "</ul>";
-    h += '<button type="button" class="sa-valider" data-action="finir-seance">Terminer la séance</button>';
+    h += '<button type="button" class="sa-quitter" data-action="finir-seance">Terminer la séance ici</button>';
     return h + "</div>";
   }
 
@@ -9042,20 +10729,65 @@ body.a-nav .nav { display: flex; }
         if (ex[i].unite !== "min") tonnage += f[i][j].kg * f[i][j].reps;
       }
     }
-    var mot = motivation(contexteMotivation());
+    var ctx = contexteMotivation(), mot = motivation(ctx);
 
     var h = '<div class="salle">';
-    h += '<div class="fin-t">Séance terminée</div>';
-    h += '<div class="fin-code">' + esc(SEANCES[state.seance].code) + "</div>";
-    h += '<div class="fin-chiffres">' +
-         '<div class="fin-c"><span class="fin-n num">' + series + "</span><span>séries</span></div>" +
-         '<div class="fin-c"><span class="fin-n num">' + Math.round(tonnage) + "</span><span>kg</span></div>" +
-         '<div class="fin-c"><span class="fin-n num">' + esc(mmss(state.chrono)) + "</span><span>durée</span></div>" +
-         "</div>";
+    h += enteteSalleHtml(state.tIdx + 1, ex.length);
+
+    // LA PASTILLE, PUIS LE TITRE. La maquette accuse reception par un rond
+    // jaune avant d'ecrire quoi que ce soit : on sait que c'est fini avant
+    // d'avoir lu. L'ecran s'ouvrait sur un titre seul.
+    h += '<div class="fin-rond" aria-hidden="true">✓</div>';
+    h += '<div class="fin-t">Séance bouclée</div>';
+    h += '<p class="fin-s"><span class="num">' + series + "</span> série" +
+         (series > 1 ? "s" : "") + " enregistrée" + (series > 1 ? "s" : "") +
+         " sur la séance " + esc(SEANCES[state.seance].code) + ".</p>";
+
     if (mot.head) {
       h += '<div class="fin-motiv"><div class="motiv-h">' + esc(mot.head) + "</div>" +
            '<div class="motiv-s">' + esc(mot.sub) + "</div></div>";
     }
+
+    // LES TROIS CHIFFRES, dans l'ordre de la maquette : le temps passe, ce qui
+    // a ete souleve, et la serie de jours. Le nombre de series a quitte les
+    // tuiles pour la phrase au-dessus, ou il se lit mieux.
+    h += '<div class="fin-chiffres">' +
+         '<div class="fin-c"><span class="fin-n num">' + esc(mmss(state.chrono)) +
+         '</span><span class="fin-cl">durée</span></div>' +
+         '<div class="fin-c"><span class="fin-n num">' + esc(millier(Math.round(tonnage))) +
+         '</span><span class="fin-cl">kg soulevés</span></div>' +
+         '<div class="fin-c"><span class="fin-n num">' + ctx.streak +
+         ' <span aria-hidden="true">🔥</span></span><span class="fin-cl">jours d\'affilée</span></div>' +
+         "</div>";
+
+    // CE QUI A BOUGE. Le bloc manquait entierement.
+    //
+    // Il compare la charge la plus lourde tenue AUJOURD'HUI sur chaque exercice
+    // a celle de la DERNIERE seance qui le portait, lue dans le journal. Rien
+    // n'est invente : sans passe sur un mouvement, il n'a pas de ligne, et la
+    // section disparait si rien n'a bouge. Un « + 0 kg » ne dirait rien.
+    var bouges = [], meilleure, avant, k;
+    for (i = 0; i < ex.length; i++) {
+      if (!f[i].length || ex[i].unite === "min") continue;
+      meilleure = 0;
+      for (k = 0; k < f[i].length; k++) {
+        if (f[i][k].kg > meilleure) meilleure = f[i][k].kg;
+      }
+      avant = seancesDeExercice(ex[i].nom, 1);
+      if (!avant.length) continue;
+      if (meilleure > avant[0].kg) {
+        bouges.push({ nom: ex[i].nom, delta: meilleure - avant[0].kg });
+      }
+    }
+    if (bouges.length) {
+      h += '<div class="fin-bouge-t">Ce qui a bougé</div><ul class="fin-bouge">';
+      for (i = 0; i < bouges.length; i++) {
+        h += '<li><span class="fin-b-n">' + esc(bouges[i].nom) + "</span>" +
+             '<span class="fin-b-v num">+ ' + esc(fmtNb(bouges[i].delta)) + " kg</span></li>";
+      }
+      h += "</ul>";
+    }
+
     h += '<button type="button" class="sa-valider" data-action="enregistrer-seance">' +
          "Enregistrer la séance</button>";
     return h + "</div>";
@@ -9129,12 +10861,23 @@ body.a-nav .nav { display: flex; }
       si: state.seance, code: SEANCES[state.seance].code,
       exos: detail.length, tonnage: Math.round(tonnage), series: series,
       sec: state.chrono, ex: detail
-    }, SEANCES[state.seance].code + " · " + detail.length + " exos · " +
-       Math.round(tonnage) + " kg · " + mmss(state.chrono));
+      // Second argument : LA LIGNE DU BANDEAU VERT. Elle disait
+      // « PUSH · 5 exos · 1360 kg · 7:27 » et la maquette dit
+      // « PUSH · mercredi 24 août · 5 séries, 1 360 kg ». Le JOUR compte plus
+      // que le chrono : le bandeau confirme QUAND une séance est entrée au
+      // journal, et la durée se relit dans la fiche.
+    }, SEANCES[state.seance].code + " · " + dateLongue(new Date()).toLowerCase() +
+       " · " + series + " série" + (series > 1 ? "s" : "") +
+       ", " + millier(Math.round(tonnage)) + " kg");
   }
 
   function validerActivite(ji, k) {
     var liste = state.obAct[ji] || [], a = liste[k], txt, enr;
+    // UN REMPLACEMENT PONCTUEL N'EST PAS DECLARE dans obAct : la lecture par
+    // creneau ne le trouve pas, et le bouton « J'ai fait le cours » ne faisait
+    // alors RIEN, sans un mot. On prend donc l'activite de remplacement quand
+    // il y en a une.
+    if (state.remplaceJour && ji === jourIndexAujourdhui()) a = actRemplacement(ji);
     if (!a) return;
 
     if (a.t === "cours") {
@@ -9283,7 +11026,12 @@ body.a-nav .nav { display: flex; }
     var h = "", d = deriver(), rech = (state.recherche || "").toLowerCase();
 
     if (state.archive) {
-      h += '<div class="bandeau-ok"><span class="bo-t">Séance enregistrée' +
+      // LA PASTILLE VERTE MANQUAIT. Le bandeau s'ouvrait sur du texte : c'est
+      // un accuse de reception, et un accuse de reception se voit avant de se
+      // lire. La maquette met un rond vert avec une coche devant.
+      h += '<div class="bandeau-ok">' +
+           '<span class="bo-p" aria-hidden="true">✓</span>' +
+           '<span class="bo-t">Séance enregistrée' +
            '<span class="bo-s">' + esc(state.archive) + "</span></span>" +
            '<button type="button" class="bo-x" data-action="fermer-bandeau" aria-label="Fermer">✕</button></div>';
     }
@@ -9379,6 +11127,20 @@ body.a-nav .nav { display: flex; }
   // seance de salle ouvre la fiche de ses exercices ; un cours et une sortie
   // n'ont pas de detail a montrer, donc ni chevron, ni curseur pointer. Un
   // chevron qui ne mene nulle part est une promesse non tenue.
+  // Mois abreges pour la pastille de date. « septembre » en entier ne tient pas
+  // dans un carre de 46 px, et la couper au rendu produirait « septem… ».
+  var MOIS_COURTS = ["janv.", "févr.", "mars", "avril", "mai", "juin",
+                     "juil.", "août", "sept.", "oct.", "nov.", "déc."];
+
+  // Ce qu'une seance s'appelle dans la liste. Une seance de salle porte son
+  // code ET ce qu'elle travaille : « PUSH » seul ne dit pas ce qu'on a fait.
+  function titreSeance(s) {
+    if (s.t === "cours") return s.nom || "Cours";
+    if (s.t === "run") return "Running";
+    var S = SEANCES[s.si];
+    return S ? s.code + " · " + S.sub : (s.code || "Séance");
+  }
+
   function seancesRecentesHtml() {
     var h = histTrie(), i, s, out = "", dd, det, cliquable;
     out += '<div class="carte-t">Séances récentes</div>';
@@ -9392,25 +11154,40 @@ body.a-nav .nav { display: flex; }
       dd = DISC[s.t];
       cliquable = s.t === "salle" && s.ex && s.ex.length;
 
+      // LES NOMBRES S'ECRIVENT A LA FRANCAISE. Le tonnage brut donnait
+      // « 3780 kg » la ou la maquette ecrit « 3 780 kg », et la distance
+      // sortait du journal telle quelle, donc « 7.2 km » avec un POINT.
+      // fmtVal pose la virgule decimale, millier l'espace des milliers.
       if (s.t === "salle") {
-        det = (s.exos || 0) + " exos · " + (s.tonnage || 0) + " kg" +
+        det = (s.exos || 0) + " exos · " + millier(s.tonnage || 0) + " kg" +
               (s.sec ? " · " + Math.round(s.sec / 60) + " min" : "");
       } else if (s.t === "cours") {
         det = NATURES[s.nat] ? NATURES[s.nat].t + " · " + s.min + " min" : s.min + " min";
       } else {
         det = (LIEUX[s.lieu] ? LIEUX[s.lieu].t : "") +
-              (s.km ? " · " + s.km + " km" : "") + (s.minutes ? " · " + s.minutes + " min" : "");
+              (s.km ? " · " + fmtVal(nombreOu(s.km, 0)) + " km" : "") +
+              (s.minutes ? " · " + s.minutes + " min" : "");
       }
 
+      // LA PASTILLE PORTE LA DATE, PAS LE CODE, et elle est TEINTEE PAR LA
+      // DISCIPLINE. Demande d'Olivier a la revue.
+      //
+      // Elle disait « PUSH » a cote d'un titre qui disait deja « PUSH », et la
+      // date etait reléguee dans la ligne de detail. La maquette fait
+      // l'inverse : un carre colore qui donne le jour d'un coup d'oeil, et la
+      // couleur dit la discipline sans qu'on ait a lire. La date quitte donc la
+      // ligne de detail, ou elle faisait doublon.
+      var dj = dateDepuisCle(s.d);
       out += "<li>" +
         (cliquable
           ? '<button type="button" class="hi-l" data-action="fiche-seance" data-d="' + esc(s.d) + '">'
           : '<div class="hi-l hi-l-fixe">') +
-        '<span class="hi-p" style="background:' + dd.pale + ";color:" + dd.encre + '">' +
-          esc(s.t === "salle" ? s.code : dd.court) + "</span>" +
+        '<span class="hi-jour" style="background:' + dd.bg + ";color:" + dd.fg + '">' +
+          '<span class="hi-j-n num">' + (dj ? dj.getDate() : "") + "</span>" +
+          '<span class="hi-j-m">' + esc(dj ? MOIS_COURTS[dj.getMonth()] : "") + "</span></span>" +
         '<span class="hi-txt"><span class="hi-n">' +
-          esc(s.t === "cours" ? (s.nom || "Cours") : (s.t === "run" ? "Running" : s.code)) + "</span>" +
-        '<span class="hi-d">' + esc(dateCourte(s.d)) + " · " + esc(det) + "</span></span>" +
+          esc(titreSeance(s)) + "</span>" +
+        '<span class="hi-d">' + esc(det) + "</span></span>" +
         (cliquable ? '<span class="hi-chev" aria-hidden="true">›</span>' : "") +
         (cliquable ? "</button>" : "</div>") + "</li>";
     }
@@ -9651,11 +11428,23 @@ body.a-nav .nav { display: flex; }
            ' data-action="mode-chart" data-v="' + i + '">' + esc(modes[i].t) + "</button>";
     }
     h += "</div>";
-    h += courbeHtml(vals, u,
-      "Départ · " + fmtVal(depart) + u,
-      "Aujourd'hui · " + fmtVal(fin) + u,
-      (delta >= 0 ? "+ " : "− ") + fmtVal(Math.abs(delta)) + u + " sur 12 sem.",
-      modes[mode].l, modes[mode].c);
+    // PAS DE COURBE SANS MESURE. L'onglet Poids existe des qu'un poids est
+    // declare, mais tant qu'aucune pesee n'est notee il n'y a rien a tracer :
+    // une ligne horizontale au poids du diagnostic se lirait comme douze
+    // semaines sans le moindre progres, ce qui serait faux.
+    if (modes[mode].v === "poids" && !(state.pesees || []).length) {
+      h += '<div class="pr-attente">' +
+           '<div class="pr-attente-t">Aucune pesée notée</div>' +
+           '<p class="pr-attente-p">Tu as déclaré <span class="num">' +
+           esc(fmtVal(nombreOu(state.obPoids, 0))) + " kg</span> au diagnostic. " +
+           "La courbe démarre à ta première pesée, depuis l'écran Aujourd'hui.</p></div>";
+    } else {
+      h += courbeHtml(vals, u,
+        "Départ · " + fmtVal(depart) + u,
+        "Aujourd'hui · " + fmtVal(fin) + u,
+        (delta >= 0 ? "+ " : "− ") + fmtVal(Math.abs(delta)) + u + " sur 12 sem.",
+        modes[mode].l, modes[mode].c);
+    }
     h += "</section>";
 
     // --- 3. La carte Running ---
@@ -9848,16 +11637,23 @@ body.a-nav .nav { display: flex; }
   function moiHtml() {
     var h = photoHtml(), d = deriver();
 
-    h += groupeHtml("Programme", [
+    // LES DEUX LIGNES QUI MENENT AUX ETAPES DE SALLE N'EXISTENT QUE S'IL Y A DE
+    // LA SALLE. Le diagnostic saute ces deux etapes pour un programme fait de
+    // cours ou de running seulement ; y mener depuis ici ouvrirait une question
+    // sans objet, et le compteur d'etapes ne saurait plus quoi annoncer.
+    var lignesProg = [
       { t: "Mon programme", s: d.slots.length + " activités déclarées", a: "aller-monprog" },
-      { t: "Mes exercices", s: nbExercicesActifs() + " retenus", a: "aller-exos" },
-      { t: "Durée par séance", s: DUREES[state.obDuree].t, a: "ob-etape", v: "5" },
-      { t: "Matériel disponible", s: nbMateriel() + " catégories", a: "ob-etape", v: "6" },
-      // ACTION DISTINCTE de « ob-etape ». Corriger une reponse et reprendre les
-      // onze etapes ne sont pas le meme geste : le premier rend la main tout de
-      // suite, le second redemande tout.
-      { t: "Refaire le diagnostic", s: "Reprend tout depuis le début", a: "ob-refaire" }
-    ]);
+      { t: "Mes exercices", s: nbExercicesActifs() + " retenus", a: "aller-exos" }
+    ];
+    if (d.slotsSalle.length) {
+      lignesProg.push({ t: "Durée par séance", s: dureeLibelle(), a: "ob-etape", v: "5" });
+      lignesProg.push({ t: "Matériel disponible", s: nbMateriel() + " catégories", a: "ob-etape", v: "6" });
+    }
+    // ACTION DISTINCTE de « ob-etape ». Corriger une reponse et reprendre les
+    // onze etapes ne sont pas le meme geste : le premier rend la main tout de
+    // suite, le second redemande tout.
+    lignesProg.push({ t: "Refaire le diagnostic", s: "Reprend tout depuis le début", a: "ob-refaire" });
+    h += groupeHtml("Programme", lignesProg);
 
     h += groupeHtml("Assistant IA", [
       { t: "Assistant IA", s: "Programme et repas", a: "aller-ia" }
@@ -9977,12 +11773,17 @@ body.a-nav .nav { display: flex; }
       { t: "Jour de pesée", s: JOURS[state.obPeseeJour] + " · " + PESEE_MOMENTS[state.obPeseeMoment].t,
         a: "ob-etape", v: "8" }
     ]);
-    h += groupeHtml("Programme", [
+    // Meme regle que sur l'ecran Moi : la duree d'une seance en salle ne se
+    // montre que s'il y a des seances de salle.
+    var lignesProfilProg = [
       { t: "Tes jours", s: noms.length ? noms.join(", ") : "aucun", a: "ob-etape", v: "4" },
       { t: "Tes cours collectifs", s: cours.length ? cours.join(", ") : "aucun", a: "ob-etape", v: "4" },
-      { t: "Tes sorties running", s: run.length ? run.join(", ") : "aucune", a: "ob-etape", v: "4" },
-      { t: "Durée par séance", s: DUREES[state.obDuree].t, a: "ob-etape", v: "5" }
-    ]);
+      { t: "Tes sorties running", s: run.length ? run.join(", ") : "aucune", a: "ob-etape", v: "4" }
+    ];
+    if (deriver().slotsSalle.length) {
+      lignesProfilProg.push({ t: "Durée par séance", s: dureeLibelle(), a: "ob-etape", v: "5" });
+    }
+    h += groupeHtml("Programme", lignesProfilProg);
     h += groupeHtml("Nutrition", [
       { t: "Objectif", s: ["Perdre du gras", "Maintenir", "Prendre du muscle"][state.obObjectif],
         a: "ob-etape", v: "2" },
@@ -10338,6 +12139,52 @@ body.a-nav .nav { display: flex; }
   // Les charges reellement soulevees sur les 4 dernieres semaines, par
   // exercice : premiere valeur, derniere valeur, et le signalement d'une
   // stagnation. C'est CE bloc qui rend la question utile.
+  // =========================================================================
+  // LE NOM AFFICHE ET L'IDENTIFIANT DU MOTEUR
+  // -------------------------------------------------------------------------
+  // LE DEFAUT QUE CE BLOC CORRIGE. Le prompt listait les exercices par leur nom
+  // affiche (« Développé couché barre »), et le validateur du moteur, lui,
+  // compare des IDENTIFIANTS de catalogue (« developpe-couche-barre »). Une IA
+  // qui repond en recopiant ce qu'elle a lu se faisait donc ecarter a tous les
+  // coups, avec « n'est pas un exercice chargé de mon programme ».
+  //
+  // Verifie en collant les deux formes : le nom est refuse, l'identifiant est
+  // reconnu. Le prompt donne donc maintenant LES DEUX, et demande l'identifiant
+  // en retour.
+  var _idsParNom = null;
+
+  function idMoteurDe(nom) {
+    var k, e;
+    if (!_idsParNom) {
+      _idsParNom = {};
+      try {
+        for (k in MOTEUR.CAT_BY_ID) {
+          if (!has(MOTEUR.CAT_BY_ID, k)) continue;
+          e = MOTEUR.CAT_BY_ID[k];
+          if (e && e.name) _idsParNom[e.name] = k;
+        }
+      } catch (err) {}
+    }
+    return has(_idsParNom, nom) ? _idsParNom[nom] : null;
+  }
+
+  // L'identifiant SEULEMENT si le validateur l'acceptera, c'est-a-dire si
+  // l'exercice est dans le plan que le moteur a construit.
+  //
+  // Le journal et le plan ne disent pas la meme chose : le journal garde ce qui
+  // a ete fait, y compris des mouvements qui ne sont plus au programme. Mesure
+  // faite : le prompt annoncait « Développé militaire barre
+  // [developpe-militaire-barre] » et le validateur repondait « n'est pas un
+  // exercice chargé de mon programme » sur ce meme identifiant. L'ecran
+  // invitait donc a une proposition qu'il allait refuser.
+  function idProposableDe(nom) {
+    var id = idMoteurDe(nom);
+    if (!id) return null;
+    try {
+      return MOTEUR.planExercices(id).length ? id : null;
+    } catch (e) { return null; }
+  }
+
   function chargesRecentes() {
     var h = histTrie(), i, j, k, par = {}, ordre = [], auj = new Date(), d, e;
     auj.setHours(0, 0, 0, 0);
@@ -10382,6 +12229,10 @@ body.a-nav .nav { display: flex; }
 
   function promptProgramme(nJours, duree) {
     var p = profilDepuisEtat(), c = chargesRecentes(), i, nom, x, L = [];
+    // Le plan doit exister AVANT qu'on demande a idProposableDe si un exercice
+    // en fait partie. C'est le meme pont que la lecture de la reponse ; le
+    // poser deux fois est sans effet, cleanProfile et buildPlan sont purs.
+    try { MOTEUR.__poserProfil(p); } catch (e) {}
     var obj = ["perte de gras", "maintien", "prise de muscle"][state.obObjectif] || "perte de gras";
     var d = deriver(), tonnage = 0, hj = histDepuis(28);
 
@@ -10402,7 +12253,18 @@ body.a-nav .nav { display: flex; }
       for (i = 0; i < c.ordre.length; i++) {
         nom = c.ordre[i];
         x = c.par[nom];
-        L.push(nom + " : " + (x.prem === x.der ? fmtVal(x.der) + " kg"
+        var idm = idProposableDe(nom);
+        // L'identifiant entre crochets, a cote du nom. C'est LUI que le
+        // validateur reconnait, et le donner ici est la seule facon d'obtenir
+        // une reponse exploitable.
+        //
+        // ⚠️ SEULS LES EXERCICES DU PLAN EN RECOIVENT UN. Le journal garde des
+        // mouvements qui ne sont plus au programme ; leur donner un identifiant
+        // reviendrait a inviter l'IA a proposer un changement que le validateur
+        // ecarterait ensuite. Ils restent listes, parce qu'ils racontent ce qui
+        // a ete fait, mais sans identifiant on ne peut pas les viser.
+        L.push(nom + (idm ? " [" + idm + "]" : "") + " : " +
+               (x.prem === x.der ? fmtVal(x.der) + " kg"
                 : fmtVal(x.prem) + " → " + fmtVal(x.der) + " kg") +
                ", " + x.series + "×" + x.reps +
                (x.stagne >= 2 ? " (bloqué depuis " + (x.stagne + 1) + " séances)" : ""));
@@ -10425,13 +12287,18 @@ body.a-nav .nav { display: flex; }
     // pas une preference de mise en forme : ce qui ne suit pas cette grammaire
     // est ecarte a la lecture, et l'utilisateur voit pourquoi.
     L.push("Une ligne par changement, séparateur barre verticale :");
-    L.push("CHARGE | identifiant de l'exercice | kg | raison courte");
+    L.push("CHARGE | identifiant | kg | raison courte");
+    L.push("VOLUME | identifiant | +1 ou -1 série | raison courte");
+    L.push("REPOS | identifiant | secondes | raison courte");
+    // SANS CETTE PHRASE, LES REPONSES SONT INEXPLOITABLES. Le validateur
+    // compare des identifiants ; un modele qui recopie le nom se fait ecarter.
+    L.push("L'identifiant est celui entre crochets ci-dessus, recopié à l'identique.");
     L.push("N'invente pas d'exercice absent de mon matériel.");
     return L.join("\n");
   }
 
   function promptNutrition(nJours) {
-    var p = profilDepuisEtat(), t = MOTEUR.nutritionTargets(p), i, s, L = [];
+    var p = profilDepuisEtat(), t = ciblesNutrition(), i, s, L = [];
     var obj = ["perte de gras", "maintien", "prise de muscle"][state.obObjectif] || "perte de gras";
     var prot = 0, kcal = 0;
 
@@ -10488,6 +12355,17 @@ body.a-nav .nav { display: flex; }
     L.push(prises.length + " prises : " + prises.join(", ") + ".");
     L.push(state.obCuisine ? "Je cuisine, mais simple : moins de 20 min par repas."
                            : "Je cuisine peu : privilégie ce qui se prépare sans cuisson.");
+    // L'ALCOOL COMPTE MAINTENANT. La question etait posee au diagnostic depuis
+    // toujours dans les defauts, mais sa reponse n'etait lue nulle part. Elle
+    // est transmise ici : c'est une source de calories liquides qui change ce
+    // qu'un dieteticien propose.
+    if (state.obAlcool === 0) {
+      L.push("Je ne bois pas d'alcool.");
+    } else if (state.obAlcool === 2) {
+      L.push("Je bois de l'alcool souvent : tiens compte de ces calories liquides.");
+    } else {
+      L.push("Je bois de l'alcool de temps en temps.");
+    }
     L.push("");
     L.push("Une ligne par prise, exactement dans cette forme, séparateur");
     L.push("barre verticale :");
@@ -10501,7 +12379,7 @@ body.a-nav .nav { display: flex; }
   function iaHtml() {
     var d = deriver(), onglet = state.iaOnglet ? 1 : 0, h = "";
     var texte = onglet === 0
-      ? promptProgramme(d.slotsSalle.length, DUREES[state.obDuree].t)
+      ? promptProgramme(d.slotsSalle.length, dureeLibelle())
       : promptNutrition(d.slots.length);
 
     h += '<div class="ia-onglets" role="group" aria-label="Choisir le sujet">';
@@ -10561,13 +12439,29 @@ body.a-nav .nav { display: flex; }
       h += '<p class="cr-p">Ton assistant ne propose aucun changement.</p>';
     }
     if (r.props && r.props.length) {
-      h += '<div class="carte-t">Propositions retenues · ' + r.props.length + "</div><ul class=\"mo-liste\">";
+      // CHAQUE CHANGEMENT SE DECIDE SEPAREMENT, comme dans la maquette.
+      // Avant, la liste etait en lecture seule et l'ecran disait lui-meme que
+      // rien n'avait ete applique : on pouvait lire l'avis de son assistant,
+      // pas s'en servir.
+      h += '<div class="carte-t">' + r.props.length + " changement" +
+           (r.props.length > 1 ? "s" : "") + " retenu" +
+           (r.props.length > 1 ? "s" : "") + "</div>";
+      h += '<div class="ia-props">';
       for (i = 0; i < r.props.length; i++) {
-        h += '<li><div class="mo-l" style="cursor:default"><span class="mo-n">' +
-             esc(r.props[i].texte || r.props[i].id || "") + "</span>" +
-             (r.props[i].raison ? '<span class="mo-s">' + esc(r.props[i].raison) + "</span>" : "") +
-             "</div></li>";
+        h += '<div class="ia-prop">' +
+             '<div class="ia-prop-t">' + esc(r.props[i].texte || r.props[i].ex || "") + "</div>" +
+             (r.props[i].raison ? '<div class="ia-prop-r">' + esc(r.props[i].raison) + "</div>" : "") +
+             '<div class="ia-prop-b">' +
+             '<button type="button" class="ia-appl" data-action="ia-appliquer" data-i="' + i + '">' +
+             "Appliquer</button>" +
+             '<button type="button" class="ia-ign" data-action="ia-ignorer" data-i="' + i + '">' +
+             "Ignorer</button></div></div>";
       }
+      h += "</div>";
+    }
+    if (r.faits && r.faits.length) {
+      h += '<div class="carte-t">Appliqué · ' + r.faits.length + "</div><ul class=\"ia-rejets\">";
+      for (i = 0; i < r.faits.length; i++) h += "<li>" + esc(r.faits[i]) + "</li>";
       h += "</ul>";
     }
     if (r.rejets && r.rejets.length) {
@@ -10584,11 +12478,123 @@ body.a-nav .nav { display: flex; }
     return h + "</div>";
   }
 
+  // LE MOTEUR NE CONNAIT PAS TES CHARGES, IL FAUT LES LUI DONNER.
+  //
+  // Deuxieme defaut corrige ici. Meme avec le bon identifiant, iaLire refusait
+  // avec « Pas de charge de référence : proposition non vérifiable ». Sa regle
+  // iaChargeRef cherche soit une cible posee sur l'exercice du plan, soit une
+  // serie dans SON propre historique — et le moteur greffe n'a ni l'une ni
+  // l'autre : le pont ne lui transmettait que le profil.
+  //
+  // On lui pose donc la charge la plus recente du JOURNAL comme cible, par sa
+  // PROPRE fonction d'ecriture. Pas de pont supplementaire, pas de champ ecrit
+  // a la main : `kgCible` veut precisement dire « la charge que l'utilisateur a
+  // trouvee », et c'est ce que le journal dit.
+  function poserChargesDansLeMoteur() {
+    var c = chargesRecentes(), i, nom, id, n = 0;
+    for (i = 0; i < c.ordre.length; i++) {
+      nom = c.ordre[i];
+      id = idMoteurDe(nom);
+      if (!id || !c.par[nom].der) continue;
+      try {
+        if (MOTEUR.appliquerProposition({ type: "charge", ex: id, kg: c.par[nom].der }, true)) n++;
+      } catch (e) {}
+    }
+    return n;
+  }
+
+  // =========================================================================
+  // APPLIQUER OU IGNORER UN CHANGEMENT
+  // -------------------------------------------------------------------------
+  // Un changement accepte est ecrit A DEUX ENDROITS, et il faut les deux :
+  //   - `state.iaPlan`, cote refonte, PERSISTE. C'est lui qui fait que la
+  //     seance de demain propose la nouvelle charge. Le plan du moteur, lui,
+  //     ne survit pas a un rechargement.
+  //   - le plan du moteur, par sa propre fonction appliquerProposition, pour
+  //     que la PROCHAINE lecture d'une reponse se valide contre l'etat a jour
+  //     et non contre l'ancien.
+  // =========================================================================
+  function nomAfficheDe(id) {
+    try {
+      var e = has(MOTEUR.CAT_BY_ID, id) ? MOTEUR.CAT_BY_ID[id] : null;
+      return e && e.name ? e.name : null;
+    } catch (err) { return null; }
+  }
+
+  // L'exercice tel que la refonte le prescrit aujourd'hui. Sert au VOLUME, qui
+  // est un delta : « une serie de moins » a besoin de savoir combien il y en a.
+  function exoRefonteParNom(nom) {
+    var i, j;
+    for (i = 0; i < SEANCES.length; i++) {
+      for (j = 0; j < SEANCES[i].exos.length; j++) {
+        if (SEANCES[i].exos[j].nom === nom) return SEANCES[i].exos[j];
+      }
+    }
+    return null;
+  }
+
+  function iaAppliquer(idx) {
+    var r = state.iaRes, p, nom, plan = {}, k, m, base, faits;
+    if (!r || !r.props || !r.props[idx]) return;
+    p = r.props[idx];
+    nom = nomAfficheDe(p.ex);
+    if (!nom) return;
+
+    // Copie du plan existant : on n'ecrase pas les changements deja acceptes
+    // sur d'autres exercices.
+    for (k in (state.iaPlan || {})) {
+      if (has(state.iaPlan, k)) plan[k] = state.iaPlan[k];
+    }
+    m = {};
+    for (k in (plan[nom] || {})) { if (has(plan[nom], k)) m[k] = plan[nom][k]; }
+
+    if (p.type === "charge") {
+      m.kg = p.kg;
+    } else if (p.type === "volume") {
+      base = m.n || (exoRefonteParNom(nom) ? exoRefonteParNom(nom).n : 3);
+      // Bornes assumees : au moins une serie, au plus six. Un delta repete ne
+      // doit pas pouvoir vider ou gonfler une seance sans limite.
+      m.n = Math.max(1, Math.min(6, base + p.delta));
+    } else if (p.type === "repos") {
+      m.repos = p.rest;
+    } else if (p.type === "remplacer") {
+      var neuf = has(MOTEUR.CAT_BY_ID, p.par) ? MOTEUR.CAT_BY_ID[p.par] : null;
+      if (!neuf) return;
+      m.remp = { nom: neuf.name, mat: neuf.mat || "", lines: neuf.lines || [] };
+    } else {
+      return;
+    }
+    plan[nom] = m;
+
+    // Le moteur, pour que la prochaine lecture se valide contre l'etat a jour.
+    try { MOTEUR.appliquerProposition(p, true); } catch (e) {}
+
+    faits = (r.faits || []).slice();
+    faits.push(p.texte || nom);
+    poser({ iaPlan: plan,
+            iaRes: { props: sansIndice(r.props, idx), rejets: r.rejets,
+                     rien: r.rien, faits: faits } });
+  }
+
+  function iaIgnorer(idx) {
+    var r = state.iaRes;
+    if (!r || !r.props || !r.props[idx]) return;
+    poser({ iaRes: { props: sansIndice(r.props, idx), rejets: r.rejets,
+                     rien: r.rien, faits: r.faits || [] } });
+  }
+
+  function sansIndice(liste, idx) {
+    var out = [], i;
+    for (i = 0; i < liste.length; i++) { if (i !== idx) out.push(liste[i]); }
+    return out;
+  }
+
   function iaLireReponse() {
     var p = profilDepuisEtat(), res;
     // Le moteur a besoin d'un profil ACTIF pour valider contre le plan. Sans ce
     // pont, iaLire rejette tout avec « aucun programme actif ».
     try { MOTEUR.__poserProfil(p); } catch (e) {}
+    poserChargesDansLeMoteur();
     try { res = MOTEUR.iaLire(state.iaTexte || ""); }
     catch (e) { res = { props: [], rejets: ["La lecture a échoué : " + e.message], rien: false }; }
     poser({ iaRes: res });
@@ -10626,7 +12632,7 @@ body.a-nav .nav { display: flex; }
     for (i = 0; i < d.progJours.length; i++) { if (d.progJours[i].ji === auj) jr = d.progJours[i]; }
     if (jr) { for (i = 0; i < jr.acts.length; i++) acts.push(DISC[jr.acts[i].t].t); }
 
-    var p = profilDepuisEtat(), t = MOTEUR.nutritionTargets(p), h = "";
+    var p = profilDepuisEtat(), t = ciblesNutrition(), h = "";
 
     // LE SOUS-TITRE DIT POURQUOI LES CHIFFRES SONT CEUX-LA AUJOURD'HUI. Ma
     // version se contentait de nommer l'activite ; celle de la maquette relie
@@ -10794,7 +12800,20 @@ body.a-nav .nav { display: flex; }
     // panneau ferme la veille.
     ecran: "splash", picker: false, archive: null, majEnCours: false,
     obStep: 0, obJourOuvert: "", ajoutOuvert: "", iaOnglet: 0,
-    slotAuj: 0, resetDemande: false, coursQuitte: false, photo: null,
+    // Les jours du Rythme dont le 2e creneau a ete ouvert a la main. Non
+    // persiste, comme les autres ouvertures : le diagnostic rouvert repart sur
+    // un ecran court, et les creneaux DEJA REMPLIS restent visibles de toute
+    // facon, puisqu'ils tiennent a `obAct` et pas a cette liste.
+    obSecondOuvert: "",
+    slotAuj: 0, resetDemande: false, photo: null,
+    // Le remplacement PONCTUEL de l'activite du jour : "" (rien), "salle",
+    // "cours" ou "run". Il remplace l'ancien drapeau `coursQuitte`, qui ne
+    // savait aller que du cours vers la salle. Non persiste : c'est un choix
+    // pour aujourd'hui, pas un reglage.
+    remplaceJour: "",
+    // L'encart des cinq seances, sur l'accueil. Ouvert par defaut, comme la
+    // maquette ; le bouton « Fermer la liste » le replie.
+    listeFermee: false,
     // Ephemeres : la recherche et la fiche ouverte ne survivent pas a un
     // rechargement. Rouvrir l'appli sur une fiche qu'on consultait la veille
     // serait desorientant.
@@ -10805,7 +12824,16 @@ body.a-nav .nav { display: flex; }
     // une proposition d'IA d'il y a trois jours la ferait rejouer sur un plan
     // qui a change entre-temps.
     iaTexte: "", iaRes: null, iaCopie: false, importMsg: "",
+    // LES CHANGEMENTS ACCEPTES DE L'ASSISTANT, eux, SURVIVENT. Ils modifient le
+    // programme, au meme titre qu'un exercice retire a la main : les perdre au
+    // rechargement ferait revenir la charge d'avant sans prevenir. Indexes par
+    // nom d'exercice affiche. Appliques par appliquerPlanIA, dans la derivation.
+    iaPlan: null,
     repos: 90, tech: false, chrono: 0,
+    // Duree de DEPART du repos en cours. L'anneau du mode entrainement en a
+    // besoin pour dessiner une proportion : sans elle, ajouter 30 s ferait
+    // remonter l'arc au-dela du tour complet.
+    reposTotal: 90,
 
     // Etat persiste. L'ordre suit CLES_SAUVEES pour que les deux listes se
     // relisent ensemble.
@@ -10822,6 +12850,11 @@ body.a-nav .nav { display: flex; }
     obPoids: "", obPoidsCible: "",
 
     obSexe: 0, obObjectif: 0, obPratique: 2, obDuree: 1,
+    // La duree tapee a la main, en minutes, ou "" pour s'en tenir a l'un des
+    // quatre reperes. Elle s'AJOUTE a obDuree au lieu de le remplacer : faire
+    // porter les minutes a obDuree aurait relu les « 1 » deja enregistres sur
+    // les telephones comme « une minute ».
+    obDureeLibre: "",
     obJours: [1, 0, 1, 1, 1, 1, 0],
     obEquip: [1, 1, 1, 0, 1, 1],
     obGear: [1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
@@ -10856,11 +12889,11 @@ body.a-nav .nav { display: flex; }
   // depuis, ni en imposer un que le code ne connait plus.
   var CLES_SAUVEES = ["vu", "seance", "repas", "modeChart", "theme", "exclus",
     "obPrenom", "obAge", "obTaille", "obPoids", "obPoidsCible",
-    "obSexe", "obObjectif", "obPratique", "obDuree", "obJours", "obEquip", "obGear",
+    "obSexe", "obObjectif", "obPratique", "obDuree", "obDureeLibre", "obJours", "obEquip", "obGear",
     "obHalt", "obRefus", "obPetitDej", "obCollation", "obCuisine", "obAlcool",
     "obPeseeJour", "obPeseeMoment", "peseeFaite", "obSupps", "obAct", "actFaits",
     "hist", "pesees", "dernierExport",
-    "obRetires", "obAjouts",
+    "obRetires", "obAjouts", "iaPlan",
     "runKm", "runMin", "runLieu",
     "faits", "tIdx", "kg", "reps", "phase", "demarre", "finiIdx"];
 
@@ -11677,6 +13710,24 @@ body.a-nav .nav { display: flex; }
       window.scrollTo(0, 0); return;
     }
     if (action === "ob-jour") { basculerTableau("obJours", parseInt(n.getAttribute("data-i"), 10)); return; }
+    if (action === "ob-second") { basculerSecond(parseInt(n.getAttribute("data-ji"), 10)); return; }
+    // L'accordeon de l'etape Programme. UNE journee ouverte a la fois : rouvrir
+    // celle qui l'est deja la referme, sinon le bouton n'aurait pas d'effet
+    // visible et on croirait au bug.
+    if (action === "ob-jour-ouvrir") {
+      var cj = n.getAttribute("data-cle");
+      poser({ obJourOuvert: state.obJourOuvert === cj ? "" : cj });
+      return;
+    }
+    // « Non merci » sur un exercice. Ecrit enfin obRefus, que la derivation
+    // lisait depuis toujours sans que rien ne le remplisse.
+    if (action === "ob-refuser") { basculerRefus(n.getAttribute("data-cle")); return; }
+    // Le memo technique du mode entrainement. `tech` etait declare dans les
+    // defauts depuis le debut et n'etait lu nulle part : il attendait ce
+    // bouton-la.
+    if (action === "basculer-tech") { poser({ tech: !state.tech }); return; }
+    if (action === "ia-appliquer") { iaAppliquer(parseInt(n.getAttribute("data-i"), 10)); return; }
+    if (action === "ia-ignorer") { iaIgnorer(parseInt(n.getAttribute("data-i"), 10)); return; }
     if (action === "ob-equip") { basculerTableau("obEquip", parseInt(n.getAttribute("data-i"), 10)); return; }
     if (action === "ob-gear") { basculerTableau("obGear", parseInt(n.getAttribute("data-i"), 10)); return; }
     if (action === "ob-supp") { basculerTableau("obSupps", parseInt(n.getAttribute("data-i"), 10)); return; }
@@ -11709,20 +13760,34 @@ body.a-nav .nav { display: flex; }
 
     // --- Aujourd'hui ---
     if (action === "creneau") {
-      poser({ slotAuj: parseInt(n.getAttribute("data-i"), 10), coursQuitte: false });
+      // Changer de creneau annule le remplacement : il valait pour l'activite
+      // qu'on vient de quitter.
+      poser({ slotAuj: parseInt(n.getAttribute("data-i"), 10), remplaceJour: "" });
       return;
     }
     if (action === "demarrer-seance") { demarrerSeance(); return; }
     if (action === "autre-seance") {
-      poser({ coursQuitte: true, seance: (state.seance + 1) % SEANCES.length });
+      poser({ remplaceJour: "salle", seance: (state.seance + 1) % SEANCES.length });
       return;
     }
     // Choisir NOMMEMENT une seance dans la liste des cinq, au lieu de faire
     // defiler a l'aveugle.
     if (action === "choisir-seance") {
-      poser({ coursQuitte: true, seance: parseInt(n.getAttribute("data-i"), 10) || 0 });
+      poser({ remplaceJour: "salle", seance: parseInt(n.getAttribute("data-i"), 10) || 0 });
       return;
     }
+    // REMPLACER L'ACTIVITE DU JOUR par une autre discipline, pour aujourd'hui
+    // seulement. Le programme de la semaine n'est pas touche.
+    if (action === "remplacer-jour") {
+      var t = n.getAttribute("data-t");
+      poser({ remplaceJour: t,
+              // Passer a la salle sans avoir choisi de seance ouvrirait sur
+              // celle du jour precedent : on repart de la rotation.
+              seance: t === "salle" ? (deriver().siDepart || 0) : state.seance });
+      return;
+    }
+    if (action === "reprendre-prevu") { poser({ remplaceJour: "" }); return; }
+    if (action === "basculer-liste") { poser({ listeFermee: !state.listeFermee }); return; }
     if (action === "ouvrir-exo") { ouvrirExercice(parseInt(n.getAttribute("data-i"), 10)); return; }
     if (action === "valider-act") {
       validerActivite(parseInt(n.getAttribute("data-ji"), 10), parseInt(n.getAttribute("data-k"), 10));
@@ -11768,10 +13833,15 @@ body.a-nav .nav { display: flex; }
       return;
     }
     if (action === "repos-regler") {
-      poser({ repos: borner(state.repos + parseInt(n.getAttribute("data-d"), 10), 15, 300) });
+      // Allonger le repos allonge AUSSI la reference de l'anneau, sinon l'arc
+      // depasserait le tour complet et ne voudrait plus rien dire.
+      var nouveau = borner(state.repos + parseInt(n.getAttribute("data-d"), 10), 15, 300);
+      poser({ repos: nouveau,
+              reposTotal: nouveau > state.reposTotal ? nouveau : state.reposTotal });
       return;
     }
-    if (action === "repos-passer") { poser({ phase: "set", repos: 90 }); return; }
+    if (action === "repos-passer") { poser({ phase: "set", repos: 90, reposTotal: 90 }); return; }
+    if (action === "annuler-serie") { annulerSerie(); return; }
     if (action === "aller-trans") { poser({ ecran: "trans", phase: "transition", finiIdx: state.tIdx }); return; }
     if (action === "finir-seance") { poser({ ecran: "salle", phase: "fin" }); return; }
     if (action === "enregistrer-seance") { enregistrerSeance(); return; }
@@ -11854,6 +13924,7 @@ body.a-nav .nav { display: flex; }
   var CHAMPS_TEXTE = {
     "ob-prenom": "obPrenom", "ob-age": "obAge", "ob-taille": "obTaille",
     "ob-poids": "obPoids", "ob-cible": "obPoidsCible",
+    "ob-duree-libre": "obDureeLibre",
     "run-km": "runKm", "run-min": "runMin", "recherche": "recherche",
     "ia-coller": "iaTexte"
   };
@@ -11897,6 +13968,12 @@ body.a-nav .nav { display: flex; }
     // qu'un fichier a ete choisi.
     if (action === "photo-choisir") { photoChoisir(n); return; }
     if (action === "importer") { importerJournal(n); return; }
+
+    // LA DUREE LIBRE SE REDESSINE AU MOMENT OU L'ON QUITTE LE CHAMP, pas a
+    // chaque frappe : c'est la seule facon d'eteindre le repere de 45 min
+    // pendant qu'on tape 50, sans reconstruire le champ sous le curseur.
+    // La valeur, elle, est deja enregistree par CHAMPS_TEXTE a la frappe.
+    if (action === "ob-duree-libre") { poser({ obDureeLibre: n.value }); return; }
 
     if (action !== "ob-slot") return;
     poserSlot(parseInt(n.getAttribute("data-ji"), 10),
@@ -12019,6 +14096,17 @@ body.a-nav .nav { display: flex; }
     exosDe: exosDe,
     exosDisponibles: exosDisponibles,
     nbTravail: nbTravail,
+    // La duree en salle, ses trois lectures. Un banc doit pouvoir verifier que
+    // le champ libre donne le meme nombre d'exercices que le repere voisin.
+    dureeMinutes: dureeMinutes,
+    dureeLibelle: dureeLibelle,
+    nbTravailPour: nbTravailPour,
+    // Le modele calorique de la refonte. Expose entier : un banc doit pouvoir
+    // verifier le detail (metabolisme de base, vie courante, sport) et pas
+    // seulement le total, sinon deux erreurs qui se compensent passeraient.
+    cibles: ciblesNutrition,
+    mbDeBase: mbDeBase,
+    kcalSeance: kcalSeance,
     jourIndexAujourdhui: jourIndexAujourdhui,
     jours: JOURS,
     // Le moteur greffe de la v1.21.0. Il reste enferme dans sa propre portee ;
