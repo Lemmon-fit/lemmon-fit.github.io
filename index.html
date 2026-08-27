@@ -549,9 +549,21 @@ body.a-nav .nav { display: flex; }
   font-size: 14px; font-weight: 800; color: transparent;
 }
 .ob-case-on .ob-case-box { background: var(--sombre-carte); border-color: var(--sombre-carte); color: var(--salle-bg); }
-.ob-case-txt { display: flex; flex-direction: column; gap: 2px; }
+.ob-case-txt { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
 .ob-case-t { font-size: 14.5px; font-weight: 700; }
 .ob-case-s { font-size: 12px; color: var(--texte-2); }
+/* Le chevron de la case qui commande une liste. Meme role que celui des
+   journees de l'etape 8 : il dit qu'il y a quelque chose dessous. */
+.ob-case-ch { flex: 0 0 auto; font-size: 13px; color: var(--texte-3); }
+
+/* LA CASE « MACHINES DE SALLE » ET SA LISTE NE FONT QU'UN BLOC.
+   Ouvert, il prend le fond des encarts et un filet citron a gauche : la liste
+   se lit alors comme le CONTENU de la case, pas comme une section voisine. */
+.ob-mach { border-radius: 13px; }
+.ob-mach-on { background: var(--fond-encart); border-left: 4px solid var(--salle-bg); }
+.ob-mach-on > .ob-case { background: transparent; border-color: transparent; }
+.ob-mach-c { padding: 0 10px 12px 10px; }
+.ob-mach-l { font-size: 12.5px; color: var(--texte-2); margin: 0 0 10px; }
 
 .ob-sess { border: 1px solid var(--bord); border-radius: 13px; padding: 0 13px; margin-bottom: 10px; }
 /* Ouverte, la journee se distingue de ses voisines repliees. */
@@ -882,7 +894,33 @@ body.a-nav .nav { display: flex; }
   position: fixed; inset: 0; background: var(--sombre-fond); color: var(--sombre-texte);
   padding: calc(14px + env(safe-area-inset-top)) 20px calc(20px + env(safe-area-inset-bottom));
   overflow-y: auto; z-index: 50;
+  display: flex; flex-direction: column;
 }
+/* LE CORPS SE CENTRE, L'ENTETE NE BOUGE PAS.
+   Les marges automatiques plutot que `justify-content: center` : quand le
+   contenu est plus haut que l'ecran, une marge auto vaut zero et l'ecran
+   redefile normalement depuis le haut, alors qu'un centrage par
+   `justify-content` pousse le debut du contenu hors de la zone atteignable.
+   L'ecran de serie est justement dans ce cas des qu'on ouvre le memo.
+   Le conteneur reste en `display: block` : ses enfants gardent la fusion de
+   leurs marges verticales, donc les quatre ecrans conservent au pixel les
+   espacements qu'Olivier a valides. Passer `.salle` en flex sans ce conteneur
+   aurait supprime cette fusion et rallonge la fin de seance d'environ 70 px. */
+.sa-corps { flex: 0 0 auto; margin-top: auto; margin-bottom: auto; }
+/* L'ENTETE NE SE LAISSE PAS COMPRIMER.
+   Mesure : avec le memo « Comment faire ? » ouvert, l'ecran de serie depasse de
+   188 px, et comme un element flex retrecit par defaut, la barre d'avancement
+   passait de 4 px a ZERO. Elle disparaissait purement et simplement. C'est le
+   passage de `.salle` en flex qui l'a rendue compressible ; en flux de blocs
+   une hauteur de 4 px est une hauteur de 4 px. */
+.salle > .sa-haut, .salle > .sa-barre { flex: 0 0 auto; }
+/* LE PREMIER BLOC DU CORPS NE PORTE PAS DE MARGE HAUTE.
+   `.sa-corps` etant un element flex, il ouvre son propre contexte : la marge
+   haute de son premier enfant ne fusionne plus avec celle de la barre, elle
+   s'y AJOUTE et compte dans la hauteur qu'on centre. Le repos tombait 9 px et
+   la fin de seance 13 px plus bas que la serie et l'enchainement, alors
+   qu'Olivier demandait justement que les quatre ecrans se ressemblent. */
+.sa-corps > :first-child { margin-top: 0; }
 .sa-haut { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
 .sa-x { min-width: 44px; min-height: 44px; border: 0; background: transparent; color: var(--sombre-texte-3); font-size: 20px; }
 .sa-code { flex: 1; font-size: 13px; font-weight: 800; letter-spacing: 1.2px; color: var(--salle-sur-sombre); }
@@ -1039,8 +1077,25 @@ body.a-nav .nav { display: flex; }
 }
 .sa-serie { font-size: 15px; font-weight: 800; color: var(--sombre-texte); }
 .sa-dernier { font-size: 12.5px; color: var(--sombre-texte-3); }
-.sa-steppers { display: flex; gap: 10px; }
-.sa-steppers .st { flex: 1 1 0; min-width: 0; }
+/* LES DEUX MOLETTES SONT EMPILEES, ELLES NE PEUVENT PAS TENIR COTE A COTE.
+   Mesure a 375 px : la carte offre 307 px de contenu, et une molette reclame
+   64 + 10 + le nombre + 10 + 64, soit 148 px avant meme d'afficher un chiffre.
+   Deux molettes cote a cote demandent donc 296 px, plus les 10 px qui les
+   separent, soit 306 : il ne reste 1 px pour les deux nombres. Le cote a cote
+   redevient possible vers 540 px de large, ce qu'aucun iPhone n'offre.
+   Le cote a cote ne debordait pas seulement du cadre : le « − » des repetitions
+   recouvrait le « + » de la charge sur 47 de ses 64 px, et comme il est opaque
+   et vient apres dans l'arbre, c'est LUI qui recevait le toucher. On croyait
+   ajouter du poids, on retirait une repetition. Mesure au point : il ne restait
+   que 16 px sur 64 ou le « + » de la charge faisait ce qu'il annonce.
+   LA MARGE BASSE EST PORTEE PAR LE GROUPE, pas par la derniere molette. En
+   flex, ses 14 px restaient a l'interieur et s'ajoutaient aux 8 px du bouton,
+   soit 22 px. En bloc, cette marge traverserait le conteneur et fusionnerait :
+   il ne serait reste que 8 px devant « Valider » et 4 devant « Comme la
+   precedente », c'est-a-dire deux cibles tactiles qui se touchent presque, le
+   defaut meme qu'on vient de corriger. */
+.sa-steppers { display: block; margin-bottom: 22px; }
+.sa-steppers .st:last-child { margin-bottom: 0; }
 
 .sa-annuler {
   width: 100%; min-height: 48px; margin-top: 12px;
@@ -8008,6 +8063,22 @@ body.a-nav .nav { display: flex; }
     { t: "Cardio", s: "Tapis, rameur, vélo, elliptique" }
   ];
 
+  // L'ORDRE D'AFFICHAGE, ET LUI SEUL.
+  //
+  // « Machines de salle » descend en dernier pour que la liste des machines de
+  // la salle se deroule JUSTE EN DESSOUS de la case qui la commande. Avant, elle
+  // apparaissait 356 px plus bas, derriere cinq autres cases et un titre de
+  // section, et rien ne defilait : sur un iPhone de 667 px de haut, la premiere
+  // machine tombait hors de l'ecran. On cochait, et il ne se passait rien de
+  // visible. Demande d'Olivier.
+  //
+  // C'est un ordre D'AFFICHAGE, pas un reordonnancement de EQUIP. Les reponses
+  // sont enregistrees par POSITION dans `obEquip`, et la table qui les traduit
+  // pour le moteur est elle aussi alignee sur ces positions : deplacer une
+  // entree de EQUIP deplacerait en silence les reponses deja enregistrees sur
+  // les telephones. Le tableau ci-dessous ne contient que des index de EQUIP.
+  var EQUIP_ORDRE = [1, 2, 3, 4, 5, 0];
+
   // UNE pesée par semaine, toujours dans les mêmes conditions. Changer une
   // seule de ces conditions déplace le chiffre plus que ce qu'une semaine de
   // déficit fait bouger : la comparaison devient impossible.
@@ -8987,10 +9058,51 @@ body.a-nav .nav { display: flex; }
       if (aRun && !aSalle) kinds[j.ji === 6 ? 0 : j.ji + 1] = "course";
     }
 
+    // CE QUI EST COCHE DOIT ARRIVER AU MOTEUR SOUS SON VRAI NOM.
+    //
+    // Trois des six lignes se trompaient de destination : « Barre et disques »
+    // partait en halteres, « Halteres » partait en barre, et « Cardio » partait
+    // en poids du corps, alors que le moteur a bien une famille cardio et
+    // qu'il se donne le poids du corps d'office (`avail = { bw: true }`).
+    // Consequence : cocher Cardio n'ouvrait aucun appareil de cardio, et les
+    // deux premieres lignes ouvraient chacune le materiel de l'autre.
+    //
+    // C'etait masque tant que « Machines de salle » restait coche, parce que la
+    // salle donne d'office halteres, barre, traction et cardio. Ca ne mordait
+    // que sur quelqu'un qui s'entraine chez lui. C'est justement le cas d'usage
+    // qu'Olivier a demande de rendre reglable.
+    //
+    // L'ORDRE DE CETTE TABLE SUIT CELUI DE `EQUIP`, PAS CELUI DE L'ECRAN.
+    // L'affichage a son propre ordre (`EQUIP_ORDRE`) et n'y touche pas.
     var equip = [];
-    var CORRESP = ["mach", "halt", "barre", "trac", "elast", "bw"];
+    var CORRESP = ["mach", "barre", "halt", "trac", "elast", "cardio"];
     for (i = 0; i < state.obEquip.length && i < CORRESP.length; i++) {
       if (state.obEquip[i]) equip.push(CORRESP[i]);
+    }
+
+    // LES MACHINES DECOCHEES, ENFIN TRANSMISES.
+    //
+    // `obGear` etait enregistre depuis le debut et n'atteignait jamais le
+    // moteur : decocher une machine ne changeait rien, alors que l'ecran promet
+    // « je ne proposerai jamais un exercice qui demande une machine absente ».
+    // Le moteur attend la liste des familles ABSENTES, et il porte deja les
+    // treize memes entrees, avec leur code.
+    //
+    // LA CORRESPONDANCE SE FAIT PAR LIBELLE, PAS PAR RANG. Les deux listes sont
+    // aujourd'hui dans le meme ordre, mais s'y fier aurait recree exactement le
+    // couplage par index qui a fait partir trois categories de materiel a la
+    // mauvaise adresse. Par libelle, reordonner l'une des deux listes reste sans
+    // effet. `controle/verifier_gear.py` refuse la construction si un libelle de
+    // GEAR ne trouve plus son jumeau chez le moteur, sans quoi la machine
+    // cesserait d'etre transmise en silence.
+    var noGear = [], gearOpts = (MOTEUR && MOTEUR.GEAR_OPTIONS) || [], gi, gj;
+    if (state.obEquip[0]) {
+      for (gi = 0; gi < GEAR.length; gi++) {
+        if (state.obGear[gi]) continue;
+        for (gj = 0; gj < gearOpts.length; gj++) {
+          if (gearOpts[gj].label === GEAR[gi].t) { noGear.push(gearOpts[gj].v); break; }
+        }
+      }
     }
 
     var nCourse = 0, nSalle = 0;
@@ -9007,6 +9119,7 @@ body.a-nav .nav { display: flex; }
       dayKinds: kinds,
       discipline: nSalle && nCourse ? "mixte" : (nCourse && !nSalle ? "course" : "muscu"),
       equipment: equip,
+      noGear: noGear,
       objectif: ["perte", "maintien", "prise"][state.obObjectif] || "perte"
     };
   }
@@ -9285,30 +9398,87 @@ body.a-nav .nav { display: flex; }
     return h;
   }
 
-  function caseHtml(action, i, on, titre, sous) {
+  // `chevron` et `deplie` ne servent qu'a la case qui commande une liste : le
+  // chevron annonce qu'il y a quelque chose dessous, et `aria-expanded` le dit
+  // aux lecteurs d'ecran, que `aria-pressed` seul laisserait dans le noir.
+  function caseHtml(action, i, on, titre, sous, chevron, deplie) {
     return '<button type="button" class="ob-case' + (on ? " ob-case-on" : "") + '"' +
-      ' aria-pressed="' + (on ? "true" : "false") + '" data-action="' + action + '" data-i="' + i + '">' +
+      ' aria-pressed="' + (on ? "true" : "false") + '"' +
+      (chevron ? ' aria-expanded="' + (deplie ? "true" : "false") + '"' : "") +
+      ' data-action="' + action + '" data-i="' + i + '">' +
       '<span class="ob-case-box" aria-hidden="true">✓</span>' +
       '<span class="ob-case-txt"><span class="ob-case-t">' + esc(titre) + "</span>" +
-      (sous ? '<span class="ob-case-s">' + esc(sous) + "</span>" : "") + "</span></button>";
+      (sous ? '<span class="ob-case-s">' + esc(sous) + "</span>" : "") + "</span>" +
+      (chevron ? '<span class="ob-case-ch" aria-hidden="true">' + chevron + "</span>" : "") +
+      "</button>";
+  }
+
+  // LA LISTE DES MACHINES SE DEROULE SOUS SA CASE.
+  //
+  // Elle formait avant une seconde section, sous son propre titre, apres les six
+  // cases : la case qui la commande et son contenu etaient separes de 356 px, et
+  // cocher ne declenchait aucun defilement. « Machines de salle » descend donc en
+  // dernier (voir EQUIP_ORDRE) et sa liste s'ouvre juste dessous, en retrait.
+  //
+  // Il n'y a pas d'etat d'ouverture separe, et c'est voulu : ce qui ouvre, c'est
+  // la case elle-meme. Un troisieme etat « cochee mais repliee » ajouterait un
+  // champ a tenir pour un besoin que personne n'a exprime.
+  var I_MACHINES = 0;
+
+  // Le rang de l'etape Materiel dans les onze, et le rang de la case
+  // « Machines de salle » dans EQUIP. Nommes UNE fois : ces deux nombres etaient
+  // ecrits en clair dans trois fichiers, et c'est exactement ce genre de
+  // constante recopiee qui a fait partir trois categories de materiel a la
+  // mauvaise adresse.
+  var ETAPE_MATERIEL = 6;
+
+  // Amener le bloc des machines a 12 px du haut, sans animation.
+  //
+  // Deux appelants : le toucher qui coche la case, et l'arrivee sur l'etape
+  // depuis « Ce dont je dispose » dans Moi. Le second compte autant que le
+  // premier : la case est desormais la DERNIERE des six, donc arriver sur cette
+  // etape avec les machines deja cochees ouvrait sur cinq cases et laissait les
+  // treize machines entierement sous la ligne de flottaison, alors que la ligne
+  // de Moi annonce justement leur nombre.
+  //
+  // Un defilement anime ne se verifie pas dans le panneau de mesure, qui ne
+  // peint pas, et il se dispute le doigt de l'utilisateur. Instantane, donc.
+  function montrerLesMachines() {
+    var bloc = document.querySelector(".ob-mach");
+    if (!bloc) return;
+    var y = (window.pageYOffset || document.documentElement.scrollTop || 0) +
+            bloc.getBoundingClientRect().top - 12;
+    window.scrollTo(0, y > 0 ? y : 0);
   }
 
   function etapeMaterielHtml() {
-    var h = '<div class="ob-liste">', i;
-    for (i = 0; i < EQUIP.length; i++) {
-      h += caseHtml("ob-equip", i, !!state.obEquip[i], EQUIP[i].t, EQUIP[i].s);
-    }
-    h += "</div>";
+    var h = '<div class="ob-liste">', i, e, ouvert = !!state.obEquip[I_MACHINES];
 
-    if (state.obEquip[0]) {
-      h += '<h2 class="ob-titre" style="font-size:17px;margin-top:20px">Les machines de ta salle</h2>';
-      h += '<p class="ob-lead">Décoche ce que tu n\'as pas. Je ne proposerai jamais un exercice ' +
-           'qui demande une machine absente.</p><div class="ob-liste">';
-      for (i = 0; i < GEAR.length; i++) {
-        h += caseHtml("ob-gear", i, !!state.obGear[i], GEAR[i].t, GEAR[i].s);
+    for (i = 0; i < EQUIP_ORDRE.length; i++) {
+      e = EQUIP_ORDRE[i];
+      if (e !== I_MACHINES) {
+        h += caseHtml("ob-equip", e, !!state.obEquip[e], EQUIP[e].t, EQUIP[e].s);
+        continue;
+      }
+
+      // La case des machines et sa liste ne font qu'un bloc : c'est ce qui les
+      // relie a l'oeil, le retrait seul ne suffisait pas.
+      h += '<div class="ob-mach' + (ouvert ? " ob-mach-on" : "") + '">';
+      h += caseHtml("ob-equip", e, ouvert, EQUIP[e].t, EQUIP[e].s,
+                    ouvert ? "▴" : "▾", ouvert);
+      if (ouvert) {
+        h += '<div class="ob-mach-c">';
+        h += '<p class="ob-mach-l">Décoche ce que tu n\'as pas. Je ne proposerai jamais ' +
+             "un exercice qui demande une machine absente.</p>";
+        h += '<div class="ob-liste">';
+        for (var g = 0; g < GEAR.length; g++) {
+          h += caseHtml("ob-gear", g, !!state.obGear[g], GEAR[g].t, GEAR[g].s);
+        }
+        h += "</div></div>";
       }
       h += "</div>";
     }
+    h += "</div>";
 
     h += '<div class="ob-champ" style="margin-top:18px"><span class="ob-champ-l">' +
          'Haltère le plus lourd</span><div class="ob-step">' +
@@ -10481,6 +10651,19 @@ body.a-nav .nav { display: flex; }
     h += "</div>";
     h += '<div class="sa-barre"><span class="sa-barre-v" style="width:' +
          avancementSeance() + '%"></span></div>';
+    // L'ENTETE OUVRE LE CORPS DE L'ECRAN, ET C'EST LUI QUI SE CENTRE.
+    //
+    // Les quatre ecrans du mode entrainement laissaient un grand vide en bas :
+    // mesure a 375 x 812, 313 px sur le repos, 233 px sur la serie, 238 px sur
+    // la fin de seance. Demande d'Olivier de les recentrer, les quatre, pour
+    // qu'ils se ressemblent.
+    //
+    // Le centrage ne peut PAS etre pose sur `.salle` : la croix, la fleche, le
+    // compteur d'exercice, le chrono et la barre d'avancement sont ses enfants
+    // directs, ils descendraient avec le reste. D'ou ce conteneur, ouvert ici et
+    // ferme par chacun des quatre ecrans : l'entete reste en haut, le corps se
+    // centre dans ce qui reste.
+    h += '<div class="sa-corps">';
     return h;
   }
 
@@ -10526,8 +10709,12 @@ body.a-nav .nav { display: flex; }
   // -------------------------------------------------------------------------
   function salleHtml() {
     var ex = exosCourants(), exo = ex[state.tIdx], f = faitsOu(), i, d;
-    if (!exo) return '<div class="salle"><p class="sa-vide">Aucun exercice.</p>' +
-      '<button type="button" class="sa-quitter" data-action="quitter-seance">Quitter</button></div>';
+    // Cet ecran n'a pas d'entete, donc il ouvre son corps lui-meme : sans quoi
+    // il serait le seul des cinq a ne pas se centrer.
+    if (!exo) return '<div class="salle"><div class="sa-corps">' +
+      '<p class="sa-vide">Aucun exercice.</p>' +
+      '<button type="button" class="sa-quitter" data-action="quitter-seance">Quitter</button>' +
+      "</div></div>";
 
     if (state.phase === "fin") return finHtml();
 
@@ -10553,7 +10740,7 @@ body.a-nav .nav { display: flex; }
       h += '<button type="button" class="sa-valider sa-valider-court"' +
            ' data-action="repos-passer">C\'est reparti</button>';
       h += "</div>";
-      return h + "</div>";
+      return h + "</div></div>";
     }
 
     // ---- LA SERIE ----
@@ -10673,7 +10860,7 @@ body.a-nav .nav { display: flex; }
            "Annuler la série " + faites + "</button>";
     }
 
-    return h + "</div>";
+    return h + "</div></div>";
   }
 
   // ECRAN D'ENCHAINEMENT : le suivant est PROPOSE, les autres restent
@@ -10736,7 +10923,7 @@ body.a-nav .nav { display: flex; }
     }
     h += "</ul>";
     h += '<button type="button" class="sa-quitter" data-action="finir-seance">Terminer la séance ici</button>';
-    return h + "</div>";
+    return h + "</div></div>";
   }
 
   function finHtml() {
@@ -10808,7 +10995,7 @@ body.a-nav .nav { display: flex; }
 
     h += '<button type="button" class="sa-valider" data-action="enregistrer-seance">' +
          "Enregistrer la séance</button>";
-    return h + "</div>";
+    return h + "</div></div>";
   }
 
   // -------------------------------------------------------------------------
@@ -11597,12 +11784,34 @@ body.a-nav .nav { display: flex; }
   // alors que la maquette en fait la porte d'entree. Signale par Olivier.
   // Deux zones cliquables, le bloc nom et le chevron, parce qu'on vise l'un ou
   // l'autre selon la main.
+  // La seule forme acceptee : une image en base64, sans un seul caractere qui
+  // puisse sortir d'un attribut. Le vocabulaire du base64 n'en contient aucun.
+  var PHOTO_FORME = /^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/;
+
+  function photoValide(v) {
+    return typeof v === "string" && v.length < 4000000 && PHOTO_FORME.test(v);
+  }
+
   function photoHtml() {
     var init = (state.obPrenom || "?").charAt(0).toUpperCase();
     var h = '<div class="moi-carte">';
     h += '<label class="moi-photo">';
-    h += state.photo
-      ? '<span class="moi-img" role="img" aria-label="Photo de profil" style="background-image:url(' + state.photo + ')"></span>'
+    // L'ADRESSE EST ENTRE APOSTROPHES. Une adresse en data: contient une
+    // virgule, et `url()` sans guillemets s'arrete dessus : la regle entiere
+    // devenait invalide et la pastille restait vide.
+    //
+    // ET ELLE EST VERIFIEE AVANT D'ETRE POSEE. C'est le seul champ de l'appli
+    // qui entre dans du HTML sans passer par esc(), et il ne vient pas toujours
+    // de toDataURL, dont la sortie est sure : il peut aussi venir d'un journal
+    // IMPORTE, et l'import recopie les valeurs sans regarder ce qu'elles
+    // contiennent. Un guillemet dans la chaine fermerait l'attribut, et comme la
+    // politique de securite autorise le script en ligne, un gestionnaire glisse
+    // la s'executerait. On n'accepte donc qu'une image en base64, et on retombe
+    // sur l'initiale sinon.
+    var photo = photoValide(state.photo) ? state.photo : null;
+    h += photo
+      ? '<span class="moi-img" role="img" aria-label="Photo de profil"' +
+        " style=\"background-image:url('" + photo + "')\"></span>"
       : '<span class="moi-init" aria-hidden="true">' + esc(init) + "</span>";
     h += '<span class="moi-cap" aria-hidden="true">Photo</span>';
     h += '<input type="file" accept="image/*" class="moi-file" data-action="photo-choisir"' +
@@ -11613,15 +11822,20 @@ body.a-nav .nav { display: flex; }
     h += '<button type="button" class="moi-chev" data-action="aller-profil"' +
          ' aria-label="Ouvrir mon profil">›</button>';
     h += "</div>";
-    if (state.photo) {
+    if (photo) {
       h += '<button type="button" class="moi-retirer" data-action="photo-retirer">' +
            "Retirer la photo</button>";
     }
-    // ON LE DIT. Un blob n'entre pas dans localStorage : la photo disparait au
-    // rechargement. Laisser l'utilisateur le decouvrir lui ferait croire a un
-    // bug, alors que c'est une limite assumee.
-    h += '<p class="moi-note">La photo reste sur cet écran et n\'est pas enregistrée : ' +
-         'elle disparaît au rechargement.</p>';
+    // La phrase qui disait que la photo n'etait pas enregistree a disparu avec
+    // la limite qu'elle annoncait : la photo est maintenant reduite puis gardee
+    // sur l'appareil, comme le reste du profil.
+    //
+    // Reste ce message, pour le cas ou le fichier choisi ne s'ouvre pas. Sans
+    // lui, un fichier illisible rendrait la main sans rien dire, et c'est
+    // exactement le silence qu'on vient de corriger.
+    if (state.photoMsg) {
+      h += '<p class="moi-note">' + esc(state.photoMsg) + "</p>";
+    }
     return h;
   }
 
@@ -11665,13 +11879,38 @@ body.a-nav .nav { display: flex; }
     ];
     if (d.slotsSalle.length) {
       lignesProg.push({ t: "Durée par séance", s: dureeLibelle(), a: "ob-etape", v: "5" });
-      lignesProg.push({ t: "Matériel disponible", s: nbMateriel() + " catégories", a: "ob-etape", v: "6" });
     }
     // ACTION DISTINCTE de « ob-etape ». Corriger une reponse et reprendre les
     // onze etapes ne sont pas le meme geste : le premier rend la main tout de
     // suite, le second redemande tout.
     lignesProg.push({ t: "Refaire le diagnostic", s: "Reprend tout depuis le début", a: "ob-refaire" });
     h += groupeHtml("Programme", lignesProg);
+
+    // LE MATERIEL A SON PROPRE GROUPE.
+    //
+    // Il etait la quatrieme ligne de « Programme », entre la duree de seance et
+    // le bouton qui refait tout le diagnostic. Olivier demandait a pouvoir gerer
+    // sa liste de materiel depuis son profil, ce qui veut dire d'abord la
+    // trouver. Un titre a son nom la rend visible sans la chercher.
+    //
+    // Le sous-titre compte les DEUX listes. Les machines n'y figuraient pas,
+    // alors que ce sont elles qu'on decoche quand on change de salle.
+    //
+    // ET LE GROUPE NE DISPARAIT PLUS QUAND LA SEMAINE N'A PAS DE SALLE.
+    // Il etait conditionne aux creneaux de salle, comme la ligne « Duree par
+    // seance » juste au-dessus. Or le cas qu'Olivier decrit EST une semaine
+    // sans salle : « un week-end chez des potes ». Le materiel devenait alors
+    // inatteignable, ni depuis Moi ni depuis le diagnostic, qui saute cette
+    // etape quand il n'y a pas de salle. Le reglage qu'il veut pouvoir changer
+    // disparaissait exactement quand il en a besoin.
+    //
+    // Y aller depuis ici marche quel que soit le programme : `obSuivant` rend
+    // la main a `retourDe` des que le diagnostic est fait, sans traverser les
+    // onze etapes.
+    h += groupeHtml("Matériel", [
+      { t: "Ce dont je dispose", s: resumeMateriel(), a: "ob-etape",
+        v: String(ETAPE_MATERIEL) }
+    ]);
 
     h += groupeHtml("Assistant IA", [
       { t: "Assistant IA", s: "Programme et repas", a: "aller-ia" }
@@ -11759,6 +11998,24 @@ body.a-nav .nav { display: flex; }
     var i, n = 0;
     for (i = 0; i < state.obEquip.length; i++) { if (state.obEquip[i]) n++; }
     return n;
+  }
+
+  // Les machines ne se comptent que si la salle est cochee : sans salle, les
+  // treize cases ne sont pas posees et annoncer « 0 machine » serait faux.
+  function nbMachines() {
+    var i, n = 0;
+    if (!state.obEquip[0]) return 0;
+    for (i = 0; i < GEAR.length; i++) { if (state.obGear[i]) n++; }
+    return n;
+  }
+
+  function resumeMateriel() {
+    var e = nbMateriel(), m = nbMachines();
+    var s = e + (e > 1 ? " catégories" : " catégorie");
+    if (state.obEquip[0]) {
+      s += " · " + m + (m > 1 ? " machines" : " machine");
+    }
+    return s;
   }
 
   /* -------------------------------------------------------------------------
@@ -12015,18 +12272,88 @@ body.a-nav .nav { display: flex; }
   /* -------------------------------------------------------------------------
      ACTIONS
      ------------------------------------------------------------------------- */
+  // LA PHOTO EST REDUITE, PUIS ENREGISTREE.
+  //
+  // La premiere version posait l'adresse rendue par createObjectURL, celle de
+  // la maquette. Elle ne s'affichait JAMAIS dans le livrable : la maquette n'a
+  // pas de politique de securite, le livrable en a une, et elle n'autorise les
+  // images qu'en 'self' et en data:. Le navigateur refusait donc de charger
+  // l'image, sans rien dire a l'utilisateur, qui voyait le choix de photo se
+  // derouler entierement pour rien. Signale par Olivier.
+  //
+  // On passe donc par data:, deja autorise, et on en profite pour REDUIRE :
+  // une photo d'iPhone brute pese 2 a 4 Mo, et son ecriture en texte encore un
+  // tiers de plus, alors que le telephone n'accorde a l'appli que 5 Mo pour
+  // tout ce qu'elle garde. 320 px de cote suffisent a une pastille de 60 px sur
+  // un ecran Retina et tiennent dans quelques dizaines de kilo-octets.
+  //
+  // On recadre AU CARRE depuis le centre, sinon une photo verticale rentre
+  // deformee dans une pastille ronde.
+  var PHOTO_COTE = 320;
+
+  // Au-dela, on ne tente meme pas la lecture : FileReader chargerait le fichier
+  // entier en memoire, puis sa transcription en texte qui pese un tiers de plus,
+  // avant le moindre controle. Un onglet ferme pour memoire epuisee ne se
+  // rattrape pas, et 40 Mo laissent passer toutes les photos d'un telephone.
+  var PHOTO_POIDS_MAX = 40 * 1024 * 1024;
+
   function photoChoisir(input) {
     var f = input && input.files && input.files[0];
     if (!f) return;
-    if (state.photo) { try { window.URL.revokeObjectURL(state.photo); } catch (e) {} }
-    poser({ photo: window.URL.createObjectURL(f) });
+    if (f.size > PHOTO_POIDS_MAX) {
+      poser({ photoMsg: "Cette image est trop lourde pour être utilisée ici." });
+      return;
+    }
+    var lecteur = new window.FileReader();
+    lecteur.onload = function () {
+      var img = new window.Image();
+      img.onload = function () {
+        var c, ctx, cote, sx, sy, url;
+        try {
+          cote = Math.min(img.width, img.height);
+          sx = Math.round((img.width - cote) / 2);
+          sy = Math.round((img.height - cote) / 2);
+          c = document.createElement("canvas");
+          c.width = PHOTO_COTE; c.height = PHOTO_COTE;
+          ctx = c.getContext("2d");
+          // Le JPEG ne connait pas la transparence : sans ce fond, une image
+          // detouree ressortirait sur du NOIR, ce qui est la couleur d'un canvas
+          // vierge une fois aplati.
+          ctx.fillStyle = "#ffffff";
+          ctx.fillRect(0, 0, PHOTO_COTE, PHOTO_COTE);
+          ctx.drawImage(img, sx, sy, cote, cote, 0, 0, PHOTO_COTE, PHOTO_COTE);
+          url = c.toDataURL("image/jpeg", 0.82);
+          // Une surface de canvas trop grande pour iOS rend une image vide sans
+          // lever d'erreur : on refuse ce qui ne ressemble pas a une photo
+          // plutot que d'enregistrer un rectangle blanc.
+          if (!photoValide(url)) {
+            poser({ photoMsg: "Cette image n'a pas pu être réduite." });
+            return;
+          }
+        } catch (e) {
+          // Un fichier illisible ne doit pas laisser l'ecran muet : on le dit
+          // la ou l'import de journal dit deja ses erreurs.
+          poser({ photoMsg: "Cette image n'a pas pu être lue." });
+          return;
+        }
+        poser({ photo: url, photoMsg: "" });
+      };
+      img.onerror = function () {
+        poser({ photoMsg: "Ce fichier n'est pas une image." });
+      };
+      img.src = lecteur.result;
+    };
+    lecteur.onerror = function () {
+      poser({ photoMsg: "Lecture du fichier impossible." });
+    };
+    lecteur.readAsDataURL(f);
   }
 
   function photoRetirer() {
-    // On REVOQUE l'URL avant de la lacher : sans ca, le blob reste en memoire
-    // du navigateur jusqu'a la fermeture de l'onglet.
-    if (state.photo) { try { window.URL.revokeObjectURL(state.photo); } catch (e) {} }
-    poser({ photo: null });
+    // On efface AUSSI le message : sinon un « ce fichier n'est pas une image »
+    // reste affiche sous une carte qui n'a plus de photo, sans plus rien
+    // designer.
+    poser({ photo: null, photoMsg: "" });
   }
 
   function exporterJournal() {
@@ -12233,8 +12560,15 @@ body.a-nav .nav { display: flex; }
   function materielTexte() {
     var out = [], i;
     for (i = 0; i < EQUIP.length; i++) { if (state.obEquip[i]) out.push(EQUIP[i].t); }
+    // Les machines ne se comptent QUE si la salle est cochee. Sans salle, les
+    // treize cases ne sont jamais posees, et annoncer « PAS de : machine a
+    // mollets » a quelqu'un qui s'entraine chez lui parle d'un materiel dont il
+    // n'a jamais ete question. Meme garde que dans l'ecran Moi et dans le
+    // profil envoye au moteur.
     var absentes = [];
-    for (i = 0; i < GEAR.length; i++) { if (!state.obGear[i]) absentes.push(GEAR[i].t); }
+    if (state.obEquip[0]) {
+      for (i = 0; i < GEAR.length; i++) { if (!state.obGear[i]) absentes.push(GEAR[i].t); }
+    }
     var l = [];
     l.push(out.length ? out.join(", ") + "." : "Poids du corps uniquement.");
     // CE QUI MANQUE COMPTE PLUS QUE CE QUI EST LA. Sans cette ligne, un modele
@@ -12787,7 +13121,7 @@ body.a-nav .nav { display: flex; }
    module a l'autre.
    =========================================================================== */
 
-  var APP_VERSION = "1.22.0";
+  var APP_VERSION = "1.22.1";
 
   function has(o, k) { return Object.prototype.hasOwnProperty.call(o, k); }
 
@@ -12823,7 +13157,11 @@ body.a-nav .nav { display: flex; }
     // un ecran court, et les creneaux DEJA REMPLIS restent visibles de toute
     // facon, puisqu'ils tiennent a `obAct` et pas a cette liste.
     obSecondOuvert: "",
-    slotAuj: 0, resetDemande: false, photo: null,
+    slotAuj: 0, resetDemande: false,
+    // La photo de profil, elle, EST persistee : elle est declaree plus bas avec
+    // les reponses du diagnostic. Ne reste ici que le message d'erreur de sa
+    // lecture, qui n'a pas a survivre au rechargement.
+    photoMsg: "",
     // Le remplacement PONCTUEL de l'activite du jour : "" (rien), "salle",
     // "cours" ou "run". Il remplace l'ancien drapeau `coursQuitte`, qui ne
     // savait aller que du cours vers la salle. Non persiste : c'est un choix
@@ -12875,7 +13213,15 @@ body.a-nav .nav { display: flex; }
     obDureeLibre: "",
     obJours: [1, 0, 1, 1, 1, 1, 0],
     obEquip: [1, 1, 1, 0, 1, 1],
-    obGear: [1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    // LES TREIZE MACHINES SONT PRESENTES PAR DEFAUT.
+    //
+    // Le rang 2, « Machine developpe epaules », valait 0 depuis toujours. Tant
+    // qu'`obGear` n'atteignait pas le moteur, ce zero ne faisait rien : c'etait
+    // un reste de maquette. Maintenant qu'il est transmis, il retirait
+    // « Developpe epaules machine » de TOUS les programmes d'une installation
+    // neuve, sans que personne n'ait declare cette machine absente et sans
+    // qu'aucun ecran ne le dise. Ce qu'on n'a pas decoche est present.
+    obGear: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
     obHalt: 24, obRefus: {},
     obPetitDej: 1, obCollation: 1, obCuisine: 1, obAlcool: 1,
     obPeseeJour: 3, obPeseeMoment: 0, peseeFaite: false,
@@ -12897,6 +13243,10 @@ body.a-nav .nav { display: flex; }
     // duree l'avait ecarte. Les deux sont des DECISIONS de l'utilisateur, pas
     // du generateur : elles survivent a un changement de duree de seance.
     obRetires: {}, obAjouts: {},
+    // La photo de profil, reduite a 320 px de cote et ecrite en data:.
+    // PERSISTEE : c'est ce qu'Olivier a demande, et c'est ce que la phrase de
+    // l'ecran Moi promet maintenant.
+    photo: null,
     runKm: "", runMin: "", runLieu: 0,
     faits: null, tIdx: 0, kg: 45, reps: 9, phase: "set", demarre: false, finiIdx: 0
   };
@@ -12912,6 +13262,9 @@ body.a-nav .nav { display: flex; }
     "obPeseeJour", "obPeseeMoment", "peseeFaite", "obSupps", "obAct", "actFaits",
     "hist", "pesees", "dernierExport",
     "obRetires", "obAjouts", "iaPlan",
+    // La photo de profil, reduite a 320 px de cote et ecrite en data:.
+    // Elle part aussi dans l'export du journal, donc une sauvegarde la ramene.
+    "photo",
     "runKm", "runMin", "runLieu",
     "faits", "tIdx", "kg", "reps", "phase", "demarre", "finiIdx"];
 
@@ -12951,6 +13304,9 @@ body.a-nav .nav { display: flex; }
   // =========================================================================
   var _dernier = null;
   var _minuteur = null;
+  // Vrai pendant `pagehide` seulement. La page est en train de partir :
+  // redessiner n'y sert a rien et pourrait ne jamais rendre la main.
+  var _enFermeture = false;
 
   function lire() {
     var brut, o, r, i, k;
@@ -12980,12 +13336,45 @@ body.a-nav .nav { display: flex; }
     }
     b = JSON.stringify(o);
     if (b === _dernier) return;
-    _dernier = b;
     try {
       window.localStorage.setItem(CLE, b);
+      _dernier = b;
+      return;
     } catch (e) {
-      // Quota depasse ou navigation privee. On avale : perdre la sauvegarde
-      // est desagreable, planter l'appli en pleine seance l'est davantage.
+      // Quota depasse ou navigation privee. On avale l'erreur : perdre la
+      // sauvegarde est desagreable, planter l'appli en pleine seance l'est
+      // davantage.
+      //
+      // MAIS ON NE MARQUE PAS L'ECRITURE COMME FAITE. `_dernier` restait pose
+      // meme apres un echec, donc la tentative suivante trouvait la meme chaine,
+      // se croyait a jour et rendait la main : une seule ecriture ratee suffisait
+      // a ne plus jamais rien enregistrer de la seance.
+    }
+
+    // LE JOURNAL PASSE AVANT LA PHOTO.
+    //
+    // Tout l'etat s'ecrit en UN SEUL bloc : si la photo fait franchir le quota,
+    // ce n'est pas la photo qu'on perd, c'est l'historique des seances avec
+    // elle, et sans un mot. Une vignette de 320 px pese quelques dizaines de
+    // kilo-octets contre environ 5 Mo de quota, donc le cas est rare ; il n'est
+    // pas impossible sur un telephone dont le stockage est deja plein.
+    // On refait donc une tentative SANS la photo, et on le dit.
+    if (o.photo) {
+      o.photo = null;
+      try {
+        b = JSON.stringify(o);
+        window.localStorage.setItem(CLE, b);
+        _dernier = b;
+        state.photo = null;
+        state.photoMsg = "La photo n'a pas pu être gardée, la mémoire de " +
+                         "l'appareil est pleine. Ton journal, lui, est enregistré.";
+        // ON REDESSINE. Cette fonction tourne dans un minuteur, longtemps apres
+        // le rendu qui a affiche la photo : sans cet appel, l'ecran continuait
+        // de montrer une pastille que l'etat venait de retirer, et le message
+        // n'apparaissait qu'au geste suivant. On ne redessine pas depuis
+        // `pagehide`, ou la page est en train de disparaitre.
+        if (!_enFermeture) { rendre(); }
+      } catch (e2) { /* meme sans la photo, ca ne rentre pas : rien de plus a faire */ }
     }
   }
 
@@ -13001,7 +13390,8 @@ body.a-nav .nav { display: flex; }
   // pagehide couvre iOS, ou beforeunload n'est pas fiable.
   function ecrireAvantDeQuitter() {
     if (_minuteur) { window.clearTimeout(_minuteur); _minuteur = null; }
-    ecrireMaintenant();
+    _enFermeture = true;
+    try { ecrireMaintenant(); } finally { _enFermeture = false; }
   }
 
   function poser(o) {
@@ -13746,7 +14136,21 @@ body.a-nav .nav { display: flex; }
     if (action === "basculer-tech") { poser({ tech: !state.tech }); return; }
     if (action === "ia-appliquer") { iaAppliquer(parseInt(n.getAttribute("data-i"), 10)); return; }
     if (action === "ia-ignorer") { iaIgnorer(parseInt(n.getAttribute("data-i"), 10)); return; }
-    if (action === "ob-equip") { basculerTableau("obEquip", parseInt(n.getAttribute("data-i"), 10)); return; }
+    if (action === "ob-equip") {
+      var iEq = parseInt(n.getAttribute("data-i"), 10);
+      basculerTableau("obEquip", iEq);
+      // COCHER « MACHINES DE SALLE » DEROULE UNE LISTE DE TREIZE CASES, ET
+      // ELLE S'OUVRE SOUS LA DERNIERE CASE DE L'ECRAN, DONC SOUS LA LIGNE DE
+      // FLOTTAISON. Sans ce defilement, on coche et il ne se passe rien de
+      // visible : c'est exactement ce qu'Olivier decrivait, et aucun des
+      // chemins de rendu n'appelait scrollTo. On amene donc le bloc a l'ecran.
+      // Defilement INSTANTANE, pas « smooth » : un defilement anime se dispute
+      // le doigt de l'utilisateur, et il ne se verifie pas ici, ou le panneau
+      // ne peint pas. On amene le bloc a 12 px du haut plutot qu'a ras bord,
+      // pour qu'on voie qu'il y a quelque chose au-dessus.
+      if (iEq === I_MACHINES && state.obEquip[I_MACHINES]) { montrerLesMachines(); }
+      return;
+    }
     if (action === "ob-gear") { basculerTableau("obGear", parseInt(n.getAttribute("data-i"), 10)); return; }
     if (action === "ob-supp") { basculerTableau("obSupps", parseInt(n.getAttribute("data-i"), 10)); return; }
     if (action === "ob-single") {
@@ -13881,9 +14285,12 @@ body.a-nav .nav { display: flex; }
       // Chaque ligne du Profil porte SON etape : on y retourne directement au
       // lieu de rouvrir le diagnostic au debut. Et on RETIENT d'ou l'on vient,
       // sans quoi on ne saurait pas ou rendre la main.
-      poser({ ecran: "onb", obStep: parseInt(n.getAttribute("data-v"), 10) || 0,
-              retourDe: state.ecran });
+      var etape = parseInt(n.getAttribute("data-v"), 10) || 0;
+      poser({ ecran: "onb", obStep: etape, retourDe: state.ecran });
       window.scrollTo(0, 0);
+      // « Ce dont je dispose » annonce un nombre de machines : on ouvre donc sur
+      // les machines, pas sur les cinq cases qui les precedent.
+      if (etape === ETAPE_MATERIEL && state.obEquip[I_MACHINES]) { montrerLesMachines(); }
       return;
     }
     if (action === "ob-quitter") { obQuitter(false); return; }
