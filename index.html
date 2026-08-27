@@ -295,7 +295,21 @@ body.a-nav .nav { display: flex; }
   padding: 0 2px;
 }
 .nav-btn svg { display: block; }
-.nav-btn-on { color: var(--citron-encre); }
+/* LA PASTILLE DE L'ONGLET COURANT.
+   Avant, l'onglet actif ne changeait que de couleur de trait. En theme clair
+   `--citron-encre` vaut #6b5b00, un olive sombre : a cote du gris des autres
+   onglets, la difference se cherche. On pose donc un aplat citron derriere
+   l'icone, et le libelle reprend le contraste plein.
+   La pastille est un ELEMENT INTERIEUR et non le bouton lui-meme : mettre le
+   fond sur le bouton, qui est en `flex: 1 1 0`, aurait donne cinq blocs
+   colles bord a bord, et l'inserer par une marge aurait retreci le seul
+   onglet actif, au risque de faire passer « Historique » a la ligne. */
+.nav-p {
+  display: flex; align-items: center; justify-content: center;
+  width: 48px; height: 28px; border-radius: 999px;
+}
+.nav-btn-on { color: var(--texte); font-weight: 800; }
+.nav-btn-on .nav-p { background: var(--salle-bg); color: var(--salle-fg); }
 
 /* ===========================================================================
    SPLASH
@@ -1534,6 +1548,17 @@ body.a-nav .nav { display: flex; }
   padding: 13px 14px; margin: 0 0 12px; font-size: 12.5px; line-height: 1.55;
   font-family: ui-monospace, "SF Mono", monospace; color: var(--texte-1b);
   white-space: pre-wrap; word-break: break-word; max-height: 320px; overflow-y: auto;
+}
+
+/* LE PLAN REPAS GARDE, DANS L'ECRAN NUTRITION.
+   Meme habillage que la question de l'assistant : c'est du texte rapporte tel
+   quel, il doit se lire comme tel et non comme un contenu de l'appli. Il
+   defile dans sa boite plutot que d'allonger l'ecran sans fin. */
+.nu-plan {
+  background: var(--fond-encart); border: 1px solid var(--bord); border-radius: 14px;
+  padding: 13px 14px; margin: 10px 0 12px; font-size: 12.5px; line-height: 1.55;
+  font-family: ui-monospace, "SF Mono", monospace; color: var(--texte-1b);
+  white-space: pre-wrap; word-break: break-word; max-height: 420px; overflow-y: auto;
 }
 
 .ia-zone {
@@ -12748,8 +12773,47 @@ body.a-nav .nav { display: flex; }
          (state.iaCopie ? "✓ Copié" : "Copier la question") + "</button>";
 
     if (onglet === 0) h += iaCollerHtml();
-    else h += '<p class="moi-note">Le plan repas se colle dans l\'écran Nutrition, ' +
-              "qui est encore en chantier.</p>";
+    else h += iaCollerRepasHtml();
+    return h;
+  }
+
+  /* -------------------------------------------------------------------------
+     LA ZONE DE COLLAGE DU PLAN REPAS
+     -------------------------------------------------------------------------
+     L'onglet Nutrition proposait une question a copier, et RIEN pour rapporter
+     la reponse : une porte de sortie sans porte d'entree. Signale par Olivier.
+
+     Ce bouton ne fait PAS semblant. Il n'y a pas de validateur pour les repas
+     comme il y en a un pour le programme : l'appli n'a aucune base d'aliments
+     derriere, elle ne peut donc ni verifier ni compter ce qu'un modele propose.
+     Ce qu'elle sait faire, et qui a une valeur reelle, c'est GARDER le plan et
+     le remettre sous les yeux dans l'ecran Nutrition, a cote des reperes qui
+     ont servi a le demander. C'est ce que le bouton annonce, et rien de plus.
+     ------------------------------------------------------------------------- */
+  function iaCollerRepasHtml() {
+    var h = '<div class="carte-t" style="margin-top:20px">Colle la réponse ici</div>';
+    h += '<textarea class="ia-zone" rows="5" placeholder="Colle le plan repas de ton assistant…"' +
+         ' data-action="ia-coller">' + esc(state.iaTexte || "") + "</textarea>";
+    h += '<button type="button" class="cs-cta cs-cta-clair" data-action="ia-repas-garder">' +
+         "Garder ce plan repas</button>";
+
+    // ON DIT CE QUE LE BOUTON FAIT, ET CE QU'IL NE FAIT PAS. Sans cette phrase,
+    // « garder » se lit comme « compter », et l'ecran Nutrition decevrait.
+    h += '<p class="moi-note">Il sera repris dans l\'écran Nutrition, sous tes ' +
+         "repères. L'appli ne mesure pas ce que tu manges : elle garde le plan, " +
+         "elle ne le compte pas.</p>";
+
+    if (state.iaRepasMsg) {
+      h += '<p class="moi-note">' + esc(state.iaRepasMsg) + "</p>";
+    }
+
+    if (state.iaRepas) {
+      h += '<div class="ia-res"><p class="cr-p">Un plan est gardé' +
+           (state.iaRepasDate ? " depuis le " + esc(dateLongue(dateDepuisCle(state.iaRepasDate))) : "") +
+           ".</p>";
+      h += '<button type="button" class="sa-annuler" data-action="ia-repas-retirer">' +
+           "Retirer ce plan</button></div>";
+    }
     return h;
   }
 
@@ -13032,6 +13096,21 @@ body.a-nav .nav { display: flex; }
          '</span><span class="vg-l">' + (t.deficit >= 0 ? "déficit" : "surplus") +
          ' kcal/j</span></div></div>';
 
+    // LE PLAN RAPPORTE DE L'ASSISTANT, S'IL Y EN A UN.
+    //
+    // Il se place ICI, juste sous les cibles qui ont servi a le demander, et
+    // AVANT le bloc en chantier : c'est le seul contenu de cet ecran qui vienne
+    // vraiment de l'utilisateur, il passe donc devant l'exemple.
+    if (state.iaRepas) {
+      h += '<section class="carte"><div class="carte-t">Ton plan repas</div>';
+      h += '<p class="cr-p">Rapporté de ton assistant' +
+           (state.iaRepasDate ? " le " + esc(dateLongue(dateDepuisCle(state.iaRepasDate))) : "") +
+           ". L\'appli le garde tel quel : elle ne mesure ni ne compte ce qu\'il contient.</p>";
+      h += '<pre class="nu-plan">' + esc(state.iaRepas) + "</pre>";
+      h += '<button type="button" class="sa-annuler" data-action="ia-repas-retirer">' +
+           "Retirer ce plan</button></section>";
+    }
+
     h += '<section class="nu-chantier">';
     h += '<div class="nu-ch-tete"><span class="nu-badge">EN CHANTIER</span></div>';
     h += '<div class="carte-t">Les prises</div>';
@@ -13121,7 +13200,7 @@ body.a-nav .nav { display: flex; }
    module a l'autre.
    =========================================================================== */
 
-  var APP_VERSION = "1.22.1";
+  var APP_VERSION = "1.22.2";
 
   function has(o, k) { return Object.prototype.hasOwnProperty.call(o, k); }
 
@@ -13179,7 +13258,7 @@ body.a-nav .nav { display: flex; }
     // La reponse collee et sa relecture. EPHEMERES, et volontairement : garder
     // une proposition d'IA d'il y a trois jours la ferait rejouer sur un plan
     // qui a change entre-temps.
-    iaTexte: "", iaRes: null, iaCopie: false, importMsg: "",
+    iaTexte: "", iaRes: null, iaCopie: false, importMsg: "", iaRepasMsg: "",
     // LES CHANGEMENTS ACCEPTES DE L'ASSISTANT, eux, SURVIVENT. Ils modifient le
     // programme, au meme titre qu'un exercice retire a la main : les perdre au
     // rechargement ferait revenir la charge d'avant sans prevenir. Indexes par
@@ -13247,6 +13326,11 @@ body.a-nav .nav { display: flex; }
     // PERSISTEE : c'est ce qu'Olivier a demande, et c'est ce que la phrase de
     // l'ecran Moi promet maintenant.
     photo: null,
+    // LE PLAN REPAS RAPPORTE DE L'ASSISTANT, et le jour ou il l'a ete.
+    // PERSISTES : un plan qu'il faudrait recoller a chaque lancement ne servirait
+    // a rien. Le texte est garde TEL QUEL, l'appli ne le decoupe pas : elle n'a
+    // pas de base d'aliments pour le compter, et l'ecran Nutrition le dit.
+    iaRepas: "", iaRepasDate: "",
     runKm: "", runMin: "", runLieu: 0,
     faits: null, tIdx: 0, kg: 45, reps: 9, phase: "set", demarre: false, finiIdx: 0
   };
@@ -13264,7 +13348,7 @@ body.a-nav .nav { display: flex; }
     "obRetires", "obAjouts", "iaPlan",
     // La photo de profil, reduite a 320 px de cote et ecrite en data:.
     // Elle part aussi dans l'export du journal, donc une sauvegarde la ramene.
-    "photo",
+    "photo", "iaRepas", "iaRepasDate",
     "runKm", "runMin", "runLieu",
     "faits", "tIdx", "kg", "reps", "phase", "demarre", "finiIdx"];
 
@@ -13858,10 +13942,17 @@ body.a-nav .nav { display: flex; }
       h += '<button type="button" class="nav-btn' + (on ? " nav-btn-on" : "") + '"' +
            ' data-action="onglet" data-ecran="' + d.k + '"' +
            ' aria-current="' + (on ? "page" : "false") + '">' +
-             '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"' +
-             ' stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
-               '<path d="' + d.d1 + '"></path><path d="' + d.d2 + '"></path>' +
-             '</svg>' +
+             // L'ICONE EST DANS UNE PASTILLE, qui se remplit de citron sur
+             // l'onglet courant. La seule teinte du trait ne suffisait pas :
+             // en theme clair, `--citron-encre` vaut un olive sombre qui se
+             // distingue mal du gris des autres onglets. Signale par Olivier,
+             // qui ne savait pas toujours dire ou il se trouvait.
+             '<span class="nav-p">' +
+               '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"' +
+               ' stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+                 '<path d="' + d.d1 + '"></path><path d="' + d.d2 + '"></path>' +
+               '</svg>' +
+             '</span>' +
              '<span>' + esc(d.t) + '</span>' +
            '</button>';
     }
@@ -14281,6 +14372,18 @@ body.a-nav .nav { display: flex; }
     if (action === "ia-onglet") { poser({ iaOnglet: parseInt(n.getAttribute("data-v"), 10), iaCopie: false }); return; }
     if (action === "ia-copier") { iaCopier(); return; }
     if (action === "ia-lire") { iaLireReponse(); return; }
+    // GARDER UN PLAN REPAS. On refuse un collage vide plutot que d'enregistrer
+    // une carte blanche dans l'ecran Nutrition.
+    if (action === "ia-repas-garder") {
+      var plan = String(state.iaTexte || "").trim();
+      // Le message a son PROPRE champ. `importMsg` ne s'affiche que dans le
+      // groupe Donnees de l'ecran Moi : le refus serait parti nulle part, et
+      // le bouton aurait rendu la main sans un mot.
+      if (!plan) { poser({ iaRepasMsg: "Colle d'abord la réponse de ton assistant." }); return; }
+      poser({ iaRepas: plan, iaRepasDate: cleDate(new Date()), iaTexte: "", iaRepasMsg: "" });
+      return;
+    }
+    if (action === "ia-repas-retirer") { poser({ iaRepas: "", iaRepasDate: "" }); return; }
     if (action === "ob-etape") {
       // Chaque ligne du Profil porte SON etape : on y retourne directement au
       // lieu de rouvrir le diagnostic au debut. Et on RETIENT d'ou l'on vient,
