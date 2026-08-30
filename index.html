@@ -921,6 +921,10 @@ body.a-nav .nav { display: flex; }
   display: flex; align-items: center; justify-content: space-between; gap: 10px;
   text-align: left; font-size: 13.5px;
 }
+/* Une ligne d'exercice qui ne se clique PAS : l'apercu montre le contenu, il
+   ne lance rien. Meme dessin que la ligne cliquable, sans son affordance. */
+.cs-exo-fige { cursor: default; }
+
 .cs-exo-n { flex: 1; }
 .cs-exo-d { font-size: 12px; color: var(--sombre-texte-3); }
 
@@ -13496,12 +13500,31 @@ body.a-nav .nav { display: flex; }
     else if (ob.type === "nutri") h += etapeNutriHtml();
     else if (ob.type === "recap") h += etapeRecapHtml(step, ob);
 
+    // 🔴 DEUX SORTIES POUR UN SEUL GESTE, ET LA PLUS VISIBLE SE TROMPAIT.
+    //
+    // Signale par Olivier. Quand on arrive de Moi pour corriger UNE reponse,
+    // « Retour » ramenait a la question PRECEDENTE du questionnaire, celle
+    // qu'on n'etait pas venu voir, et il fallait descendre chercher un lien
+    // « Annuler et revenir » pour ressortir. Deux boutons, deux comportements,
+    // et celui qu'on touche d'instinct etait le mauvais.
+    //
+    // LA REGLE : ce qu'on fait ici depend d'ou l'on vient.
+    //   - Premier diagnostic : on deroule. « Retour » remonte d'une question,
+    //     « Continuer » descend d'une question. C'est un questionnaire.
+    //   - Correction depuis Moi : on est venu changer UNE chose. Les deux
+    //     boutons sortent, l'un en gardant, l'autre en jetant. C'est une fiche.
+    //
+    // Le lien « Annuler et revenir » disparait du meme coup : il n'a plus de
+    // role distinct, et Olivier demandait justement a quoi il servait.
+    var _corrige = !!state.vu;
     h += '<div class="ob-nav">';
-    if (step > 0) {
+    if (_corrige) {
+      h += '<button type="button" class="ob-prev" data-action="ob-quitter">Annuler</button>';
+    } else if (step > 0) {
       h += '<button type="button" class="ob-prev" data-action="ob-prev">Retour</button>';
     }
     h += '<button type="button" class="ob-next" data-action="ob-next">' +
-         (state.vu ? "Enregistrer" : (rang >= vis.length - 1 ? "Ouvrir l'appli" : "Continuer")) +
+         (_corrige ? "Enregistrer" : (rang >= vis.length - 1 ? "Ouvrir l'appli" : "Continuer")) +
          "</button>";
     h += "</div>";
 
@@ -13513,12 +13536,9 @@ body.a-nav .nav { display: flex; }
     // questionnaire par erreur — mais rien ne remplacait cette issue.
     //
     // La regle : un diagnostic DEJA FAIT (`vu`) se corrige, il ne se refait pas.
-    // Le bouton principal enregistre et rend la main ; le lien du dessous
-    // permet de repartir sans rien changer.
-    if (state.vu) {
-      h += '<button type="button" class="ob-quitter" data-action="ob-quitter">' +
-           "Annuler et revenir</button>";
-    }
+    // ⚠️ LE LIEN DU BAS A DISPARU. Il faisait exactement ce que fait maintenant
+    // le bouton « Annuler » de la barre, et deux chemins pour un meme geste
+    // obligent a choisir entre eux avant de comprendre qu'ils sont identiques.
     h += "</div>";
     return h;
   }
@@ -13887,8 +13907,11 @@ body.a-nav .nav { display: flex; }
     // « Fermer la liste » replie l'encart des cinq seances ; « Revenir au cours
     // du jour » n'existe QUE si l'on a effectivement remplace l'activite prevue,
     // sinon il proposerait de revenir a l'endroit ou l'on se trouve deja.
+    // Le bouton dit ce qu'il FAIT, pas ce qu'il montre. « Voir toutes les
+    // seances » decrivait un affichage ; ce qu'on vient chercher ici, c'est
+    // changer la seance du jour.
     h += '<button type="button" class="cs-btn" data-action="basculer-liste">' +
-         (state.listeFermee ? "Voir toutes les séances" : "Fermer la liste") + "</button>";
+         (state.listeFermee ? "Changer de séance" : "Garder cette séance") + "</button>";
     // « Revenir au ... du jour » n'est PAS ici : il vit avec le bloc de
     // remplacement, sous toutes les cartes. Pose ici, il disparaissait des
     // qu'on remplacait par un running ou un cours, et il n'y avait plus aucune
@@ -13947,6 +13970,12 @@ body.a-nav .nav { display: flex; }
       h += "</ul></section>";
     }
 
+    // ⚠️ PENDANT QU'ON CHOISIT, ON NE MONTRE PAS LE CONTENU DE CELLE
+    // QU'ON QUITTE. Les deux ensemble faisaient trois blocs empiles dont deux
+    // parlent d'exercices : on ne savait plus lesquels appartenaient a quoi.
+    // Demande d'Olivier : « on epure le contenu ».
+    if (!state.listeFermee) return h;
+
     // La liste des exercices garde sa carte sombre a elle : c'est le contenu de
     // la seance du jour, pas un choix de seance.
     h += '<section class="carte-sombre">';
@@ -13964,6 +13993,64 @@ body.a-nav .nav { display: flex; }
     }
     h += "</ul></section>";
     return h;
+  }
+
+  // -------------------------------------------------------------------------
+  // L'APERCU D'UNE SEANCE, AVANT DE LA PRENDRE
+  // -------------------------------------------------------------------------
+  // \U0001F534 ON CHOISISSAIT UNE SEANCE SANS VOIR CE QU'ELLE CONTIENT. Toucher
+  // une ligne de la liste la prenait immediatement : on validait « PUSH » ou
+  // « LEGS » sur un code de trois lettres, sans savoir quels exercices
+  // tombaient ni combien de temps ca durait. Demande d'Olivier.
+  //
+  // \u26a0\ufe0f RIEN N'EST APPLIQUE TANT QU'ON N'A PAS DIT OUI. `apercuSi` est une
+  // cle a part : regarder n'engage pas, et le bouton Retour ramene a la liste
+  // avec la seance du jour intacte.
+  function apercuSeanceHtml() {
+    var si = state.apercuSi, S, ex, i, series = 0, d, jourPrevu;
+    if (typeof si !== "number" || si < 0 || si >= nbSeancesProgramme()) {
+      return '<p class="cb-vide">Cette séance n\'existe plus dans ton programme.</p>';
+    }
+    S = seanceProgramme(si);
+    ex = exosDe(si);
+    for (i = 0; i < ex.length; i++) series += ex[i].n;
+    d = deriver();
+    jourPrevu = d.jourDe(si);
+
+    var h = '<section class="carte-sombre">';
+    h += '<div class="cs-haut"><span class="cs-code">Séance ' + esc(S.code) + "</span>" +
+         '<span class="cs-quand"> · ' +
+         esc(jourPrevu ? "prévue " + jourPrevu : "hors rotation") + "</span></div>";
+    h += '<div class="cs-sub">' + esc(S.sub) + "</div>";
+    h += '<div class="cs-det"><span class="num">' + ex.length + "</span> exercices · " +
+         '<span class="num">' + series + '</span> séries · <span class="num">' +
+         esc(S.duree) + "</span></div>";
+
+    // Le contenu, c'est la raison d'etre de cet ecran. Meme forme que la liste
+    // de la seance du jour, pour qu'on compare sans avoir a s'adapter.
+    h += '<ul class="cs-exos">';
+    for (i = 0; i < ex.length; i++) {
+      h += '<li><div class="cs-exo cs-exo-fige">' +
+           '<span class="cs-exo-n">' + esc(ex[i].nom) + "</span>" +
+           '<span class="cs-exo-d num">' + esc(ex[i].n + " × " + ex[i].reps +
+           (ex[i].unite ? " " + ex[i].unite : "")) + "</span></div></li>";
+    }
+    h += "</ul>";
+
+    // \u26a0\ufe0f LE JOUR PREVU EST RAPPELE ICI, pas seulement en en-tete. Prendre
+    // la seance de vendredi aujourd'hui, c'est devoir faire autre chose
+    // vendredi, et c'est le moment ou la question se pose.
+    if (jourPrevu) {
+      h += '<p class="cs-txt">Elle est prévue ' + esc(jourPrevu) +
+           ". Si tu la prends aujourd\u2019hui, il faudra choisir autre chose " +
+           "ce jour-là.</p>";
+    }
+
+    h += '<button type="button" class="cs-cta" data-action="apercu-oui">' +
+         "OK, go pour cette séance</button>";
+    h += '<button type="button" class="cs-btn" data-action="apercu-retour">' +
+         "Retour, en choisir une autre</button>";
+    return h + "</section>";
   }
 
   function carteCoursHtml(a) {
@@ -14385,9 +14472,17 @@ body.a-nav .nav { display: flex; }
     // prendre une seance d'avance, ce qui n'est pas un remplacement.
     if (du.act) h += remplacerHtml(du.act.t);
 
-    h += resumeNutritionHtml();
-    h += cartePoidsHtml();
-    h += cartePeseeHtml();
+    // \u26a0\ufe0f NI NUTRITION NI POIDS SUR CET ECRAN. Demande d'Olivier.
+    //
+    // Le resume nutrition a son onglet, qui dit la meme chose en plus complet :
+    // le repeter ici rallongeait l'ecran d'entrainement sans rien apprendre.
+    // La carte de poids part dans l'onglet Historique, a cote de la courbe et
+    // du calendrier : c'est la qu'on vient regarder ou l'on en est.
+    //
+    // \u26a0\ufe0f ET LA PESEE NE S'AFFICHE QUE LE JOUR DE LA PESEE. Le rappel
+    // « prochaine pesee jeudi, dans 4 jours » occupait le bas de l'ecran les six
+    // autres jours de la semaine pour ne rien demander.
+    if (jourIndexAujourdhui() === state.obPeseeJour) h += cartePeseeHtml();
     return h;
   }
 
@@ -15366,6 +15461,12 @@ body.a-nav .nav { display: flex; }
       if (rech) { h += resultatsRechercheHtml(rech); }
     }
 
+    // LE POIDS VIT ICI DESORMAIS, plus sur l'ecran du jour. Demande d'Olivier :
+    // l'ecran d'entrainement porte l'entrainement, et l'Historique porte ce
+    // qu'on vient regarder. La carte se place AVANT le calendrier : c'est le
+    // chiffre qu'on cherche en premier en ouvrant cet onglet.
+    h += cartePoidsHtml();
+
     h += calendrierHtml();
     h += seancesRecentesHtml();
     return h;
@@ -16069,9 +16170,15 @@ body.a-nav .nav { display: flex; }
     // LA SALLE. Le diagnostic saute ces deux etapes pour un programme fait de
     // cours ou de running seulement ; y mener depuis ici ouvrirait une question
     // sans objet, et le compteur d'etapes ne saurait plus quoi annoncer.
+    // \u26a0\ufe0f « MES EXERCICES » N'EST PLUS ICI. Il etait la ligne voisine de
+    // « Mon programme », et rien ne disait laquelle sert a quoi : on ouvrait la
+    // seconde en croyant y trouver la premiere. Il vit maintenant au bas de
+    // « Mon programme », la ou l'on est deja en train de composer sa semaine.
+    // Signale par Olivier.
     var lignesProg = [
-      { t: "Mon programme", s: d.slots.length + " activités déclarées", a: "aller-monprog" },
-      { t: "Mes exercices", s: nbExercicesActifs() + " retenus", a: "aller-exos" }
+      { t: "Mon programme",
+        s: d.slots.length + " activités · " + nbExercicesActifs() + " exercices",
+        a: "aller-monprog" }
     ];
     if (d.slotsSalle.length) {
       lignesProg.push({ t: "Durée par séance", s: dureeLibelle(), a: "ob-etape", v: String(rangEtape("Durée")) });
@@ -16079,8 +16186,10 @@ body.a-nav .nav { display: flex; }
     // ACTION DISTINCTE de « ob-etape ». Corriger une reponse et reprendre les
     // onze etapes ne sont pas le meme geste : le premier rend la main tout de
     // suite, le second redemande tout.
-    lignesProg.push({ t: "Refaire le diagnostic", s: "Reprend tout depuis le début", a: "ob-refaire" });
+    lignesProg.push({ t: "Reprendre le diagnostic",
+                      s: "Une étape, ou tout", a: "refaire-ouvrir" });
     h += groupeHtml("Programme", lignesProg);
+    h += refaireHtml();
 
     // LE MATERIEL A SON PROPRE GROUPE.
     //
@@ -16156,6 +16265,53 @@ body.a-nav .nav { display: flex; }
     // donnees, a l'endroit ou l'on vient justement les gerer.
     h += '<div class="mo-pied num">Lemmon Fit · hors-ligne · aucune donnée envoyée</div>';
     return h;
+  }
+
+  // -------------------------------------------------------------------------
+  // REPRENDRE LE DIAGNOSTIC : UNE ETAPE, OU TOUT
+  // -------------------------------------------------------------------------
+  // 🔴 UN SEUL APPUI RELANCAIT LES ONZE ETAPES, SANS CONFIRMATION. Il remettait
+  // `vu` a faux, donc l'application repassait en mode « premier diagnostic » :
+  // plus de bouton Annuler, plus de sortie, il fallait tout rederouler.
+  // C'etait le geste le plus lourd de cet ecran apres l'effacement des
+  // donnees, et le seul des deux sans garde-fou. Signale par Olivier.
+  //
+  // ⚠️ ET LE PLUS SOUVENT, ON NE VEUT PAS TOUT REFAIRE. On vient changer une
+  // reponse. Le panneau liste donc les etapes, chacune ouvrant la sienne, et
+  // relegue « tout reprendre » en bas, la ou l'on ne clique pas par curiosite.
+  //
+  // ⚠️ IL LISTE LES ETAPES VISIBLES, PAS LES DOUZE. Un coureur pur n'a ni
+  // Duree ni Materiel ni Pratique : les lui proposer ouvrirait des questions
+  // que `etapePertinente` refuse d'afficher, donc des ecrans vides.
+  function refaireHtml() {
+    if (!state.refaireOuvert) return "";
+    var vis = etapesVisibles(), i, h = "";
+    h += '<section class="carte mo-refaire"><div class="carte-t">Reprendre le diagnostic</div>';
+    h += '<p class="cr-p">Touche l\'étape que tu veux changer. Tu reviens ici ' +
+         "juste après, et rien d\u2019autre ne bouge.</p>";
+    h += '<div class="mo-g-c">';
+    for (i = 0; i < vis.length; i++) {
+      // ⚠️ ON SAUTE « C'est parti » PAR SON NOM, et pas par son type : il
+      // partage `type: "recap"` avec « Repères », qui lui porte de vrais
+      // chiffres et merite sa ligne. C'est un ecran de fin, il ne contient
+      // aucune reponse a corriger.
+      if (OB[vis[i]].nom === "C'est parti") continue;
+      h += '<button type="button" class="mo-l" data-action="ob-etape" data-v="' +
+           vis[i] + '">' +
+           '<span class="mo-n">' + esc(OB[vis[i]].nom) + "</span>" +
+           '<span class="mo-c" aria-hidden="true">›</span></button>';
+    }
+    h += "</div>";
+    // ⚠️ LE BOUTON ANNULER MANQUAIT, ET C'EST TOUT CE QU'IL MANQUAIT.
+    // Demande d'Olivier : « il manque le bouton annuler si on clic par erreur
+    // ou curiosite ». Meme arrangement que la carte de reinitialisation juste
+    // en dessous, qui pose le meme genre de question : l'action en premier,
+    // la sortie discrete en second.
+    h += '<button type="button" class="cr-btn" data-action="ob-refaire">' +
+         "Tout reprendre depuis le début</button>";
+    h += '<button type="button" class="dg-annuler" data-action="refaire-fermer">' +
+         "Annuler</button>";
+    return h + "</section>";
   }
 
   // EN DEUX TEMPS, ET LE SECOND ENUMERE CE QUI DISPARAIT. Un effacement
@@ -16400,6 +16556,24 @@ body.a-nav .nav { display: flex; }
          "question à partir de tes charges et de tes quatre dernières semaines.</div>" +
          '<button type="button" class="cs-cta" data-action="aller-ia">' +
          "Demander une amélioration de mon programme à mon IA</button></section>";
+
+    // LE CATALOGUE, AU BAS DE LA PAGE OU L'ON COMPOSE.
+    //
+    // \u26a0\ufe0f IL NE FAIT PAS LA MEME CHOSE QUE « Retirer », ET LE SOUS-TITRE LE
+    // DIT. « Retirer » ecarte un exercice de CETTE seance ; decocher ici
+    // l'ecarte de TOUTES, definitivement, jusqu'a ce qu'on le recoche. Deux
+    // portees differentes, deux endroits differents, et la phrase qui fait la
+    // difference.
+    h += '<div class="mo-g"><div class="mo-g-t">Le catalogue</div><div class="mo-g-c">';
+    h += '<button type="button" class="mo-l" data-action="aller-exos">' +
+         '<span class="mo-n">Mes exercices</span>' +
+         '<span class="mo-s num">' + nbExercicesActifs() + " retenus</span>" +
+         '<span class="mo-c" aria-hidden="true">›</span></button>';
+    h += "</div>";
+    h += '<p class="cr-p">Décocher un exercice ici l\'écarte de <b>toutes</b> tes ' +
+         "séances. Le bouton « Retirer » ci-dessus ne vaut que pour la séance " +
+         "où tu l\u2019emploies.</p>";
+    h += "</div>";
     return h;
   }
 
@@ -16437,11 +16611,20 @@ body.a-nav .nav { display: flex; }
     // retire a la main. Ces decisions survivent a un changement de duree :
     // le generateur propose, l'utilisateur tranche, et le generateur ne
     // reecrit pas la decision.
+    // Le compte dit ce que le vivier CONTIENT, et le panneau dit d'ou il vient.
+    // Mesure : 60 a 68 exercices par seance sur un profil bien equipe. Ce n'est
+    // pas un reste, c'est tout ce que le materiel permet sur les mouvements de
+    // cette seance-la.
     h += '<button type="button" class="mp-plus" data-action="ajout-ouvrir" data-si="' + a.si + '">' +
-         "＋ Ajouter un exercice (" + dispo.length + " disponible" + (dispo.length > 1 ? "s" : "") + ")</button>";
+         "＋ Ajouter un exercice (" + dispo.length + " au choix)</button>";
 
     if (state.ajoutOuvert === String(a.si)) {
       h += '<div class="mp-panneau">';
+      // D'ou vient cette liste. Sans cette phrase, on la prend pour un reste,
+      // alors qu'elle porte tout ce que le materiel declare permet sur les
+      // mouvements de cette seance.
+      h += '<p class="cb-vide">Tout ce que ton matériel permet sur les ' +
+           "mouvements de cette séance.</p>";
       if (!dispo.length) {
         h += '<p class="cb-vide">Rien à réintégrer : tous les exercices de cette séance sont déjà là.</p>';
       } else {
@@ -17686,7 +17869,7 @@ body.a-nav .nav { display: flex; }
    module a l'autre.
    =========================================================================== */
 
-  var APP_VERSION = "1.25.1";
+  var APP_VERSION = "1.25.2";
 
   function has(o, k) { return Object.prototype.hasOwnProperty.call(o, k); }
 
@@ -17739,7 +17922,19 @@ body.a-nav .nav { display: flex; }
     remplaceJour: "",
     // L'encart des cinq seances, sur l'accueil. Ouvert par defaut, comme la
     // maquette ; le bouton « Fermer la liste » le replie.
-    listeFermee: false,
+    // \u26a0\ufe0f REPLIEE PAR DEFAUT. Demande d'Olivier : sous la carte du jour on
+    // veut le PROGRAMME DU JOUR, pas le choix des autres seances. La liste
+    // s'ouvre a la demande, par le bouton « Changer de seance ».
+    listeFermee: true,
+    // La seance qu'on est en train de REGARDER avant de la prendre, ou -1.
+    // \u26a0\ufe0f DISTINCTE DE `seance`, qui est celle qu'on FAIT. Les confondre
+    // reviendrait a changer de seance des le premier coup d'oeil, ce qui est
+    // exactement ce que cet ecran existe pour eviter.
+    apercuSi: -1,
+    // Le panneau « Refaire le diagnostic » est-il deplie ? Meme motif en deux
+    // temps que l'effacement des donnees, pour la meme raison : un appui de
+    // curiosite ne doit pas relancer onze etapes.
+    refaireOuvert: false,
     // Ephemeres : la recherche et la fiche ouverte ne survivent pas a un
     // rechargement. Rouvrir l'appli sur une fiche qu'on consultait la veille
     // serait desorientant.
@@ -18190,7 +18385,11 @@ body.a-nav .nav { display: flex; }
   // =========================================================================
   var ONGLETS = ["jour", "nutri", "histo", "prog", "moi"];
 
-  var PARENT = { fiche: "histo", profil: "moi", monprog: "moi", exos: "moi", theme: "moi", ia: "moi" };
+  // \u26a0\ufe0f « Mes exercices » A POUR PARENT « Mon programme », et plus « Moi ».
+  // On y entre depuis la page ou l'on compose sa semaine ; en ressortir doit y
+  // ramener, pas remonter d'un cran de plus.
+  var PARENT = { fiche: "histo", profil: "moi", monprog: "moi", exos: "monprog", theme: "moi", ia: "moi",
+                 apercu: "jour" };
 
   var FIGES = { onb: 1, salle: 1, splash: 1, trans: 1 };
 
@@ -18210,6 +18409,7 @@ body.a-nav .nav { display: flex; }
     nutri:   "Nutrition",
     histo:   "Historique",
     fiche:   "Fiche exercice",
+    apercu:  "Aperçu de la séance",
     prog:    "Progrès",
     moi:     "Moi",
     profil:  "Profil",
@@ -18610,7 +18810,7 @@ body.a-nav .nav { display: flex; }
   // Un onglet reste allume quand on est sur l'un de ses ecrans de detail :
   // consulter une fiche, c'est encore etre dans l'Historique.
   var NAV_GROUPE = {
-    jour:  ["jour"],
+    jour:  ["jour", "apercu"],
     nutri: ["nutri"],
     histo: ["histo", "fiche"],
     prog:  ["prog"],
@@ -18791,6 +18991,12 @@ body.a-nav .nav { display: flex; }
     if (e === "theme") {
       return { plein: null, nav: nav,
                interieur: retourHtml(e) + '<h1 class="ecran-titre-2">Apparence</h1>' + themeHtml() };
+    }
+    if (e === "apercu") {
+      return { plein: null, nav: nav,
+               interieur: retourHtml(e) +
+                          '<h1 class="ecran-titre-2">Aperçu de la séance</h1>' +
+                          apercuSeanceHtml() };
     }
     if (e === "jour") {
       return { plein: null, interieur: jourHtml(), nav: nav };
@@ -19022,8 +19228,29 @@ body.a-nav .nav { display: flex; }
     }
     // Choisir NOMMEMENT une seance dans la liste des cinq, au lieu de faire
     // defiler a l'aveugle.
+    // \U0001F534 TOUCHER UNE SEANCE NE LA PREND PLUS : ELLE S'OUVRE. On validait
+    // « PUSH » sur un code de trois lettres, sans avoir vu un seul exercice.
+    // Demande d'Olivier. La prise se fait depuis l'apercu, et seulement la.
     if (action === "choisir-seance") {
-      poser({ remplaceJour: "salle", seance: parseInt(n.getAttribute("data-i"), 10) || 0 });
+      poser({ apercuSi: parseInt(n.getAttribute("data-i"), 10) || 0,
+              ecran: "apercu" });
+      window.scrollTo(0, 0);
+      return;
+    }
+    // « OK, go pour cette seance. » C'est ICI que le remplacement s'applique,
+    // et nulle part ailleurs.
+    if (action === "apercu-oui") {
+      poser({ remplaceJour: "salle", seance: state.apercuSi >= 0 ? state.apercuSi : 0,
+              apercuSi: -1, ecran: "jour", listeFermee: true });
+      window.scrollTo(0, 0);
+      return;
+    }
+    // « Retour, en choisir une autre. » On revient a la liste OUVERTE : revenir
+    // sur une liste repliee obligerait a la rouvrir pour reprendre le choix
+    // qu'on etait en train de faire.
+    if (action === "apercu-retour") {
+      poser({ apercuSi: -1, ecran: "jour", listeFermee: false });
+      window.scrollTo(0, 0);
       return;
     }
     // REMPLACER L'ACTIVITE DU JOUR par une autre discipline, pour aujourd'hui
@@ -19143,8 +19370,13 @@ body.a-nav .nav { display: flex; }
       return;
     }
     if (action === "ob-quitter") { obQuitter(false); return; }
+    if (action === "refaire-ouvrir") { poser({ refaireOuvert: true }); return; }
+    if (action === "refaire-fermer") { poser({ refaireOuvert: false }); return; }
     if (action === "ob-refaire") {
-      poser({ ecran: "onb", obStep: 0, vu: false, retourDe: "" });
+      // Le panneau se referme : au retour, on ne veut pas retrouver ouvert
+      // l'ecran par lequel on vient de tout relancer.
+      poser({ ecran: "onb", obStep: 0, vu: false, retourDe: "",
+              refaireOuvert: false });
       window.scrollTo(0, 0);
       return;
     }
@@ -19432,6 +19664,7 @@ body.a-nav .nav { display: flex; }
     fatigueDeclaree: fatigueDeclaree,
     runVerdict: runVerdict,
     etapePertinente: etapePertinente,
+    etapesVisibles: etapesVisibles,
     rangEtape: rangEtape,
     completerParDefaut: completerParDefaut,
     formeValide: formeValide,
