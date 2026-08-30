@@ -809,6 +809,15 @@ body.a-nav .nav { display: flex; }
   background: var(--sombre-carte); color: var(--sombre-texte);
   border-radius: 20px; padding: 18px 16px; margin-bottom: 12px;
 }
+/* « Changer de seance » vit HORS de la carte de la seance : il n'est pas une
+   variante de « Demarrer », il change ce qu'on va faire. Meme geometrie que les
+   remplacants de discipline plus bas, pour qu'on les lise comme une famille. */
+.jour-changer {
+  width: 100%; min-height: 52px; border-radius: 14px; margin-bottom: 12px;
+  border: 1.5px solid var(--bord); background: transparent;
+  color: var(--texte); font-size: 15px; font-weight: 700;
+}
+
 .cs-code { font-size: 26px; font-weight: 800; letter-spacing: -.4px; color: var(--salle-sur-sombre); }
 .carte-cours .cs-code { color: var(--cours-sur-sombre); }
 .carte-run .cs-code { color: var(--run-sur-sombre); }
@@ -899,8 +908,26 @@ body.a-nav .nav { display: flex; }
 
 .cs-sur { font-size: 12.5px; color: var(--sombre-texte-3); margin-top: 2px; display: flex; align-items: center; gap: 8px; }
 .cs-pill { background: var(--sombre-pastille); border-radius: 20px; padding: 2px 9px; font-size: 11px; font-weight: 800; }
-.cs-sub { font-size: 14px; color: var(--sombre-texte-2); margin-top: 6px; }
-.cs-det { font-size: 13px; color: var(--sombre-texte-3); margin-top: 8px; }
+/* LE NOM DE LA SEANCE DOMINE LA CARTE. Il etait rendu par `cs-haut .cs-code`,
+   c'est-a-dire a 11,5 px en petites capitales, sous une regle qui ecrase le
+   26 px de `cs-code`. Le plus gros texte de la carte etait alors le
+   sous-titre. */
+/* L'EN-TETE DE LA SEANCE EST CENTRE. Demande d'Olivier. Le titre seul centre
+   au-dessus de deux lignes calees a gauche se lit comme un decalage ; les trois
+   lignes forment un bloc. La liste des exercices, elle, reste a gauche : on la
+   parcourt, on ne la contemple pas. */
+.cs-nom {
+  font-size: 32px; font-weight: 800; letter-spacing: -.8px; line-height: 1.05;
+  color: var(--salle-sur-sombre); text-align: center;
+}
+.cs-sub {
+  font-size: 15.5px; color: var(--sombre-texte-2); margin-top: 4px;
+  text-align: center;
+}
+.cs-det {
+  font-size: 12.5px; color: var(--sombre-texte-3); margin-top: 10px;
+  text-align: center;
+}
 .cs-txt { font-size: 14px; line-height: 1.55; color: var(--sombre-texte-2); margin: 10px 0 0; }
 .cs-cta {
   width: 100%; min-height: 60px; border-radius: 14px; border: 0; margin-top: 14px;
@@ -8356,6 +8383,10 @@ body.a-nav .nav { display: flex; }
     { nom: "Course", titre: "Tu en es où avec la course ?", sous: "Le niveau fixe ton allure et la longueur ordinaire d'une sortie. La sortie longue de la semaine va plus loin, c'est son rôle. La durée demandée est celle d'une sortie, pas d'une séance en salle.", type: "course" },
     { nom: "Durée", titre: "Combien de temps pour une séance en salle ?", sous: "Uniquement pour tes séances de salle : c'est ce qui fixe le nombre d'exercices et la longueur des repos. Un cours collectif ou une sortie running gardent leur propre durée. Réponds avec le temps que tu as vraiment, pas celui que tu voudrais avoir.", type: "duree" },
     { nom: "Matériel", titre: "Tu t'entraînes où, avec quoi ?", sous: "Ce que tu coches ici détermine les exercices que je te propose : c'est la réponse qui évite le plus d'erreurs. Le poids du plus lourd haltère, lui, ne sert qu'à ton assistant.", type: "materiel" },
+    // \u26a0\ufe0f APRES MATERIEL, AVANT PROGRAMME. Elle doit etre posee avant que
+    // le programme s'affiche, sinon on montre des exercices qu'on va retirer
+    // dans la foulee.
+    { nom: "Zones", titre: "Une zone à ménager ?", sous: "Coche ce que tu préfères ne pas travailler : une douleur, une blessure, une zone que tu ne veux pas solliciter. Je ne te proposerai plus aucun exercice qui la vise. Tu peux ne rien cocher.", type: "zones" },
     { nom: "Programme", titre: "Voilà ton programme", sous: "Une carte par activité déclarée. Déplie-les, et refuse ce qui ne te convient pas : je remplace par un mouvement équivalent, quand ton matériel en permet un.", type: "programme" },
     { nom: "Habitudes", titre: "Comment tu manges, et ce que tu prends", sous: "Elles servent à décrire tes habitudes dans la demande que tu enverras à ton assistant. L'appli, elle, ne compte rien de ce que tu manges.", type: "nutri" },
     { nom: "Repères", titre: "Tes repères alimentaires", sous: "Estimés depuis ton poids, ta taille, ton âge et tes activités déclarées. Sans poids, il n'y a rien à estimer.", type: "recap",
@@ -8592,7 +8623,7 @@ body.a-nav .nav { display: flex; }
       // exercice ne changeait rien. Le moteur, lui, porte `excluded` depuis
       // toujours et le verse dans ses exclusions de creneau
       // (block_moteur.js:1589).
-      excluded: exclusIds().concat(exclusDuMateriel(equip)),
+      excluded: exclusIds().concat(exclusDuMateriel(equip), exclusDesZones()),
       // ⚠️ « MAINTIEN » N'EXISTE PAS POUR LE MOTEUR.
       // Il ne connait que perte, prise et tonifier (block_moteur.js:1303) ;
       // `cleanProfile` ramene tout le reste a null (2423), et un objectif null
@@ -8628,6 +8659,55 @@ body.a-nav .nav { display: flex; }
   // 3. TOUT CE QUI DEMANDE UNE CATEGORIE NON DECLAREE. Voir `horsDuDeclare` :
   //    c'est la reponse au fait que cocher « Machines de salle » donnait
   //    d'office barre, halteres et traction.
+  // -------------------------------------------------------------------------
+  // LES ZONES QU'ON PREFERE NE PAS TRAVAILLER
+  // -------------------------------------------------------------------------
+  // Demande d'Olivier : « on a tous des zones qu'on n'aime pas travailler ou
+  // des zones douloureuses a ne pas solliciter ».
+  //
+  // ⚠️ ON PASSE PAR `excluded`, PAS PAR LE CHAMP `zones` DU MOTEUR.
+  // Le champ `zones` existe et sert a RENFORCER : le creneau gagne une serie et
+  // survit a la taille. Il n'agit qu'en prise de masse, `zonesDe` refuse tout
+  // autre objectif. Ce qu'Olivier demande est l'inverse, et pour les TROIS
+  // objectifs. `excluded`, lui, vaut partout, et le moteur l'applique par-dessus
+  // la disponibilite : un exercice ecarte ne peut plus etre repeche par aucune
+  // de ses regles.
+  //
+  // ⚠️ LA ZONE SE LIT DANS `MOTEUR.ZONES`, PAS DANS UNE TABLE RECOPIEE.
+  // Le moteur definit chaque zone par les PATRONS de mouvement qu'elle sert :
+  // c'est ce qui rend la reponse capable d'agir. Une table locale derivrait, et
+  // ce projet en paie deja une.
+  //
+  // Mesure : les sept zones couvrent 95 des 120 exercices. Les 25 autres sont
+  // les echauffements, le cardio, le HIIT et la course, qui ne visent aucun
+  // muscle : ecarter une zone ne les touche jamais.
+  function exclusDesZones() {
+    var Z = (MOTEUR && MOTEUR.ZONES) || [], c = MOTEUR.CATALOG;
+    var pats = {}, out = [], i, j;
+    for (i = 0; i < Z.length; i++) {
+      if (!state.obEviter[Z[i].v]) continue;
+      for (j = 0; j < Z[i].pats.length; j++) pats[Z[i].pats[j]] = 1;
+    }
+    for (i = 0; i < c.length; i++) {
+      if (has(pats, c[i].pat)) out.push(c[i].id);
+    }
+    return out;
+  }
+
+  // Vrai quand cet exercice appartient a une zone mise de cote. Les ecrans s'en
+  // servent pour le DIRE plutot que de le faire disparaitre en silence : une
+  // case qui reste cochee dans « Mes exercices » sur un exercice qu'on ne verra
+  // jamais est exactement le genre de desaccord entre deux portes que ce projet
+  // passe son temps a debusquer.
+  function zoneEvitee(id) {
+    var Z = (MOTEUR && MOTEUR.ZONES) || [], e = MOTEUR.CAT_BY_ID[id], i;
+    if (!e) return null;
+    for (i = 0; i < Z.length; i++) {
+      if (state.obEviter[Z[i].v] && Z[i].pats.indexOf(e.pat) >= 0) return Z[i].label;
+    }
+    return null;
+  }
+
   function exclusDuMateriel(equip) {
     var out = [], k, i, ids;
 
@@ -8828,31 +8908,61 @@ body.a-nav .nav { display: flex; }
     return has(PROG_HORS_ZONE, pat) ? PROG_HORS_ZONE[pat] : "";
   }
 
-  // -------------------------------------------------------------------------
-  // LE CODE COURT DE LA SEANCE
-  // -------------------------------------------------------------------------
-  // Le moteur porte treize gabarits et leurs libelles. Trois sont trop longs
-  // pour la pastille de la bande de semaine, qui affichait jusqu'ici « FULL
-  // BODY » au maximum : « HAUT DU CORPS B » y ferait le double.
+  // La forme est celle qu'Olivier a ecrite : la FAMILLE, puis ce qui est mis en
+  // avant, suffixe d'un « + ». « Full Body / Leg+ » dit d'un coup que c'est une
+  // seance de corps entier ET qu'elle insiste sur les jambes.
   //
-  // On raccourcit le LIBELLE, jamais le code minuscule du moteur : le libelle
-  // porte le suffixe A / B / C qui distingue deux seances de la meme famille,
-  // et le code, lui, est partage par « FULL BODY A » et « FULL BODY B ».
-  var PROG_RACCOURCIS = [
-    ["FULL BODY", "FULL"],
-    ["HAUT DU CORPS", "HAUT"],
-    ["BAS DU CORPS", "BAS"]
-  ];
+  // ⚠️ LE NOM DIT D'ABORD L'ETENDUE. C'est la confusion qu'Olivier a
+  // relevee sur capture : « Full Body / Push+ » et « Push » partageaient un mot
+  // et ne travaillaient pas du tout la meme chose, l'une le corps entier,
+  // l'autre trois muscles. La regle :
+  //     « Full Body / ... »      la seance prend tout le corps ;
+  //     « Haut du corps / ... »  une moitie ;
+  //     un nom de muscles        cette zone-la, et rien d'autre.
+  //
+  // ⚠️ PLUS DE A, B NI C. « FULL BODY C » nommait un rang dans une
+  // rotation, pas un contenu. La distinction ne revient que la ou elle serait
+  // autrement perdue, et alors sous la forme du muscle qui change vraiment.
+  //
+  // ⚠️ LE SUFFIXE NOMME UN MUSCLE MESURE, PAS UNE IMPRESSION. Pour les deux
+  // seances de haut du corps, les slots sont identiques sauf le dernier :
+  // isolement d'epaule d'un cote (`delt`), de poitrine de l'autre
+  // (`chest-iso`). Meme methode pour le bas du corps : `quad-iso` contre
+  // `ham-iso`. Deux noms inventes ont ete essayes avant, « Angles+ » et
+  // « Variante » ; ni l'un ni l'autre ne disait ce que la seance fait.
+  //
+  // ⚠️ L'ANGLAIS EST ACCEPTE, MAIS ON NE TRADUIT PAS DANS LES DEUX SENS.
+  // « HAUT DU CORPS » est deja en francais dans le moteur et le reste.
+  //
+  // ⚠️ `court` EST UN MOT COMPLET, JAMAIS UN MOT COUPE. La case de la bande
+  // de la semaine fait un septieme de la largeur de l'ecran. C'est la coupe
+  // qu'Olivier a refusee (« FULL C »), pas la brievete.
+  var NOMS_SEANCE = {
+    "FULL BODY A":     { nom: "Full Body / Push+",           court: "PUSH+" },
+    "FULL BODY B":     { nom: "Full Body / Pull+",           court: "PULL+" },
+    "FULL BODY C":     { nom: "Full Body / Leg+",            court: "LEG+" },
+    "FULL BODY":       { nom: "Full Body / Léger",           court: "LÉGER" },
+    "HAUT DU CORPS":   { nom: "Haut du corps / Épaules+",    court: "ÉPAULES+" },
+    "HAUT DU CORPS B": { nom: "Haut du corps / Poitrine+",   court: "POITRINE+" },
+    "BAS DU CORPS":    { nom: "Bas du corps / Quadriceps+",  court: "QUADRICEPS+" },
+    "BAS DU CORPS B":  { nom: "Bas du corps / Ischios+",     court: "ISCHIOS+" },
+    "PUSH":            { nom: "Poitrine, épaules, triceps",  court: "POITRINE" },
+    "PULL":            { nom: "Dos et biceps",               court: "DOS" },
+    "LEGS":            { nom: "Jambes",                      court: "JAMBES" },
+    "HIIT":            { nom: "HIIT",                        court: "HIIT" },
+    "CARDIO":          { nom: "Cardio",                      court: "CARDIO" }
+  };
 
-  function codeCourtDe(label) {
-    var s = String(label || ""), i;
-    for (i = 0; i < PROG_RACCOURCIS.length; i++) {
-      if (s.indexOf(PROG_RACCOURCIS[i][0]) === 0) {
-        return (PROG_RACCOURCIS[i][1] + s.slice(PROG_RACCOURCIS[i][0].length)).trim();
-      }
-    }
-    return s;
+  // ⚠️ UN GABARIT INCONNU REND SON LIBELLE TEL QUEL. On prefere un nom
+  // interne visible a un nom vide : il se remarque, donc il se corrige. Un
+  // vide passerait inapercu. C'est le cas de « DÉPENSE », deja lisible.
+  function nomsDe(label) {
+    var s = String(label || "");
+    if (has(NOMS_SEANCE, s)) return NOMS_SEANCE[s];
+    return { nom: s, court: s };
   }
+
+  function codeCourtDe(label) { return nomsDe(label).nom; }
 
   // -------------------------------------------------------------------------
   // LA CLE STABLE D'UN GABARIT
@@ -9190,6 +9300,15 @@ body.a-nav .nav { display: flex; }
     return out.join(",");
   }
 
+  // Une cle d'etat en forme d'objet, rendue stable pour l'empreinte. `for-in`
+  // ne garantit pas l'ordre : sans le tri, la meme reponse pourrait produire
+  // deux empreintes et faire reconstruire le programme pour rien.
+  function cleTriee(o) {
+    var out = [], k;
+    for (k in o) { if (has(o, k) && o[k]) out.push(k); }
+    return out.sort().join(",");
+  }
+
   function empreinteProgramme() {
     var ex = [], k;
     for (k in state.exclus) { if (has(state.exclus, k) && state.exclus[k]) ex.push(k); }
@@ -9209,6 +9328,19 @@ body.a-nav .nav { display: flex; }
       // ressortait du cache sous une empreinte inchangee.
       state.obRunNiveau,
       state.obRunDuree,
+      // 🔴 CINQUIEME FOIS QUE CETTE EMPREINTE OUBLIE UNE CLE. `obDepense`
+      // l'avait fait, puis `obRunNiveau` et `obRunDuree`, et maintenant les
+      // zones mises de cote. Le symptome est toujours le meme et toujours
+      // muet : la reponse s'enregistre, l'ecran la montre cochee, et le
+      // programme ressort du cache inchange.
+      //
+      // Mesure avant correction : cocher « Dos » ecartait bien 18 exercices
+      // dans `exclusDesZones()`, et le profil pose au moteur n'en portait que
+      // 12, ceux du materiel. Aucun exercice de tirage ne disparaissait.
+      //
+      // ⚠️ TOUTE CLE D'ETAT QUE `profilDepuisEtat` LIT DOIT ENTRER ICI.
+      // C'est la seule regle, et elle a ete violee cinq fois.
+      cleTriee(state.obEviter),
       // ⚠️ MEME RAISON ICI. `progCache.seances` est indexe par rang de seance et
       // n'est vide que quand l'empreinte change : sans l'etat de la journee de
       // depense, la seance substituee serait servie depuis le cache de la
@@ -9662,9 +9794,17 @@ body.a-nav .nav { display: flex; }
       }
       if (!bloc) { lab = "FULL BODY"; sub = "Tout le corps"; }
     }
+    var _n = nomsDe(lab);
     return {
-      code: codeCourtDe(lab),
+      code: _n.nom,
+      // Le nom court, pour la bande de la semaine. Un mot complet et plus bref,
+      // jamais un mot coupe.
+      court: _n.court,
       label: lab,
+      // \u26a0\ufe0f LE SOUS-TITRE DISPARAIT QUAND LE NOM LE REPETE. « Tout le
+      // corps, dominante jambes » au-dessus de « Tout le corps, dominante
+      // jambes » se lit comme un defaut d'affichage.
+      // Le sous-titre du moteur est garde : il explique le « + » du nom.
       sub: sub,
       duree: r.s.duration,
       trop: !!r.s.over,
@@ -12918,6 +13058,68 @@ body.a-nav .nav { display: flex; }
     return h + "</div>";
   }
 
+  // L'ETAPE DES ZONES A MENAGER.
+  //
+  // \u26a0\ufe0f LES SEPT ZONES VIENNENT DE `MOTEUR.ZONES`, pas d'une liste recopiee.
+  // Le moteur les definit par les PATRONS DE MOUVEMENT qu'elles servent, et
+  // c'est ce qui rend la reponse capable d'agir : cocher « Dos » ecarte les
+  // exercices de tirage, pas une etiquette.
+  //
+  // \u26a0\ufe0f ON DIT CE QUE CA COUTE, DES QU'UNE CASE EST COCHEE. Ecarter une
+  // zone raccourcit les seances qui ne travaillent qu'elle. Le taire ferait
+  // decouvrir la consequence trois jours plus tard, devant une seance amputee
+  // sans explication.
+  function etapeZonesHtml() {
+    var Z = (MOTEUR && MOTEUR.ZONES) || [], i, on, n = 0, h = "";
+    h += '<div class="ob-chips">';
+    for (i = 0; i < Z.length; i++) {
+      on = !!state.obEviter[Z[i].v];
+      if (on) n++;
+      h += '<button type="button" class="ob-case' + (on ? " ob-case-on" : "") + '"' +
+           ' aria-pressed="' + (on ? "true" : "false") + '"' +
+           ' data-action="ob-eviter" data-v="' + esc(Z[i].v) + '">' +
+           '<span class="ob-case-box" aria-hidden="true">✓</span>' +
+           '<span class="ob-case-txt"><span class="ob-case-t">' + esc(Z[i].label) +
+           "</span>" +
+           '<span class="ob-case-s">' + esc(zoneCompte(Z[i])) + "</span></span></button>";
+    }
+    h += "</div>";
+    // 🔴 ON DIT CE QU'IL RESTE, PAS SEULEMENT CE QU'ON RETIRE. Mesure sur
+    // un profil bien equipe a quatre seances : ecarter les sept zones laisse
+    // QUATRE exercices, tous des echauffements. L'application afficherait alors
+    // quatre « seances » qui ne sont qu'un echauffement, sans que rien n'ait
+    // prevenu. Le compte se lit ici, avant de valider.
+    if (n) {
+      var reste = 0, nb = nbSeancesProgramme(), zi;
+      for (zi = 0; zi < nb; zi++) reste += exosDe(zi).length;
+      h += '<p class="ob-lead" style="margin-top:14px">' + n + " zone" +
+           (n > 1 ? "s" : "") + " mise" + (n > 1 ? "s" : "") + " de côté. " +
+           "Il te reste <b>" + reste + " exercice" + (reste > 1 ? "s" : "") +
+           "</b> sur l'ensemble de ta semaine.</p>";
+      // ⚠️ PAS D'AVERTISSEMENT SUR LE CAS EXTREME, ET C'EST DELIBERE.
+      // Une premiere version prevenait quand il restait moins de deux exercices
+      // par seance. Mesure : ce seuil ne se franchit qu'a SIX zones ecartees
+      // sur sept, ce qu'Olivier a qualifie d'heresie et que personne ne fera.
+      // C'etait donc une phrase de plus que rien n'affiche, et ce projet en a
+      // deja debusque quatre.
+      //
+      // Le compte ci-dessus, lui, sort des la premiere case cochee et dit
+      // exactement ce qu'il faut savoir pour decider.
+    }
+    return h;
+  }
+
+  // Combien d'exercices une zone represente, sur le materiel declare. Le
+  // chiffre change la decision : ecarter les bras coute moins qu'ecarter les
+  // jambes.
+  function zoneCompte(z) {
+    var c = MOTEUR.CATALOG, i, n = 0;
+    for (i = 0; i < c.length; i++) {
+      if (z.pats.indexOf(c[i].pat) >= 0) n++;
+    }
+    return n + " exercice" + (n > 1 ? "s" : "");
+  }
+
   function etapeDureeHtml() {
     var h = '<div class="ob-chips">', i, on, libre = dureeLibreValide(), n;
     for (i = 0; i < DUREES.length; i++) {
@@ -13494,6 +13696,7 @@ body.a-nav .nav { display: flex; }
     else if (ob.type === "chips") h += etapeChipsHtml(ob);
     else if (ob.type === "jours") h += etapeJoursHtml();
     else if (ob.type === "course") h += etapeCourseHtml();
+    else if (ob.type === "zones") h += etapeZonesHtml();
     else if (ob.type === "duree") h += etapeDureeHtml();
     else if (ob.type === "materiel") h += etapeMaterielHtml();
     else if (ob.type === "programme") h += etapeProgrammeHtml();
@@ -13622,7 +13825,12 @@ body.a-nav .nav { display: flex; }
   function etapePertinente(i) {
     var ob = OB[i];
     if (!ob) return false;
-    if (ob.type === "duree" || ob.type === "materiel") return aDeLaSalle();
+    // \u26a0\ufe0f LES ZONES NE SE POSENT QU'A QUI VA EN SALLE. Elles designent des
+    // patrons de mouvement du catalogue de musculation ; un coureur pur n'a
+    // aucun exercice a ecarter, et la question serait sans objet.
+    if (ob.type === "duree" || ob.type === "materiel" || ob.type === "zones") {
+      return aDeLaSalle();
+    }
     if (ob.type === "course") return aDeLaCourse();
     // ⚠️ « TU EN ES OU AVEC LA MUSCULATION ? » NE SE POSE PAS A QUELQU'UN
     // QUI NE FAIT QUE COURIR. Sa reponse ne sert qu'a deux choses, la charge de
@@ -13830,7 +14038,12 @@ body.a-nav .nav { display: flex; }
       }
 
       dd = DISC[jr.acts[0].t];
-      code = jr.acts[0].t === "salle" ? seanceProgramme(jr.acts[0].si).code : dd.court;
+      // \u26a0\ufe0f LE NOM COURT ICI, ET SEULEMENT ICI. La case fait un septieme
+      // de la largeur de l'ecran ; « Tout le corps, dominante jambes » y
+      // prendrait cinq lignes. Le court est un mot COMPLET et plus bref,
+      // jamais un mot coupe : c'est la coupe qu'Olivier a refusee, pas la
+      // brievete.
+      code = jr.acts[0].t === "salle" ? seanceProgramme(jr.acts[0].si).court : dd.court;
       cle = i + "-0";
       fait = !!state.actFaits[cle];
       h += '<div class="sem-c' + (i === auj ? " sem-auj" : "") + '"' +
@@ -13876,66 +14089,69 @@ body.a-nav .nav { display: flex; }
     var ex = exosDe(a.si), i, series = 0, fait = !!state.actFaits[a.ji + "-" + a.k];
     for (i = 0; i < ex.length; i++) series += ex[i].n;
 
-    // LA CARTE SOMBRE NE PORTE PLUS QUE LA SEANCE DU JOUR ET SES TROIS BOUTONS.
+    // UN SEUL ENCADREMENT POUR LA SEANCE : son en-tete, le bouton qui la lance,
+    // et ce qu'elle contient. Demande d'Olivier.
     //
-    // Elle contenait aussi la liste des cinq seances et la liste des exercices :
-    // trois choses de nature differente dans un seul bloc noir, qu'on parcourait
-    // en se demandant ou l'une finissait. La maquette sort la liste des cinq
-    // seances dans son PROPRE encart clair, borde de citron.
+    // Ils etaient dans deux cartes separees, et la seconde avait ete peinte en
+    // citron pour rattacher le contenu au bouton. Une carte partagee dit la
+    // meme chose sans avoir a colorer : ce qui est dedans est ce que le bouton
+    // va lancer. Le citron redevient la couleur d'une ACTION, comme partout
+    // ailleurs dans l'appli.
     //
-    // L'en-tete suit aussi la maquette : « SÉANCE PULL · prévue jeudi » sur une
-    // ligne discrete, et le vrai titre est ce que la seance travaille.
+    // L'en-tete suit la maquette : « SEANCE PULL, prevue jeudi » sur une ligne
+    // discrete, et le vrai titre est ce que la seance travaille.
     var d = deriver(), jourPrevu = d.jourDe(a.si), S = seanceProgramme(a.si);
+    // 🔴 LA HIERARCHIE ETAIT A L'ENVERS. Le nom de la seance vivait dans
+    // `cs-haut`, dont la regle CSS ecrase le 26 px de `cs-code` a 11,5 : le
+    // titre le plus gros de la carte etait « Tout le corps, dominante jambes »,
+    // et le nom de la seance une etiquette au-dessus. On ouvrait l'ecran sans
+    // savoir d'un coup d'oeil ce qu'on allait faire. Signale par Olivier.
+    //
+    // L'ordre est maintenant : le NOM, ce qu'elle travaille, puis le detail.
+    // Le jour prevu descend avec le detail : c'est une precision, pas un titre.
     var h = '<section class="carte-sombre">';
-    h += '<div class="cs-haut"><span class="cs-code">Séance ' + esc(S.code) + "</span>" +
-         '<span class="cs-quand"> · ' +
-         esc(jourPrevu ? "prévue " + jourPrevu : "hors rotation") + "</span></div>";
-    h += '<div class="cs-sub">' + esc(S.sub) + "</div>";
-    // LA DUREE VIENT DE LA SEANCE, PLUS DU REGLAGE.
-    // `dureeLibelle()` annoncait la meme duree pour toutes les seances, celle
-    // demandee au diagnostic. Le moteur, lui, chiffre CHAQUE seance sur le cout
-    // reel de ses exercices : un PULL au poids du corps ne dure pas ce que dure
-    // un PULL en salle, et le dire evite d'annoncer une heure pour cinquante
-    // minutes de travail.
-    h += '<div class="cs-det"><span class="num">' + ex.length + "</span> exercices · " +
+    h += '<div class="cs-nom">' + esc(S.code) + "</div>";
+    // Le sous-titre ne sort que s'il ajoute quelque chose au nom.
+    if (S.sub) h += '<div class="cs-sub">' + esc(S.sub) + "</div>";
+    // LA DUREE VIENT DE LA SEANCE, PLUS DU REGLAGE. `dureeLibelle()` annoncait
+    // la meme duree pour toutes les seances, celle demandee au diagnostic. Le
+    // moteur, lui, chiffre CHAQUE seance sur le cout reel de ses exercices.
+    h += '<div class="cs-det">' +
+         esc(jourPrevu ? "prévue " + jourPrevu : "hors rotation") + " · " +
+         '<span class="num">' + ex.length + "</span> exercices · " +
          '<span class="num">' + series + '</span> séries · <span class="num">' +
          esc(S.duree) + "</span></div>";
     h += '<button type="button" class="cs-cta" data-action="demarrer-seance">' +
          (fait ? "Refaire la séance" : "Démarrer la séance") + "</button>";
 
-    // LES DEUX AUTRES BOUTONS DE LA MAQUETTE, en bloc et non en lien souligne.
-    // « Fermer la liste » replie l'encart des cinq seances ; « Revenir au cours
-    // du jour » n'existe QUE si l'on a effectivement remplace l'activite prevue,
-    // sinon il proposerait de revenir a l'endroit ou l'on se trouve deja.
-    // Le bouton dit ce qu'il FAIT, pas ce qu'il montre. « Voir toutes les
-    // seances » decrivait un affichage ; ce qu'on vient chercher ici, c'est
-    // changer la seance du jour.
-    h += '<button type="button" class="cs-btn" data-action="basculer-liste">' +
-         (state.listeFermee ? "Changer de séance" : "Garder cette séance") + "</button>";
-    // « Revenir au ... du jour » n'est PAS ici : il vit avec le bloc de
-    // remplacement, sous toutes les cartes. Pose ici, il disparaissait des
-    // qu'on remplacait par un running ou un cours, et il n'y avait plus aucune
-    // issue pour revenir a ce qui etait prevu. Trouve en le mesurant.
+    // LE CONTENU, SOUS LE BOUTON ET DANS LA MEME CARTE.
+    // \u26a0\ufe0f IL DISPARAIT PENDANT QU'ON CHOISIT UNE AUTRE SEANCE : montrer
+    // le contenu de celle qu'on quitte pendant qu'on lit la liste des autres
+    // faisait deux listes d'exercices a l'ecran, et on ne savait plus laquelle
+    // appartenait a quoi.
+    if (state.listeFermee) {
+      h += '<div class="cs-libre-t">Ordre libre</div>';
+      h += '<div class="cs-libre-s">Touche un exercice pour démarrer la séance dessus.</div>';
+      h += '<ul class="cs-exos">';
+      for (i = 0; i < ex.length; i++) {
+        h += '<li><button type="button" class="cs-exo" data-action="ouvrir-exo" data-i="' + i + '">' +
+             '<span class="cs-exo-n">' + esc(ex[i].nom) + "</span>" +
+             '<span class="cs-exo-d num">' + esc(ex[i].n + " × " + ex[i].reps +
+             (ex[i].unite ? " " + ex[i].unite : "")) + "</span></button></li>";
+      }
+      h += "</ul>";
+    }
     h += "</section>";
 
-    // L'ENCART DE TOUTES LES SEANCES, HORS DE LA CARTE SOMBRE.
-    //
-    // La maquette les montre TOUTES avec leur jour prevu a droite, et c'est ce
-    // jour-la qui rend le choix informe : prendre la seance de vendredi
-    // aujourd'hui, c'est savoir qu'il faudra faire autre chose vendredi.
-    //
-    // ⚠️ ELLES NE SONT PLUS CINQ. Le moteur decoupe la semaine selon le nombre
-    // de creneaux de salle declares : un seul full body pour une seance par
-    // semaine, trois pour trois, haut et bas pour quatre,
-    // PUSH/PULL/LEGS/HIIT/FULL pour cinq. Le titre ne peut donc plus annoncer
-    // un chiffre, et la boucle ne peut plus s'arreter a cinq.
-    // ⚠️ LA PROPOSITION SE LIT ICI, entre la seance du jour et la liste de la
-    // semaine : c'est l'endroit ou l'on regarde son rythme. Elle ne s'affiche
-    // que si elle est SERVABLE, sinon on proposerait quelque chose que
-    // l'application ne saurait pas construire.
-    //
-    // ⚠️ AUCUNE CLASSE NI JETON CSS NEUFS. Quatre jetons inexistants ont deja
-    // fait tomber des declarations entieres en silence dans ce projet.
+    // \u26a0\ufe0f « CHANGER DE SEANCE » EST HORS DE LA CARTE. Il ne lance pas la
+    // seance, il en change : dans le meme encadrement, il se lisait comme une
+    // variante de « Demarrer ». Demande d'Olivier.
+    h += '<button type="button" class="jour-changer" data-action="basculer-liste">' +
+         (state.listeFermee ? "Changer de séance" : "Garder cette séance") + "</button>";
+
+    // \u26a0\ufe0f LA PROPOSITION DE JOURNEE DEPENSIERE NE S'AFFICHE QUE SI ELLE EST
+    // SERVABLE, sinon on proposerait quelque chose que l'application ne saurait
+    // pas construire.
     if (depenseProposable() && depenseServable(profilPose())) {
       h += '<section class="carte-sombre">' +
            '<div class="mp-ia-t">Une journée plus dépensière</div>' +
@@ -13946,11 +14162,20 @@ body.a-nav .nav { display: flex; }
            "Non merci</button></section>";
     }
 
+    // L'ENCART DE TOUTES LES SEANCES. Elles y sont TOUTES avec leur jour prevu
+    // a droite, et c'est ce jour-la qui rend le choix informe : prendre la
+    // seance de vendredi aujourd'hui, c'est savoir qu'il faudra faire autre
+    // chose vendredi.
+    //
+    // \u26a0\ufe0f ELLES NE SONT PLUS CINQ. Le moteur decoupe la semaine selon le
+    // nombre de creneaux de salle declares : un seul full body pour une seance
+    // par semaine, trois pour trois, haut et bas pour quatre. Le titre ne peut
+    // donc plus annoncer un chiffre, et la boucle ne peut plus s'arreter a cinq.
     if (!state.listeFermee) {
       h += '<section class="cs-toutes">';
       h += '<div class="cs-toutes-t">Toutes les séances de ton programme</div>';
-      h += '<div class="cs-toutes-s">Le jour prévu est indiqué à droite. Si tu prends ' +
-           "celle d'un autre jour, tu sauras quoi faire ce jour-là.</div>";
+      h += '<div class="cs-toutes-s">Le jour prévu est indiqué à droite. Touche-en ' +
+           "une pour voir ce qu'elle contient avant de la prendre.</div>";
       h += '<ul class="cs-liste">';
       var jourDeS, exS, faitS, SS, nS = nbSeancesProgramme();
       for (i = 0; i < nS; i++) {
@@ -13964,34 +14189,11 @@ body.a-nav .nav { display: flex; }
              '<span class="cs-s-d num">' + exS.length + " exercices · " +
              esc(SS.duree) + "</span></span>" +
              '<span class="cs-s-j">' + esc(jourDeS || "hors rotation") +
-             '<span class="cs-s-e" aria-hidden="true">' + (faitS ? "✓" : "›") + "</span></span>" +
+             '<span class="cs-s-e" aria-hidden="true">' + (faitS ? "\u2713" : "\u203a") + "</span></span>" +
              "</button></li>";
       }
       h += "</ul></section>";
     }
-
-    // ⚠️ PENDANT QU'ON CHOISIT, ON NE MONTRE PAS LE CONTENU DE CELLE
-    // QU'ON QUITTE. Les deux ensemble faisaient trois blocs empiles dont deux
-    // parlent d'exercices : on ne savait plus lesquels appartenaient a quoi.
-    // Demande d'Olivier : « on epure le contenu ».
-    if (!state.listeFermee) return h;
-
-    // La liste des exercices garde sa carte sombre a elle : c'est le contenu de
-    // la seance du jour, pas un choix de seance.
-    h += '<section class="carte-sombre">';
-
-    // ORDRE LIBRE : toucher un exercice demarre DESSUS. Sans ca, il faudrait
-    // traverser la seance pour atteindre le troisieme mouvement.
-    h += '<div class="cs-libre-t">Ordre libre</div>';
-    h += '<div class="cs-libre-s">Touche un exercice pour démarrer la séance dessus.</div>';
-    h += '<ul class="cs-exos">';
-    for (i = 0; i < ex.length; i++) {
-      h += '<li><button type="button" class="cs-exo" data-action="ouvrir-exo" data-i="' + i + '">' +
-           '<span class="cs-exo-n">' + esc(ex[i].nom) + "</span>" +
-           '<span class="cs-exo-d num">' + esc(ex[i].n + " × " + ex[i].reps +
-           (ex[i].unite ? " " + ex[i].unite : "")) + "</span></button></li>";
-    }
-    h += "</ul></section>";
     return h;
   }
 
@@ -14234,11 +14436,16 @@ body.a-nav .nav { display: flex; }
            esc(prochain.nom.toLowerCase()) + " · <b>" + esc(quoi) + "</b>" +
            (_cp
             ? ". Un jour sans courir vaut mieux qu'une sortie de trop."
-            : ". La récupération fait partie du programme — mais tu peux prendre " +
-              "une séance d'avance ci-dessous.") + "</p>";
+            : ". La récupération fait partie du programme, mais rien " +
+              "ne t\u2019empêche de t\u2019entraîner.") + "</p>";
       if (!_cp) {
+        // \u26a0\ufe0f « FAIRE UNE SEANCE QUAND MEME », ET PLUS « PRENDRE UNE SEANCE
+        // D'AVANCE ». Demande d'Olivier. « D'avance » sous-entend qu'on entame
+        // le credit de la semaine et qu'il faudra le rendre, ce qui est faux :
+        // rien n'est deduit, la rotation ne bouge pas. Le libelle decrivait un
+        // mecanisme qui n'existe pas.
         h += '<button type="button" class="cr-btn" data-action="autre-seance">' +
-             "Prendre une séance d'avance</button>";
+             "Faire une séance quand même</button>";
       }
     } else {
       h += '<p class="cr-p">Rien de prévu aujourd\'hui.</p>';
@@ -16170,52 +16377,27 @@ body.a-nav .nav { display: flex; }
     // LA SALLE. Le diagnostic saute ces deux etapes pour un programme fait de
     // cours ou de running seulement ; y mener depuis ici ouvrirait une question
     // sans objet, et le compteur d'etapes ne saurait plus quoi annoncer.
-    // \u26a0\ufe0f « MES EXERCICES » N'EST PLUS ICI. Il etait la ligne voisine de
-    // « Mon programme », et rien ne disait laquelle sert a quoi : on ouvrait la
-    // seconde en croyant y trouver la premiere. Il vit maintenant au bas de
-    // « Mon programme », la ou l'on est deja en train de composer sa semaine.
-    // Signale par Olivier.
-    var lignesProg = [
-      { t: "Mon programme",
-        s: d.slots.length + " activités · " + nbExercicesActifs() + " exercices",
-        a: "aller-monprog" }
-    ];
-    if (d.slotsSalle.length) {
-      lignesProg.push({ t: "Durée par séance", s: dureeLibelle(), a: "ob-etape", v: String(rangEtape("Durée")) });
-    }
-    // ACTION DISTINCTE de « ob-etape ». Corriger une reponse et reprendre les
-    // onze etapes ne sont pas le meme geste : le premier rend la main tout de
-    // suite, le second redemande tout.
-    lignesProg.push({ t: "Reprendre le diagnostic",
-                      s: "Une étape, ou tout", a: "refaire-ouvrir" });
-    h += groupeHtml("Programme", lignesProg);
+    // 🔴 LE GROUPE DU HAUT A DISPARU, ET AVEC LUI TROIS DOUBLONS. Signale par
+    // Olivier sur capture : « Duree par seance » en haut disait la meme chose
+    // que « Duree » dans le panneau juste dessous, et « Reprendre le
+    // diagnostic » en haut n'etait que l'interrupteur du panneau qu'on voyait
+    // deja. Trois lignes pour deux idees.
+    //
+    // Tout est desormais dans une seule section « Programme », toujours
+    // ouverte. Voir `refaireHtml`.
     h += refaireHtml();
 
-    // LE MATERIEL A SON PROPRE GROUPE.
+    // 🔴 LE GROUPE MATERIEL A DISPARU : IL FAISAIT DOUBLON AVEC L'ETAPE
+    // « Materiel » de la section Programme juste au-dessus. Signale par
+    // Olivier sur capture, les deux entoures au feutre.
     //
-    // Il etait la quatrieme ligne de « Programme », entre la duree de seance et
-    // le bouton qui refait tout le diagnostic. Olivier demandait a pouvoir gerer
-    // sa liste de materiel depuis son profil, ce qui veut dire d'abord la
-    // trouver. Un titre a son nom la rend visible sans la chercher.
-    //
-    // Le sous-titre compte les DEUX listes. Les machines n'y figuraient pas,
-    // alors que ce sont elles qu'on decoche quand on change de salle.
-    //
-    // ET LE GROUPE NE DISPARAIT PLUS QUAND LA SEMAINE N'A PAS DE SALLE.
-    // Il etait conditionne aux creneaux de salle, comme la ligne « Duree par
-    // seance » juste au-dessus. Or le cas qu'Olivier decrit EST une semaine
-    // sans salle : « un week-end chez des potes ». Le materiel devenait alors
-    // inatteignable, ni depuis Moi ni depuis le diagnostic, qui saute cette
-    // etape quand il n'y a pas de salle. Le reglage qu'il veut pouvoir changer
-    // disparaissait exactement quand il en a besoin.
-    //
-    // Y aller depuis ici marche quel que soit le programme : `obSuivant` rend
-    // la main a `retourDe` des que le diagnostic est fait, sans traverser les
-    // onze etapes.
-    h += groupeHtml("Matériel", [
-      { t: "Ce dont je dispose", s: resumeMateriel(), a: "ob-etape",
-        v: String(etapeMateriel()) }
-    ]);
+    // ⚠️ MAIS L'ETAPE DOIT ALORS ETRE LISTEE MEME SANS SALLE. Ce groupe
+    // existait pour une raison precise, qui etait ecrite ici : le diagnostic
+    // saute l'etape Materiel quand la semaine ne porte aucune seance de
+    // salle, or c'est exactement le cas ou l'on veut la changer, « un
+    // week-end chez des potes ». Le supprimer sans rien faire d'autre aurait
+    // rendu le materiel inatteignable. `refaireHtml` force donc cette etape
+    // dans sa liste, quel que soit le programme.
 
     h += groupeHtml("Assistant IA", [
       { t: "Assistant IA", s: "Programme et repas", a: "aller-ia" }
@@ -16284,33 +16466,76 @@ body.a-nav .nav { display: flex; }
   // Duree ni Materiel ni Pratique : les lui proposer ouvrirait des questions
   // que `etapePertinente` refuse d'afficher, donc des ecrans vides.
   function refaireHtml() {
-    if (!state.refaireOuvert) return "";
-    var vis = etapesVisibles(), i, h = "";
+    var vis = etapesVisibles(), d = deriver(), i, h = "";
+
+    // ⚠️ « MON PROGRAMME » EN TETE, ET SURTOUT PAS DANS LA LISTE DES
+    // ETAPES. L'etape « Programme » du diagnostic et l'ecran « Mon programme »
+    // portent le meme mot et ne font pas la meme chose : l'etape est une
+    // relecture, l'ecran est celui ou l'on retire et ajoute des exercices, et
+    // ou vit « Mes exercices ». C'est le seul point du haut de l'ecran que le
+    // panneau ne recouvrait PAS : le retirer sans le remettre ici aurait rendu
+    // cet ecran inatteignable.
+    h += '<div class="mo-g"><div class="mo-g-t">Programme</div><div class="mo-g-c">';
+    h += '<button type="button" class="mo-l" data-action="aller-monprog">' +
+         '<span class="mo-n">Mon programme</span>' +
+         '<span class="mo-s num">' + d.slots.length + " activités · " +
+         nbExercicesActifs() + " exercices</span>" +
+         '<span class="mo-c" aria-hidden="true">›</span></button>';
+    h += "</div></div>";
+
+    // LE PANNEAU EST TOUJOURS OUVERT. Il etait derriere un interrupteur qui
+    // vivait dans le groupe du haut, lequel vient de disparaitre : garder
+    // l'interrupteur aurait demande de le remettre quelque part, pour cacher
+    // une liste de dix lignes qui EST la section.
     h += '<section class="carte mo-refaire"><div class="carte-t">Reprendre le diagnostic</div>';
     h += '<p class="cr-p">Touche l\'étape que tu veux changer. Tu reviens ici ' +
-         "juste après, et rien d\u2019autre ne bouge.</p>";
+         "juste après, et rien d’autre ne bouge.</p>";
     h += '<div class="mo-g-c">';
+    // ⚠️ « MATERIEL » EST FORCE DANS LA LISTE, MEME SANS SALLE. Le
+    // diagnostic saute cette etape quand la semaine ne porte aucune seance de
+    // salle ; c'est defendable pendant le questionnaire, ou l'on ne veut pas
+    // poser une question sans objet. Ici c'est un menu de correction, et le
+    // materiel concerne aussi un coureur : tapis, corde a sauter et appareils
+    // de cardio vivent dans la meme liste.
+    var mat = rangEtape("Matériel");
+    if (mat >= 0 && vis.indexOf(mat) < 0) {
+      vis = vis.slice();
+      vis.push(mat);
+      vis.sort(function (x, y) { return x - y; });
+    }
     for (i = 0; i < vis.length; i++) {
       // ⚠️ ON SAUTE « C'est parti » PAR SON NOM, et pas par son type : il
       // partage `type: "recap"` avec « Repères », qui lui porte de vrais
       // chiffres et merite sa ligne. C'est un ecran de fin, il ne contient
       // aucune reponse a corriger.
       if (OB[vis[i]].nom === "C'est parti") continue;
+      // ⚠️ ET ON SAUTE « Programme » : la ligne « Mon programme »
+      // ci-dessus mene au meme sujet en mieux, et deux lignes qui portent le
+      // meme mot dans la meme section sont exactement le doublon qu'on retire.
+      if (OB[vis[i]].nom === "Programme") continue;
       h += '<button type="button" class="mo-l" data-action="ob-etape" data-v="' +
            vis[i] + '">' +
            '<span class="mo-n">' + esc(OB[vis[i]].nom) + "</span>" +
            '<span class="mo-c" aria-hidden="true">›</span></button>';
     }
     h += "</div>";
-    // ⚠️ LE BOUTON ANNULER MANQUAIT, ET C'EST TOUT CE QU'IL MANQUAIT.
-    // Demande d'Olivier : « il manque le bouton annuler si on clic par erreur
-    // ou curiosite ». Meme arrangement que la carte de reinitialisation juste
-    // en dessous, qui pose le meme genre de question : l'action en premier,
-    // la sortie discrete en second.
-    h += '<button type="button" class="cr-btn" data-action="ob-refaire">' +
-         "Tout reprendre depuis le début</button>";
-    h += '<button type="button" class="dg-annuler" data-action="refaire-fermer">' +
-         "Annuler</button>";
+
+    // ⚠️ « TOUT REPRENDRE » DEMANDE CONFIRMATION, et c'est la que vit le
+    // bouton Annuler qu'Olivier reclamait. Le panneau ne se replie plus, donc
+    // la confirmation ne peut plus etre le fait de l'ouvrir : elle se pose sur
+    // le geste lui-meme. Meme motif en deux temps que la reinitialisation.
+    if (state.refaireOuvert) {
+      h += '<p class="cr-p">Tu vas reprendre le diagnostic depuis le début. ' +
+           "Tes réponses actuelles servent de point de départ, rien " +
+           "n’est effacé.</p>";
+      h += '<button type="button" class="cr-btn" data-action="ob-refaire">' +
+           "Oui, tout reprendre</button>";
+      h += '<button type="button" class="dg-annuler" data-action="refaire-fermer">' +
+           "Annuler</button>";
+    } else {
+      h += '<button type="button" class="dg-annuler" data-action="refaire-ouvrir">' +
+           "Tout reprendre depuis le début</button>";
+    }
     return h + "</section>";
   }
 
@@ -16351,6 +16576,10 @@ body.a-nav .nav { display: flex; }
     // que l'ecran cesse de le proposer resterait sinon au compteur, et ferait
     // annoncer un exercice de moins que ce que le programme sert vraiment.
     for (i = 0; i < c.length; i++) {
+      // ⚠️ UNE ZONE MISE DE COTE NE COMPTE PLUS. Le chiffre annonce ce
+      // que le programme peut servir ; y laisser les exercices d'une zone
+      // ecartee ferait annoncer quinze exercices de plus que la realite.
+      if (zoneEvitee(c[i].id)) continue;
       if (exoCoursePrescrit(c[i].id) || !state.exclus[c[i].id]) n++;
     }
     return n;
@@ -16700,6 +16929,20 @@ body.a-nav .nav { display: flex; }
              '<span class="ob-case-t">' + esc(c[i].name) + "</span>" +
              '<span class="ob-case-s">Prescrit par ton programme de course</span>' +
              "</div></li>";
+        continue;
+      }
+      // 🔴 UN EXERCICE D'UNE ZONE MISE DE COTE LE DIT, il ne reste pas
+      // coche. Sans cette ligne, sa case serait allumee comme les autres alors
+      // qu'aucune seance ne le proposera jamais : deux portes vers le meme etat
+      // qui ne disent pas la meme chose, exactement le defaut que ce projet
+      // passe son temps a debusquer. La case est retiree parce qu'elle ne
+      // servirait a rien : la zone gagne de toute facon.
+      var _ze = zoneEvitee(c[i].id);
+      if (_ze) {
+        h += '<li><div class="mo-fige">' +
+             '<span class="ob-case-t">' + esc(c[i].name) + "</span>" +
+             '<span class="ob-case-s">Zone mise de côté : ' + esc(_ze) +
+             "</span></div></li>";
         continue;
       }
       on = !state.exclus[c[i].id];
@@ -17869,7 +18112,7 @@ body.a-nav .nav { display: flex; }
    module a l'autre.
    =========================================================================== */
 
-  var APP_VERSION = "1.25.2";
+  var APP_VERSION = "1.25.3";
 
   function has(o, k) { return Object.prototype.hasOwnProperty.call(o, k); }
 
@@ -18072,6 +18315,14 @@ body.a-nav .nav { display: flex; }
     // profil transmis au moteur : tout le monde recevait l'allure et le plafond
     // de distance d'un debutant.
     obRunNiveau: 0, obRunDuree: 1,
+    // Les zones que l'utilisateur prefere ne pas travailler. Une douleur, une
+    // blessure, une zone qu'il ne veut pas solliciter.
+    //
+    // \u26a0\ufe0f UN OBJET, PAS UN TABLEAU. `obGear` a pris un cran de retard DEUX
+    // fois parce qu'il etait positionnel : le jour ou une zone est ajoutee au
+    // moteur, un tableau ferait glisser toutes les reponses d'un rang. La cle
+    // est l'identifiant de la zone, et il ne bouge pas.
+    obEviter: {},
     // Le message du bouton de rechargement. Il ne se sauve pas : il ne
     // vaut que pour l'appui qui vient d'avoir lieu.
     majMsg: "",
@@ -18127,7 +18378,7 @@ body.a-nav .nav { display: flex; }
     "obSexe", "obObjectif", "obPratique", "obPratiqueDite", "obDuree", "obDureeLibre", "obJours", "obEquip", "obGear",
     "obHalt", "obPetitDej", "obCollation", "obCuisine", "obAlcool",
     "obPeseeJour", "obPeseeMoment", "peseeFaite", "obSupps", "obAct", "actFaits",
-    "obRunNiveau", "obRunDuree",
+    "obRunNiveau", "obRunDuree", "obEviter",
     "hist", "pesees", "dernierExport",
     "obRetires", "obAjouts", "iaPlan", "progDec", "obDepense", "forme",
     // La photo de profil, reduite a 320 px de cote et ecrite en data:.
@@ -19174,6 +19425,18 @@ body.a-nav .nav { display: flex; }
     }
     if (action === "pg-oui") { pgDecider(n.getAttribute("data-i"), true); return; }
     if (action === "pg-non") { pgDecider(n.getAttribute("data-i"), false); return; }
+    // Cocher ou decocher une zone a menager. Choix multiple : on peut avoir mal
+    // a l'epaule ET ne pas vouloir travailler les jambes.
+    if (action === "ob-eviter") {
+      var _zv = n.getAttribute("data-v"), _zc = {}, _zk;
+      for (_zk in state.obEviter) {
+        if (has(state.obEviter, _zk) && _zk !== _zv) _zc[_zk] = state.obEviter[_zk];
+      }
+      if (!state.obEviter[_zv]) _zc[_zv] = 1;
+      poser({ obEviter: _zc });
+      return;
+    }
+
     if (action === "ob-single") {
       var _cleS = n.getAttribute("data-cle");
       o[_cleS] = parseInt(n.getAttribute("data-v"), 10);
@@ -19692,6 +19955,8 @@ body.a-nav .nav { display: flex; }
     seanceCourseDe: seanceCourseDe,
     coureurPur: coureurPur,
     exoCoursePrescrit: exoCoursePrescrit,
+    exclusDesZones: exclusDesZones,
+    zoneEvitee: zoneEvitee,
     promptProgramme: promptProgramme,
     distanceVisee: distanceVisee,
     seanceProgramme: seanceProgramme,
