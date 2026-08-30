@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; connect-src 'self' https://api.anthropic.com https://api.openai.com https://generativelanguage.googleapis.com https://api.mistral.ai; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; manifest-src 'self'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; connect-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; manifest-src 'self'; base-uri 'none'; form-action 'none'">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#f7f3ea">
@@ -8332,12 +8332,20 @@ body.a-nav .nav { display: flex; }
       chips: [{ t: "Perdre du gras", s: "Déficit quotidien plafonné à 500 kcal" },
               { t: "Maintenir", s: "Calories au niveau du maintien" },
               { t: "Prendre du muscle", s: "Surplus quotidien plafonné à 400 kcal" }] },
+    { nom: "Rythme", titre: "Quels jours tu t'entraînes ?", sous: "Les activités que tu déclares entrent aussi dans le calcul des calories.", type: "jours" },
+    // \U0001F534 APRES RYTHME, ET C'EST LA SEULE PLACE POSSIBLE. Cette etape ne se
+    // pose qu'a quelqu'un qui a declare une seance de salle, et cette
+    // information n'existe qu'apres Rythme. Posee avant, comme elle l'etait
+    // depuis ce matin, `aDeLaSalle()` rendait toujours faux et l'etape etait
+    // sautee PAR TOUT LE MONDE au premier diagnostic. Personne ne repondait a
+    // la question, `obPratiqueDite` restait a 0, et le modele de charge
+    // appliquait le coefficient debutant : 11 exercices mesures a 54 % en
+    // moyenne de la charge attendue, squat barre a 35 kg au lieu de 65.
     { nom: "Pratique", titre: "Tu en es où avec la musculation ?", sous: "Elle est reprise dans la demande que tu enverras à ton assistant. Le programme, lui, se règle sur ta durée et ton matériel.", type: "chips", single: "obPratique",
       chips: [{ t: "Je débute", s: "Moins de 3 mois" },
               { t: "Je reprends", s: "J'ai déjà pratiqué, arrêté depuis" },
               { t: "Régulier", s: "6 mois et plus, sans coupure" },
               { t: "Assidu", s: "2 ans et plus, je connais mes charges" }] },
-    { nom: "Rythme", titre: "Quels jours tu t'entraînes ?", sous: "Les activités que tu déclares entrent aussi dans le calcul des calories.", type: "jours" },
     // \u26a0\ufe0f APRES RYTHME, ET C'EST LA SEULE PLACE POSSIBLE. Sa pertinence se
     // lit dans les jours declares : posee avant, elle s'afficherait pour
     // quelqu'un qui n'a pas encore dit qu'il court, et disparaitrait ensuite.
@@ -8669,6 +8677,26 @@ body.a-nav .nav { display: flex; }
   // 30 et 250 kg sont larges a dessein : la borne existe contre la faute de
   // frappe, pas contre les morphologies.
   var POIDS_MIN = 30, POIDS_MAX = 250;
+
+  // -------------------------------------------------------------------------
+  // UNE DISTANCE LUE DANS LE JOURNAL, BORNEE
+  // -------------------------------------------------------------------------
+  // 🔴 QUATRE LECTEURS DU MEME CHAMP, ET UN SEUL BORNAIT. Le champ Distance
+  // n'est valide nulle part : « abc », « -3 », « 80 », « 1e3 » entrent dans le
+  // journal et y restent. Le modele calorique, lui, borne bien a 0,5-60 km.
+  // Les trois autres lecteurs ne bornaient rien.
+  //
+  // Mesure : une entree a 80 fait proposer « Passer a Je cours deja » avec le
+  // texte « Ta plus longue sortie du mois fait 80 km », et un -3 se soustrait
+  // du total du mois affiche sur l'ecran Progres.
+  //
+  // ⚠️ ON REUTILISE LES BORNES DU MODELE CALORIQUE, on n'en ecrit pas de
+  // deuxieme jeu : deux jeux de bornes pour la meme grandeur finiraient par ne
+  // plus dire la meme chose.
+  function kmNote(v) {
+    var n = nombreOu(v, 0);
+    return (n >= RUN_KM_MIN && n <= RUN_KM_MAX) ? n : 0;
+  }
 
   function poidsVraisemblable(defaut) {
     var v = nombreOu(state.obPoids, 0);
@@ -9330,12 +9358,56 @@ body.a-nav .nav { display: flex; }
         for (kk2 in p.dayKinds) {
           if (has(p.dayKinds, kk2)) kindsRun[kk2] = p.dayKinds[kk2];
         }
+        // 🔴 AUTANT DE JOURNEES DE COURSE QUE DE CRENEAUX DECLARES. Le plan du
+        // moteur est range par jour : deux sorties le mardi ne pouvaient donner
+        // qu'une seule seance, et les deux creneaux recevaient le meme objet,
+        // memes blocs et meme distance. Le diagnostic invite pourtant a en
+        // declarer deux le meme jour.
+        //
+        // On marque donc « course » un jour LIBRE de plus pour chaque creneau
+        // excedentaire, et le moteur batit sa semaine sur ce compte-la. Ce n'est
+        // pas un mensonge sur le rythme : quelqu'un qui sort deux fois le mardi
+        // court bien deux fois cette semaine-la, et le gabarit hebdomadaire doit
+        // le savoir pour repartir endurance, seuil et sortie longue.
+        var _vus = {}, _libres = [], _dk;
         for (i = 0; i < d.slotsRun.length; i++) {
-          kindsRun[d.slotsRun[i].ji === 6 ? 0 : d.slotsRun[i].ji + 1] = "course";
+          _dk = d.slotsRun[i].ji === 6 ? 0 : d.slotsRun[i].ji + 1;
+          if (!has(_vus, _dk)) { _vus[_dk] = 1; kindsRun[_dk] = "course"; continue; }
+          _vus[_dk]++;
+          _libres.push(1);
+        }
+        // Les jours de la semaine que rien n'occupe, pris dans l'ordre.
+        if (_libres.length) {
+          var _pris = {}, _j;
+          for (_j = 0; _j < d.progJours.length; _j++) {
+            if (!d.progJours[_j].vide) {
+              _pris[d.progJours[_j].ji === 6 ? 0 : d.progJours[_j].ji + 1] = 1;
+            }
+          }
+          for (_j = 0; _j <= 6 && _libres.length; _j++) {
+            if (has(_pris, _j) || has(kindsRun, _j)) continue;
+            kindsRun[_j] = "course";
+            _libres.pop();
+          }
         }
         var pRun = {}, kk3;
         for (kk3 in p) { if (has(p, kk3)) pRun[kk3] = p[kk3]; }
         pRun.dayKinds = kindsRun;
+        // ⚠️ LES JOURS AJOUTES ENTRENT AUSSI DANS `days`. `buildPlan`
+        // n'itere QUE `profile.days` : marquer un jour « course » dans
+        // `dayKinds` sans l'y ajouter ne construit rien du tout. Mesure : le
+        // second creneau d'une meme journee ne recevait aucune seance, la liste
+        // des sorties baties restant a deux au lieu de trois.
+        var _jours = [], _jv = {}, _jk4;
+        for (_jk4 = 0; _jk4 < p.days.length; _jk4++) {
+          _jours.push(p.days[_jk4]);
+          _jv[p.days[_jk4]] = 1;
+        }
+        for (_jk4 in kindsRun) {
+          if (!has(kindsRun, _jk4)) continue;
+          if (!has(_jv, _jk4)) { _jours.push(parseInt(_jk4, 10)); _jv[_jk4] = 1; }
+        }
+        pRun.days = _jours;
         // \u26a0\ufe0f LA SORTIE A SA PROPRE DUREE. Le moteur taille le bloc courable
         // sur `profile.minutes`, qui portait la duree d'une seance de SALLE.
         // L'etape Duree promet pourtant le contraire au coureur, mot pour mot :
@@ -9381,15 +9453,38 @@ body.a-nav .nav { display: flex; }
       // Sous une cle hors plage, la sortie n'est plus retrouvable par son jour.
       // On tient donc a cote un index par creneau, qui est ce que la carte lit.
       // Le plan reste range comme le moteur l'attend ; l'index sert l'ecran.
+      // 🔴 L'INDEX EST TENU PAR CRENEAU, PAS PAR JOUR. Indexe par `ji`, le
+      // second creneau d'une meme journee ecrasait le premier : deux sorties le
+      // mardi rendaient deux fois la meme prescription.
+      //
+      // On distribue donc les journees de course baties par le moteur aux
+      // creneaux declares, dans l'ordre, une par creneau. Les journees en trop
+      // que `kindsRun` a fait naitre pour les creneaux doubles servent
+      // exactement a cela : elles ne s'affichent nulle part par elles-memes,
+      // elles alimentent le second creneau du jour.
       _coursParJour = {};
       if (planCourse) {
+        var _dispo = [], _dk2;
+        for (_dk2 = 1; _dk2 <= 7; _dk2++) {
+          if (planCourse[_dk2] && estSeanceDeCourse(planCourse[_dk2])) {
+            _dispo.push(planCourse[_dk2]);
+          }
+        }
         for (i = 0; i < d.slotsRun.length; i++) {
           sl = d.slotsRun[i];
           jk = MOTEUR.dayKey(sl.ji === 6 ? 0 : sl.ji + 1);
-          if (!planCourse[jk]) continue;
+          // La journee du creneau d'abord, puis n'importe laquelle de reste :
+          // le second creneau d'un mardi prend la sortie d'un jour libre.
+          var _s = null;
+          if (planCourse[jk] && estSeanceDeCourse(planCourse[jk])) {
+            var _ix = _dispo.indexOf(planCourse[jk]);
+            if (_ix >= 0) { _s = _dispo[_ix]; _dispo.splice(_ix, 1); }
+          }
+          if (!_s && _dispo.length) _s = _dispo.shift();
+          if (!_s) continue;
           if (has(plan, jk)) { jk = enPlus; enPlus++; }
-          plan[jk] = planCourse[MOTEUR.dayKey(sl.ji === 6 ? 0 : sl.ji + 1)];
-          _coursParJour[sl.ji] = plan[jk];
+          plan[jk] = _s;
+          _coursParJour[sl.a.cle] = _s;
         }
       }
       p.plan = plan;
@@ -9453,21 +9548,27 @@ body.a-nav .nav { display: flex; }
   // ⚠️ ON LIT LE PLAN DEJA POSE, ON NE RECONSTRUIT PAS. `profilPose()` a deja
   // fait le travail et l'a mis en cache ; rappeler `buildPlan` a chaque rendu
   // referait la semaine entiere six fois par ouverture de l'ecran d'accueil.
-  function seanceCourseDe(ji) {
-    var p, s;
+  // Vrai quand la seance rendue par le moteur porte un bloc courable. Une
+  // seance de salle a exactement le meme rangement : sans ce controle, on
+  // afficherait un PUSH sur une carte de running.
+  function estSeanceDeCourse(s) {
+    var i;
+    if (!s || !isArray(s.exercises)) return false;
+    for (i = 0; i < s.exercises.length; i++) {
+      if (s.exercises[i].track === "run") return true;
+    }
+    return false;
+  }
+
+  // ⚠️ ELLE PREND UNE CLE DE CRENEAU, « ji-k », ET PLUS UN NUMERO DE JOUR. Deux
+  // sorties le meme jour existent, le diagnostic les propose, et un numero de
+  // jour ne sait pas les distinguer.
+  function seanceCourseDe(cle) {
+    var p, s, i;
     try { p = profilPose(); } catch (e) { return null; }
     if (!p || !p.plan) return null;
-    // On lit l'index par creneau, pas le plan par jour : un jour qui porte
-    // aussi une seance de salle range sa sortie sous une cle hors plage.
-    s = _coursParJour[ji];
-    if (!s || !isArray(s.exercises)) return null;
-    // Une seance de salle a le meme rangement : on ne garde que ce qui porte un
-    // bloc courable, sinon on rendrait un PUSH sur une carte de running.
-    var i, aCourse = false;
-    for (i = 0; i < s.exercises.length; i++) {
-      if (s.exercises[i].track === "run") { aCourse = true; break; }
-    }
-    if (!aCourse) return null;
+    s = _coursParJour[cle];
+    if (!estSeanceDeCourse(s)) return null;
 
     // \u26a0\ufe0f LE REFUS D'UN BLOC D'ACCOMPAGNEMENT EST HONORE ICI. `pickRun`
     // ne lit pas `excluded` et le moteur est greffe verbatim : le filtre se
@@ -9493,8 +9594,8 @@ body.a-nav .nav { display: flex; }
   }
 
   // La distance visee de la sortie, en kilometres, ou 0.
-  function distanceVisee(ji) {
-    var s = seanceCourseDe(ji), i;
+  function distanceVisee(cle) {
+    var s = seanceCourseDe(cle), i;
     if (!s) return 0;
     for (i = 0; i < s.exercises.length; i++) {
       if (s.exercises[i].track === "run" && s.exercises[i].cible > 0) {
@@ -10585,6 +10686,20 @@ body.a-nav .nav { display: flex; }
   // Le perimetre, SANS PROFIL : objectif, rythme, niveau, etat du choix.
   function depenseVoulue() {
     if (objectifDeLEtat() !== "perte") return false;
+    // ⚠️ PAS DE JOURNEE DE DEPENSE A UN COUREUR. Arbitrage d'Olivier du
+    // 30 aout 2026, mot pour mot : « Pour le coureur pas de journee de
+    // depense. »
+    //
+    // Cette exclusion existait deja, mais PAR ACCIDENT : la regle compte les
+    // creneaux de SALLE, donc un coureur pur tombait a zero et sortait du
+    // perimetre sans que personne l'ait decide. Une exclusion accidentelle se
+    // defait a la premiere refonte de la regle voisine ; ecrite, elle tient.
+    //
+    // La raison, au-dela de l'arbitrage : la journee de depense pose un bloc
+    // d'intervalles EN SALLE. La proposer a quelqu'un qui n'a declare aucune
+    // seance de salle reviendrait a lui servir de la musculation, ce que le
+    // reste de l'application a justement cesse de faire.
+    if (coureurPur()) return false;
     var n = nbCreneauxSalle();
     if (n < 2 || n > 4) return false;
     // ⚠️ PAS DE BLOC D'INTERVALLES A QUI A COCHE « JE DEBUTE ». Mesure : une
@@ -10592,7 +10707,11 @@ body.a-nav .nav { display: flex; }
     // 25 series chargees a 12. Le moteur ne pose jamais de jour d'intervalles
     // avant cinq seances par semaine ; cette proposition serait le premier
     // chemin par lequel un debutant autodeclare en recevrait un.
-    if (state.obPratiqueDite && state.obPratique === 0) return false;
+    // ⚠️ SANS LE TEMOIN ICI. `obPratique` vaut 2 par defaut : la valeur 0 ne
+    // peut donc venir que d'une reponse reellement donnee. Exiger le temoin en
+    // plus faisait tomber la garde sur un profil migre, et la journee
+    // d'intervalles etait proposee a quelqu'un qui a declare debuter.
+    if (state.obPratique === 0) return false;
     return true;
   }
 
@@ -11276,7 +11395,7 @@ body.a-nav .nav { display: flex; }
     for (i = 0; i < h.length; i++) {
       if (h[i].t !== "run") continue;
       if (!h[i].d || h[i].d < lim) continue;
-      km = nombreOu(h[i].km, 0);
+      km = kmNote(h[i].km);
       if (km <= 0) continue;
       n++;
       if (km > max) max = km;
@@ -11309,17 +11428,23 @@ body.a-nav .nav { display: flex; }
                " km, la longueur ordinaire de ton niveau est de " + cible +
                " km. Tu peux passer au niveau au-dessus : les distances " +
                "montent, et l\u2019allure de r\u00e9f\u00e9rence aussi.",
-        bouton: "Passer à " + T[niv + 1].label
+        bouton: "Passer à « " + T[niv + 1].label + " »"
       };
     }
-    if (r.max > 0 && r.max < cible * RV_BAS && niv > 0) {
+    // ⚠️ LE SEUIL DE DESCENTE EST PLAFONNE PAR LE NIVEAU DU DESSOUS, sinon le
+    // verdict oscille. Mesure : pour une plus longue sortie de 6 a 7 km, on
+    // proposait de monter au niveau 1, puis trois semaines plus tard de
+    // redescendre au 0, puis de remonter, indefiniment, sans que la pratique
+    // ait change d'un metre. Bande exacte [6 ; 7,15[.
+    if (r.max > 0 && r.max < Math.min(cible * RV_BAS, T[niv - 1] ? T[niv - 1].maxKm : cible) &&
+        niv > 0) {
       return {
         sens: -1, vers: niv - 1, longue: r.max, cible: cible, n: r.n,
         texte: "Ta plus longue sortie du mois fait " + frDec(String(r.max)) +
                " km, pour un niveau qui en prévoit " + cible +
                " ordinairement. Redescendre d\u2019un niveau rapprochera les " +
                "distances proposées de ce que tu cours.",
-        bouton: "Passer à " + T[niv - 1].label
+        bouton: "Passer à « " + T[niv - 1].label + " »"
       };
     }
     return null;
@@ -12288,17 +12413,36 @@ body.a-nav .nav { display: flex; }
   //
   // Quatre sources, dans cet ordre. Chacune est plus sure que la suivante, et
   // `suppose` dit a l'ecran a partir d'ou il faut se taire ou nuancer.
-  function kmDeLaSortie(a, ji) {
+  function kmDeLaSortie(a) {
     var v;
     // 1. Ce que le coureur a NOTE pour cette sortie-la. Rien ne le depasse.
     if (a && (a.km || a.minutes)) {
       v = kmDeLEntree(a);
       if (v > 0) return { km: v, source: "note", suppose: false };
     }
-    // 2. Ce que le programme a PRESCRIT pour ce jour-la. C'est un fait de
+    // 🔴 ET LA SAISIE EN COURS, SOUS LA CLE DU CRENEAU. Sans cette lecture, la
+    // branche « note » ci-dessus n'etait JAMAIS atteinte depuis l'ecran :
+    // `depenseHebdo` parcourt les creneaux du programme, et un creneau ne porte
+    // ni km ni minutes, seulement sa cle. Mesure avant correction : les reperes
+    // du jour etaient identiques a la kilocalorie pres, que le champ Distance
+    // soit vide, a 1 km ou a 30 km.
+    //
+    // La carte du jour affichait pourtant « Tu notes 30 km : c'est cette
+    // distance-la qui compte pour tes calories. » Elle ne comptait pas. C'est
+    // la demande d'Olivier mot pour mot, « ajuster les calories cramees du
+    // coup », et elle n'etait pas tenue.
+    if (a && a.cle) {
+      v = kmDeLEntree({ km: (state.runKm || {})[a.cle],
+                        minutes: (state.runMin || {})[a.cle] });
+      if (v > 0) return { km: v, source: "note", suppose: false };
+    }
+    // 2. Ce que le programme a PRESCRIT pour CE CRENEAU. C'est un fait de
     //    l'application, pas une supposition sur l'utilisateur.
-    if (typeof ji === "number") {
-      try { v = distanceVisee(ji); } catch (e) { v = 0; }
+    //    ⚠️ LA CLE DU CRENEAU, PLUS LE NUMERO DE JOUR : deux sorties le
+    //    meme jour ont deux prescriptions distinctes depuis la correction du
+    //    30 aout, et un numero de jour ne sait pas les distinguer.
+    if (a && a.cle) {
+      try { v = distanceVisee(a.cle); } catch (e) { v = 0; }
       if (v > 0) return { km: v, source: "prevu", suppose: false };
     }
     // 3. Ses sorties recentes. Vrai de lui, mais pas de CETTE sortie.
@@ -12313,10 +12457,10 @@ body.a-nav .nav { display: flex; }
   // on ne peut pas savoir quelle distance le programme prevoyait ce jour-la, et
   // on retombe sur les habitudes. Les appelants qui connaissent le jour le
   // passent ; les autres obtiennent une estimation, pas une erreur.
-  function kcalSeance(a, poids, ji) {
+  function kcalSeance(a, poids) {
     var met;
     if (!a) return 0;
-    if (a.t === "run") return KCAL_PAR_KG_ET_KM * poids * kmDeLaSortie(a, ji).km;
+    if (a.t === "run") return KCAL_PAR_KG_ET_KM * poids * kmDeLaSortie(a).km;
     if (a.t === "cours") {
       met = MET_COURS[a.nat] !== undefined ? MET_COURS[a.nat] : MET_COURS[1];
       return met * poids * ((a.min || 60) / 60);
@@ -12359,7 +12503,7 @@ body.a-nav .nav { display: flex; }
   function depenseHebdo(poids) {
     var d = deriver(), total = 0, i;
     for (i = 0; i < d.slots.length; i++) {
-      total += kcalSeance(d.slots[i].a, poids, d.slots[i].ji);
+      total += kcalSeance(d.slots[i].a, poids);
     }
     return total;
   }
@@ -12849,7 +12993,30 @@ body.a-nav .nav { display: flex; }
   // ecrits en clair dans trois fichiers, et c'est exactement ce genre de
   // constante recopiee qui a fait partir trois categories de materiel a la
   // mauvaise adresse.
-  var ETAPE_MATERIEL = 6;
+  // \U0001F534 LE RANG D'UNE ETAPE SE DEMANDE PAR SON NOM, JAMAIS PAR SON NUMERO.
+  //
+  // Huit references ecrites en dur pointaient vers les rangs d'avant
+  // l'insertion de l'etape « Course ». Aucune n'a leve, aucune n'a rougi : elles
+  // ouvraient simplement la mauvaise question. « Duree par seance » ouvrait la
+  // question sur la course, « Ce dont je dispose » ouvrait la duree, et l'ecran
+  // « Tes reperes alimentaires » n'affichait plus un seul repere.
+  //
+  // \u26a0\ufe0f C'EST UNE FONCTION, PAS UNE CONSTANTE. Le rang se resout a
+  // l'appel, donc apres que `OB` a ete construit : une constante calculee au
+  // chargement dependrait de l'ordre des blocs dans l'assemblage, ce qui est
+  // exactement le genre de dependance invisible qu'on cherche a retirer.
+  //
+  // Rend -1 quand le nom n'existe pas. Les appelants passent alors une valeur
+  // hors bornes au routeur, qui ne bouge pas : mieux vaut un bouton qui ne fait
+  // rien qu'un bouton qui ouvre autre chose sans le dire.
+  function rangEtape(nom) {
+    var i;
+    for (i = 0; i < OB.length; i++) { if (OB[i].nom === nom) return i; }
+    return -1;
+  }
+
+  // Garde le nom d'origine : trois appelants le connaissent deja.
+  function etapeMateriel() { return rangEtape("Matériel"); }
 
   // Amener le bloc des machines a 12 px du haut, sans animation.
   //
@@ -13231,7 +13398,13 @@ body.a-nav .nav { display: flex; }
   function recapLignes(step) {
     var d = deriver(), p = profilDepuisEtat(), out = [], i, noms = [];
 
-    if (step === 9) {
+    // \U0001F534 L'ETAPE SE RECONNAIT A SON NOM. Cablee sur `step === 9`, cette
+    // branche a cesse d'etre atteinte le jour ou une etape a ete inseree avant
+    // elle : l'ecran titrait « Tes reperes alimentaires » et affichait le
+    // recapitulatif de profil, identique a l'ecran suivant. Le maintien, la
+    // cible et les proteines avaient disparu du diagnostic, et le repli honnete
+    // « Il manque ton poids, etape 2 » avec eux.
+    if (OB[step] && OB[step].nom === "Repères") {
       var t = ciblesNutrition();
       // ⚠️ SANS POIDS, IL N'Y A RIEN A ESTIMER. L'ecran annoncait « Maintien
       // estime 2 620 kcal/j » a qui n'avait rien saisi, sur un corps de 80 kg,
@@ -13253,7 +13426,14 @@ body.a-nav .nav { display: flex; }
 
     for (i = 0; i < d.progJours.length; i++) noms.push(d.progJours[i].nom.slice(0, 3));
     out.push({ l: "Profil", v: (state.obPrenom || "—") + (state.obAge ? " · " + state.obAge + " ans" : "") });
-    out.push({ l: "Objectif", v: p.startWeight + " → " + p.targetWeight + " kg" });
+    // 🔴 UN POIDS QUE PERSONNE N'A SAISI NE S'AFFICHE PAS, et un poids saisi
+    // s'ecrit a la francaise. Deux defauts sur la meme ligne : « 80 → 75 kg »
+    // sortait sur un profil vide, ce sont les valeurs de repli du calcul ; et
+    // un vrai poids sortait avec un POINT, « 84.2 → 78.5 kg », alors que
+    // Nutrition et Moi ecrivent « 84,2 → 78,5 kg » sur le meme etat.
+    out.push({ l: "Objectif", v: ciblesPretes()
+      ? frDec(String(p.startWeight)) + " → " + frDec(String(p.targetWeight)) + " kg"
+      : "—" });
     out.push({ l: "Rythme", v: noms.length ? noms.join(", ") : "—" });
     out.push({ l: "Programme", v: d.slots.length + " séance" + (d.slots.length > 1 ? "s" : "") +
                " sur " + d.progJours.length + " jour" + (d.progJours.length > 1 ? "s" : "") });
@@ -13820,8 +14000,8 @@ body.a-nav .nav { display: flex; }
     // carte affichait deux champs vides et rien d'autre, alors que le moteur
     // savait dire ENDURANCE, 6 km, allure 8 min/km, avec echauffement et retour
     // au calme. Decision d'Olivier : la course est un programme prescrit.
-    var s = seanceCourseDe(a.ji);
-    var cible = distanceVisee(a.ji);
+    var s = seanceCourseDe(cleRun(a));
+    var cible = distanceVisee(cleRun(a));
     var saisi = runKmDe(a);
 
     var h = '<section class="carte-sombre carte-run">';
@@ -15018,7 +15198,7 @@ body.a-nav .nav { display: flex; }
       var _rkm = (state.runKm && state.runKm[_cle]) || "";
       var _rmin = (state.runMin && state.runMin[_cle]) || "";
       if (!_rkm) {
-        var _vis = distanceVisee(ji);
+        var _vis = distanceVisee(_cle);
         if (_vis > 0) _rkm = String(_vis).replace(".", ",");
       }
       txt = "Running · " + LIEUX[a.lieu].t +
@@ -15548,7 +15728,7 @@ body.a-nav .nav { display: flex; }
     for (i = 0; i < hj.length; i++) {
       s = hj[i];
       if (s.t === "cours") { heures += s.min || 0; continue; }
-      if (s.t === "run") { sorties++; km += nombreOu(s.km, 0); continue; }
+      if (s.t === "run") { sorties++; km += kmNote(s.km); continue; }
       tonnage += s.tonnage || 0;
       if (!s.ex) continue;
       for (j = 0; j < s.ex.length; j++) {
@@ -15734,24 +15914,31 @@ body.a-nav .nav { display: flex; }
       if (!d || jourEcart(auj, d) > 28 || jourEcart(auj, d) < 0) continue;
       m = nombreOu(h[i].minutes, 0);
       if (m > pluslongue) pluslongue = m;
-      if (nombreOu(h[i].km, 0) > plusloin) plusloin = nombreOu(h[i].km, 0);
-      kmMois += nombreOu(h[i].km, 0);
+      // Bornees, comme le modele calorique le fait deja : un « 80 » tape au
+      // lieu de « 8 » gonflait la plus longue sortie et le total du mois.
+      if (kmNote(h[i].km) > plusloin) plusloin = kmNote(h[i].km);
+      kmMois += kmNote(h[i].km);
     }
     var cible = runPalier(pluslongue);
     var pct = cible ? Math.min(100, Math.round(pluslongue / cible * 100)) : 100;
 
     var t = '<section class="run-obj"><div class="ro-t">Running</div>';
     if (cible) {
-      t += '<div class="ro-titre">Tenir ' + cible + " min sans marcher</div>" +
-           '<div class="ro-s">Ta plus longue sortie sans t\'arrêter, sur les quatre ' +
-           "dernières semaines. Le palier monte dès que tu l\u2019atteins.</div>" +
+      // ⚠️ ON NE PROMET PAS UNE MESURE QU'ON NE PREND PAS. « sans marcher » et
+      // « sans t'arreter » etaient les deux seuls mots faux : aucun arret n'est
+      // enregistre nulle part, le nombre affiche est celui tape dans la case
+      // Duree, et la sortie que l'appli prescrit contient elle-meme quatre a
+      // huit minutes de marche a tous les niveaux.
+      t += '<div class="ro-titre">Porter ta sortie à ' + cible + " min</div>" +
+           '<div class="ro-s">Ta plus longue sortie des quatre dernières ' +
+           "semaines. Le palier monte dès que tu l\u2019atteins.</div>" +
            '<div class="ro-c"><span class="ro-piste"><span class="ro-barre" style="width:' +
            pct + '%"></span></span><span class="ro-n num">' +
            Math.round(pluslongue) + " / " + cible + " min</span></div>";
     } else {
       // Le dernier palier est franchi. On ne propose pas de faire plus long :
       // deux heures d'affilee ne se conseillent pas depuis une application.
-      t += '<div class="ro-titre">Deux heures tenues</div>' +
+      t += '<div class="ro-titre">Deux heures de sortie</div>' +
            '<div class="ro-s">Tu as passé tous les paliers de durée. Ce que tu ' +
            "vises maintenant ne se décide plus ici.</div>";
     }
@@ -15887,7 +16074,7 @@ body.a-nav .nav { display: flex; }
       { t: "Mes exercices", s: nbExercicesActifs() + " retenus", a: "aller-exos" }
     ];
     if (d.slotsSalle.length) {
-      lignesProg.push({ t: "Durée par séance", s: dureeLibelle(), a: "ob-etape", v: "5" });
+      lignesProg.push({ t: "Durée par séance", s: dureeLibelle(), a: "ob-etape", v: String(rangEtape("Durée")) });
     }
     // ACTION DISTINCTE de « ob-etape ». Corriger une reponse et reprendre les
     // onze etapes ne sont pas le meme geste : le premier rend la main tout de
@@ -15918,7 +16105,7 @@ body.a-nav .nav { display: flex; }
     // onze etapes.
     h += groupeHtml("Matériel", [
       { t: "Ce dont je dispose", s: resumeMateriel(), a: "ob-etape",
-        v: String(ETAPE_MATERIEL) }
+        v: String(etapeMateriel()) }
     ]);
 
     h += groupeHtml("Assistant IA", [
@@ -15959,7 +16146,9 @@ body.a-nav .nav { display: flex; }
     h += '<p class="cr-p">Ton téléphone garde l\'appli en mémoire pour qu\'elle s\'ouvre ' +
          "hors-ligne. Si j'ai publié des nouveautés, ce bouton va les chercher.</p>";
     h += '<button type="button" class="cr-btn" data-action="recharger-maj">' +
-         "Recharger la dernière version</button></section>";
+         "Recharger la dernière version</button>";
+    if (state.majMsg) h += '<p class="cr-p">' + esc(state.majMsg) + "</p>";
+    h += "</section>";
 
     h += resetHtml();
 
@@ -15997,8 +16186,11 @@ body.a-nav .nav { display: flex; }
     return h + "</section>";
   }
 
+  // \u26a0\ufe0f IL COMPTE CE QUE L'ECRAN MONTRE. Annoncer « 140 retenus » sur la
+  // ligne d'accueil et en afficher dix derriere ferait douter du chiffre, ou de
+  // la liste.
   function nbExercicesActifs() {
-    var c = MOTEUR.CATALOG, i, n = 0;
+    var c = exosMontrables(), i, n = 0;
     // \u26a0\ufe0f UNE SORTIE PRESCRITE COMPTE TOUJOURS. Un refus enregistre avant
     // que l'ecran cesse de le proposer resterait sinon au compteur, et ferait
     // annoncer un exercice de moins que ce que le programme sert vraiment.
@@ -16057,9 +16249,9 @@ body.a-nav .nav { display: flex; }
     h += '<p class="ob-lead">Ce que le programme et les repères caloriques ' +
          "utilisent pour se calculer, et ce que ton assistant recevra.</p>";
     h += groupeHtml("Toi", [
-      { t: "Prénom", s: state.obPrenom || "non renseigné", a: "ob-etape", v: "0" },
-      { t: "Âge", s: state.obAge ? state.obAge + " ans" : "non renseigné", a: "ob-etape", v: "0" },
-      { t: "Taille", s: state.obTaille ? state.obTaille + " cm" : "non renseignée", a: "ob-etape", v: "0" }
+      { t: "Prénom", s: state.obPrenom || "non renseigné", a: "ob-etape", v: String(rangEtape("Toi")) },
+      { t: "Âge", s: state.obAge ? state.obAge + " ans" : "non renseigné", a: "ob-etape", v: String(rangEtape("Toi")) },
+      { t: "Taille", s: state.obTaille ? state.obTaille + " cm" : "non renseignée", a: "ob-etape", v: String(rangEtape("Toi")) }
     ]);
     // ⚠️ « NON RENSEIGNE » PLUTOT QU'UN POIDS INVENTE. Les trois lignes du
     // groupe precedent savent deja le dire ; ces deux-la affichaient 80 kg et
@@ -16067,28 +16259,28 @@ body.a-nav .nav { display: flex; }
     // envoye au moteur, ou le repli est necessaire, au lieu de l'etat.
     h += groupeHtml("Poids", [
       { t: "Poids de départ", s: state.obPoids ? fmtVal(p.startWeight) + " kg" : "non renseigné",
-        a: "ob-etape", v: "1" },
+        a: "ob-etape", v: String(rangEtape("Poids")) },
       { t: "Poids cible", s: state.obPoidsCible ? fmtVal(p.targetWeight) + " kg" : "non renseigné",
-        a: "ob-etape", v: "1" },
+        a: "ob-etape", v: String(rangEtape("Poids")) },
       { t: "Jour de pesée", s: JOURS[state.obPeseeJour] + " · " + PESEE_MOMENTS[state.obPeseeMoment].t,
-        a: "ob-etape", v: "8" }
+        a: "ob-etape", v: String(rangEtape("Habitudes")) }
     ]);
     // Meme regle que sur l'ecran Moi : la duree d'une seance en salle ne se
     // montre que s'il y a des seances de salle.
     var lignesProfilProg = [
-      { t: "Tes jours", s: noms.length ? noms.join(", ") : "aucun", a: "ob-etape", v: "4" },
-      { t: "Tes cours collectifs", s: cours.length ? cours.join(", ") : "aucun", a: "ob-etape", v: "4" },
-      { t: "Tes sorties running", s: run.length ? run.join(", ") : "aucune", a: "ob-etape", v: "4" }
+      { t: "Tes jours", s: noms.length ? noms.join(", ") : "aucun", a: "ob-etape", v: String(rangEtape("Rythme")) },
+      { t: "Tes cours collectifs", s: cours.length ? cours.join(", ") : "aucun", a: "ob-etape", v: String(rangEtape("Rythme")) },
+      { t: "Tes sorties running", s: run.length ? run.join(", ") : "aucune", a: "ob-etape", v: String(rangEtape("Rythme")) }
     ];
     if (deriver().slotsSalle.length) {
-      lignesProfilProg.push({ t: "Durée par séance", s: dureeLibelle(), a: "ob-etape", v: "5" });
+      lignesProfilProg.push({ t: "Durée par séance", s: dureeLibelle(), a: "ob-etape", v: String(rangEtape("Durée")) });
     }
     h += groupeHtml("Programme", lignesProfilProg);
     h += groupeHtml("Nutrition", [
       { t: "Objectif", s: ["Perdre du gras", "Maintenir", "Prendre du muscle"][state.obObjectif],
-        a: "ob-etape", v: "2" },
-      { t: "Compléments", s: nbSupps() + " retenus", a: "ob-etape", v: "8" },
-      { t: "Habitudes", s: resumeHabitudes(), a: "ob-etape", v: "8" }
+        a: "ob-etape", v: String(rangEtape("Objectif")) },
+      { t: "Compléments", s: nbSupps() + " retenus", a: "ob-etape", v: String(rangEtape("Habitudes")) },
+      { t: "Habitudes", s: resumeHabitudes(), a: "ob-etape", v: String(rangEtape("Habitudes")) }
     ]);
     // LE GROUPE « MES DONNEES » VIT ICI, PAS DANS MOI. C'est la maquette qui le
     // place sur le Profil, avec le poids du journal, les deux sens de
@@ -16272,11 +16464,48 @@ body.a-nav .nav { display: flex; }
      greffe avec le moteur : 120 entrees, chacune avec son materiel et son
      pattern de mouvement.
      ------------------------------------------------------------------------- */
+  // Vrai pour un exercice qui appartient a la course : les blocs de la sortie
+  // et ce qui l'entoure. C'est la seule famille qui concerne un coureur pur.
+  function exoDeCourse(e) {
+    return !!(e && typeof e.pat === "string" && e.pat.indexOf("run-") === 0);
+  }
+
+  // Les exercices que CE profil peut recevoir. Pour tout le monde, le catalogue
+  // entier. Pour quelqu'un qui n'a declare que des sorties, les exercices de
+  // course seulement.
+  //
+  // 🔴 LES 130 EXERCICES DE SALLE PROMETTAIENT UN EFFET QU'ILS N'AVAIENT PAS.
+  // La phrase de l'ecran dit « le programme se reecrit avec ce qui reste ».
+  // Chez un coureur pur, il n'y a aucune seance de salle a reecrire : la case
+  // s'enregistrait, le compteur bougeait, et rien ne changeait. C'est le meme
+  // defaut que la case de la sortie prescrite, corrige le 30 aout, a une autre
+  // echelle.
+  //
+  // ⚠️ ON NE JETTE RIEN. Les refus deja enregistres restent dans
+  // `state.exclus`, et la liste complete revient telle qu'elle etait des qu'une
+  // seance de salle est declaree.
+  function exosMontrables() {
+    var c = MOTEUR.CATALOG, out = [], i;
+    if (!coureurPur()) return c;
+    for (i = 0; i < c.length; i++) { if (exoDeCourse(c[i])) out.push(c[i]); }
+    return out;
+  }
+
   function exosCatalogueHtml() {
-    var c = MOTEUR.CATALOG, i, h = "", on, actifs = nbExercicesActifs();
+    var c = exosMontrables(), i, h = "", on, actifs = 0;
+    for (i = 0; i < c.length; i++) {
+      if (exoCoursePrescrit(c[i].id) || !state.exclus[c[i].id]) actifs++;
+    }
     h += '<p class="ob-lead">Décoche ce que tu ne veux plus voir. Le programme se ' +
          'réécrit avec ce qui reste. <b class="num">' + actifs + '</b> sur <b class="num">' +
          c.length + "</b> retenus.</p>";
+    // La phrase qui dit pourquoi la liste est courte. Sans elle, quelqu'un qui
+    // a deja vu les 140 exercices croirait en avoir perdu 130.
+    if (coureurPur()) {
+      h += '<p class="ob-lead">Les exercices de salle n\'apparaissent pas : tu ' +
+           "n'as déclaré aucune séance en salle. Ils reviendront le jour où tu " +
+           "en déclareras une, avec tes choix intacts.</p>";
+    }
     h += '<ul class="mo-liste">';
     for (i = 0; i < c.length; i++) {
       // 🔴 LA SORTIE NE SE DECOCHE PAS, ET L'ECRAN LE DIT MAINTENANT. Elle
@@ -16520,12 +16749,28 @@ body.a-nav .nav { display: flex; }
       //
       // ON REFUSE LE FICHIER ENTIER plutot que d'en ecrire une moitie : un
       // import a moitie applique est un etat que personne n'a jamais teste.
-      var refuse = null;
+      // \U0001F534 ON PASSE PAR LA MEME TOLERANCE QUE LA LECTURE DU DISQUE, sinon
+      // les deux portes qui menent au meme etat ne disent pas la meme chose.
+      //
+      // `lire()` completait un `obGear` de 13 entrees et reprenait le defaut
+      // d'une cle qui a change de type ; `formeValide`, lui, exigeait la forme
+      // exacte de la version courante et refusait le FICHIER ENTIER. Une
+      // sauvegarde ecrite par la 1.22.x butait donc sur `obGear`, puis sur
+      // `runKm`, puis sur `runMin`. Quelqu'un qui change de telephone et
+      // restaure sa sauvegarde ne recuperait rien, avec un message qui laissait
+      // croire a un fichier abime.
+      //
+      // \u26a0\ufe0f LE REFUS RESTE EN PLACE POUR CE QUI EST VRAIMENT MALFORME. On
+      // ne desarme pas le controle : on lui presente la valeur deja normalisee,
+      // exactement comme le disque le fait. Un `obJours: "oui"` est toujours
+      // refuse, et le fichier entier avec.
+      var refuse = null, vk;
       for (i = 0; i < CLES_SAUVEES.length; i++) {
         k = CLES_SAUVEES[i];
         if (!has(o, k)) continue;
-        if (!formeValide(k, o[k])) { refuse = k; break; }
-        maj[k] = o[k];
+        vk = completerParDefaut(k, o[k]);
+        if (!formeValide(k, vk)) { refuse = k; break; }
+        maj[k] = vk;
         repris++;
       }
       if (refuse) {
@@ -16563,21 +16808,48 @@ body.a-nav .nav { display: flex; }
 
   // Vide les caches du service worker puis recharge. C'est la seule sortie
   // pour qui a l'appli en ecran d'accueil : sans ca, iOS resert sa copie.
+  // 🔴 ON VERIFIE LE RESEAU AVANT DE VIDER, ET PAS APRES.
+  //
+  // Ce bouton supprimait les caches puis rechargeait. Hors ligne, l'appli
+  // devenait une ligne de texte, « LEMMON FIT est hors-ligne et n'a rien en
+  // cache. Reconnecte-toi une fois. », et elle ne revenait qu'au retour du
+  // reseau. Quelqu'un qui appuie dessus dans un sous-sol de salle de sport
+  // perdait son appli jusqu'a la sortie.
+  //
+  // ⚠️ LA GARDE EXISTAIT DEJA DANS sw.js ET N'ETAIT BRANCHEE SUR RIEN. Le
+  // service worker laisse passer sans y toucher toute requete portant
+  // `?nocache` : elle a ete ecrite pour cette sonde, et le mot n'apparaissait
+  // nulle part dans l'application. On s'en sert enfin.
   function rechargerMaj() {
     var fini = function () {
       window.location.href = window.location.pathname + "?v=" + jourNumero() + "-" + (state.hist || []).length;
     };
+    var vider = function () {
+      try {
+        if (window.caches && window.caches.keys) {
+          window.caches.keys().then(function (ks) {
+            var i, p = [];
+            for (i = 0; i < ks.length; i++) p.push(window.caches.delete(ks[i]));
+            return window.Promise.all(p);
+          }).then(fini)["catch"](fini);
+          return;
+        }
+      } catch (e) {}
+      fini();
+    };
+    // Sans reseau, on ne touche a rien et on le dit. Le message remplace le
+    // rechargement : il n'y a rien a aller chercher, et tout a perdre.
     try {
-      if (window.caches && window.caches.keys) {
-        window.caches.keys().then(function (ks) {
-          var i, p = [];
-          for (i = 0; i < ks.length; i++) p.push(window.caches.delete(ks[i]));
-          return window.Promise.all(p);
-        }).then(fini)["catch"](fini);
-        return;
-      }
-    } catch (e) {}
-    fini();
+      if (!window.fetch) { vider(); return; }
+      window.fetch(window.location.pathname + "?nocache=" + jourNumero(),
+                   { cache: "no-store" })
+        .then(function (r) {
+          if (r && r.ok) { vider(); return; }
+          poser({ majMsg: "Pas de réseau pour l’instant. L’appli reste telle qu’elle est." });
+        })["catch"](function () {
+          poser({ majMsg: "Pas de réseau pour l’instant. L’appli reste telle qu’elle est." });
+        });
+    } catch (e) { vider(); }
   }
 
   function resetConfirmer() {
@@ -16770,7 +17042,13 @@ body.a-nav .nav { display: flex; }
     // champ d'experience et il est greffe verbatim, donc il n'y a rien a
     // brancher de ce cote. Ici, en revanche, c'est exactement ce qu'un
     // preparateur a besoin de savoir avant de relire un programme.
-    L.push(PRATIQUE_PHRASE[state.obPratique] || PRATIQUE_PHRASE[0]);
+    // ⚠️ LA REPONSE SE LIT A TRAVERS SON TEMOIN, comme dans le modele de
+    // charge. Sans lui, la demande envoyee a l'assistant affirmait « Je pratique
+    // regulierement depuis six mois ou plus, sans coupure » y compris pour un
+    // vrai debutant, pendant que le modele de charge lui appliquait le
+    // coefficient debutant. Les deux se contredisaient dans le meme envoi.
+    var _iPr = state.obPratiqueDite ? state.obPratique : 0;
+    L.push(PRATIQUE_PHRASE[_iPr] || PRATIQUE_PHRASE[0]);
     L.push("");
 
     L.push("== CE QUE J'AI FAIT SUR 4 SEMAINES ==");
@@ -17365,7 +17643,11 @@ body.a-nav .nav { display: flex; }
     // Les valeurs sortent de nutritionTargets : la maquette les ecrit en dur
     // (78,4 -> 75 kg en 11 semaines, 460 kcal), ce qui ne vaut que pour son
     // profil d'exemple.
-    if (t.weeks && t.deficit) {
+    // ⚠️ LA MEME GARDE QUE LA CARTE DU HAUT. Sans elle, l'ecran disait « Il
+    // manque ton poids. » puis, quinze lignes plus bas, « A ce rythme,
+    // 80 → 75 kg en 13 semaines. Le deficit est de 448 kcal par jour. » Le meme
+    // ecran se contredisait, avec un corps invente.
+    if (t.pret && t.weeks && t.deficit) {
       var parSem = Math.round((Math.abs(t.deficit) * 7 / 7700) * 100) / 100;
       h += '<section class="nu-horizon"><div class="nu-h-t">Horizon</div>' +
            '<div class="nu-h-p">À ce rythme, <b>' + esc(fmtVal(p.startWeight)) + " → " +
@@ -17404,7 +17686,7 @@ body.a-nav .nav { display: flex; }
    module a l'autre.
    =========================================================================== */
 
-  var APP_VERSION = "1.25.0";
+  var APP_VERSION = "1.25.1";
 
   function has(o, k) { return Object.prototype.hasOwnProperty.call(o, k); }
 
@@ -17595,6 +17877,9 @@ body.a-nav .nav { display: flex; }
     // profil transmis au moteur : tout le monde recevait l'allure et le plafond
     // de distance d'un debutant.
     obRunNiveau: 0, obRunDuree: 1,
+    // Le message du bouton de rechargement. Il ne se sauve pas : il ne
+    // vaut que pour l'appui qui vient d'avoir lieu.
+    majMsg: "",
     actFaits: {},
 
     // LE JOURNAL DATE, ajoute a la spec du prototype. Voir block_journal.js
@@ -17736,6 +18021,28 @@ body.a-nav .nav { display: flex; }
       k = CLES_SAUVEES[i];
       if (has(o, k)) r[k] = completerParDefaut(k, o[k]);
     }
+    // \U0001F534 LE TEMOIN DE LA QUESTION « OU TU EN ES » SE MIGRE, SANS QUOI LES
+    // CHARGES SONT DIVISEES PAR DEUX.
+    //
+    // `obPratiqueDite` est ne le 30 aout, avec le modele de charge : il dit si
+    // la puce a ete touchee, parce que « Regulier » est la valeur par DEFAUT et
+    // qu'un defaut n'est pas une reponse. Sans temoin, `chargeDeDepart` retombe
+    // sur le coefficient debutant.
+    //
+    // Mesure sur un profil migre depuis la 1.22.2 : 21 exercices proposes
+    // changent, aucun ne reste identique, rapport 0,44 a 0,56, et trois tombent
+    // sous le plancher donc ne proposent plus rien. Squat barre 35 kg au lieu
+    // de 65. Pendant ce temps l'ecran affiche « Regulier » comme retenu.
+    //
+    // \u26a0\ufe0f LA QUESTION LEUR A BIEN ETE POSEE. L'etape Pratique existe depuis
+    // longtemps et un diagnostic termine (`vu`) l'a forcement traversee : la
+    // reponse affichee est celle qu'ils ont laissee, defaut compris. On la
+    // prend donc pour dite. Le seul cas ou l'on se trompe est celui de
+    // quelqu'un qui a traverse l'etape sans rien toucher, et a qui l'on
+    // attribue « Regulier » : c'est exactement ce que son ecran lui montrait.
+    if (o.vu && has(o, "obPratique") && !has(o, "obPratiqueDite")) {
+      r.obPratiqueDite = 1;
+    }
     return r;
   }
 
@@ -17759,6 +18066,33 @@ body.a-nav .nav { display: flex; }
   // rangs en trop ne sont lus par personne.
   function completerParDefaut(cle, v) {
     var d = has(DEFAUTS, cle) ? DEFAUTS[cle] : undefined, out, i;
+    // \U0001F534 UNE CLE QUI A CHANGE DE TYPE ENTRE DEUX VERSIONS REPREND SON
+    // DEFAUT. `runKm` et `runMin` etaient des CHAINES jusqu'a la 1.22.2, ils
+    // sont des OBJETS indexes par creneau depuis la 1.25.0. Relus tels quels :
+    //   - le `for (k in "7,5")` de la saisie et de l'archivage itere "0","1","2"
+    //     et ecrit `{"0":"7","1":",","2":"5"}` sur le disque ;
+    //   - l'export recopie la chaine, et le fichier produit est REFUSE par
+    //     l'import de la meme version, qui attend un objet.
+    // Mesure : la sauvegarde d'Olivier n'etait plus restaurable, et celle faite
+    // aujourd'hui ne l'etait pas davantage.
+    //
+    // \u26a0\ufe0f ON NE CONVERTIT PAS, ON REPREND LE DEFAUT. Traduire "7,5" en
+    // `{...}` supposerait de deviner a quel creneau ce chiffre appartenait ;
+    // il n'y avait qu'une paire pour toute l'application, l'information n'existe
+    // pas. Deux champs a re-remplir valent mieux qu'un chiffre attribue au
+    // hasard.
+    // ⚠️ SEULEMENT QUAND LA VALEUR RELUE N'EST PAS UN OBJET DU TOUT. Une
+    // premiere version de cette regle rejetait aussi les TABLEAUX, et elle a
+    // vide `obAct` d'un coup : un banc a rougi sur-le-champ, la journee du jour
+    // etant devenue un jour de repos. Un tableau se parcourt par cle comme un
+    // objet, il porte peut-etre de vraies reponses, et le jeter en silence est
+    // exactement la perte de donnees qu'on est en train de corriger. La regle
+    // ne vise donc que ce qui ne peut RIEN porter : une chaine, un nombre, un
+    // booleen, ou rien.
+    if (d && typeof d === "object" && !isArray(d) &&
+        (v === null || v === undefined || typeof v !== "object")) {
+      return copie(d);
+    }
     if (!isArray(d) || !isArray(v) || v.length >= d.length) return v;
     out = v.slice();
     for (i = v.length; i < d.length; i++) out.push(copie(d[i]));
@@ -18805,7 +19139,7 @@ body.a-nav .nav { display: flex; }
       window.scrollTo(0, 0);
       // « Ce dont je dispose » annonce un nombre de machines : on ouvre donc sur
       // les machines, pas sur les cinq cases qui les precedent.
-      if (etape === ETAPE_MATERIEL && state.obEquip[I_MACHINES]) { montrerLesMachines(); }
+      if (etape === etapeMateriel() && state.obEquip[I_MACHINES]) { montrerLesMachines(); }
       return;
     }
     if (action === "ob-quitter") { obQuitter(false); return; }
@@ -19098,6 +19432,10 @@ body.a-nav .nav { display: flex; }
     fatigueDeclaree: fatigueDeclaree,
     runVerdict: runVerdict,
     etapePertinente: etapePertinente,
+    rangEtape: rangEtape,
+    completerParDefaut: completerParDefaut,
+    formeValide: formeValide,
+    ob: function () { return OB; },
     runVerdictDecider: runVerdictDecider,
     formeDuJour: formeDuJour,
     poserForme: poserForme,

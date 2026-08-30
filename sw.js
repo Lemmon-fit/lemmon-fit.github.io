@@ -4,7 +4,7 @@
 // dans manifest.json. Le nom du cache en découle : changer de version purge
 // donc automatiquement l'ancien cache, ce que "lemmonfit-cache-v1" (figé) ne
 // faisait jamais.
-var VERSION = "1.25.0";
+var VERSION = "1.25.1";
 var CACHE_NAME = "lemmonfit-" + VERSION;
 
 var INDEX_URL = new URL("./index.html", self.location.href).href;
@@ -44,6 +44,13 @@ function cacheKey(request) {
   var url = new URL(request.url);
   url.search = "";
   url.hash = "";
+  // La racine et le document sont la MEME ressource. Sans cette ligne, le
+  // service worker gardait deux copies de la coquille, une sous "./" et une
+  // sous "./index.html" : 2 188 222 o en cache pour un fichier qui en pese
+  // 997 000. On ne peut pas retirer "./" du prechargement pour autant, sinon
+  // une navigation vers la racine perdrait le raccourci de cache et attendrait
+  // le reseau jusqu'a 3,5 s. On ramene donc les deux sur la meme cle.
+  if (url.pathname.slice(-1) === "/") url.pathname += "index.html";
   return url.href;
 }
 
