@@ -859,19 +859,25 @@ body.a-nav .nav { display: flex; }
 .cs-liste { list-style: none; margin: 10px 0 0; padding: 0; }
 .cs-liste li { border-bottom: 1px solid var(--sep); }
 .cs-liste li:last-child { border-bottom: 0; }
+/* UNE ENTREE DE LA LISTE DES SEANCES. Trois lignes empilees, et non trois
+   colonnes : le nom d'une seance fait aujourd'hui jusqu'a vingt-six caracteres,
+   et une mise en colonnes le cassait en trois morceaux. */
 .cs-s {
-  width: 100%; min-height: 60px; padding: 10px 0;
-  display: flex; align-items: center; gap: 11px;
+  width: 100%; padding: 12px 0;
+  display: flex; flex-direction: column; gap: 3px;
   border: 0; background: transparent; font-family: inherit; text-align: left;
 }
-.cs-s-p {
-  flex: 0 0 auto; min-width: 58px; text-align: center;
-  background: var(--salle-pale); color: var(--salle-encre);
-  font-size: 10px; font-weight: 800; letter-spacing: .4px;
-  padding: 5px 8px; border-radius: 8px;
+/* Ligne 1 : le nom, et le jour prevu pousse a droite. */
+.cs-s-h {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: 10px; width: 100%;
 }
-.cs-s-c { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-.cs-s-n { font-size: 14.5px; font-weight: 700; color: var(--texte); }
+.cs-s-n {
+  font-size: 15.5px; font-weight: 800; color: var(--texte);
+  line-height: 1.25; min-width: 0;
+}
+/* Lignes 2 et 3, sur toute la largeur : plus rien ne les comprime. */
+.cs-s-sub { font-size: 13px; color: var(--texte-1b); line-height: 1.4; }
 .cs-s-d { font-size: 12px; color: var(--texte-2); }
 .cs-s-j {
   flex: 0 0 auto; display: flex; align-items: center; gap: 6px;
@@ -1249,6 +1255,38 @@ body.a-nav .nav { display: flex; }
    il ne serait reste que 8 px devant « Valider » et 4 devant « Comme la
    precedente », c'est-a-dire deux cibles tactiles qui se touchent presque, le
    defaut meme qu'on vient de corriger. */
+/* LE RELEVE DE L'APPAREIL. Il vit DANS la carte de saisie, sous les molettes
+   et au-dessus du bouton de validation : c'est la derniere chose qu'on renseigne
+   avant de valider, donc la derniere chose qu'on doit lire.
+   ⚠️ Aucun jeton neuf : les cinq utilises existent deja. */
+.sa-releve { margin: 0 0 18px; }
+.sa-releve-l {
+  display: block; font-size: 12.5px; font-weight: 700;
+  color: var(--sombre-texte-3); margin-bottom: 7px;
+}
+.sa-releve-c { display: flex; align-items: center; gap: 10px; }
+.sa-releve-i {
+  flex: 1; min-width: 0; min-height: 52px;
+  background: var(--sombre-carte); border: 1.5px solid var(--sombre-bord);
+  border-radius: 13px; color: var(--sombre-texte);
+  font-size: 17px; padding: 0 14px;
+  font-family: ui-monospace, "SF Mono", monospace;
+}
+.sa-releve-u {
+  flex: 0 0 auto; font-size: 14px; font-weight: 700;
+  color: var(--sombre-texte-3);
+}
+.sa-releve-h {
+  font-size: 11.5px; line-height: 1.4; color: var(--sombre-texte-3);
+  margin: 7px 0 0;
+}
+/* La ligne de l'ecran de fin. Elle n'existe que s'il y a un chiffre. */
+.fin-releve {
+  font-size: 13px; line-height: 1.45; color: var(--sombre-texte-3);
+  margin: 12px 0 0; text-align: center;
+}
+.fin-releve .num { color: var(--salle-bg); font-weight: 800; }
+
 .sa-steppers { display: block; margin-bottom: 22px; }
 .sa-steppers .st:last-child { margin-bottom: 0; }
 
@@ -8003,6 +8041,64 @@ body.a-nav .nav { display: flex; }
         "Tourne le buste sur une amplitude modeste, jamais jusqu'à la butée de la machine.",
         "Charge légère et mouvement lent : aucun à-coup, ni à l'aller ni au retour.",
         "Erreur fréquente : mettre lourd et se lancer avec l'élan, la colonne encaisse toute la torsion."
+      ] },
+    // ---------------------------------------------------------------
+    // rang 3.5 : derriere la marche rapide : le tapis n'avait aucun exercice de travail
+    { id: "tapis-continu", name: "Tapis, allure continue",
+      pat: "cardio", equip: ["cardio"], rank: 3.5,
+      mins: 20,
+      note: "allure soutenue",
+      mat: "Tapis de course",
+      lines: [
+        "Allure a laquelle tu peux dire une phrase courte, pas une conversation.",
+        "Mets 1 % de pente : a plat, le tapis fait defiler le sol sous toi et l'effort est plus faible que dehors.",
+        "Prends la duree comme objectif, pas la distance."
+      ] },
+    // ---------------------------------------------------------------
+    // rang 2.5 : derriere le velo HIIT : le tapis n'avait aucun bloc d'intervalles
+    { id: "tapis-fractionne", name: "Tapis, fractionne",
+      pat: "hiit", equip: ["cardio"], rank: 2.5,
+      dur: "1 min rapide / 2 min souple", sets: 7, rest: 0, blockMins: 20,
+      mat: "Tapis de course",
+      lines: [
+        "Une minute a allure rapide, deux minutes en marche ou trottinement leger. Sept fois.",
+        "Regle la vitesse avant de monter dessus, pas pendant l'effort.",
+        "Si tu debutes, commence par quatre repetitions et monte au fil des semaines."
+      ] },
+    // ---------------------------------------------------------------
+    // rang 4.5 : derriere l'elliptique : le stepper n'avait qu'un echauffement
+    { id: "stepper-continu", name: "Stepper",
+      pat: "cardio", equip: ["mach"], gear: "cardio-salle", rank: 4.5,
+      mins: 15,
+      note: "cadence reguliere",
+      mat: "Stepper",
+      lines: [
+        "Buste droit, ne t'appuie pas de tout ton poids sur les poignees.",
+        "Pose le pied a plat sur la marche, pas seulement la pointe.",
+        "Cadence reguliere plutot que des a-coups : c'est la duree qui compte."
+      ] },
+    // ---------------------------------------------------------------
+    // rang 4.6 : derriere le stepper : le velo allonge n'avait qu'un echauffement
+    { id: "velo-allonge-continu", name: "Velo allonge",
+      pat: "cardio", equip: ["mach"], gear: "cardio-salle", rank: 4.6,
+      mins: 15,
+      note: "resistance moyenne",
+      mat: "Velo allonge",
+      lines: [
+        "Le dossier soulage le bas du dos : utile si t'asseoir sur une selle te gene.",
+        "Regle le siege pour que la jambe reste legerement flechie en fin de poussee.",
+        "Cadence reguliere, resistance moyenne plutot que forte."
+      ] },
+    // ---------------------------------------------------------------
+    // rang 4.5 : derriere la corde a sauter : l'elliptique n'avait pas de fractionne
+    { id: "elliptique-fractionne", name: "Elliptique, fractionne",
+      pat: "hiit", equip: ["mach"], gear: "cardio-salle", rank: 4.5,
+      dur: "40 sec fort / 80 sec souple", sets: 8, rest: 0, blockMins: 16,
+      mat: "Velo elliptique",
+      lines: [
+        "Quarante secondes a resistance forte, quatre-vingts secondes en recuperation active. Huit fois.",
+        "Monte la resistance pendant l'effort, redescends-la pour recuperer.",
+        "Sans impact : utile si les genoux se rappellent a toi."
       ] }
   ];
 
@@ -8249,7 +8345,17 @@ body.a-nav .nav { display: flex; }
     // cochent un par un. Ce qui reste ici est le cardio qui ne demande rien :
     // marche rapide, HIIT au poids du corps. Plus la corde a sauter, en
     // sous-liste, parce qu'une corde n'est pas le sol.
-    { t: "Cardio en poids de corps", s: "Marche rapide, HIIT sans matériel" }
+    { t: "Cardio en poids de corps", s: "Marche rapide, HIIT sans matériel" },
+    // \U0001F534 LE POIDS DU CORPS ETAIT SUPPOSE, JAMAIS DEMANDE. Le moteur pose
+    // `avail = { bw: true }` en dur : un profil qui ne declarait rien recevait
+    // douze exercices, tous au poids du corps. Olivier : « nulle part je n'ai
+    // coche poids de corps ».
+    //
+    // \u26a0\ufe0f AJOUTEE EN FIN DE LISTE, ET NULLE PART AILLEURS. `obEquip` est un
+    // tableau positionnel sauvegarde tel quel : inserer au milieu ferait glisser
+    // toutes les reponses deja enregistrees d'un rang. C'est arrive deux fois a
+    // `obGear`.
+    { t: "Poids du corps", s: "Pompes, squats, gainage, sans rien d'autre" }
   ];
 
   // L'ORDRE D'AFFICHAGE, ET LUI SEUL.
@@ -8266,7 +8372,11 @@ body.a-nav .nav { display: flex; }
   // pour le moteur est elle aussi alignee sur ces positions : deplacer une
   // entree de EQUIP deplacerait en silence les reponses deja enregistrees sur
   // les telephones. Le tableau ci-dessous ne contient que des index de EQUIP.
-  var EQUIP_ORDRE = [1, 2, 3, 4, 5, 0];
+  // ⚠️ LE POIDS DU CORPS EN TETE. C'est ce que tout le monde a, et la
+  // question monte ensuite vers ce qu'on possede. Il a fallu l'ajouter ICI en
+  // plus de `EQUIP` : le banc de garde a vu du premier coup qu'une categorie
+  // absente de cet ordre ne s'affiche jamais, meme declaree.
+  var EQUIP_ORDRE = [6, 1, 2, 3, 4, 5, 0];
 
   // UNE pesée par semaine, toujours dans les mêmes conditions. Changer une
   // seule de ces conditions déplace le chiffre plus que ce qu'une semaine de
@@ -8559,7 +8669,13 @@ body.a-nav .nav { display: flex; }
     //
     // Une chaine vide ne pousse rien dans `equipment`. Ce que la case gouverne
     // vraiment, c'est `CARDIO_SANS_MATERIEL` plus bas.
-    var CORRESP = ["mach", "barre", "halt", "trac", "elast", ""];
+    // ⚠️ SEPT ENTREES, COMME `EQUIP`. Les deux dernieres sont vides :
+    // « Cardio en poids de corps » et « Poids du corps » ne correspondent a
+    // aucune categorie de materiel du moteur, qui suppose le corps toujours
+    // disponible. Elles agissent par `excluded`, plus bas. Le banc de garde
+    // exige que les deux listes aient la meme longueur, et il a raison : une
+    // categorie sans correspondance passerait en silence.
+    var CORRESP = ["mach", "barre", "halt", "trac", "elast", "", ""];
     for (i = 0; i < state.obEquip.length && i < CORRESP.length; i++) {
       if (state.obEquip[i] && CORRESP[i]) equip.push(CORRESP[i]);
     }
@@ -8623,7 +8739,8 @@ body.a-nav .nav { display: flex; }
       // exercice ne changeait rien. Le moteur, lui, porte `excluded` depuis
       // toujours et le verse dans ses exclusions de creneau
       // (block_moteur.js:1589).
-      excluded: exclusIds().concat(exclusDuMateriel(equip), exclusDesZones()),
+      excluded: exclusIds().concat(exclusDuMateriel(equip), exclusDesZones(),
+                                   exclusDuPoidsDuCorps()),
       // ⚠️ « MAINTIEN » N'EXISTE PAS POUR LE MOTEUR.
       // Il ne connait que perte, prise et tonifier (block_moteur.js:1303) ;
       // `cleanProfile` ramene tout le reste a null (2423), et un objectif null
@@ -8681,6 +8798,66 @@ body.a-nav .nav { display: flex; }
   // Mesure : les sept zones couvrent 95 des 120 exercices. Les 25 autres sont
   // les echauffements, le cardio, le HIIT et la course, qui ne visent aucun
   // muscle : ecarter une zone ne les touche jamais.
+  // Le rang du poids du corps dans `obEquip`. \u26a0\ufe0f LE DERNIER, et il le
+  // restera : toute categorie neuve s'ajoute APRES, jamais avant.
+  var I_POIDS_DU_CORPS = 6;
+
+  // -------------------------------------------------------------------------
+  // LE POIDS DU CORPS, QUAND ON N'EN VEUT PAS
+  // -------------------------------------------------------------------------
+  // \U0001F534 LE MOTEUR LE POSE EN DUR : `avail = { bw: true }`, a trois
+  // endroits. On ne peut pas le lui retirer, il est greffe verbatim. On passe
+  // donc par `excluded`, comme pour les zones et les machines absentes.
+  //
+  // \u26a0\ufe0f ON N'EMPORTE QUE LA MUSCULATION. Les echauffements et le cardio
+  // sans materiel sont eux aussi sans equipement ; les exclure viderait la
+  // seance de son echauffement et supprimerait la marche rapide, que la case
+  // « Cardio en poids de corps » gouverne deja. On se limite aux exercices qui
+  // servent une ZONE musculaire, c'est-a-dire au travail de force.
+  // Vrai quand cet exercice ne demande RIEN d'autre que le corps. Le moteur
+  // etiquette ces entrees `equip: ["bw"]` ; une liste vide n'existe pas au
+  // catalogue.
+  function estAuPoidsDuCorps(e) {
+    var i;
+    if (!e || !isArray(e.equip)) return false;
+    if (!e.equip.length) return true;
+    for (i = 0; i < e.equip.length; i++) { if (e.equip[i] !== "bw") return false; }
+    return true;
+  }
+
+  function exclusDuPoidsDuCorps() {
+    var out = [], c, i, Z, j, pats = {};
+    // 🔴 UNE ENTREE ABSENTE VAUT « COCHEE », JAMAIS « DECOCHEE ».
+    //
+    // `obEquip` est positionnel et vient de trois sources : le disque, un
+    // import, et les bancs. Le disque passe par `completerParDefaut`, qui
+    // rallonge a sept et pose 1 ; les deux autres peuvent tres bien rendre un
+    // tableau de six. Lire `undefined` comme un refus retirerait alors la
+    // musculation au poids du corps a quelqu'un qui n'a jamais rien decoche.
+    //
+    // Mesure : deux bancs ont rougi dans la minute qui a suivi l'ajout de la
+    // septieme case, en posant un tableau de six. Un utilisateur dont la
+    // sauvegarde echapperait au completement aurait perdu son programme de la
+    // meme facon, et sans banc pour le dire.
+    if (state.obEquip.length <= I_POIDS_DU_CORPS) return out;
+    if (state.obEquip[I_POIDS_DU_CORPS]) return out;
+    Z = (MOTEUR && MOTEUR.ZONES) || [];
+    for (i = 0; i < Z.length; i++) {
+      for (j = 0; j < Z[i].pats.length; j++) pats[Z[i].pats[j]] = 1;
+    }
+    c = MOTEUR.CATALOG;
+    for (i = 0; i < c.length; i++) {
+      // ⚠️ UN EXERCICE AU POIDS DU CORPS PORTE `equip: ["bw"]`, PAS UNE
+      // LISTE VIDE. Un premier jet ecartait tout ce qui avait un equipement, ce
+      // qui les ecartait EUX AUSSI : la liste sortait a zero et rien ne
+      // changeait. Mesure : `exclusBw = 0` alors que la case etait decochee.
+      if (!estAuPoidsDuCorps(c[i])) continue;
+      if (!has(pats, c[i].pat)) continue;              // ni force, ni zone
+      out.push(c[i].id);
+    }
+    return out;
+  }
+
   function exclusDesZones() {
     var Z = (MOTEUR && MOTEUR.ZONES) || [], c = MOTEUR.CATALOG;
     var pats = {}, out = [], i, j;
@@ -8853,10 +9030,30 @@ body.a-nav .nav { display: flex; }
   // qui n'en a pas, sans que rien ne le signale.
   var I_VELO = 13, I_RAMEUR = 14, I_TAPIS = 15, I_CORDE = 16;
 
+  // Le rang de « Cardio de salle » chez le moteur : stepper, elliptique et velo
+  // allonge partagent cette seule case.
+  var I_CARDIO_SALLE = 12;
+
+  // \u26a0\ufe0f LES RANGS DE `obGear` QUI NE SONT PAS DE LA FORCE. Tout le reste
+  // de la sous-liste (poulies, chest press, presse a cuisses, leg curl...) est
+  // du materiel de force. Cette table repond a une question que personne ne
+  // posait : « cette personne a-t-elle de quoi soulever ? »
+  var GEAR_CARDIO = {};
+  GEAR_CARDIO[I_CARDIO_SALLE] = 1;
+  GEAR_CARDIO[I_VELO] = 1;
+  GEAR_CARDIO[I_RAMEUR] = 1;
+  GEAR_CARDIO[I_TAPIS] = 1;
+  GEAR_CARDIO[I_CORDE] = 1;
+
   var APPAREILS_CARDIO = {};
   APPAREILS_CARDIO[I_VELO] = ["velo-continu", "velo-hiit-tabata", "warm-up-velo"];
   APPAREILS_CARDIO[I_RAMEUR] = ["rameur-continu", "rameur-hiit-tabata", "warm-up-rameur"];
-  APPAREILS_CARDIO[I_TAPIS] = ["repos-marche-lente", "course-tapis", "warm-up-marche"];
+  // \u26a0\ufe0f `tapis-continu` ET `tapis-fractionne` SONT AJOUTES PAR
+  // `block_extension.js`, et ils tombent avec le tapis comme les autres. Sans
+  // ces deux lignes, quelqu'un qui n'a pas de tapis s'en verrait proposer, et
+  // `controle/verifier_cardio.py` refuserait la construction.
+  APPAREILS_CARDIO[I_TAPIS] = ["repos-marche-lente", "course-tapis", "warm-up-marche",
+                               "tapis-continu", "tapis-fractionne"];
   APPAREILS_CARDIO[I_CORDE] = ["corde-a-sauter"];
 
   // Ce que la case « Cardio en poids de corps » gouverne vraiment. Ces deux-la
@@ -9341,6 +9538,9 @@ body.a-nav .nav { display: flex; }
       // ⚠️ TOUTE CLE D'ETAT QUE `profilDepuisEtat` LIT DOIT ENTRER ICI.
       // C'est la seule regle, et elle a ete violee cinq fois.
       cleTriee(state.obEviter),
+      // \u26a0\ufe0f `obEquip` EST DEJA DANS L'EMPREINTE, plus haut, sous forme
+      // jointe : la septieme case y entre donc toute seule. Verifie plutot que
+      // suppose, apres cinq oublis dans cette meme fonction.
       // ⚠️ MEME RAISON ICI. `progCache.seances` est indexe par rang de seance et
       // n'est vide que quand l'empreinte change : sans l'etat de la journee de
       // depense, la seance substituee serait servie depuis le cache de la
@@ -9375,8 +9575,251 @@ body.a-nav .nav { display: flex; }
   //
   // Elle ne lit que l'etat brut : aucun appel au profil, donc aucune recursion.
   function cleGabarits() {
+    // 🔴 LE MATERIEL ENTRE DANS CETTE CLE DEPUIS LE 31 AOUT. C'est la
+    // SIXIEME cle de cache oubliee en deux jours, apres `obDepense`,
+    // `obRunNiveau`, `obRunDuree` et `obEviter` dans `empreinteProgramme`.
+    //
+    // Le jour ou le choix des gabarits a commence a dependre du materiel
+    // declare (`poserLeCardio`), cette cle a cesse de decrire ce qu'elle
+    // protege : mesure sur cinq profils d'affilee, la journee de cardio posee
+    // pour l'un restait servie a tous les suivants, y compris a celui qui
+    // n'avait declare aucun appareil.
+    //
+    // ⚠️ DEUX CLES POUR DEUX CACHES, ET ELLES NE COUVRENT PAS LA MEME
+    // CHOSE. `empreinteProgramme` protege le PROFIL, celle-ci protege le choix
+    // des GABARITS. Ajouter une entree a l'une ne renseigne pas l'autre : c'est
+    // exactement ce qui vient d'arriver.
     return "g|" + nbCreneauxSalle() + "|" + state.obObjectif +
-           "|" + depEtat().etat;
+           "|" + depEtat().etat +
+           "|" + state.obEquip.join("") + "|" + state.obGear.join("");
+  }
+
+  // -------------------------------------------------------------------------
+  // CE QUE LE MATERIEL DECLARE PERMET VRAIMENT DE FAIRE
+  // -------------------------------------------------------------------------
+  // Vrai quand l'utilisateur a de quoi travailler en FORCE : une barre, des
+  // halteres, une barre de traction, des elastiques, des machines, ou son
+  // propre poids de corps s'il l'a garde.
+  // 🔴 COCHER « MACHINES DE SALLE » NE DIT PAS QU'ON A DE QUOI SOULEVER.
+  //
+  // Cette fonction rendait vrai des que l'une des cinq premieres categories
+  // etait cochee. Or la premiere, « Machines de salle », ouvre une SOUS-LISTE :
+  // quelqu'un qui n'y coche que le rameur n'a AUCUN materiel de force, et
+  // l'application le comptait pourtant comme equipe.
+  //
+  // Consequence mesuree, signalee par Olivier : avec un rameur seul sur cinq
+  // jours, `poserLeCardio` ne demandait qu'UNE journee de cardio ; le gabarit
+  // HIIT en portant deja une, il ne substituait rien, et quatre seances sur
+  // cinq ne portaient qu'un echauffement de six minutes.
+  //
+  // \u26a0\ufe0f `aDuCardio()`, vingt lignes plus bas, porte EXACTEMENT cette garde
+  // et la commente : « cocher Machines de salle NE SUFFIT PAS ». La symetrique
+  // manquait. Les deux fonctions se lisent maintenant ensemble.
+  // -------------------------------------------------------------------------
+  // LA SEMAINE SERA-T-ELLE REPETITIVE ?
+  // -------------------------------------------------------------------------
+  // Arbitrage d'Olivier, 31 aout 2026 : le dire, et servir quand meme. « Si
+  // c'est le choix de l'utilisateur c'est pas grave. »
+  //
+  // LA REGLE N'A PAS DE SEUIL INVENTE : la semaine est repetitive quand elle
+  // compte MOINS d'exercices de travail distincts qu'elle ne compte de seances.
+  // Deux exercices pour cinq seances, on le dit. Cinq pour trois, on se tait.
+  //
+  // \u26a0\ufe0f LES ECHAUFFEMENTS NE COMPTENT PAS. Ils se repetent par nature et ne
+  // disent rien de la variete du travail.
+  //
+  // \u26a0\ufe0f ZERO EXERCICE N'EST PAS CE CAS-LA. L'etape Materiel le dit deja avec
+  // sa propre phrase ; deux messages pour la meme cause diraient deux fois la
+  // meme chose. On rend donc `null`.
+  //
+  // Rend `{ seances, distincts, vides }`, ou `null` si la semaine n'existe pas
+  // encore. C'est l'ECRAN qui decide quoi en dire : la mesure ne juge pas.
+  //
+  // \u26a0\ufe0f `vides` COMPTE LES SEANCES QUI NE PORTENT AUCUN EXERCICE DE
+  // TRAVAIL, c'est-a-dire rien d'autre qu'un echauffement. Mesure du 31 aout :
+  // une corde a sauter declaree seule en laisse quatre sur cinq, et c'est
+  // delibere. Une corde n'ouvre qu'un exercice de patron `hiit` ; substituer une
+  // journee de cardio poserait un creneau que rien ne peut remplir, et ecrire un
+  // bloc continu de trente-neuf minutes de corde a sauter serait pire : personne
+  // ne le tient, et l'application aurait invente un exercice pour boucher un
+  // trou. On le dit plutot que de le bricoler.
+  function etatDeLaSemaine() {
+    var n, i, j, ex, vus = {}, distincts = 0, c, vides = 0, trav;
+    try { n = nbSeancesProgramme(); } catch (e) { return null; }
+    if (!(n > 0)) return null;
+    for (i = 0; i < n; i++) {
+      try { ex = exosDe(i); } catch (e2) { return null; }
+      trav = 0;
+      for (j = 0; j < ex.length; j++) {
+        c = MOTEUR.CAT_BY_ID[ex[j].id];
+        if (!c || c.pat === "warm") continue;
+        trav++;
+        if (has(vus, ex[j].id)) continue;
+        vus[ex[j].id] = 1;
+        distincts++;
+      }
+      if (!trav) vides++;
+    }
+    return { seances: n, distincts: distincts, vides: vides };
+  }
+
+  function aDeLaForce() {
+    var i;
+    // Les categories 1 a 4 (barre, halteres, traction, elastiques) n'ouvrent
+    // aucune sous-liste : les cocher DIT qu'on a le materiel.
+    for (i = 1; i < 5; i++) { if (state.obEquip[i]) return true; }
+    // Le poids du corps en est, quand on l'a garde. Une entree absente vaut
+    // cochee, comme partout ailleurs sur ce tableau positionnel.
+    if (state.obEquip.length <= I_POIDS_DU_CORPS) return true;
+    if (state.obEquip[I_POIDS_DU_CORPS]) return true;
+    // Et la categorie 0, elle, se verifie appareil par appareil.
+    if (!state.obEquip[I_MACHINES]) return false;
+    for (i = 0; i < state.obGear.length; i++) {
+      if (state.obGear[i] && !has(GEAR_CARDIO, i)) return true;
+    }
+    return false;
+  }
+
+  // Vrai quand un appareil de cardio est declare, ou le cardio sans materiel.
+  // \u26a0\ufe0f COCHER « Machines de salle » NE SUFFIT PAS : la sous-liste dit
+  // ensuite quels appareils on a vraiment, et quelqu'un qui a decoche velo,
+  // rameur et tapis n'a pas de cardio, meme avec la categorie ouverte.
+  function aDuCardio() {
+    var k;
+    if (state.obEquip[I_CARDIO_BW]) return true;
+    if (!state.obEquip[I_MACHINES]) return false;
+    // 🔴 LA CASE « CARDIO DE SALLE » NE COMPTAIT PAS. Cette boucle parcourt
+    // `APPAREILS_CARDIO`, qui ne liste que le velo, le rameur, le tapis et la
+    // corde : ces quatre-la n'ont pas de `gear` chez le moteur et doivent etre
+    // ecartes par identifiant. Le rang 12, lui, EN A un, donc il n'avait aucune
+    // raison de figurer dans cette table, et personne n'a vu qu'il manquait
+    // aussi ici.
+    //
+    // Consequence mesuree : declarer un stepper, un elliptique ou un velo
+    // allonge ne faisait PAS basculer la semaine en cardio, et `elliptique`,
+    // le seul exercice de travail que cette case debloque, n'etait jamais
+    // servi. Il existait dans le catalogue et personne ne le demandait.
+    if (state.obGear[I_CARDIO_SALLE]) return true;
+    for (k in APPAREILS_CARDIO) {
+      if (!has(APPAREILS_CARDIO, k)) continue;
+      if (String(k) === String(I_CORDE)) continue;
+      if (state.obGear[k]) return true;
+    }
+    return false;
+  }
+
+  // 🔴 LE MATERIEL NE CHOISISSAIT PAS LES GABARITS, SEUL LE NOMBRE DE JOURS LE
+  // FAISAIT. `splitFor` rend FULL BODY A/B/C jusqu'a trois jours, HAUT/BAS a
+  // quatre, et ne pose une journee CARDIO qu'a SEPT. Aucun de ces gabarits, en
+  // dessous de cinq jours, ne porte de creneau `cardio` ni `hiit` : un velo
+  // declare ne pouvait apparaitre que comme echauffement, six minutes, puis des
+  // pompes. Signale par Olivier, capture a l'appui.
+  //
+  // \u26a0\ufe0f LA REGLE DEPEND DE CE QU'ON PEUT FAIRE D'AUTRE :
+  //   - du cardio ET de la force : UNE journee de cardio, le reste intact. On
+  //     ajoute a un programme qui tient, on ne le remplace pas.
+  //   - du cardio ET RIEN D'AUTRE : la moitie de la semaine au moins, arrondie
+  //     au superieur. Sinon on servirait des seances de force sans rien pour
+  //     les faire.
+  //
+  // \u26a0\ufe0f ON SUBSTITUE EN AVAL, comme la journee de depense le fait deja.
+  // Le moteur est greffe verbatim et ses gabarits sont exposes : on choisit
+  // parmi les siens, on n'en ecrit pas.
+  function poserLeCardio(gabarits) {
+    var TPL = MOTEUR.TPL, n = gabarits.length, i, veut;
+    if (!TPL || !TPL.cardio || !n) return gabarits;
+    if (!aDuCardio()) return gabarits;
+
+    // Combien de journees de cardio la semaine doit porter.
+    //
+    // 🔴 « LA MOITIE DE LA SEMAINE » ETAIT UN CHIFFRE PRUDENT, ET IL ETAIT FAUX.
+    // Quand il n'y a AUCUN materiel de force, ce ne sont pas la moitie des
+    // journees qui seraient vides, ce sont TOUTES : il n'existe rien pour les
+    // remplir. La moitie laissait donc, sur cinq jours, deux seances ne portant
+    // qu'un echauffement. La regle devient exacte au lieu d'etre prudente.
+    //
+    // \u26a0\ufe0f DU CARDIO ET DE LA FORCE : UNE SEULE JOURNEE, inchange. On ajoute
+    // a un programme qui tient, on ne le remplace pas.
+    veut = aDeLaForce() ? 1 : n;
+
+    // Celles qui en portent deja comptent : un gabarit HIIT est une journee de
+    // cardio, et le moteur en pose deja une a partir de cinq jours.
+    var deja = 0;
+    for (i = 0; i < n; i++) {
+      if (gabarits[i] && (gabarits[i].code === "cardio" || gabarits[i].code === "hiit")) deja++;
+    }
+    if (deja >= veut) return gabarits;
+
+    // On remplace en partant de la FIN : la premiere seance de la semaine reste
+    // celle que le moteur a choisie, et c'est elle qu'on ouvre le plus souvent.
+    var out = gabarits.slice(), aPoser = veut - deja, j = n - 1;
+    while (aPoser > 0 && j >= 0) {
+      if (out[j].code !== "cardio" && out[j].code !== "hiit") {
+        out[j] = TPL.cardio;
+        aPoser--;
+      }
+      j--;
+    }
+    return out;
+  }
+
+  // -------------------------------------------------------------------------
+  // UNE JOURNEE QUI SERAIT VIDE DEVIENT UNE JOURNEE DE CARDIO
+  // -------------------------------------------------------------------------
+  // 🔴 `poserLeCardio` TRAITE LE TOUT OU RIEN, PAS L'ENTRE-DEUX. Il bascule
+  // toute la semaine quand il n'y a AUCUN materiel de force. Il reste le cas
+  // intermediaire, trouve par le banc : un rameur et UNE POULIE gardent le
+  // decoupage de force, mais une poulie ne travaille que le haut du corps, et la
+  // journee « Jambes » ne porte plus qu'un echauffement de cinq minutes.
+  //
+  // LA REGLE EST EXACTE PLUTOT QUE PRUDENTE : on ne devine pas quelles journees
+  // seraient vides, on CONSTRUIT la seance et on regarde.
+  //
+  // \u26a0\ufe0f ON NE REMPLACE QUE LE VIDE. Une journee maigre reste ce qu'elle est :
+  // deux exercices de jambes valent mieux que zero, et decider a partir de
+  // combien une seance est « trop maigre » demanderait un seuil invente.
+  //
+  // \u26a0\ufe0f SANS CARDIO DECLARE, ON NE REMPLACE RIEN. Il n'y aurait rien a
+  // mettre a la place, et une journee de cardio vide vaut moins qu'une journee
+  // de force vide : au moins la seconde dit ce qu'elle voulait etre. C'est
+  // l'etape Materiel qui previent, pas le programme qui bricole.
+  //
+  // \u26a0\ufe0f ON CONSTRUIT POUR REGARDER, ET C'EST LE PRIX. `buildSession` est
+  // appele une fois par gabarit, et seulement quand la cle des gabarits change :
+  // materiel, objectif, ou nombre de jours.
+  function remplacerLesJourneesVides(gabarits) {
+    var TPL = MOTEUR.TPL, out, i, s, j, c, trav, profil;
+    if (!TPL || !TPL.cardio || !gabarits || !gabarits.length) return gabarits;
+    if (!aDuCardio()) return gabarits;
+    // 🔴 NE JAMAIS LIRE `progCache.profil` ICI, ET LE BANC L'A PROUVE.
+    //
+    // Premiere ecriture de cette fonction : elle prenait le profil du cache. Le
+    // banc a repondu en rendant une semaine ENTIEREMENT en cardio a quelqu'un
+    // qui possede un rameur ET une poulie, alors que sa poulie porte quatre
+    // exercices. La cause : `nbSeancesProgramme()` appelle `gabaritsProgramme()`
+    // DIRECTEMENT, sans passer par `progContexte`. A ce moment-la le profil du
+    // cache est encore celui d'avant, les seances de force se construisent
+    // contre l'ancien materiel, paraissent vides, et le resultat est mis en
+    // cache sous la NOUVELLE cle : `progContexte` ne le reconstruira jamais.
+    //
+    // On construit donc le profil sur place. ⚠️ `cleanProfile` EST PUR, a la
+    // difference de `__poserProfil` qui pose le profil dans le moteur : le poser
+    // ici, au milieu de la composition des gabarits, changerait ce que le moteur
+    // analyse pendant qu'on decide de ce qu'il analysera.
+    try { profil = MOTEUR.cleanProfile(profilDepuisEtat()); } catch (e0) { return gabarits; }
+    if (!profil) return gabarits;
+    out = gabarits.slice();
+    for (i = 0; i < out.length; i++) {
+      if (!out[i] || out[i].code === "cardio" || out[i].code === "hiit") continue;
+      try { s = MOTEUR.buildSession(out[i], profil); } catch (e) { continue; }
+      trav = 0;
+      for (j = 0; j < ((s && s.exercises) || []).length; j++) {
+        c = MOTEUR.CAT_BY_ID[s.exercises[j].id];
+        if (c && c.pat !== "warm") trav++;
+      }
+      if (!trav) out[i] = TPL.cardio;
+    }
+    return out;
   }
 
   function gabaritsProgramme() {
@@ -9393,9 +9836,20 @@ body.a-nav .nav { display: flex; }
       // ⚠️ `distinguerGabarits` N'EST PAS UNE PRECAUTION DE STYLE. Sans elle,
       // deux journees de la semaine peuvent porter la meme cle, et les retraits
       // de l'une s'appliquent a l'autre. Voir la mesure au-dessus de la fonction.
+      // \u26a0\ufe0f L'ORDRE COMPTE. Le cardio se pose AVANT la journee de depense :
+      // celle-ci substitue la DERNIERE seance de la semaine, et elle doit voir
+      // la liste telle qu'elle sera servie. `distinguerGabarits` passe en
+      // dernier, il ne fait que separer deux journees devenues identiques.
+      // \u26a0\ufe0f `remplacerLesJourneesVides` PASSE EN DERNIER AVANT LA
+      // DISTINCTION. Il construit chaque seance pour voir si elle porte
+      // quelque chose, et il fabrique SON PROPRE profil : lire celui du cache
+      // ici rendait une semaine de cardio a qui possede une poulie, parce que
+      // `nbSeancesProgramme` entre par cette porte sans passer par
+      // `progContexte`. Voir la fonction.
       progCache.gabarits = distinguerGabarits(
-        posterDepense(MOTEUR.splitPour(nbCreneauxSalle(),
-                                       { objectif: objectifDeLEtat() })));
+        remplacerLesJourneesVides(
+          posterDepense(poserLeCardio(MOTEUR.splitPour(nbCreneauxSalle(),
+                                       { objectif: objectifDeLEtat() })))));
     }
     return progCache.gabarits;
   }
@@ -9794,6 +10248,28 @@ body.a-nav .nav { display: flex; }
       }
       if (!bloc) { lab = "FULL BODY"; sub = "Tout le corps"; }
     }
+    // 🔴 UN SOUS-TITRE NE PROMET PAS UNE PARTIE DE SEANCE QUI N'Y EST PAS.
+    //
+    // Les gabarits CARDIO et HIIT portent deux ou trois creneaux de gainage, et
+    // leurs sous-titres les annoncent : « Endurance + gainage », « Intervalles
+    // + gainage ». Or tous les exercices de gainage du catalogue sont au poids
+    // du corps. Quelqu'un qui a decoche le poids du corps n'en recoit aucun, les
+    // creneaux sont sautes en silence, et le sous-titre continue de les
+    // promettre. Mesure sur un profil « rameur seul » : quatre seances sur cinq
+    // annoncaient du gainage qu'aucune ne portait.
+    //
+    // \u26a0\ufe0f MEME REGLE QUE LA JOURNEE DE DEPENSE JUSTE AU-DESSUS, qui se
+    // renomme quand elle ne porte finalement aucun bloc. On ne fabrique pas un
+    // sous-titre : on retire la promesse non tenue, et rien d'autre.
+    if (sub && sub.indexOf("gainage") >= 0) {
+      var _ex = (r.s && r.s.exercises) || [], _k, _c, _gain = false;
+      for (_k = 0; _k < _ex.length; _k++) {
+        _c = MOTEUR.CAT_BY_ID[_ex[_k].id];
+        if (_c && _c.pat === "core") { _gain = true; break; }
+      }
+      if (!_gain) sub = sub.replace(/\s*\+\s*gainage\s*$/, "");
+    }
+
     var _n = nomsDe(lab);
     return {
       code: _n.nom,
@@ -9835,13 +10311,74 @@ body.a-nav .nav { display: flex; }
   // le repli rend la duree annoncee, c'est-a-dire le comportement d'avant, et
   // `controle/verifier_duree.py` refuse la construction pour qu'on l'apprenne
   // au build et pas par un chiffre faux a l'ecran.
+  // -------------------------------------------------------------------------
+  // UN BLOC CONTINU SEUL REMPLIT LA SEANCE
+  // -------------------------------------------------------------------------
+  // 🔴 `rameur-continu` DURE DOUZE MINUTES, QUOI QU'ON AIT DEMANDE. Le catalogue
+  // fige une duree par exercice. Quelqu'un qui declare des seances de 45 minutes
+  // et n'a qu'un rameur recevait donc six minutes d'echauffement et douze
+  // minutes de rameur, pendant que l'ecran annoncait 45.
+  //
+  // Arbitrage d'Olivier, 31 aout 2026 : une seance de 45 minutes sur un seul
+  // appareil est UN BLOC CONTINU, et non trois blocs differents. Le bloc s'etire
+  // donc jusqu'a la duree declaree, echauffement deduit.
+  //
+  // \u26a0\ufe0f UNE SEULE FONCTION DECIDE, DEUX ENDROITS LA LISENT : la construction
+  // des exercices (`exosProgramme`) et la duree annoncee (`minutesConstruites`).
+  // Deux calculs separes finiraient par diverger, et la carte du jour montrerait
+  // une duree que la seance ne fait pas.
+  //
+  // \u26a0\ufe0f ON N'ETIRE QUE QUAND LE BLOC EST SEUL. Un bloc de cardio glisse
+  // dans une seance de force ne doit pas avaler les halteres. Les conditions
+  // sont mesurables : tous les exercices se comptent en temps, il n'y a qu'un
+  // seul exercice de TRAVAIL, et son patron est `cardio`. Le HIIT est exclu : il
+  // porte sa propre structure d'efforts et de recuperations, l'etirer changerait
+  // l'exercice et pas seulement sa duree.
+  //
+  // \u26a0\ufe0f ON N'ETIRE JAMAIS VERS LE BAS. Quelqu'un qui declare des seances de
+  // quinze minutes garde les douze du catalogue plutot que d'etre ramene a neuf :
+  // le catalogue dit une duree qui a un sens pour l'exercice.
+  //
+  // Rend `{ id, avant, apres }`, ou `null` quand il n'y a pas lieu d'etirer.
+  function etirementDuBlocContinu(exsMoteur) {
+    var k, c, u, ech = 0, trav = 0, bloc = null, cible;
+    if (!exsMoteur || !exsMoteur.length) return null;
+    for (k = 0; k < exsMoteur.length; k++) {
+      c = MOTEUR.CAT_BY_ID[exsMoteur[k].id];
+      if (!c) return null;
+      u = unitePrescrite(c, exsMoteur[k]);
+      // Un seul exercice compte en series et la seance n'est plus une suite de
+      // blocs : sa duree ne se lit pas en additionnant des minutes.
+      if (u.unite !== "min") return null;
+      if (c.pat === "warm") { ech += u.reps; continue; }
+      trav++;
+      if (c.pat === "cardio") bloc = { id: exsMoteur[k].id, avant: u.reps };
+    }
+    if (trav !== 1 || !bloc) return null;
+    cible = dureeMinutes() - ech;
+    if (!(cible > bloc.avant)) return null;
+    // \u26a0\ufe0f `total` EST LA DUREE EXACTE, ET ELLE NE S'ESTIME PAS. On n'arrive
+    // ici que si TOUS les exercices se comptent en minutes : leur somme est la
+    // duree de la seance, au chiffre pres. Le moteur, lui, ajoute un supplement
+    // de transition calcule sur des series et des repos qui n'existent pas ici,
+    // et la carte annoncait 47 minutes pour une seance de 45.
+    return { id: bloc.id, avant: bloc.avant, apres: cible, total: ech + cible };
+  }
+
   function minutesConstruites(si) {
     var r, m;
     try { r = seanceMoteurDe(si); } catch (e) { return dureeMinutes(); }
     m = String(r.s && r.s.duration ? r.s.duration : "").match(/\d+/);
     if (!m) return dureeMinutes();
     m = parseInt(m[0], 10);
-    return (m > 0 && m < 600) ? m : dureeMinutes();
+    if (!(m > 0 && m < 600)) return dureeMinutes();
+    // 🔴 SANS CETTE LIGNE, L'ETIREMENT SERAIT UN MENSONGE DE PLUS. Le moteur
+    // calcule sa duree sur le catalogue, donc sur les douze minutes d'origine :
+    // la carte du jour aurait annonce dix-huit minutes pour une seance de
+    // quarante-cinq, et la depense aurait ete facturee sur dix-huit.
+    var _et = etirementDuBlocContinu(r.s.exercises);
+    if (_et) return _et.total;
+    return m;
   }
 
   // -------------------------------------------------------------------------
@@ -9928,6 +10465,15 @@ body.a-nav .nav { display: flex; }
         rang: out.length,
         cle: cle
       });
+    }
+
+    // LE BLOC CONTINU SEUL PREND LA SEANCE. Voir `etirementDuBlocContinu` juste
+    // au-dessus de `minutesConstruites` : c'est elle, et elle seule, qui decide.
+    var _et = etirementDuBlocContinu(r.s.exercises);
+    if (_et) {
+      for (i = 0; i < out.length; i++) {
+        if (out[i].id === _et.id) { out[i].reps = _et.apres; break; }
+      }
     }
 
     // LES AJOUTS DE L'UTILISATEUR, en fin de liste.
@@ -12601,6 +13147,39 @@ body.a-nav .nav { display: flex; }
   // on ne peut pas savoir quelle distance le programme prevoyait ce jour-la, et
   // on retombe sur les habitudes. Les appelants qui connaissent le jour le
   // passent ; les autres obtiennent une estimation, pas une erreur.
+  // -------------------------------------------------------------------------
+  // CE QU'UN APPAREIL A REELLEMENT COMPTE SUR CETTE SEANCE
+  // -------------------------------------------------------------------------
+  // Rend `{ kcal, min }` quand la DERNIERE fois qu'on a fait cette seance, un
+  // compteur a ete lu. Rend `null` sinon.
+  //
+  // \u26a0\ufe0f LA DERNIERE FOIS GOUVERNE, ET SEULE ELLE. Si la seance a ete
+  // refaite depuis sans lire le compteur, on revient a l'estimation : garder le
+  // releve d'il y a trois semaines ferait payer aujourd'hui pour un effort
+  // d'avant-hier. C'est pour cela que la boucle rend `null` des la premiere
+  // archive trouvee sur ce rang, au lieu de continuer a chercher.
+  //
+  // \u26a0\ufe0f PLAFOND A 20 kcal PAR MINUTE. Garde contre le doigt qui glisse,
+  // pas defiance envers l'appareil : 20 kcal/min, c'est un MET de 17 pour
+  // quelqu'un de 80 kg, au-dessus de ce qu'un humain tient plus de quelques
+  // minutes. Le sens de l'erreur compte : la depense entre dans le maintien,
+  // donc un chiffre gonfle AUGMENTE la ration autorisee.
+  var KCAL_MIN_PLAFOND = 20;
+
+  function mesureDeLaSeance(si) {
+    var h = state.hist || [], i, e, plaf, kc;
+    if (typeof si !== "number") return null;
+    for (i = h.length - 1; i >= 0; i--) {
+      e = h[i];
+      if (!e || e.t !== "salle" || e.si !== si) continue;
+      if (!(e.kcalMes > 0) || !(e.minMes > 0)) return null;
+      plaf = KCAL_MIN_PLAFOND * e.minMes;
+      kc = e.kcalMes > plaf ? plaf : e.kcalMes;
+      return { kcal: kc, min: e.minMes };
+    }
+    return null;
+  }
+
   function kcalSeance(a, poids) {
     var met;
     if (!a) return 0;
@@ -12636,7 +13215,25 @@ body.a-nav .nav { display: flex; }
     // quelqu'un qui s'entraine au poids du corps. Voir block_charge.js pour la
     // raison de chaque borne.
     if (typeof a.si === "number") {
-      return metDeLaSeance(a.si, poids) * poids * (minutesConstruites(a.si) / 60);
+      // 🔴 UNE MESURE VAUT MIEUX QUE LE FORFAIT QU'ELLE REMPLACE.
+      //
+      // Demande d'Olivier, 31 aout 2026 : pouvoir entrer le temps passe et les
+      // calories affichees a la fin d'un exercice sur velo, rameur, tapis ou
+      // stepper. Le chiffre arrive ici : il n'y a pas de meilleure estimation
+      // que celle qu'un compteur a faite pendant l'effort.
+      //
+      // \u26a0\ufe0f LE RESTE DE LA SEANCE RESTE ESTIME. Un jour qui melange rameur
+      // et halteres n'a de mesure que sur le rameur : on facture les calories
+      // relevees, PLUS l'estimation d'avant sur les minutes qu'elles ne
+      // couvrent pas. Sans cette soustraction, les minutes du rameur seraient
+      // comptees deux fois.
+      var _min = minutesConstruites(a.si), _mes = mesureDeLaSeance(a.si), _reste;
+      if (_mes) {
+        _reste = _min - _mes.min;
+        if (_reste < 0) _reste = 0;
+        return _mes.kcal + metDeLaSeance(a.si, poids) * poids * (_reste / 60);
+      }
+      return metDeLaSeance(a.si, poids) * poids * (_min / 60);
     }
     return MET_SALLE * poids * (dureeMinutes() / 60);
   }
@@ -13361,6 +13958,63 @@ body.a-nav .nav { display: flex; }
            '<span class="ob-step-v">' + state.obHalt + ' kg</span>' +
            '<button type="button" class="ob-step-btn" data-action="ob-halt" data-d="2" aria-label="Plus 2 kg">+</button>' +
            "</div></div>";
+    }
+
+    // 🔴 NE RIEN COCHER DU TOUT DONNE DES SEANCES VIDES, ET IL FAUT LE
+    // DIRE. Mesure : avec les sept cases decochees, le programme rend trois
+    // seances qui ne portent qu'un echauffement chacune. Ce n'est pas un
+    // defaut du moteur, c'est la consequence exacte de la declaration ; mais
+    // la decouvrir devant une seance d'un exercice serait cruel.
+    //
+    // ⚠️ ON N'EMPECHE PAS DE CONTINUER. C'est une declaration, pas un
+    // formulaire a valider : quelqu'un peut vouloir tout decocher le temps
+    // d'une blessure. On dit ce que ca donne, et on laisse passer.
+    var _rien = true, _ri;
+    for (_ri = 0; _ri < state.obEquip.length; _ri++) {
+      if (state.obEquip[_ri]) { _rien = false; break; }
+    }
+    if (_rien && aDeLaSalle()) {
+      h += '<p class="ob-lead" style="margin-top:18px">Tu n’as rien coché. ' +
+           "Tes séances de salle n’auront qu’un échauffement : sans " +
+           "matériel ni poids du corps, il ne reste aucun exercice à te " +
+           "proposer.</p>";
+    }
+
+    // ⚠️ LA SEMAINE SERA-T-ELLE REPETITIVE ? Arbitrage d'Olivier du 31 aout :
+    // le dire, et servir quand meme. Un rameur seul sur cinq jours donne cinq
+    // vraies seances de 45 minutes, mais elles reposent sur deux exercices. Ce
+    // n'est pas un defaut, c'est ce qu'un rameur permet ; le cacher serait
+    // malhonnete, l'empecher serait paternaliste.
+    //
+    // ⚠️ JAMAIS EN MEME TEMPS QUE LA PHRASE CI-DESSUS. `repetitionDeLaSemaine`
+    // rend `null` quand il n'y a AUCUN exercice de travail : ce cas a deja sa
+    // phrase, et deux messages pour la meme cause la diraient deux fois.
+    // \u26a0\ufe0f TROIS MESSAGES POSSIBLES, UN SEUL S'AFFICHE, du plus grave au
+    // moins grave : rien coche (ci-dessus), des seances vides, une semaine
+    // repetitive. Deux phrases pour la meme cause la diraient deux fois.
+    if (!_rien && aDeLaSalle()) {
+      var _rep = etatDeLaSemaine();
+      // DES SEANCES QUI NE PORTENT RIEN. Mesure du 31 aout : une corde a sauter
+      // declaree seule en laisse quatre sur cinq. Elle n'ouvre qu'un exercice de
+      // patron `hiit`, et rien d'autre ne peut remplir les autres journees. On
+      // le dit plutot que de servir quatre echauffements sans un mot.
+      if (_rep && _rep.vides > 0) {
+        h += '<p class="ob-lead" style="margin-top:18px"><b>' + _rep.vides +
+             " séance" + (_rep.vides > 1 ? "s" : "") + " sur " + _rep.seances +
+             "</b> n\u2019aura" + (_rep.vides > 1 ? "ont" : "") +
+             " qu\u2019un échauffement : ce que tu as coché ne permet pas de " +
+             "les remplir. Coche le poids du corps, ou un appareil de plus.</p>";
+        _rep = null;
+      }
+      if (_rep && _rep.distincts > 0 && _rep.distincts < _rep.seances &&
+          _rep.seances > 1) {
+        h += '<p class="ob-lead" style="margin-top:18px">Ton matériel donne <b>' +
+             _rep.distincts + " exercice" + (_rep.distincts > 1 ? "s" : "") +
+             " de travail différent" + (_rep.distincts > 1 ? "s" : "") +
+             "</b> pour <b>" + _rep.seances + " séances</b> : la semaine sera " +
+             "répétitive. Rien ne t’empêche de continuer. Cocher le poids " +
+             "du corps, ou un appareil de plus, varierait les séances.</p>";
+      }
     }
     return h;
   }
@@ -14183,13 +14837,26 @@ body.a-nav .nav { display: flex; }
         exS = exosDe(i);
         faitS = i === a.si && fait;
         SS = seanceProgramme(i);
+        // 🔴 LA LIGNE S'EMPILE, ELLE NE SE DIVISE PLUS EN TROIS COLONNES.
+        //
+        // Le dessin d'avant posait une pastille a gauche, le texte au milieu et
+        // le jour a droite. Il tenait tant que la pastille portait un code de
+        // quatre lettres. Depuis que les seances ont des noms entiers,
+        // « Bas du corps / Quadriceps+ » y occupe la moitie de la largeur : le
+        // titre se cassait sur trois lignes, les comptes sur deux, et six
+        // lignes se chevauchaient par entree. Signale par Olivier sur capture.
+        //
+        // ⚠️ LA PASTILLE A DISPARU, ET C'EST VOULU. Elle portait le nom de la
+        // seance, qui est desormais le titre juste a cote : elle le repetait.
         h += '<li><button type="button" class="cs-s" data-action="choisir-seance" data-i="' + i + '">' +
-             '<span class="cs-s-p">' + esc(SS.code) + "</span>" +
-             '<span class="cs-s-c"><span class="cs-s-n">' + esc(SS.sub) + "</span>" +
-             '<span class="cs-s-d num">' + exS.length + " exercices · " +
-             esc(SS.duree) + "</span></span>" +
+             '<span class="cs-s-h">' +
+             '<span class="cs-s-n">' + esc(SS.code) + "</span>" +
              '<span class="cs-s-j">' + esc(jourDeS || "hors rotation") +
              '<span class="cs-s-e" aria-hidden="true">' + (faitS ? "\u2713" : "\u203a") + "</span></span>" +
+             "</span>" +
+             '<span class="cs-s-sub">' + esc(SS.sub) + "</span>" +
+             '<span class="cs-s-d num">' + exS.length + " exercices · " +
+             esc(SS.duree) + "</span>" +
              "</button></li>";
       }
       h += "</ul></section>";
@@ -14802,6 +15469,11 @@ body.a-nav .nav { display: flex; }
       // peut donc pas se faire passer pour une serie faite.
       kg: dernier ? dernier.kg : (e.kg || e.kgSuggere || 0),
       reps: dernier ? dernier.reps : e.reps,
+      // Le compteur de l'appareil repart de ce qui a ete releve la derniere
+      // fois sur cet exercice, ou de zero. \u26a0\ufe0f ZERO VEUT DIRE « RIEN RELEVE »
+      // et non « zero calorie » : c'est ce zero qui fait retomber la seance sur
+      // l'estimation, au lieu de la facturer a rien.
+      kcal: dernier && dernier.kcal > 0 ? dernier.kcal : 0,
       tech: false, chrono: state.chrono || 0
     });
   }
@@ -14818,7 +15490,12 @@ body.a-nav .nav { display: flex; }
     if (f0[state.tIdx].length >= exo.n) return;
 
     faits = copierFaits(f0);
-    faits[state.tIdx].push({ kg: state.kg, reps: state.reps });
+    faits[state.tIdx].push({ kg: state.kg, reps: state.reps,
+                             // Le releve de l'appareil voyage AVEC la serie, et
+                             // pas a cote : `faits` est deja sauvegarde, donc il
+                             // survit a une fermeture sans une cle de plus.
+                             kcal: surAppareilDeCardio(exo) && state.kcal > 0
+                                   ? state.kcal : 0 });
 
     if (faits[state.tIdx].length >= exo.n) {
       for (i = 0; i < ex.length; i++) {
@@ -14922,6 +15599,61 @@ body.a-nav .nav { display: flex; }
   // `kg > 0` sur place, et la retirer supprime une fausse piste.
   function chronometre(exo) {
     return !!(exo && exo.unite);
+  }
+
+  // -------------------------------------------------------------------------
+  // LES EXERCICES FAITS SUR UN APPAREIL QUI COMPTE
+  // -------------------------------------------------------------------------
+  // Velo, rameur, tapis, elliptique, stepper : ces machines affichent un
+  // compteur de calories a la fin de l'effort. C'est la seule mesure directe de
+  // depense que l'application puisse recevoir, et elle vaut mieux que le
+  // forfait qu'elle remplace.
+  //
+  // \u26a0\ufe0f DEUX CONDITIONS, ET LES DEUX SONT NECESSAIRES. L'exercice se
+  // compte en TEMPS (`chronometre`), et il demande un APPAREIL (`cardio` pour le
+  // materiel de maison, `mach` pour celui de salle). La marche rapide, le HIIT
+  // au poids du corps et la corde a sauter se comptent aussi en temps, mais
+  // aucun compteur ne les regarde : leur poser la question n'aurait aucune
+  // reponse a recevoir.
+  //
+  // \u26a0\ufe0f LES ECHAUFFEMENTS SUR APPAREIL EN FONT PARTIE, ET C'EST VOULU.
+  // Six minutes de rameur souple brulent quelque chose, l'appareil le compte,
+  // et l'exclure au motif que c'est un echauffement perdrait une mesure qui
+  // existe.
+  function surAppareilDeCardio(exo) {
+    if (!exo || !chronometre(exo)) return false;
+    var c = (MOTEUR.CAT_BY_ID && MOTEUR.CAT_BY_ID[exo.id]) || null;
+    var eq = (c && c.equip) || [], i;
+    for (i = 0; i < eq.length; i++) {
+      if (eq[i] === "cardio" || eq[i] === "mach") return true;
+    }
+    return false;
+  }
+
+  // Les calories relevees sur l'ensemble d'une liste de series faites.
+  function kcalRelevees(ex, f) {
+    var i, j, t = 0;
+    for (i = 0; i < ex.length; i++) {
+      if (!f[i] || !surAppareilDeCardio(ex[i])) continue;
+      for (j = 0; j < f[i].length; j++) t += f[i][j].kcal > 0 ? f[i][j].kcal : 0;
+    }
+    return t;
+  }
+
+  // Les minutes que ces relevies couvrent. \u26a0\ufe0f ON NE COMPTE QUE LES SERIES
+  // QUI PORTENT UN CHIFFRE : facturer les minutes d'un velo dont on n'a pas lu
+  // le compteur retirerait ces minutes a l'estimation sans rien mettre a la
+  // place, et la seance vaudrait moins que si le champ n'existait pas.
+  function minutesRelevees(ex, f) {
+    var i, j, t = 0;
+    for (i = 0; i < ex.length; i++) {
+      if (!f[i] || !surAppareilDeCardio(ex[i])) continue;
+      for (j = 0; j < f[i].length; j++) {
+        if (!(f[i][j].kcal > 0)) continue;
+        t += ex[i].unite === "min" ? f[i][j].reps : (f[i][j].reps / 60);
+      }
+    }
+    return t;
   }
 
   // Ce que vaut une serie, ecrit comme l'appli l'ecrit partout ailleurs.
@@ -15128,6 +15860,37 @@ body.a-nav .nav { display: flex; }
     h += stepper("reps-pas", state.reps, exo.unite ? exo.unite : "reps",
                  chronometre(exo) ? "Durée" : "Répétitions");
     h += "</div>";
+
+    // 🔴 CE QU'AFFICHE L'APPAREIL, ET QUI N'ENTRAIT NULLE PART.
+    //
+    // Demande d'Olivier, 31 aout 2026 : « Quand on choisit un exercice velo,
+    // rameur, tapis ou encore step [...] il faut qu'a la fin de l'exercice je
+    // puisse rentrer le temps passe et les calories cramees. »
+    //
+    // Le temps passe, c'est la molette « Durée » juste au-dessus : elle existait
+    // deja et la valider ecrit la duree reellement tenue. Les calories, non.
+    // Faute de ce chiffre, la depense d'une seance de cardio retombait sur un
+    // forfait de 5,0 MET, le meme pour un velo souple et un rameur a fond.
+    //
+    // \u26a0\ufe0f UN CHAMP LIBRE, PAS UNE MOLETTE. Un compteur affiche 187, et
+    // monter de zero a 187 par crans demanderait une trentaine de touchers.
+    // On tape le nombre qu'on lit.
+    //
+    // \u26a0\ufe0f FACULTATIF. Tous les appareils n'affichent pas les calories, et
+    // laisser vide ne bloque rien : la seance se valide, et sa depense reste
+    // estimee comme avant.
+    if (surAppareilDeCardio(exo)) {
+      h += '<div class="sa-releve">' +
+           '<label class="sa-releve-l" for="sa-kcal">Calories affichées par l\u2019appareil</label>' +
+           '<div class="sa-releve-c">' +
+           '<input id="sa-kcal" class="sa-releve-i num" type="text" inputmode="numeric"' +
+           ' autocomplete="off" placeholder="187" data-action="sa-kcal" value="' +
+           (state.kcal > 0 ? esc(String(state.kcal)) : "") + '">' +
+           '<span class="sa-releve-u">kcal</span></div>' +
+           '<p class="sa-releve-h">Facultatif. Si tu le remplis, ta dépense du jour ' +
+           "compte ce chiffre au lieu d\u2019une estimation.</p>" +
+           "</div>";
+    }
 
     // REPRENDRE LA SERIE PRECEDENTE, EN UN TOUCHER.
     //
@@ -15339,6 +16102,16 @@ body.a-nav .nav { display: flex; }
          ' <span aria-hidden="true">🔥</span></span><span class="fin-cl">jours d\'affilée</span></div>' +
          "</div>";
 
+    // CE QUE L'APPAREIL A COMPTE. \u26a0\ufe0f LA LIGNE N'EXISTE QUE S'IL Y A UN
+    // CHIFFRE : un « 0 kcal » sur une seance d'halteres laisserait croire qu'on
+    // n'a rien brule, alors qu'on n'a simplement rien releve.
+    var _kc = kcalRelevees(ex, f);
+    if (_kc > 0) {
+      h += '<p class="fin-releve"><span class="num">' + esc(millier(_kc)) +
+           " kcal</span> relevées sur l\u2019appareil. Ta dépense du jour les " +
+           "compte à la place d\u2019une estimation.</p>";
+    }
+
     // CE QUI A BOUGE. Le bloc manquait entierement.
     //
     // Il compare la charge la plus lourde tenue AUJOURD'HUI sur chaque exercice
@@ -15465,7 +16238,14 @@ body.a-nav .nav { display: flex; }
       si: state.seance, code: seanceProgramme(state.seance).code,
       sub: seanceProgramme(state.seance).sub,
       exos: detail.length, tonnage: Math.round(tonnage), series: series,
-      sec: state.chrono, ex: detail
+      sec: state.chrono, ex: detail,
+      // CE QU'UN APPAREIL A COMPTE, ET SUR COMBIEN DE MINUTES.
+      // \u26a0\ufe0f LES DEUX ENSEMBLE, JAMAIS LES CALORIES SEULES. Sans les
+      // minutes, on ne saurait pas quelle part de la seance a ete mesuree et
+      // quelle part reste a estimer : une seance mixte rameur plus halteres
+      // serait facturee au seul rameur, ou comptee deux fois.
+      kcalMes: Math.round(kcalRelevees(ex, f)),
+      minMes: Math.round(minutesRelevees(ex, f))
       // Second argument : LA LIGNE DU BANDEAU VERT. Elle disait
       // « PUSH · 5 exos · 1360 kg · 7:27 » et la maquette dit
       // « PUSH · mercredi 24 août · 5 séries, 1 360 kg ». Le JOUR compte plus
@@ -15534,6 +16314,19 @@ body.a-nav .nav { display: flex; }
     poser({ ecran: "salle", demarre: true, tIdx: 0, phase: "set", faits: f,
             faitsCle: empreinteExos(ex),
             kg: ex[0] ? ex[0].kg : 0, reps: ex[0] ? ex[0].reps : 0,
+            // 🔴 LE RELEVE DE L'APPAREIL DOIT REPARTIR DE ZERO ICI.
+            // `kcal` traverse un rechargement, comme `chrono` et pour la meme
+            // raison : un chiffre recopie d'un compteur puis perdu par une mise
+            // en veille se retape a l'aveugle. Mais ce qui doit survivre a une
+            // INTERRUPTION ne doit pas survivre a une SEANCE : sans cette
+            // remise a zero, la seance de demain s'ouvrirait avec les 187 kcal
+            // d'hier deja dans le champ, et « Valider » les archiverait sans
+            // que rien ne les distingue d'un chiffre lu ce matin.
+            //
+            // ⚠️ `ouvrirExercice` fait deja ce travail pour les exercices
+            // SUIVANTS, en reprenant le releve de la derniere serie. Seule
+            // l'entree en seance manquait, parce qu'elle ne passe pas par lui.
+            kcal: 0,
             chrono: 0, repos: REPOS_DEFAUT, finiIdx: 0 });
   }
 
@@ -18112,7 +18905,7 @@ body.a-nav .nav { display: flex; }
    module a l'autre.
    =========================================================================== */
 
-  var APP_VERSION = "1.25.3";
+  var APP_VERSION = "1.25.5";
 
   function has(o, k) { return Object.prototype.hasOwnProperty.call(o, k); }
 
@@ -18261,7 +19054,11 @@ body.a-nav .nav { display: flex; }
     // « Machines de salle » restait coche, la salle redonnant la traction
     // d'office — le meme masquage exactement que celui qui a cache pendant des
     // versions le defaut de la table CORRESP.
-    obEquip: [1, 1, 1, 1, 1, 1],
+    // \u26a0\ufe0f SEPT ENTREES DEPUIS LE 31 AOUT, la septieme etant le poids du
+    // corps. Elle vaut 1 : c'est ce qui reste quand on n'a rien, et un ancien
+    // profil dont le tableau n'en compte que six sera complete a 1 par
+    // `completerParDefaut`. Personne ne perd son programme a la mise a jour.
+    obEquip: [1, 1, 1, 1, 1, 1, 1],
     // LES TREIZE MACHINES SONT PRESENTES PAR DEFAUT.
     //
     // Le rang 2, « Machine developpe epaules », valait 0 depuis toujours. Tant
@@ -18366,7 +19163,11 @@ body.a-nav .nav { display: flex; }
     faits: null, faitsCle: "",
     // 45 kg etait la charge de depart de la maquette. Le moteur ne prescrit
     // aucun poids et le journal n'en connait pas encore : on part de 0.
-    tIdx: 0, kg: 0, reps: 9, phase: "set", demarre: false, finiIdx: 0
+    tIdx: 0, kg: 0, reps: 9, phase: "set", demarre: false, finiIdx: 0,
+    // Les calories lues sur le compteur de l'appareil pour la serie en cours.
+    // \u26a0\ufe0f ZERO VEUT DIRE « RIEN RELEVE », jamais « zero calorie » : c'est
+    // ce zero qui fait retomber la seance sur son estimation.
+    kcal: 0
   };
 
   // Seules ces cles traversent un rechargement. Une cle absente du fichier
@@ -18408,7 +19209,10 @@ body.a-nav .nav { display: flex; }
     // ce ne l'est pas pour estimer une depense. Aucun calcul de calories ne doit
     // s'appuyer dessus.
     "faits", "faitsCle", "tIdx", "kg", "reps", "phase", "demarre", "finiIdx",
-    "chrono"];
+    // \u26a0\ufe0f `kcal` EST ICI POUR LA MEME RAISON QUE `chrono`. Un chiffre
+    // recopie d'un compteur puis perdu par une mise en veille se retape a
+    // l'aveugle : l'appareil, lui, s'est remis a zero entre-temps.
+    "chrono", "kcal"];
 
   var CLE = "lemmonfit.v1";
 
@@ -19555,6 +20359,10 @@ body.a-nav .nav { display: flex; }
       if (!pr) return;
       state.kg = pr.kg;
       state.reps = pr.reps;
+      // Le releve de l'appareil fait partie de « la precedente » : le bouton
+      // annonce une serie, il doit en ecrire tous les champs et pas les deux
+      // premiers.
+      state.kcal = pr.kcal > 0 ? pr.kcal : 0;
       validerSerie();
       return;
     }
@@ -19700,6 +20508,10 @@ body.a-nav .nav { display: flex; }
     "ob-prenom": "obPrenom", "ob-age": "obAge", "ob-taille": "obTaille",
     "ob-poids": "obPoids", "ob-cible": "obPoidsCible",
     "ob-duree-libre": "obDureeLibre",
+    // Le compteur de l'appareil. Il ecrit SANS redessiner, comme les autres :
+    // reconstruire l'ecran sous le curseur reprendrait le focus a chaque
+    // chiffre tape.
+    "sa-kcal": "kcal",
     "recherche": "recherche",
     "ia-coller": "iaTexte"
   };
@@ -19710,6 +20522,15 @@ body.a-nav .nav { display: flex; }
     action = n.getAttribute("data-action");
 
     if (has(CHAMPS_TEXTE, action)) {
+      // \u26a0\ufe0f UN CHAMP QUI S'ADDITIONNE DOIT ETRE UN NOMBRE. Tous les autres
+      // champs de cette table sont relus par `parseFloat` a l'usage et vivent
+      // tres bien en chaine. Les calories, elles, se totalisent sur la seance :
+      // en chaine, « 120 » plus « 95 » donnerait « 12095 ».
+      if (action === "sa-kcal") {
+        var _kc = parseInt(String(n.value).replace(/[^0-9]/g, ""), 10);
+        poserSansRendre({ kcal: _kc > 0 ? _kc : 0 });
+        return;
+      }
       o[CHAMPS_TEXTE[action]] = n.value;
       poserSansRendre(o);
       return;
@@ -19956,6 +20777,10 @@ body.a-nav .nav { display: flex; }
     coureurPur: coureurPur,
     exoCoursePrescrit: exoCoursePrescrit,
     exclusDesZones: exclusDesZones,
+    exclusDuPoidsDuCorps: exclusDuPoidsDuCorps,
+    etatDeLaSemaine: etatDeLaSemaine,
+    aDeLaForce: aDeLaForce,
+    aDuCardio: aDuCardio,
     zoneEvitee: zoneEvitee,
     promptProgramme: promptProgramme,
     distanceVisee: distanceVisee,
