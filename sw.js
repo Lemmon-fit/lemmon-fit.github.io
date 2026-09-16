@@ -1,10 +1,10 @@
-// LEMMON FIT — service worker
+// LEMMON FIT : service worker
 //
 // VERSION doit rester identique à APP_VERSION dans index.html et à "version"
 // dans manifest.json. Le nom du cache en découle : changer de version purge
 // donc automatiquement l'ancien cache, ce que "lemmonfit-cache-v1" (figé) ne
 // faisait jamais.
-var VERSION = "1.25.5";
+var VERSION = "1.27.0";
 var CACHE_NAME = "lemmonfit-" + VERSION;
 
 var INDEX_URL = new URL("./index.html", self.location.href).href;
@@ -12,8 +12,8 @@ var PRECACHE_URLS = ["./", "./index.html", "./icon-180.png", "./icon-512.png", "
 
 // Au-delà de ce délai on sert le cache sans attendre. Le téléchargement
 // continue en arrière-plan pour rafraîchir le cache.
-// Sans ce garde-fou, un réseau faible mais vivant — sous-sol de salle de sport,
-// portail Wi-Fi qui ne répond pas — laissait fetch() suspendu : le lancement se
+// Sans ce garde-fou, un réseau faible mais vivant (sous-sol de salle de sport,
+// portail Wi-Fi qui ne répond pas) laissait fetch() suspendu : le lancement se
 // figeait des dizaines de secondes au lieu de basculer sur le cache.
 var NET_TIMEOUT_MS = 3500;
 
@@ -87,7 +87,7 @@ self.addEventListener("fetch", function (event) {
 
   // Sonde réseau du bouton « Mettre à jour l'appli » : on ne l'intercepte PAS.
   // Sinon elle serait servie depuis le cache (cacheKey retire la requête), donc
-  // elle réussirait hors-ligne — et l'appli viderait son cache en croyant le
+  // elle réussirait hors-ligne, et l'appli viderait son cache en croyant le
   // réseau disponible, avant de recharger dans le vide.
   if (url.searchParams.has("nocache")) return;
 
