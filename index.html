@@ -710,22 +710,8 @@ body.a-nav .nav { display: flex; }
   text-decoration: underline; text-underline-offset: 2px;
 }
 
-/* L'emplacement du pictogramme. Il occupe sa place meme vide, pour que la
-   colonne des noms reste alignee et qu'un dessin manquant se voie. */
-.ob-picto {
-  flex: 0 0 auto; width: 30px; height: 30px;
-  display: flex; align-items: center; justify-content: center;
-  color: var(--citron-encre);
-}
-.ob-picto svg { width: 100%; height: 100%; display: block; }
-/* ⚠️ CE CADRE ETAIT INVISIBLE. Il visait `--bord2`, un jeton qui n'existe pas :
-   la declaration entiere est alors ignoree par le navigateur, sans erreur et
-   sans trace. L'emplacement occupait bien ses 30 px, mais ne montrait rien, ce
-   qui est exactement ce qu'il est cense empecher. Vu sur la capture, pas par un
-   banc ; `controle/verifier_jetons_css.py` refuse desormais un jeton inconnu. */
-.ob-picto-vide {
-  border: 1.5px dashed var(--bord-fort); border-radius: 7px;
-}
+/* L'emplacement du pictogramme des machines (`.ob-picto`) a ete retire le
+   17 septembre 2026 : a 30 px, un dessin serait illisible (Olivier). */
 
 .ob-exos { list-style: none; margin: 0; padding: 0; }
 .ob-exo {
@@ -779,18 +765,6 @@ body.a-nav .nav { display: flex; }
 .jour-r .ecran-titre { margin: 2px 0 0; }
 .serie { display: flex; align-items: center; gap: 5px; font-size: 22px; }
 .serie-n { font-size: 26px; font-weight: 800; color: var(--citron-encre); }
-
-.sem { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; margin-bottom: 14px; }
-.sem-c {
-  min-height: 58px; border-radius: 11px; background: var(--fond-encart); color: var(--texte-2);
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;
-  position: relative; padding: 4px 2px;
-}
-.sem-auj { outline: 2px solid var(--texte); outline-offset: -2px; }
-.sem-i { font-size: 11px; font-weight: 800; opacity: .75; }
-.sem-t { font-size: 9.5px; font-weight: 800; letter-spacing: .2px; text-align: center; line-height: 1.15; }
-.sem-repos { opacity: .5; font-weight: 400; }
-.sem-ok { position: absolute; top: 3px; right: 4px; font-size: 9px; }
 
 .motiv { background: var(--fond-encart); border-radius: 14px; padding: 13px 14px; margin-bottom: 12px; }
 .motiv-h { font-size: 15px; font-weight: 800; margin-bottom: 3px; }
@@ -934,9 +908,15 @@ body.a-nav .nav { display: flex; }
   font-size: 11px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase;
   color: var(--texte-3); margin-bottom: 8px;
 }
-.remp-b { display: flex; gap: 8px; flex-wrap: wrap; }
+/* DEUX COLONNES DE MEME LARGEUR (Olivier, 17 septembre 2026 : « uniformiser la
+   largeur de ces blocs »). En ligne souple, chaque bouton prenait la largeur de
+   son texte : « Un running » etait deux fois plus etroit que ses voisins. Un
+   nombre impair laisse le dernier seul sur sa ligne : il la prend entiere
+   plutot que de laisser une case vide. */
+.remp-b { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.remp-x:last-child:nth-child(odd) { grid-column: 1 / -1; }
 .remp-x {
-  flex: 1 1 auto; min-height: 48px; padding: 0 12px;
+  min-width: 0; min-height: 48px; padding: 6px 10px; line-height: 1.25;
   border-radius: 12px;
   border: 1.5px solid var(--bord-fort);
   background: var(--fond-carte);
@@ -1530,7 +1510,9 @@ body.a-nav .nav { display: flex; }
 .cal-fait { font-weight: 800; }
 .cal-manque { background: transparent; border: 1.5px solid var(--bord-fort); color: var(--texte-3); }
 .cal-avenir { background: transparent; border: 1.5px dashed var(--bord-discret); color: var(--texte-3); }
-.cal-repos { opacity: .55; }
+/* Un jour prevu d'AVANT la premiere seance notee n'est ni fait ni manque : il
+   a l'air d'un jour sans rien (17 septembre 2026). */
+.cal-repos, .cal-avant { opacity: .55; }
 .cal-auj { outline: 2px solid var(--texte); outline-offset: -2px; }
 
 .cal-leg { display: flex; flex-wrap: wrap; gap: 4px 12px; margin-bottom: 16px; }
@@ -1625,35 +1607,17 @@ body.a-nav .nav { display: flex; }
 .ro-piste { height: 6px; border-radius: 5px; background: rgba(31,109,192,.22); margin-top: 10px; overflow: hidden; }
 .ro-barre { display: block; height: 100%; background: var(--run-bg); }
 
-.bdg { display: flex; gap: 8px; margin-bottom: 20px; }
-.bd {
-  flex: 1; border: 1.5px dashed var(--bord-fort); border-radius: 14px;
-  padding: 12px 6px; text-align: center; display: flex; flex-direction: column; gap: 2px;
-  color: var(--texte-3);
-}
-.bd-on { border-style: solid; border-color: var(--salle-bg); background: var(--salle-pale); color: var(--salle-encre); }
-.bd-n { font-size: 18px; font-weight: 800; }
-.bd-l { font-size: 10.5px; line-height: 1.3; }
-
 
 /* Le label est le conteneur, l'input file est pose TRANSPARENT par-dessus en
-   absolute inset 0. C'est ce montage qui ouvre la photothèque au premier
-   toucher : appeler .click() sur un input cache est bloque hors geste direct. */
-.moi-photo {
-  position: relative; width: 76px; height: 76px; border-radius: 50%; flex: 0 0 auto;
-  background: var(--fond-encart) center/cover no-repeat;
-  border: 1.5px solid var(--bord); display: flex; align-items: center; justify-content: center;
-  overflow: hidden;
-}
+   absolute inset 0. C'est ce montage qui ouvre le selecteur de fichiers au
+   premier toucher : appeler .click() sur un input cache est bloque hors geste
+   direct. Il sert a l'import du journal (la photo de profil est partie le
+   17 septembre 2026). */
 .moi-file { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; }
 
 .moi-ident { flex: 1; min-width: 0; }
 .moi-nom { font-size: 22px; font-weight: 800; letter-spacing: -.3px; }
 .moi-sous { font-size: 12.5px; color: var(--texte-2); margin-top: 2px; }
-.moi-retirer {
-  min-height: 44px; padding: 0 2px; border: 0; background: transparent; margin-top: 2px;
-  color: var(--texte-2); font-size: 12.5px; text-decoration: underline;
-}
 .moi-note { font-size: 12px; color: var(--texte-3); margin: 0 0 16px; line-height: 1.5; }
 
 /* Une ligne du catalogue qui ne se decoche pas : la sortie de course est
@@ -1917,28 +1881,6 @@ body.a-nav .nav { display: flex; }
    --------------------------------------------------------------------------- */
 .pesee-suite { background: var(--fond-encart); border-radius: 16px; padding: 14px 15px; margin-bottom: 12px; }
 
-/* ---------------------------------------------------------------------------
-   LE POIDS DU MOMENT
-   ---------------------------------------------------------------------------
-   L'ecran disait QUAND se peser sans jamais dire OU l'on en est. La valeur est
-   grosse parce que c'est ce qu'on vient chercher ; la date reste discrete, a
-   droite, parce qu'elle qualifie sans qu'on ait a la lire.
-   --------------------------------------------------------------------------- */
-.poids-c {
-  background: var(--fond-carte);
-  border: 1px solid var(--bord);
-  border-radius: 18px;
-  padding: 14px 16px;
-  margin-bottom: 12px;
-}
-.poids-h { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
-.poids-l {
-  font-size: 11px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase;
-  color: var(--texte-3);
-}
-.poids-q { font-size: 12.5px; color: var(--texte-2); text-align: right; }
-.poids-v { font-size: 32px; font-weight: 800; color: var(--texte); line-height: 1.1; margin-top: 2px; }
-.poids-u { font-size: 15px; font-weight: 700; color: var(--texte-2); margin-left: 5px; }
 .ps-t { font-size: 11px; font-weight: 800; letter-spacing: 1.1px; text-transform: uppercase; color: var(--texte-2); margin-bottom: 4px; }
 .ps-q { font-size: 14.5px; font-weight: 700; color: var(--texte); }
 .ps-p { font-size: 13px; color: var(--texte-1b); line-height: 1.5; margin-top: 4px; }
@@ -2080,28 +2022,15 @@ body.a-nav .nav { display: flex; }
 .pr-barre { display: block; height: 100%; border-radius: 4px; background: var(--salle-bg); }
 .pr-gain { font-size: 12px; font-weight: 700; flex: 0 0 auto; white-space: nowrap; }
 
-.bdg { display: flex; gap: 9px; margin-bottom: 20px; }
-.bd { flex: 1; text-align: center; padding: 14px 6px; border-radius: 15px; border: 1.5px solid var(--bord); background: var(--fond-carte); display: flex; flex-direction: column; }
-.bd-on { background: var(--salle-pale); border-color: var(--salle-bg); }
-.bd-n { font-size: 22px; line-height: 1; font-weight: 800; color: var(--texte-3); }
-.bd-on .bd-n { color: var(--salle-encre); }
-.bd-l { font-size: 11.5px; font-weight: 700; color: var(--texte-2); margin-top: 7px; line-height: 1.3; }
-.bd-on .bd-l { color: var(--salle-encre); }
-
 /* ---------------------------------------------------------------------------
    MOI : carte d'identite sombre, groupes a separateurs
    --------------------------------------------------------------------------- */
 .moi-carte { display: flex; align-items: center; gap: 12px; background: var(--sombre-carte); border-radius: 18px; padding: 14px; margin-bottom: 14px; }
-.moi-photo { position: relative; width: 60px; height: 60px; flex: 0 0 60px; border-radius: 18px; overflow: hidden; display: block; }
-.moi-img { display: block; width: 100%; height: 100%; background-size: cover; background-position: center; }
-.moi-init { width: 100%; height: 100%; background: var(--salle-bg); display: flex; align-items: center; justify-content: center; font-size: 23px; font-weight: 800; color: var(--salle-fg); }
-.moi-cap { position: absolute; inset: auto 0 0 0; height: 20px; background: rgba(16,15,13,.72); color: var(--sombre-texte); font-size: 10.5px; font-weight: 800; letter-spacing: .4px; text-align: center; line-height: 20px; }
 .moi-file { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; }
 .moi-ident { flex: 1; min-height: 60px; background: transparent; border: 0; text-align: left; padding: 0; display: flex; flex-direction: column; justify-content: center; min-width: 0; }
 .moi-nom { display: block; font-size: 18px; font-weight: 800; color: var(--sombre-texte); }
 .moi-sous { display: block; font-size: 13px; color: var(--sombre-texte-3); margin-top: 2px; }
 .moi-chev { width: 44px; height: 44px; flex: 0 0 44px; border-radius: 50%; border: 0; background: transparent; color: var(--salle-sur-sombre); font-size: 20px; }
-.moi-retirer { width: 100%; min-height: 46px; margin: -6px 0 14px; border-radius: 12px; border: 1.5px dashed var(--texte-3c); background: transparent; color: var(--texte-1b); font-size: 13.5px; font-weight: 600; text-decoration: none; }
 .moi-note { font-size: 12px; color: var(--texte-3); margin: 0 0 16px; line-height: 1.5; }
 
 .mo-g { margin-bottom: 14px; }
@@ -2129,7 +2058,6 @@ body.a-nav .nav { display: flex; }
    valeurs n'existent NULLE PART dans la maquette, et une echelle qui compte
    deja 27 paliers n'a pas besoin d'un 28e.
    --------------------------------------------------------------------------- */
-.sem-ok { font-size: 9.5px; }        /* 9px : hors echelle, le plancher est 9,5 */
 .cal-h { font-size: 10.5px; }        /* 10px : la maquette ecrit 10,5 partout */
            /* 21px : absent, l'ecran Nutrition va a 18 */
 .hi-chev { font-size: 16px; }        /* 20px : les chevrons de la maquette font 16 */
@@ -2199,21 +2127,6 @@ body.a-nav .nav { display: flex; }
   color: var(--texte-2); font-size: 13.5px; font-weight: 600;
   text-decoration: underline; margin-bottom: 20px;
 }
-
-/* ---------------------------------------------------------------------------
-   COMPLEMENTS DE LA NUTRITION : empiles, plus cote a cote
-   ---------------------------------------------------------------------------
-   Le texte long passait PAR-DESSUS le libelle : il vivait dans une colonne en
-   `flex: 0 0 auto`, prevue pour un chiffre court, et refusait de retrecir.
-   --------------------------------------------------------------------------- */
-.nu-supps { list-style: none; margin: 0 0 16px; padding: 0; }
-.nu-supp {
-  display: flex; flex-direction: column; gap: 3px;
-  padding: 12px 0; border-bottom: 1px solid var(--sep);
-}
-.nu-supp:last-child { border-bottom: 0; }
-.nu-supp-n { font-size: 15px; font-weight: 700; color: var(--texte); }
-.nu-supp-w { font-size: 13px; line-height: 1.5; color: var(--texte-1b); }
 
 /* ---------------------------------------------------------------------------
    PROGRES ET NUTRITION : conformite d'apres les captures d'Olivier
@@ -2367,6 +2280,44 @@ body.a-nav .nav { display: flex; }
   background: transparent; color: var(--texte);
   font-family: inherit; font-size: 15px; font-weight: 700;
 }
+
+/* ---------------------------------------------------------------------------
+   LE MENU EN HAUT A DROITE (17 septembre 2026)
+   ---------------------------------------------------------------------------
+   Historique et Profil ont quitte la nav basse pour ce menu, demande
+   d'Olivier. Le bouton se pose a droite du titre des trois onglets ; le
+   panneau, lui, est hors de l'ecran, en position fixe, et `rendreCorps` le
+   cale sous le bouton. Le voile le referme au toucher.
+   --------------------------------------------------------------------------- */
+.tete { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.tete .ecran-titre { min-width: 0; }
+.jour-droite { display: flex; align-items: center; gap: 10px; flex: 0 0 auto; }
+.menu-btn {
+  width: 44px; height: 44px; flex: 0 0 44px; padding: 0;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 12px; border: 1.5px solid var(--bord);
+  background: var(--fond-carte); color: var(--texte);
+}
+.menu-btn[aria-expanded="true"] { border-color: var(--texte); }
+.menu-voile {
+  position: fixed; inset: 0; z-index: 60;
+  background: rgba(16, 15, 13, .28);
+  touch-action: none;
+}
+.menu-pan {
+  position: fixed; top: 64px; right: 16px; z-index: 61;
+  min-width: 220px; padding: 6px;
+  background: var(--fond-carte); border: 1px solid var(--bord); border-radius: 16px;
+  box-shadow: 0 12px 32px rgba(16, 15, 13, .22);
+}
+.menu-l {
+  display: flex; align-items: center; gap: 12px;
+  width: 100%; min-height: 52px; padding: 0 14px;
+  border: 0; border-radius: 11px; background: transparent;
+  color: var(--texte); font-family: inherit; font-size: 16px; font-weight: 700; text-align: left;
+}
+.menu-l + .menu-l { border-top: 1px solid var(--bord); border-radius: 0 0 11px 11px; }
+.menu-l svg { flex: 0 0 auto; color: var(--texte-2); }
 </style>
 <script>
 (function () {
@@ -8704,11 +8655,11 @@ body.a-nav .nav { display: flex; }
     // Decision d'Olivier : l'app ne montre que les calories cramees par le sport
     // et le deficit qu'il induit ; le maintien attend le chantier nutrition. Les
     // proteines restent sur l'ecran Nutrition.
-    { nom: "C'est parti", titre: "Tout est prêt", sous: "Tu peux revenir sur chaque réponse depuis Moi, à tout moment.", type: "recap",
+    { nom: "C'est parti", titre: "Tout est prêt", sous: "Tu peux revenir sur chaque réponse depuis Profil, dans le menu en haut à droite, à tout moment.", type: "recap",
       // ⚠️ PAS DE `recap` : il portait « Olivier · 38 ans », « 78,4 vers
       // 75 kg », et deux jetons « @JOURS@ » et « @PROG@ » que RIEN ne
       // substituait, ni ici ni dans l'assembleur.
-      note: "Rien n'est envoyé nulle part. Pense à exporter ton journal de temps en temps depuis Moi › Profil : c'est la seule copie." }
+      note: "Rien n'est envoyé nulle part. Pense à exporter ton journal de temps en temps depuis Profil, dans le menu : c'est la seule copie." }
   ];
 
   // Portes de lecture pour les bancs et la page de controle.
@@ -16864,37 +16815,9 @@ body.a-nav .nav { display: flex; }
     return n;
   }
 
-  // LA PLUS LONGUE SERIE JAMAIS TENUE. Elle se lit dans le passe, contrairement
-  // a serieCourante() qui remonte depuis aujourd'hui : c'est un record, il ne
-  // se perd pas quand la serie en cours se casse.
-  function serieRecord() {
-    var h = state.hist || [], d = deriver(), i, prevus = {}, parDate = {};
-    if (!h.length || !d.progJours.length) return "-";
-    for (i = 0; i < d.progJours.length; i++) prevus[d.progJours[i].ji] = 1;
-    // ⚠️ UNE ACTIVITE « EN PLUS » NE VALIDE PAS UN JOUR PREVU. Decision
-    // d'Olivier : elle compte dans l'Historique et la depense, pas dans la
-    // serie. Sans ce filtre, un yoga ajoute un jour de jambes validait le jour
-    // de jambes sans que les jambes aient ete faites.
-    for (i = 0; i < h.length; i++) { if (!h[i].plus) parDate[h[i].d] = 1; }
-
-    var premiere = null, dd;
-    for (i = 0; i < h.length; i++) {
-      dd = dateDepuisCle(h[i].d);
-      if (dd && (!premiere || dd < premiere)) premiere = dd;
-    }
-    if (!premiere) return "-";
-
-    var cur = new Date(premiere.getTime()), auj = new Date(), n = 0, max = 0, garde = 0;
-    auj.setHours(0, 0, 0, 0);
-    while (cur <= auj && garde++ < 4000) {
-      if (prevus[(cur.getDay() + 6) % 7]) {
-        if (parDate[cleDate(cur)]) { n++; if (n > max) max = n; }
-        else n = 0;
-      }
-      cur.setDate(cur.getDate() + 1);
-    }
-    return max || "-";
-  }
+  // 🔴 `serieRecord` (la plus longue serie jamais tenue) A ETE RETIREE LE 17
+  // SEPTEMBRE 2026 : sa seule lectrice etait la vignette « record de streak »
+  // de Progres, retiree le meme jour sur decision d'Olivier.
 
   // Assiduite : seances faites sur seances prevues, depuis la premiere trace.
   function assiduite() {
@@ -18193,18 +18116,12 @@ body.a-nav .nav { display: flex; }
   }
 
   // -------------------------------------------------------------------------
-  // UNE LIGNE DE MACHINE : la case, le pictogramme, le nom, et « voir »
+  // UNE LIGNE DE MACHINE : la case, le nom, et « voir »
   // -------------------------------------------------------------------------
-  // ⚠️ LE PICTOGRAMME EST UN EMPLACEMENT VIDE POUR L'INSTANT. Olivier fournira
-  // les dessins. Un emplacement vide rend un cadre neutre : la ligne garde sa
-  // geometrie, et il SE VOIT qu'un dessin manque. Un emplacement absent, lui,
-  // ne se verrait pas, et on livrerait une liste a moitie illustree sans s'en
-  // apercevoir.
-  //
-  // Pour poser un dessin : ecrire le contenu du SVG dans le champ `pic` de
-  // l'entree, dans block_catalogues.js. Grille de 64 sur 64, trait de 2,5,
-  // `stroke="currentColor"` et `fill="none"` : la couleur suit celle du texte,
-  // donc les deux themes marchent sans y toucher.
+  // 🔴 LE PICTOGRAMME A ETE RETIRE LE 17 SEPTEMBRE 2026, emplacement compris.
+  // Decision d'Olivier : a 30 px, un dessin serait « trop petit et
+  // illisible ». Aucune machine n'en avait encore ; le lien « voir » reste la
+  // seule facon de reconnaitre un appareil.
   //
   // ⚠️ LE LIEN OUVRE UNE RECHERCHE D'IMAGES, IL N'EN AFFICHE AUCUNE. La
   // securite de la page interdit toute image venue d'ailleurs
@@ -18214,17 +18131,6 @@ body.a-nav .nav { display: flex; }
   //
   // `rel="noopener noreferrer"` n'est pas decoratif : sans lui, la page ouverte
   // garde une poignee sur la notre.
-  function pictoHtml(g) {
-    var d = GEAR[g].pic || "";
-    if (!d) {
-      return '<span class="ob-picto ob-picto-vide" aria-hidden="true"></span>';
-    }
-    return '<span class="ob-picto" aria-hidden="true">' +
-           '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" ' +
-           'stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">' +
-           d + "</svg></span>";
-  }
-
   function caseMachineHtml(g) {
     var on = !!state.obGear[g];
     var h = '<div class="ob-mline">';
@@ -18232,7 +18138,6 @@ body.a-nav .nav { display: flex; }
          ' aria-pressed="' + (on ? "true" : "false") + '"' +
          ' data-action="ob-gear" data-i="' + g + '">' +
          '<span class="ob-case-box" aria-hidden="true">✓</span>' +
-         pictoHtml(g) +
          '<span class="ob-case-txt"><span class="ob-case-t">' + esc(GEAR[g].t) + "</span>" +
          (GEAR[g].s ? '<span class="ob-case-s">' + esc(GEAR[g].s) + "</span>" : "") +
          "</span></button>";
@@ -18447,7 +18352,7 @@ body.a-nav .nav { display: flex; }
       h += '<p class="ob-prog-pied"><span class="num">' + total + "</span> exercices sur " +
            '<span class="num">' + journees + "</span> journée" + (journees > 1 ? "s" : "") +
            ", échauffements compris. Refuse ce qui ne te va pas maintenant, ou plus tard " +
-           "depuis Moi › Mes exercices : le programme se réécrit avec ce qui reste.</p>";
+           "depuis Profil › Mon programme › Mes exercices : le programme se réécrit avec ce qui reste.</p>";
     }
     return h;
   }
@@ -19005,44 +18910,11 @@ body.a-nav .nav { display: flex; }
   }
 
   // -------------------------------------------------------------------------
-  // BANDE DE LA SEMAINE
-  // -------------------------------------------------------------------------
-  // Sept cases, une par jour. Chacune porte l'initiale et le CODE de son
-  // activite, suffixe « +1 » quand la journee en porte deux, sinon la seconde
-  // seance serait invisible sur l'ecran qui sert justement a lire la semaine.
-  function bandeSemaineHtml() {
-    var d = deriver(), auj = jourIndexAujourdhui(), h = "", i, j, jr, code, dd, fait, cle;
-
-    h += '<div class="sem" role="img" aria-label="Ta semaine">';
-    for (i = 0; i < 7; i++) {
-      jr = null;
-      for (j = 0; j < d.progJours.length; j++) { if (d.progJours[j].ji === i) jr = d.progJours[j]; }
-
-      if (!jr || jr.vide) {
-        h += '<div class="sem-c' + (i === auj ? " sem-auj" : "") + '">' +
-             '<span class="sem-i">' + esc(JOURS[i].charAt(0)) + "</span>" +
-             '<span class="sem-t sem-repos">repos</span></div>';
-        continue;
-      }
-
-      dd = DISC[jr.acts[0].t];
-      // \u26a0\ufe0f LE NOM COURT ICI, ET SEULEMENT ICI. La case fait un septieme
-      // de la largeur de l'ecran ; « Tout le corps, dominante jambes » y
-      // prendrait cinq lignes. Le court est un mot COMPLET et plus bref,
-      // jamais un mot coupe : c'est la coupe qu'Olivier a refusee, pas la
-      // brievete.
-      code = jr.acts[0].t === "salle" ? seanceProgramme(jr.acts[0].si).court : dd.court;
-      cle = i + "-0";
-      fait = !!state.actFaits[cle];
-      h += '<div class="sem-c' + (i === auj ? " sem-auj" : "") + '"' +
-           ' style="background:' + dd.pale + ";color:" + dd.encre + '">' +
-           '<span class="sem-i">' + esc(JOURS[i].charAt(0)) + "</span>" +
-           '<span class="sem-t">' + esc(code) + (jr.acts.length > 1 ? " +1" : "") + "</span>" +
-           (fait ? '<span class="sem-ok" aria-label="faite">✓</span>' : "") +
-           "</div>";
-    }
-    return h + "</div>";
-  }
+  // 🔴 LA BANDE DE LA SEMAINE A ETE RETIREE LE 17 SEPTEMBRE 2026. Decision
+  // d'Olivier : « inutile et encombrante pour rien ». Elle ne faisait
+  // qu'afficher (aucun toucher) ce que trois autres ecrans disent deja : la
+  // semaine dans Mon programme, le jour prevu de chaque seance dans « Changer
+  // de seance », et ce qui est fait dans le calendrier de l'Historique.
 
   // -------------------------------------------------------------------------
   // SELECTEUR DE CRENEAU
@@ -19544,32 +19416,11 @@ body.a-nav .nav { display: flex; }
   //   1. le jour dit, pas encore faite  -> la carte de saisie
   //   2. le jour dit, deja faite        -> l'accuse de reception
   //   3. les autres jours               -> le rappel
-  // LE POIDS DU MOMENT. Ce bloc manquait entierement.
   //
-  // L'ecran passait directement des repas a « Prochaine pesée » : il disait
-  // QUAND se peser sans jamais dire OU l'on en est. C'est pourtant le chiffre
-  // qu'on vient chercher. Signale par Olivier.
-  //
-  // La valeur affichee est la DERNIERE PESEE, pas le poids du diagnostic, et la
-  // ligne de droite dit de quand elle date. Sans pesee, on le dit : afficher le
-  // poids declare sous l'etiquette « poids » laisserait croire a une mesure.
-  function cartePoidsHtml() {
-    var pes = state.pesees || [], derniere = pes.length ? pes[pes.length - 1] : null;
-    var d = derniere ? dateDepuisCle(derniere.d) : null;
-    var valeur = derniere ? derniere.kg : nombreOu(state.obPoids, 0);
-    if (!valeur) return "";
-
-    var quand = d
-      ? "dernière pesée " + JOURS_LONGS[(d.getDay() + 6) % 7] + " " + d.getDate()
-      : "poids déclaré au diagnostic";
-
-    return '<section class="poids-c">' +
-      '<div class="poids-h"><span class="poids-l">Poids</span>' +
-      '<span class="poids-q">' + esc(quand) + "</span></div>" +
-      '<div class="poids-v num">' + esc(fmtVal(valeur)) +
-      '<span class="poids-u">kg</span></div></section>';
-  }
-
+  // 🔴 `cartePoidsHtml` (la carte « Poids » de l'Historique) A ETE RETIREE LE
+  // 17 SEPTEMBRE 2026. Decision d'Olivier : « pas utile, on a le graphe ».
+  // L'ecran Progres dit le poids dans tous les cas : la courbe des la
+  // premiere pesee, « Tu as declare X kg au diagnostic » sans pesee.
   function cartePeseeHtml() {
     var auj = jourIndexAujourdhui();
 
@@ -20196,12 +20047,14 @@ body.a-nav .nav { display: flex; }
 
     h += '<header class="jour-h">';
     h += '<div class="jour-d">' + esc(dateLongue(new Date())) + "</div>";
-    h += '<div class="jour-r"><h1 class="ecran-titre">Aujourd\'hui</h1>' +
+    // LE MENU EN HAUT A DROITE (17 septembre 2026), a droite de la serie.
+    // Le titre suit l'onglet depuis le 17 septembre 2026 : « Seance ».
+    h += '<div class="jour-r"><h1 class="ecran-titre">' + esc(TITRES.jour) + "</h1>" +
+         '<div class="jour-droite">' +
          '<div class="serie" aria-label="' + serie + ' séances validées cette semaine">' +
-         '<span aria-hidden="true">🔥</span><span class="serie-n num">' + serie + "</span></div></div>";
+         '<span aria-hidden="true">🔥</span><span class="serie-n num">' + serie + "</span></div>" +
+         menuBoutonHtml() + "</div></div>";
     h += "</header>";
-
-    h += bandeSemaineHtml();
 
     if (mot.head) {
       h += '<section class="motiv"><div class="motiv-h">' + esc(mot.head) + "</div>" +
@@ -21461,13 +21314,10 @@ body.a-nav .nav { display: flex; }
       if (rech) { h += resultatsRechercheHtml(rech); }
     }
 
-    // LE POIDS VIT ICI DESORMAIS, plus sur l'ecran du jour. Demande d'Olivier :
-    // l'ecran d'entrainement porte l'entrainement, et l'Historique porte ce
-    // qu'on vient regarder. La carte se place AVANT le calendrier : c'est le
-    // chiffre qu'on cherche en premier en ouvrant cet onglet.
-    h += cartePoidsHtml();
-    // La depense de la semaine passe juste apres le poids : ce sont les deux
-    // chiffres qu'on vient chercher en ouvrant cet onglet.
+    // 🔴 LA CARTE « POIDS » N'EST PLUS ICI depuis le 17 septembre 2026 :
+    // Olivier, « pas utile, on a le graphe ». Le poids se lit dans Progres.
+    // La depense de la semaine passe en tete : c'est le chiffre qu'on vient
+    // chercher en ouvrant cet onglet.
     h += carteDepenseHtml();
 
     h += calendrierHtml();
@@ -21513,9 +21363,19 @@ body.a-nav .nav { display: flex; }
     // ⚠️ UNE ACTIVITE « EN PLUS » COLORE UN JOUR DE REPOS, JAMAIS UN JOUR MANQUE.
     // Meme regle que la serie : elle ne valide pas un jour prevu.
     var parDatePlus = {};
+    // 🔴 UN JOUR N'EST MANQUE QU'A PARTIR DE LA PREMIERE ENTREE DU JOURNAL.
+    // Olivier, capture du 17 septembre 2026 : journal vide, et pourtant tous
+    // ses jours prevus du mois encadres « manque », jusqu'a avant son premier
+    // lancement. L'appli n'enregistre pas la date du diagnostic ; decision
+    // d'Olivier (option a) : on part de la premiere seance notee, quelle
+    // qu'elle soit. Avant elle, et tant que le journal est vide, un jour
+    // prevu passe n'est ni fait ni manque : il reste neutre (`cal-avant`).
+    var debut = null, dj;
     for (i = 0; i < jr.length; i++) {
       if (jr[i].plus) parDatePlus[jr[i].d] = jr[i].t;
       else parDate[jr[i].d] = jr[i].t;
+      dj = dateDepuisCle(jr[i].d);
+      if (dj && (!debut || dj < debut)) debut = dj;
     }
 
     h += '<div class="carte-t">' + esc(MOIS[mois]) + " " + an + "</div>";
@@ -21536,8 +21396,14 @@ body.a-nav .nav { display: flex; }
         // gardees dans ce meme fichier depuis toujours.
         var ddc = DISC[parDate[cle] || parDatePlus[cle]];
         if (ddc) st = "background:" + ddc.bg + ";color:" + ddc.fg;
-      } else if (dd > auj) {
+      } else if (dd > auj || (prevus[ji] && cle === cleDate(auj))) {
+        // AUJOURD'HUI N'EST PAS ENCORE MANQUE. Decision d'Olivier du 17
+        // septembre 2026 : un jour prevu ne devient « manque » qu'une fois
+        // passe. Tant que la journee court, sa seance est encore a faire, et la
+        // case se dessine comme celles qui viennent.
         cls += " cal-avenir";
+      } else if (prevus[ji] && (!debut || dd < debut)) {
+        cls += " cal-avant";
       } else if (prevus[ji]) {
         cls += " cal-manque";
       } else {
@@ -21842,14 +21708,13 @@ body.a-nav .nav { display: flex; }
      ------------------------------------------------------------------------- */
   function progHtml() {
     var modes = modesDisponibles(), h = "", i, j, k, mode, vals, d = deriver();
-    var hj = state.hist || [], tonnage = 0, record = 0, s, heures = 0, km = 0, sorties = 0;
+    var hj = state.hist || [], s, km = 0;
     var recs = {}, ordre = [];
 
     for (i = 0; i < hj.length; i++) {
       s = hj[i];
-      if (s.t === "cours") { heures += s.min || 0; continue; }
-      if (s.t === "run") { sorties++; km += kmNote(s.km); continue; }
-      tonnage += s.tonnage || 0;
+      if (s.t === "cours") continue;
+      if (s.t === "run") { km += kmNote(s.km); continue; }
       if (!s.ex) continue;
       for (j = 0; j < s.ex.length; j++) {
         // Les records se comptent en kilos : un maintien en secondes comme un
@@ -21857,7 +21722,6 @@ body.a-nav .nav { display: flex; }
         if (s.ex[j].unite) continue;
         for (k = 0; k < s.ex[j].sets.length; k++) {
           var kg = s.ex[j].sets[k].kg;
-          if (kg > record) record = kg;
           if (!recs[s.ex[j].nom]) { recs[s.ex[j].nom] = { max: kg, min: kg }; ordre.push(s.ex[j].nom); }
           if (kg > recs[s.ex[j].nom].max) recs[s.ex[j].nom].max = kg;
           if (kg < recs[s.ex[j].nom].min) recs[s.ex[j].nom].min = kg;
@@ -21865,17 +21729,10 @@ body.a-nav .nav { display: flex; }
       }
     }
 
-    // --- 1. Trois vignettes ---
-    // LIBELLES DE LA MAQUETTE. Les miens disaient « tonnes » et « record kg » :
-    // exacts, mais ils nomment l'UNITE au lieu de ce qu'elle mesure. « soulevés
-    // au total » et « record de streak » disent de quoi il s'agit.
-    h += '<div class="vign">';
-    h += vignette(hj.length, "séances");
-    if (d.slotsSalle.length) h += vignette(fmtVal(Math.round(tonnage / 100) / 10) + " t", "soulevés au total");
-    else if (d.slotsCours.length) h += vignette(fmtVal(Math.round(heures / 6) / 10) + " h", "de cours au total");
-    else h += vignette(fmtVal(km) + " km", "courus au total");
-    h += vignette(serieRecord(), "record de streak");
-    h += "</div>";
+    // 🔴 LES TROIS VIGNETTES DU HAUT (seances, souleves au total, record de
+    // streak) ONT ETE RETIREES LE 17 SEPTEMBRE 2026. Olivier : « pas
+    // interessant, on a les graphes ». Les courbes Tonnage et Seances disent la
+    // meme chose ; pour un coureur, la carte Running porte ses kilometres.
 
     // ⚠️ CE QUE LE JOURNAL DIT, AVANT LES COURBES. C'est l'ecran ou l'on vient
     // regarder ou l'on en est ; y taire les conseils que le journal permet
@@ -21917,7 +21774,7 @@ body.a-nav .nav { display: flex; }
              ? 'Tu as déclaré <span class="num">' +
                esc(fmtVal(nombreOu(state.obPoids, 0))) + " kg</span> au diagnostic. "
              : "Tu n'as pas encore donné ton poids. ") +
-           "La courbe démarre à ta première pesée, depuis l'écran Aujourd'hui.</p></div>";
+           "La courbe démarre à ta première pesée, depuis l'onglet Séance.</p></div>";
     } else {
       h += courbeHtml(vals, u,
         "Départ · " + fmtVal(depart) + u,
@@ -21955,8 +21812,9 @@ body.a-nav .nav { display: flex; }
       h += "</section>";
     }
 
-    // --- 6. Paliers ---
-    h += badgesHtml(hj.length);
+    // 🔴 LE BLOC « PALIERS » (5, 22, 65 seances) A ETE RETIRE LE 17 SEPTEMBRE
+    // 2026. Olivier : « inutile ». `MOTEUR.BADGES` reste lu par la carte de
+    // message de l'ecran du jour.
     return h;
   }
 
@@ -22204,85 +22062,32 @@ body.a-nav .nav { display: flex; }
     return t;
   }
 
-  function badgesHtml(total) {
-    var b = MOTEUR.BADGES, i, h = '<div class="carte-t" style="margin-top:20px">Paliers</div><div class="bdg">';
-    for (i = 0; i < b.length; i++) {
-      h += '<div class="bd' + (total >= b[i].n ? " bd-on" : "") + '">' +
-           '<span class="bd-n num">' + b[i].n + "</span>" +
-           '<span class="bd-l">' + esc(b[i].label) + "</span></div>";
-    }
-    return h + "</div>";
-  }
-
   /* =========================================================================
-     LA BRANCHE MOI : Moi, Profil, Mon programme, Mes exercices, Apparence
+     LA BRANCHE PROFIL (cle `moi`) : Profil, Mes infos (cle `profil`), Mon
+     programme, Mes exercices, Apparence. Renommee le 17 septembre 2026.
      ========================================================================= */
 
   /* -------------------------------------------------------------------------
-     MOI
+     PROFIL, L'ONGLET
      ------------------------------------------------------------------------- */
-  // La photo passe par un <label> qui CONTIENT un <input type="file">
-  // transparent en absolute inset 0. C'est ce montage, et lui seul, qui ouvre
-  // la photothèque du telephone au premier toucher : un bouton qui appelle
-  // .click() sur un input cache est bloque par Safari hors geste direct.
   // LA CARTE D'IDENTITE EST SOMBRE, ET LE PSEUDO EST UN BOUTON.
   //
-  // Ma premiere version posait le nom en texte mort : rien ne menait a Profil,
-  // alors que la maquette en fait la porte d'entree. Signale par Olivier.
-  // Deux zones cliquables, le bloc nom et le chevron, parce qu'on vise l'un ou
-  // l'autre selon la main.
-  // La seule forme acceptee : une image en base64, sans un seul caractere qui
-  // puisse sortir d'un attribut. Le vocabulaire du base64 n'en contient aucun.
-  var PHOTO_FORME = /^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/;
-
-  function photoValide(v) {
-    return typeof v === "string" && v.length < 4000000 && PHOTO_FORME.test(v);
-  }
-
-  function photoHtml() {
-    var init = (state.obPrenom || "?").charAt(0).toUpperCase();
+  // Ma premiere version posait le nom en texte mort : rien ne menait aux
+  // reglages, alors que la maquette en fait la porte d'entree. Signale par
+  // Olivier. Deux zones cliquables, le bloc nom et le chevron, parce qu'on
+  // vise l'un ou l'autre selon la main.
+  //
+  // 🔴 LA PHOTO DE PROFIL A ETE RETIREE LE 17 SEPTEMBRE 2026. Olivier : « ca
+  // n'apporte rien a l'appli ». La pastille (photo ou initiale), le choix de
+  // fichier, « Retirer la photo » et ses messages d'erreur sont partis avec.
+  function identiteHtml() {
     var h = '<div class="moi-carte">';
-    h += '<label class="moi-photo">';
-    // L'ADRESSE EST ENTRE APOSTROPHES. Une adresse en data: contient une
-    // virgule, et `url()` sans guillemets s'arrete dessus : la regle entiere
-    // devenait invalide et la pastille restait vide.
-    //
-    // ET ELLE EST VERIFIEE AVANT D'ETRE POSEE. C'est le seul champ de l'appli
-    // qui entre dans du HTML sans passer par esc(), et il ne vient pas toujours
-    // de toDataURL, dont la sortie est sure : il peut aussi venir d'un journal
-    // IMPORTE, et l'import recopie les valeurs sans regarder ce qu'elles
-    // contiennent. Un guillemet dans la chaine fermerait l'attribut, et comme la
-    // politique de securite autorise le script en ligne, un gestionnaire glisse
-    // la s'executerait. On n'accepte donc qu'une image en base64, et on retombe
-    // sur l'initiale sinon.
-    var photo = photoValide(state.photo) ? state.photo : null;
-    h += photo
-      ? '<span class="moi-img" role="img" aria-label="Photo de profil"' +
-        " style=\"background-image:url('" + photo + "')\"></span>"
-      : '<span class="moi-init" aria-hidden="true">' + esc(init) + "</span>";
-    h += '<span class="moi-cap" aria-hidden="true">Photo</span>';
-    h += '<input type="file" accept="image/*" class="moi-file" data-action="photo-choisir"' +
-         ' aria-label="Choisir une photo de profil"></label>';
     h += '<button type="button" class="moi-ident" data-action="aller-profil">' +
          '<span class="moi-nom">' + esc(state.obPrenom || "Toi") + "</span>" +
          '<span class="moi-sous">' + esc(resumeProfilCourt()) + "</span></button>";
     h += '<button type="button" class="moi-chev" data-action="aller-profil"' +
-         ' aria-label="Ouvrir mon profil">›</button>';
+         ' aria-label="Ouvrir mes infos">›</button>';
     h += "</div>";
-    if (photo) {
-      h += '<button type="button" class="moi-retirer" data-action="photo-retirer">' +
-           "Retirer la photo</button>";
-    }
-    // La phrase qui disait que la photo n'etait pas enregistree a disparu avec
-    // la limite qu'elle annoncait : la photo est maintenant reduite puis gardee
-    // sur l'appareil, comme le reste du profil.
-    //
-    // Reste ce message, pour le cas ou le fichier choisi ne s'ouvre pas. Sans
-    // lui, un fichier illisible rendrait la main sans rien dire, et c'est
-    // exactement le silence qu'on vient de corriger.
-    if (state.photoMsg) {
-      h += '<p class="moi-note">' + esc(state.photoMsg) + "</p>";
-    }
     return h;
   }
 
@@ -22321,7 +22126,7 @@ body.a-nav .nav { display: flex; }
   }
 
   function moiHtml() {
-    var h = photoHtml(), d = deriver();
+    var h = identiteHtml(), d = deriver();
 
     // LES DEUX LIGNES QUI MENENT AUX ETAPES DE SALLE N'EXISTENT QUE S'IL Y A DE
     // LA SALLE. Le diagnostic saute ces deux etapes pour un programme fait de
@@ -22364,7 +22169,10 @@ body.a-nav .nav { display: flex; }
     // L'IMPORT MANQUAIT. Le README exige « export / import JSON du journal »,
     // mais aucun des dix prompts ne l'a commande : il est tombe entre l'etape 6,
     // qui ne demandait que l'export, et la recette, qui le teste au parcours 11.
-    // Meme montage que la photo : un <label> qui contient l'input file.
+    // UN <label> QUI CONTIENT L'INPUT FILE, transparent en absolute inset 0.
+    // C'est ce montage, et lui seul, qui ouvre le selecteur de fichiers au
+    // premier toucher : un bouton qui appelle .click() sur un input cache est
+    // bloque par Safari hors geste direct.
     h += '<label class="mo-l mo-l-file">' +
          '<span class="mo-n">Importer un journal<span class="mo-fmt">' +
          "remplace tout ce qui est enregistré</span></span>" +
@@ -22508,7 +22316,7 @@ body.a-nav .nav { display: flex; }
     }
     h += '<div class="dg-t dg-t-rouge">Tout effacer, vraiment ?</div>';
     h += '<p class="cr-p">Ce qui disparaît : ton diagnostic, ton programme de la semaine, ' +
-         "tes cours et tes sorties, ton historique, ta pesée et ta photo.</p>";
+         "tes cours et tes sorties, ton historique et ta pesée.</p>";
     h += '<p class="cr-p">C\'est définitif, il n\'y a pas de corbeille. Exporte ton ' +
          "journal d'abord si tu veux le garder.</p>";
     h += '<button type="button" class="dg-btn" data-action="reset-confirmer">' +
@@ -22951,89 +22759,8 @@ body.a-nav .nav { display: flex; }
   /* -------------------------------------------------------------------------
      ACTIONS
      ------------------------------------------------------------------------- */
-  // LA PHOTO EST REDUITE, PUIS ENREGISTREE.
-  //
-  // La premiere version posait l'adresse rendue par createObjectURL, celle de
-  // la maquette. Elle ne s'affichait JAMAIS dans le livrable : la maquette n'a
-  // pas de politique de securite, le livrable en a une, et elle n'autorise les
-  // images qu'en 'self' et en data:. Le navigateur refusait donc de charger
-  // l'image, sans rien dire a l'utilisateur, qui voyait le choix de photo se
-  // derouler entierement pour rien. Signale par Olivier.
-  //
-  // On passe donc par data:, deja autorise, et on en profite pour REDUIRE :
-  // une photo d'iPhone brute pese 2 a 4 Mo, et son ecriture en texte encore un
-  // tiers de plus, alors que le telephone n'accorde a l'appli que 5 Mo pour
-  // tout ce qu'elle garde. 320 px de cote suffisent a une pastille de 60 px sur
-  // un ecran Retina et tiennent dans quelques dizaines de kilo-octets.
-  //
-  // On recadre AU CARRE depuis le centre, sinon une photo verticale rentre
-  // deformee dans une pastille ronde.
-  var PHOTO_COTE = 320;
-
-  // Au-dela, on ne tente meme pas la lecture : FileReader chargerait le fichier
-  // entier en memoire, puis sa transcription en texte qui pese un tiers de plus,
-  // avant le moindre controle. Un onglet ferme pour memoire epuisee ne se
-  // rattrape pas, et 40 Mo laissent passer toutes les photos d'un telephone.
-  var PHOTO_POIDS_MAX = 40 * 1024 * 1024;
-
-  function photoChoisir(input) {
-    var f = input && input.files && input.files[0];
-    if (!f) return;
-    if (f.size > PHOTO_POIDS_MAX) {
-      poser({ photoMsg: "Cette image est trop lourde pour être utilisée ici." });
-      return;
-    }
-    var lecteur = new window.FileReader();
-    lecteur.onload = function () {
-      var img = new window.Image();
-      img.onload = function () {
-        var c, ctx, cote, sx, sy, url;
-        try {
-          cote = Math.min(img.width, img.height);
-          sx = Math.round((img.width - cote) / 2);
-          sy = Math.round((img.height - cote) / 2);
-          c = document.createElement("canvas");
-          c.width = PHOTO_COTE; c.height = PHOTO_COTE;
-          ctx = c.getContext("2d");
-          // Le JPEG ne connait pas la transparence : sans ce fond, une image
-          // detouree ressortirait sur du NOIR, ce qui est la couleur d'un canvas
-          // vierge une fois aplati.
-          ctx.fillStyle = "#ffffff";
-          ctx.fillRect(0, 0, PHOTO_COTE, PHOTO_COTE);
-          ctx.drawImage(img, sx, sy, cote, cote, 0, 0, PHOTO_COTE, PHOTO_COTE);
-          url = c.toDataURL("image/jpeg", 0.82);
-          // Une surface de canvas trop grande pour iOS rend une image vide sans
-          // lever d'erreur : on refuse ce qui ne ressemble pas a une photo
-          // plutot que d'enregistrer un rectangle blanc.
-          if (!photoValide(url)) {
-            poser({ photoMsg: "Cette image n'a pas pu être réduite." });
-            return;
-          }
-        } catch (e) {
-          // Un fichier illisible ne doit pas laisser l'ecran muet : on le dit
-          // la ou l'import de journal dit deja ses erreurs.
-          poser({ photoMsg: "Cette image n'a pas pu être lue." });
-          return;
-        }
-        poser({ photo: url, photoMsg: "" });
-      };
-      img.onerror = function () {
-        poser({ photoMsg: "Ce fichier n'est pas une image." });
-      };
-      img.src = lecteur.result;
-    };
-    lecteur.onerror = function () {
-      poser({ photoMsg: "Lecture du fichier impossible." });
-    };
-    lecteur.readAsDataURL(f);
-  }
-
-  function photoRetirer() {
-    // On efface AUSSI le message : sinon un « ce fichier n'est pas une image »
-    // reste affiche sous une carte qui n'a plus de photo, sans plus rien
-    // designer.
-    poser({ photo: null, photoMsg: "" });
-  }
+  // 🔴 `photoChoisir` ET `photoRetirer` SONT PARTIES LE 17 SEPTEMBRE 2026, avec
+  // la photo de profil.
 
   function exporterJournal() {
     var o = {}, i, k, b, url, a;
@@ -23083,8 +22810,8 @@ body.a-nav .nav { display: flex; }
   function formeValide(cle, v) {
     var d = has(DEFAUTS, cle) ? DEFAUTS[cle] : undefined;
 
-    // Trois cles valent `null` au repos et portent autre chose une fois posees.
-    if (cle === "photo") return v === null || photoValide(v);
+    // Deux cles valent `null` au repos et portent autre chose une fois posees.
+    // (La troisieme, `photo`, est partie le 17 septembre 2026.)
     if (cle === "iaPlan") return v === null || (!!v && typeof v === "object" && !isArray(v));
     if (cle === "faits") {
       if (v === null) return true;
@@ -23875,7 +23602,7 @@ body.a-nav .nav { display: flex; }
      pas des calories, et l'utilisateur croirait suivre ce qu'il mange.
      ------------------------------------------------------------------------- */
   function nutriHtml() {
-    var h = "", i;
+    var h = "";
     var cal = caloriesDuSport(), pv = proteinesVisees();
 
     // 🔴 PLUS D'ACTIVITE PREVUE EN TETE. Le sous-titre nommait la seance que le
@@ -23973,31 +23700,12 @@ body.a-nav .nav { display: flex; }
     // Il listait aussi quatre repas d'exemple, juste sous les quatre VRAIS
     // repas de la carte « Ce que tu as mange » : le meme ecran montrait deux
     // fois les memes noms, une fois avec les calories notees, une fois sans.
-    h += '<div class="carte-t">Tes compléments</div>';
-    var pris = 0;
-    // MISE EN PAGE PROPRE AU COMPLEMENT, PAS CELLE DES LIGNES DE REGLAGE.
     //
-    // Je reutilisais `.mo-l`, dont la valeur de droite est en `flex: 0 0 auto`
-    // parce qu'elle porte normalement un chiffre court. Ici elle portait le
-    // texte long du complement : il refusait de retrecir et passait PAR-DESSUS
-    // le libelle. Vu par Olivier a l'ecran.
-    //
-    // Le libelle et sa raison sont donc empiles, chacun sur sa ligne.
-    h += '<ul class="nu-supps">';
-    for (i = 0; i < MOTEUR.SUPPS.length; i++) {
-      if (!state.obSupps[i]) continue;
-      pris++;
-      h += '<li class="nu-supp"><span class="nu-supp-n">' + esc(MOTEUR.SUPPS[i].label) + "</span>" +
-           '<span class="nu-supp-w">' + esc(MOTEUR.SUPPS[i].why) + "</span></li>";
-    }
-    h += "</ul>";
-    // L'ETAT VIDE MANQUAIT SA MOITIE UTILE : il constatait l'absence sans dire
-    // ou la corriger. Celui de la maquette nomme l'etape a rouvrir.
-    if (!pris) {
-      h += '<p class="cr-p">Tu n\'as retenu aucun complément au diagnostic. ' +
-           "Rien n'est ajouté à ton plan. Reviens sur l'étape Habitudes si tu " +
-           "changes d'avis.</p>";
-    }
+    // 🔴 LE BLOC « TES COMPLEMENTS » A ETE RETIRE LE 17 SEPTEMBRE 2026.
+    // Olivier : « inutile ». Il recopiait la liste cochee a l'etape Habitudes,
+    // avec la meme phrase, sans dose, sans moment, sans rien compter. La
+    // question reste au diagnostic : la liste part dans la demande de plan
+    // repas envoyee a l'assistant (`promptNutrition`, plus haut).
 
     // 🔴 LE BLOC HORIZON ET L'AVERTISSEMENT « CES CHIFFRES SONT DES REPERES » ONT
     // ETE RETIRES le 15 septembre 2026, avec les reperes caloriques qu'ils
@@ -25046,7 +24754,7 @@ body.a-nav .nav { display: flex; }
    module a l'autre.
    =========================================================================== */
 
-  var APP_VERSION = "1.27.0";
+  var APP_VERSION = "1.27.1";
 
   function has(o, k) { return Object.prototype.hasOwnProperty.call(o, k); }
 
@@ -25088,10 +24796,12 @@ body.a-nav .nav { display: flex; }
     // facon, puisqu'ils tiennent a `obAct` et pas a cette liste.
     obSecondOuvert: "",
     slotAuj: 0, resetDemande: false,
-    // La photo de profil, elle, EST persistee : elle est declaree plus bas avec
-    // les reponses du diagnostic. Ne reste ici que le message d'erreur de sa
-    // lecture, qui n'a pas a survivre au rechargement.
-    photoMsg: "",
+    // LE MENU EN HAUT A DROITE, et le dernier des trois onglets affiche, qui
+    // sert de retour a Historique et Profil. Non persistes : l'appli rouvre
+    // toujours menu ferme, sur l'ecran du jour.
+    menuOuvert: false, dernierOnglet: "jour",
+    // 🔴 LA PHOTO DE PROFIL A ETE RETIREE LE 17 SEPTEMBRE 2026, avec son
+    // message d'erreur `photoMsg`. Olivier : « ca n'apporte rien a l'appli ».
     // Le remplacement PONCTUEL de l'activite du jour : "" (rien), "salle",
     // "cours" ou "run". Il remplace l'ancien drapeau `coursQuitte`, qui ne
     // savait aller que du cours vers la salle. Non persiste : c'est un choix
@@ -25328,10 +25038,6 @@ body.a-nav .nav { display: flex; }
     // duree l'avait ecarte. Les deux sont des DECISIONS de l'utilisateur, pas
     // du generateur : elles survivent a un changement de duree de seance.
     obRetires: {}, obAjouts: {},
-    // La photo de profil, reduite a 320 px de cote et ecrite en data:.
-    // PERSISTEE : c'est ce qu'Olivier a demande, et c'est ce que la phrase de
-    // l'ecran Moi promet maintenant.
-    photo: null,
     // LE PLAN REPAS RAPPORTE DE L'ASSISTANT, et le jour ou il l'a ete.
     // PERSISTES : un plan qu'il faudrait recoller a chaque lancement ne servirait
     // a rien. Le texte est garde TEL QUEL, l'appli ne le decoupe pas : elle n'a
@@ -25373,9 +25079,12 @@ body.a-nav .nav { display: flex; }
     "obRunNiveau", "obRunDuree", "obEviter",
     "hist", "pesees", "dernierExport",
     "obRetires", "obAjouts", "iaPlan", "progDec", "progRegl", "repas", "perso", "obDepense", "forme",
-    // La photo de profil, reduite a 320 px de cote et ecrite en data:.
-    // Elle part aussi dans l'export du journal, donc une sauvegarde la ramene.
-    "photo", "iaRepas", "iaRepasDate",
+    // 🔴 `photo` N'EST PLUS SAUVEE depuis le 17 septembre 2026 (photo de profil
+    // retiree). Une photo deja enregistree est ignoree a la lecture, comme
+    // toute cle inconnue, et disparait du stockage a la premiere ecriture, qui
+    // ne recopie que cette liste. Un journal importe qui en porte une passe
+    // aussi : l'import ne lit que cette liste.
+    "iaRepas", "iaRepasDate",
     "runKm", "runMin", "runKcal", "coursMin", "coursKcal",
     // Le remplacement et les activites en plus du jour, AVEC LEUR DATE. Voir
     // `remplacementActif` et `enPlusDuJour` (block_jour.js).
@@ -25443,9 +25152,6 @@ body.a-nav .nav { display: flex; }
   // =========================================================================
   var _dernier = null;
   var _minuteur = null;
-  // Vrai pendant `pagehide` seulement. La page est en train de partir :
-  // redessiner n'y sert a rien et pourrait ne jamais rendre la main.
-  var _enFermeture = false;
 
   function lire() {
     var brut, o, r, i, k;
@@ -25564,32 +25270,9 @@ body.a-nav .nav { display: flex; }
       // se croyait a jour et rendait la main : une seule ecriture ratee suffisait
       // a ne plus jamais rien enregistrer de la seance.
     }
-
-    // LE JOURNAL PASSE AVANT LA PHOTO.
-    //
-    // Tout l'etat s'ecrit en UN SEUL bloc : si la photo fait franchir le quota,
-    // ce n'est pas la photo qu'on perd, c'est l'historique des seances avec
-    // elle, et sans un mot. Une vignette de 320 px pese quelques dizaines de
-    // kilo-octets contre environ 5 Mo de quota, donc le cas est rare ; il n'est
-    // pas impossible sur un telephone dont le stockage est deja plein.
-    // On refait donc une tentative SANS la photo, et on le dit.
-    if (o.photo) {
-      o.photo = null;
-      try {
-        b = JSON.stringify(o);
-        window.localStorage.setItem(CLE, b);
-        _dernier = b;
-        state.photo = null;
-        state.photoMsg = "La photo n'a pas pu être gardée, la mémoire de " +
-                         "l'appareil est pleine. Ton journal, lui, est enregistré.";
-        // ON REDESSINE. Cette fonction tourne dans un minuteur, longtemps apres
-        // le rendu qui a affiche la photo : sans cet appel, l'ecran continuait
-        // de montrer une pastille que l'etat venait de retirer, et le message
-        // n'apparaissait qu'au geste suivant. On ne redessine pas depuis
-        // `pagehide`, ou la page est en train de disparaitre.
-        if (!_enFermeture) { rendre(); }
-      } catch (e2) { /* meme sans la photo, ca ne rentre pas : rien de plus a faire */ }
-    }
+    // 🔴 LA SECONDE TENTATIVE « SANS LA PHOTO » EST PARTIE AVEC LA PHOTO DE
+    // PROFIL, le 17 septembre 2026 : il n'y a plus rien a sacrifier pour faire
+    // tenir le journal.
   }
 
   function ecrire() {
@@ -25604,8 +25287,7 @@ body.a-nav .nav { display: flex; }
   // pagehide couvre iOS, ou beforeunload n'est pas fiable.
   function ecrireAvantDeQuitter() {
     if (_minuteur) { window.clearTimeout(_minuteur); _minuteur = null; }
-    _enFermeture = true;
-    try { ecrireMaintenant(); } finally { _enFermeture = false; }
+    ecrireMaintenant();
   }
 
   function poser(o) {
@@ -25628,16 +25310,28 @@ body.a-nav .nav { display: flex; }
   // =========================================================================
   // ROUTAGE
   // -------------------------------------------------------------------------
-  // Quinze vues, une seule affichee. ONGLETS porte l'ordre de la nav basse,
+  // Dix-neuf vues, une seule affichee. ONGLETS porte l'ordre de la nav basse,
   // PARENT dit a quel ecran un detail remonte, FIGES neutralise le glissement.
+  //
+  // 🔴 TROIS ONGLETS EN BAS DEPUIS LE 17 SEPTEMBRE 2026, et plus cinq.
+  // Decision d'Olivier : « en bas de l'ecran on ne garde que trois onglets :
+  // seance, nutrition, progres ». Historique et Profil passent dans le MENU en
+  // haut a droite (voir MENU_DEF) : ils deviennent des ecrans de detail, avec
+  // un bouton de retour vers l'onglet d'ou l'on vient.
   // =========================================================================
-  var ONGLETS = ["jour", "nutri", "histo", "prog", "moi"];
+  var ONGLETS = ["jour", "nutri", "prog"];
 
   // \u26a0\ufe0f « Mes exercices » A POUR PARENT « Mon programme », et plus « Moi ».
   // On y entre depuis la page ou l'on compose sa semaine ; en ressortir doit y
   // ramener, pas remonter d'un cran de plus.
+  //
+  // ⚠️ LE PARENT DE `histo` ET DE `moi` BOUGE : c'est le dernier onglet
+  // affiche, repose a chaque rendu par `rendreCorps` (voir `dernierOnglet`).
+  // Ouvert depuis Nutrition, l'Historique ramene a Nutrition. Les valeurs
+  // ecrites ici ne servent qu'avant le premier rendu.
   var PARENT = { fiche: "histo", profil: "moi", monprog: "moi", exos: "monprog", theme: "moi", ia: "moi",
-                 apercu: "jour", libre: "jour", repas: "nutri", scan: "repas" };
+                 apercu: "jour", libre: "jour", repas: "nutri", scan: "repas",
+                 histo: "jour", moi: "jour" };
 
   var FIGES = { onb: 1, salle: 1, splash: 1, trans: 1 };
 
@@ -25651,7 +25345,9 @@ body.a-nav .nav { display: flex; }
   var TITRES = {
     splash:  "",
     onb:     "Diagnostic",
-    jour:    "Aujourd'hui",
+    // « Seance », comme son onglet, depuis le 17 septembre 2026 (Olivier). Les
+    // boutons de retour des ecrans qui en dependent disent donc « ‹ Seance ».
+    jour:    "Séance",
     salle:   "Mode entraînement",
     trans:   "Enchaînement",
     nutri:   "Nutrition",
@@ -25660,8 +25356,14 @@ body.a-nav .nav { display: flex; }
     apercu:  "Aperçu de la séance",
     libre:   "Une autre activité",
     prog:    "Progrès",
-    moi:     "Moi",
-    profil:  "Profil",
+    // 🔴 L'ONGLET « MOI » S'APPELLE « PROFIL » DEPUIS LE 17 SEPTEMBRE 2026
+    // (demande d'Olivier). Le sous-ecran qui portait deja ce nom devient
+    // « Mes infos », sinon deux ecrans emboites s'appelleraient pareil et le
+    // bouton de retour dirait « ‹ Profil » sur un ecran titre « Profil ». Les
+    // CLES `moi` et `profil` ne changent pas : les bancs et la sauvegarde les
+    // connaissent.
+    moi:     "Profil",
+    profil:  "Mes infos",
     monprog: "Mon programme",
     exos:    "Mes exercices",
     theme:   "Apparence",
@@ -25696,6 +25398,8 @@ body.a-nav .nav { display: flex; }
     _sens = sens || 0;
     state.ecran = e;
     state.picker = false;
+    // Changer d'ecran referme le menu, par quelque porte qu'on sorte.
+    state.menuOuvert = false;
     ecrire();
     rendre();
     window.scrollTo(0, 0);
@@ -26053,25 +25757,67 @@ body.a-nav .nav { display: flex; }
   // Traces SVG repris de la source du prototype. Deux `path` par icone,
   // stroke-width 2, bouts arrondis, 22 x 22.
   // =========================================================================
+  // 🔴 L'ONGLET « JOUR » S'APPELLE « SEANCE » depuis le 17 septembre 2026
+  // (demande d'Olivier), et son ecran porte le meme titre.
   var NAV_DEF = [
-    { k: "jour",  t: "Jour",        d1: "M4 12h16", d2: "M6 8v8M18 8v8M3 10v4M21 10v4" },
+    { k: "jour",  t: "Séance",      d1: "M4 12h16", d2: "M6 8v8M18 8v8M3 10v4M21 10v4" },
     { k: "nutri", t: "Nutrition",   d1: "M7 3v8a3 3 0 0 0 6 0V3", d2: "M10 11v10M18 3c-1.5 2-2 4-2 6s.5 3 2 3 2-1 2-3-.5-4-2-6zm0 12v6" },
+    { k: "prog",  t: "Progrès",     d1: "M4 19V5m0 14h16", d2: "M7 15l3.5-4 3 2.5L19 8" }
+  ];
+
+  // LE MENU EN HAUT A DROITE : ce qui a quitte la nav basse, avec les memes
+  // icones. Il ne s'ouvre que depuis les trois onglets.
+  var MENU_DEF = [
     { k: "histo", t: "Historique",  d1: "M12 3a9 9 0 1 0 9 9 9 9 0 0 0-9-9z", d2: "M12 7v5l3 2" },
-    { k: "prog",  t: "Progrès",     d1: "M4 19V5m0 14h16", d2: "M7 15l3.5-4 3 2.5L19 8" },
-    { k: "moi",   t: "Moi",         d1: "M12 4.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7z", d2: "M5 20c0-3.5 3.1-5.5 7-5.5s7 2 7 5.5" }
+    { k: "moi",   t: "Profil",      d1: "M12 4.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7z", d2: "M5 20c0-3.5 3.1-5.5 7-5.5s7 2 7 5.5" }
   ];
 
   // Un onglet reste allume quand on est sur l'un de ses ecrans de detail :
-  // consulter une fiche, c'est encore etre dans l'Historique.
+  // noter un repas, c'est encore etre dans Nutrition. Historique, Profil et
+  // leurs detail n'allument aucun onglet : ils ne sont plus dans la nav.
   var NAV_GROUPE = {
     jour:  ["jour", "apercu", "libre"],
-    nutri: ["nutri"],
-    histo: ["histo", "fiche"],
-    prog:  ["prog"],
-    moi:   ["moi", "profil", "monprog", "exos", "theme", "ia"]
+    nutri: ["nutri", "repas", "scan"],
+    prog:  ["prog"]
   };
 
   function navActif(k) { return NAV_GROUPE[k].indexOf(state.ecran) >= 0; }
+
+  function iconeHtml(d, taille) {
+    return '<svg width="' + taille + '" height="' + taille + '" viewBox="0 0 24 24" fill="none" aria-hidden="true"' +
+           ' stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+             '<path d="' + d.d1 + '"></path><path d="' + d.d2 + '"></path>' +
+           '</svg>';
+  }
+
+  // LE BOUTON DU MENU, trois traits, pose a droite du titre des onglets.
+  function menuBoutonHtml() {
+    return '<button type="button" class="menu-btn" data-action="menu-ouvrir"' +
+           ' aria-label="Menu" aria-expanded="' + (state.menuOuvert ? "true" : "false") + '">' +
+           iconeHtml({ d1: "M4 7h16M4 12h16", d2: "M4 17h16" }, 22) + "</button>";
+  }
+
+  // L'en-tete des onglets Nutrition et Progres : le titre, et le menu a droite.
+  // L'ecran du jour pose le sien lui-meme, avec la date et la serie.
+  function enteteOngletHtml(titre) {
+    return '<div class="tete"><h1 class="ecran-titre">' + esc(titre) + "</h1>" +
+           menuBoutonHtml() + "</div>";
+  }
+
+  // LE MENU OUVERT. Un voile qui le referme au toucher, et le panneau. Il est
+  // pose HORS de #ecran : le glissement clone #ecran, et un menu ouvert ne
+  // doit pas partir avec le volet. Sa hauteur se cale sur le bouton, apres le
+  // rendu (voir `rendreCorps`).
+  function menuHtml() {
+    var h = '<div class="menu-voile" data-action="menu-fermer"></div>' +
+            '<nav class="menu-pan" aria-label="Menu">', i, d;
+    for (i = 0; i < MENU_DEF.length; i++) {
+      d = MENU_DEF[i];
+      h += '<button type="button" class="menu-l" data-action="onglet" data-ecran="' + d.k + '">' +
+           iconeHtml(d, 22) + "<span>" + esc(d.t) + "</span></button>";
+    }
+    return h + "</nav>";
+  }
 
   function navHtml() {
     var h = "", i, d, on;
@@ -26207,16 +25953,19 @@ body.a-nav .nav { display: flex; }
     if (e === "onb") {
       return { plein: null, interieur: onboardingHtml(), nav: nav };
     }
+    // HISTORIQUE ET PROFIL SONT DES ECRANS DE DETAIL depuis qu'ils vivent dans
+    // le menu : bouton de retour et titre de second niveau, comme les autres.
     if (e === "histo") {
       return { plein: null, nav: nav,
-               interieur: '<h1 class="ecran-titre">Historique</h1>' + histoHtml() };
+               interieur: retourHtml(e) + '<h1 class="ecran-titre-2">' + esc(TITRES.histo) + "</h1>" +
+                          histoHtml() };
     }
     if (e === "fiche") {
       return { plein: null, interieur: ficheHtml(), nav: nav };
     }
     if (e === "prog") {
       return { plein: null, nav: nav,
-               interieur: '<h1 class="ecran-titre">Progrès</h1>' + progHtml() };
+               interieur: enteteOngletHtml(TITRES.prog) + progHtml() };
     }
     if (e === "ia") {
       return { plein: null, nav: nav,
@@ -26224,7 +25973,7 @@ body.a-nav .nav { display: flex; }
     }
     if (e === "nutri") {
       return { plein: null, nav: nav,
-               interieur: '<h1 class="ecran-titre">Nutrition</h1>' + nutriHtml() };
+               interieur: enteteOngletHtml(TITRES.nutri) + nutriHtml() };
     }
     if (e === "repas") {
       return { plein: null, nav: nav,
@@ -26239,11 +25988,12 @@ body.a-nav .nav { display: flex; }
     }
     if (e === "moi") {
       return { plein: null, nav: nav,
-               interieur: '<h1 class="ecran-titre">Moi</h1>' + moiHtml() };
+               interieur: retourHtml(e) + '<h1 class="ecran-titre-2">' + esc(TITRES.moi) + "</h1>" +
+                          moiHtml() };
     }
     if (e === "profil") {
       return { plein: null, nav: nav,
-               interieur: retourHtml(e) + '<h1 class="ecran-titre-2">Profil</h1>' + profilHtml() };
+               interieur: retourHtml(e) + '<h1 class="ecran-titre-2">' + esc(TITRES.profil) + '</h1>' + profilHtml() };
     }
     if (e === "monprog") {
       return { plein: null, nav: nav,
@@ -26339,9 +26089,29 @@ body.a-nav .nav { display: flex; }
     // allumee est une pastille verte qui ne s'eteint plus.
     if (e !== "scan" && scanFlux) scanArreter();
 
+    // LE DERNIER ONGLET AFFICHE EST LE PARENT D'HISTORIQUE ET DE PROFIL. Ouverts
+    // depuis le menu de Nutrition, ils ramenent a Nutrition ; atteints apres une
+    // seance, ils ramenent a l'ecran du jour, dernier onglet vu.
+    if (ONGLETS.indexOf(e) >= 0) state.dernierOnglet = e;
+    PARENT.histo = state.dernierOnglet || "jour";
+    PARENT.moi = PARENT.histo;
+    // Le menu ne vit que sur les trois onglets.
+    if (ONGLETS.indexOf(e) < 0) state.menuOuvert = false;
+
     c = corpsDe(e);
     document.body.className = c.nav ? "a-nav" : "";
-    racine.innerHTML = envelopper(c, true) + (c.nav ? navHtml() : "");
+    racine.innerHTML = envelopper(c, true) + (c.nav ? navHtml() : "") +
+                       (state.menuOuvert ? menuHtml() : "");
+
+    // LE PANNEAU SE CALE SOUS LE BOUTON. La hauteur du bouton change d'un
+    // onglet a l'autre (l'ecran du jour pose la date au-dessus du titre) : on
+    // la lit apres le rendu plutot que de l'ecrire trois fois en CSS.
+    if (state.menuOuvert) {
+      var _mb = racine.querySelector(".menu-btn"), _mp = racine.querySelector(".menu-pan");
+      if (_mb && _mp) {
+        try { _mp.style.top = Math.round(_mb.getBoundingClientRect().bottom + 8) + "px"; } catch (e5) {}
+      }
+    }
 
     // ⚠️ LE CORPS EST RECONSTRUIT A CHAQUE RENDU, DONC L'ELEMENT VIDEO AUSSI.
     // Sans ce rattachement, le premier rendu declenche par autre chose que le
@@ -26881,7 +26651,10 @@ body.a-nav .nav { display: flex; }
       window.scrollTo(0, 0);
       return;
     }
-    if (action === "photo-retirer") { photoRetirer(); return; }
+    // LE MENU EN HAUT A DROITE. Ses deux lignes passent par « onglet », comme
+    // la nav basse : `aller` le referme.
+    if (action === "menu-ouvrir") { poser({ menuOuvert: !state.menuOuvert }); return; }
+    if (action === "menu-fermer") { poser({ menuOuvert: false }); return; }
     if (action === "exporter") { exporterJournal(); return; }
     if (action === "recharger-maj") { rechargerMaj(); return; }
     if (action === "reset-demander") { poser({ resetDemande: true }); return; }
@@ -27029,7 +26802,6 @@ body.a-nav .nav { display: flex; }
 
     // Un input file n'emet pas de clic exploitable : c'est « change » qui dit
     // qu'un fichier a ete choisi.
-    if (action === "photo-choisir") { photoChoisir(n); return; }
     if (action === "importer") { importerJournal(n); return; }
 
     // LA DUREE LIBRE SE REDESSINE AU MOMENT OU L'ON QUITTE LE CHAMP, pas a
