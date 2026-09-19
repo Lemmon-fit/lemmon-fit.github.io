@@ -107,10 +107,32 @@
   --run-sur-sombre:   #bcdcff;
   --salle-sur-sombre: #f4d912;
 
-  /* Citron, autres nuances */
-  --citron-courbe: #c9ae00;
-  --citron-encre:  #6b5b00;
-  --citron-doux:   #e3cf5a;
+  /* L'ACTION PRINCIPALE (19 septembre 2026, palettes de Claude Design). Le
+     jaune servait a la fois d'action et de repere de la discipline Salle ;
+     les palettes homme et femme les separent. Dans la palette neutre (avant
+     la reponse Homme / Femme), l'action reste le citron d'avant : memes
+     valeurs que `--salle-*` et que les anciens `--citron-*`, retires.
+       -bg / -fg     : aplat d'action et son encre (boutons, onglet actif)
+       -pale         : aplat attenue (aire sous la courbe)
+       -encre        : texte d'action sur fond clair (liens « voir »)
+       -sur-sombre   : texte d'accent sur une carte mise en avant
+       -selection    : fond d'un choix coche (ancien voile citron a 14 %)
+       -courbe       : trait et points des courbes de Progres */
+  --action-bg:         #f4d912;
+  --action-fg:         #100f0d;
+  --action-pale:       #fdf4bd;
+  --action-encre:      #6b5b00;
+  --action-sur-sombre: #f4d912;
+  --action-selection:  #f5ecb0;
+  --action-courbe:     #c9ae00;
+
+  /* LA QUATRIEME DISCIPLINE, « AUTRE ACTIVITE », qui n'avait pas de variable :
+     la table des disciplines du code (`DISC`) la lit desormais ici. */
+  --autre-bg:         #7a5cc0;
+  --autre-fg:         #fffdf7;
+  --autre-pale:       #e6def6;
+  --autre-encre:      #4a3585;
+  --autre-sur-sombre: #d3c6f7;
 
   /* Vert : repos et validation */
   --vert-encre:    #3f6132;
@@ -123,6 +145,11 @@
   --vert-pale-c:   #cfe3c6;
   --vert-sombre:   #1a2a16;
   --vert-bord:     #cfdcc7;
+  /* Le vert d'un TEXTE pose sur une carte mise en avant (19 septembre 2026) :
+     « ✓ fait » de l'ecran de transition, hausses de l'ecran de fin. Il etait
+     ecrit en dur (#9ccf8c), fait pour un fond sombre ; en clair Volt et
+     Framboise ces cartes deviennent claires (surcharge plus bas). */
+  --vert-sur-sombre: #9ccf8c;
 
   /* Destructif. RESERVE a « Reinitialiser mes donnees ». Aucune autre action
      ne porte cette teinte : si tout est rouge, plus rien n'alerte. */
@@ -176,7 +203,11 @@
   --run-pale:    #10365e;
   --run-encre:   #bcdcff;
 
-  --citron-encre: #f4d912;
+  --action-pale:      #4a4000;
+  --action-encre:     #f4d912;
+  --action-selection: #302c0f;
+  --autre-pale:       #2e2352;
+  --autre-encre:      #d3c6f7;
   --vert-encre:   #8caa7c;
   --vert-encre-b: #cfe3c6;
   --vert-pale:    #1a2a16;
@@ -190,6 +221,357 @@
 
   --lien:       #bcdcff;
   --lien-hover: #d3e3f6;
+}
+
+/* ===========================================================================
+   LES PALETTES HOMME ET FEMME (19 septembre 2026)
+   ---------------------------------------------------------------------------
+   « Volt » pour les hommes, « Framboise » pour les femmes : directions
+   choisies par Olivier sur les maquettes de Claude Design, blocs recopies
+   TELS QUELS de `DOSSIER_CLAUDE_DESIGN_COULEURS/03_PROMPT_CLAUDE_CODE.md`
+   par un script, sans retouche. Elles surchargent le theme par l'attribut
+   `data-palette` pose sur <html> d'apres la reponse « Tu es : Homme / Femme »
+   (`appliqueTheme`, block_socle.js). Sans reponse : pas d'attribut, palette
+   neutre (les deux blocs ci-dessus).
+   ⚠️ EN CLAIR, LES VARIABLES `--sombre-*` RECOIVENT DES VALEURS CLAIRES :
+   Olivier ne veut « aucun grand bloc noir ou gris » en thème clair. Leur nom
+   devient trompeur, leur role ne change pas (« carte mise en avant »).
+   =========================================================================== */
+
+/* Homme clair */
+:root[data-theme="clair"][data-palette="homme"] {
+  /* Surfaces et bords */
+  --fond: #f2f3f1;
+  --fond-carte: #fcfdfc;
+  --fond-encart: #e8e9e7;
+  --sep: #eeefed;
+  --bord: #d4d6d1;
+  --bord-discret: #e0e2df;
+  --bord-champ: #c4c8c1;
+  --bord-fort: #adb2a9;
+  /* Textes */
+  --texte: #171816;
+  --texte-1b: #454941;
+  --texte-2: #54594f;
+  --texte-3: #54594f;
+  --texte-3b: #707769;
+  --texte-3c: #707769;
+  /* Cartes mises en avant (variables --sombre-*) */
+  --sombre-carte: #eef8d7;
+  --sombre-fond: #f2f3f1;
+  --sombre-fond-2: #f0f6e4;
+  --sombre-piste: #e0e2df;
+  --sombre-pastille: #dff2ae;
+  --sombre-barre: #e0e2df;
+  --sombre-bord: #adb2a9;
+  --sombre-texte: #171816;
+  --sombre-texte-b: #171816;
+  --sombre-texte-2: #454941;
+  --sombre-texte-3: #54594f;
+  /* Action principale (NOUVELLES variables, remplacent le citron) */
+  --action-bg: #a6dc14;
+  --action-fg: #111111;
+  --action-pale: #eefbc6;
+  --action-encre: #3e5500;
+  --action-sur-sombre: #3e5500;
+  --action-selection: #e3eec5;
+  --action-courbe: #6f9400;
+  /* Discipline Salle */
+  --salle-bg: #f4d912;
+  --salle-fg: #100f0d;
+  --salle-pale: #fdf4bd;
+  --salle-encre: #4a4000;
+  --salle-sur-sombre: #4a4000;
+  /* Discipline Cours collectif */
+  --cours-bg: #d9741a;
+  --cours-fg: #100f0d;
+  --cours-pale: #f8ddc2;
+  --cours-encre: #7d3d05;
+  --cours-sur-sombre: #7d3d05;
+  /* Discipline Running */
+  --run-bg: #1f6dc0;
+  --run-fg: #fffdf7;
+  --run-pale: #d3e3f6;
+  --run-encre: #16497f;
+  --run-sur-sombre: #16497f;
+  /* Discipline Autre activité (NOUVELLES variables) */
+  --autre-bg: #7a5cc0;
+  --autre-fg: #fffdf7;
+  --autre-pale: #e6def6;
+  --autre-encre: #4a3585;
+  --autre-sur-sombre: #4a3585;
+  /* Vert (inchangé) */
+  --vert-encre: #3f6132;
+  --vert-encre-b: #2f5226;
+  --vert-bg: #668d55;
+  --vert-bg-b: #8caa7c;
+  --vert-clair: #a8c39a;
+  --vert-pale: #dfe9d8;
+  --vert-pale-b: #e7f0e2;
+  --vert-pale-c: #cfe3c6;
+  --vert-sombre: #1a2a16;
+  --vert-bord: #cfdcc7;
+  /* Destructif (inchangé, réservé à « Réinitialiser mes données ») */
+  --danger: #8f3421;
+  --danger-bord: #d5a293;
+  --danger-fg: #fdf6f3;
+  /* Liens (inchangés) */
+  --lien: #1a5bab;
+  --lien-hover: #16497f;
+}
+
+/* Homme sombre */
+:root[data-theme="sombre"][data-palette="homme"] {
+  /* Surfaces et bords */
+  --fond: #0d0e0c;
+  --fond-carte: #1a1b18;
+  --fond-encart: #141613;
+  --sep: #262924;
+  --bord: #333630;
+  --bord-discret: #40443c;
+  --bord-champ: #363932;
+  --bord-fort: #858c7d;
+  /* Textes */
+  --texte: #ebecea;
+  --texte-1b: #cfd1cc;
+  --texte-2: #abb0a6;
+  --texte-3: #abb0a6;
+  --texte-3b: #abb0a6;
+  --texte-3c: #abb0a6;
+  /* Cartes mises en avant (variables --sombre-*) */
+  --sombre-carte: #1a1b18;
+  --sombre-fond: #0d0e0c;
+  --sombre-fond-2: #141412;
+  --sombre-piste: #474d42;
+  --sombre-pastille: #363a31;
+  --sombre-barre: #474d42;
+  --sombre-bord: #666e5e;
+  --sombre-texte: #edeeec;
+  --sombre-texte-b: #ebecea;
+  --sombre-texte-2: #cfd1cc;
+  --sombre-texte-3: #a6aba0;
+  /* Action principale (NOUVELLES variables, remplacent le citron) */
+  --action-bg: #c6f032;
+  --action-fg: #111111;
+  --action-pale: #2c3a05;
+  --action-encre: #c6f032;
+  --action-sur-sombre: #c6f032;
+  --action-selection: #272e11;
+  --action-courbe: #a8d41a;
+  /* Discipline Salle */
+  --salle-bg: #f4d912;
+  --salle-fg: #100f0d;
+  --salle-pale: #4a4000;
+  --salle-encre: #f4d912;
+  --salle-sur-sombre: #f4d912;
+  /* Discipline Cours collectif */
+  --cours-bg: #d9741a;
+  --cours-fg: #100f0d;
+  --cours-pale: #4a2503;
+  --cours-encre: #f5c493;
+  --cours-sur-sombre: #f5c493;
+  /* Discipline Running */
+  --run-bg: #1f6dc0;
+  --run-fg: #fffdf7;
+  --run-pale: #10365e;
+  --run-encre: #bcdcff;
+  --run-sur-sombre: #bcdcff;
+  /* Discipline Autre activité (NOUVELLES variables) */
+  --autre-bg: #7a5cc0;
+  --autre-fg: #fffdf7;
+  --autre-pale: #2e2352;
+  --autre-encre: #d3c6f7;
+  --autre-sur-sombre: #d3c6f7;
+  /* Vert (inchangé) */
+  --vert-encre: #8caa7c;
+  --vert-encre-b: #cfe3c6;
+  --vert-bg: #668d55;
+  --vert-bg-b: #8caa7c;
+  --vert-clair: #a8c39a;
+  --vert-pale: #1a2a16;
+  --vert-pale-b: #1a2a16;
+  --vert-pale-c: #223019;
+  --vert-sombre: #1a2a16;
+  --vert-bord: #3f5236;
+  /* Destructif (inchangé, réservé à « Réinitialiser mes données ») */
+  --danger: #e08a80;
+  --danger-bord: #7a3328;
+  --danger-fg: #100f0d;
+  /* Liens (inchangés) */
+  --lien: #bcdcff;
+  --lien-hover: #d3e3f6;
+}
+
+/* Femme clair */
+:root[data-theme="clair"][data-palette="femme"] {
+  /* Surfaces et bords */
+  --fond: #f7edf1;
+  --fond-carte: #fdfbfc;
+  --fond-encart: #f1dfe7;
+  --sep: #f5e8ed;
+  --bord: #e4c3d1;
+  --bord-discret: #ecd5de;
+  --bord-champ: #dbaec1;
+  --bord-fort: #cc8ea8;
+  /* Textes */
+  --texte: #1e1016;
+  --texte-1b: #5f2b40;
+  --texte-2: #74344f;
+  --texte-3: #74344f;
+  --texte-3b: #9b4669;
+  --texte-3c: #9b4669;
+  /* Cartes mises en avant (variables --sombre-*) */
+  --sombre-carte: #f8e0ea;
+  --sombre-fond: #f7edf1;
+  --sombre-fond-2: #f8e6ee;
+  --sombre-piste: #ecd5de;
+  --sombre-pastille: #f3c3d7;
+  --sombre-barre: #ecd5de;
+  --sombre-bord: #cc8ea8;
+  --sombre-texte: #1e1016;
+  --sombre-texte-b: #1e1016;
+  --sombre-texte-2: #5f2b40;
+  --sombre-texte-3: #74344f;
+  /* Action principale (NOUVELLES variables, remplacent le citron) */
+  --action-bg: #d41c6a;
+  --action-fg: #ffffff;
+  --action-pale: #fbdbe8;
+  --action-encre: #a3104f;
+  --action-sur-sombre: #a3104f;
+  --action-selection: #f0c3d6;
+  --action-courbe: #d41c6a;
+  /* Discipline Salle */
+  --salle-bg: #f4d912;
+  --salle-fg: #100f0d;
+  --salle-pale: #fdf4bd;
+  --salle-encre: #4a4000;
+  --salle-sur-sombre: #4a4000;
+  /* Discipline Cours collectif */
+  --cours-bg: #d9741a;
+  --cours-fg: #100f0d;
+  --cours-pale: #f8ddc2;
+  --cours-encre: #7d3d05;
+  --cours-sur-sombre: #7d3d05;
+  /* Discipline Running */
+  --run-bg: #1f6dc0;
+  --run-fg: #fffdf7;
+  --run-pale: #d3e3f6;
+  --run-encre: #16497f;
+  --run-sur-sombre: #16497f;
+  /* Discipline Autre activité (NOUVELLES variables) */
+  --autre-bg: #7a5cc0;
+  --autre-fg: #fffdf7;
+  --autre-pale: #e6def6;
+  --autre-encre: #4a3585;
+  --autre-sur-sombre: #4a3585;
+  /* Vert (inchangé) */
+  --vert-encre: #3f6132;
+  --vert-encre-b: #2f5226;
+  --vert-bg: #668d55;
+  --vert-bg-b: #8caa7c;
+  --vert-clair: #a8c39a;
+  --vert-pale: #dfe9d8;
+  --vert-pale-b: #e7f0e2;
+  --vert-pale-c: #cfe3c6;
+  --vert-sombre: #1a2a16;
+  --vert-bord: #cfdcc7;
+  /* Destructif (inchangé, réservé à « Réinitialiser mes données ») */
+  --danger: #8f3421;
+  --danger-bord: #d5a293;
+  --danger-fg: #fdf6f3;
+  /* Liens (inchangés) */
+  --lien: #1a5bab;
+  --lien-hover: #16497f;
+}
+
+/* Femme sombre */
+:root[data-theme="sombre"][data-palette="femme"] {
+  /* Surfaces et bords */
+  --fond: #12080c;
+  --fond-carte: #231018;
+  --fond-encart: #1c0d13;
+  --sep: #351824;
+  --bord: #462030;
+  --bord-discret: #58283c;
+  --bord-champ: #4a2132;
+  --bord-fort: #b3567d;
+  /* Textes */
+  --texte: #f1e4ea;
+  --texte-1b: #e1bccb;
+  --texte-2: #cb8ba6;
+  --texte-3: #cb8ba6;
+  --texte-3b: #cb8ba6;
+  --texte-3c: #cb8ba6;
+  /* Cartes mises en avant (variables --sombre-*) */
+  --sombre-carte: #231018;
+  --sombre-fond: #13060c;
+  --sombre-fond-2: #1b0b12;
+  --sombre-piste: #6b2442;
+  --sombre-pastille: #501b31;
+  --sombre-barre: #6b2442;
+  --sombre-bord: #98345e;
+  --sombre-texte: #f3e8ec;
+  --sombre-texte-b: #f1e4ea;
+  --sombre-texte-2: #e1bccb;
+  --sombre-texte-3: #c884a0;
+  /* Action principale (NOUVELLES variables, remplacent le citron) */
+  --action-bg: #d41c6a;
+  --action-fg: #ffffff;
+  --action-pale: #4c1430;
+  --action-encre: #ff8fbc;
+  --action-sur-sombre: #ff84b3;
+  --action-selection: #2d0b19;
+  --action-courbe: #ff5c9a;
+  /* Discipline Salle */
+  --salle-bg: #f4d912;
+  --salle-fg: #100f0d;
+  --salle-pale: #4a4000;
+  --salle-encre: #f4d912;
+  --salle-sur-sombre: #f4d912;
+  /* Discipline Cours collectif */
+  --cours-bg: #d9741a;
+  --cours-fg: #100f0d;
+  --cours-pale: #4a2503;
+  --cours-encre: #f5c493;
+  --cours-sur-sombre: #f5c493;
+  /* Discipline Running */
+  --run-bg: #1f6dc0;
+  --run-fg: #fffdf7;
+  --run-pale: #10365e;
+  --run-encre: #bcdcff;
+  --run-sur-sombre: #bcdcff;
+  /* Discipline Autre activité (NOUVELLES variables) */
+  --autre-bg: #7a5cc0;
+  --autre-fg: #fffdf7;
+  --autre-pale: #2e2352;
+  --autre-encre: #d3c6f7;
+  --autre-sur-sombre: #d3c6f7;
+  /* Vert (inchangé) */
+  --vert-encre: #8caa7c;
+  --vert-encre-b: #cfe3c6;
+  --vert-bg: #668d55;
+  --vert-bg-b: #8caa7c;
+  --vert-clair: #a8c39a;
+  --vert-pale: #1a2a16;
+  --vert-pale-b: #1a2a16;
+  --vert-pale-c: #223019;
+  --vert-sombre: #1a2a16;
+  --vert-bord: #3f5236;
+  /* Destructif (inchangé, réservé à « Réinitialiser mes données ») */
+  --danger: #e08a80;
+  --danger-bord: #7a3328;
+  --danger-fg: #100f0d;
+  /* Liens (inchangés) */
+  --lien: #bcdcff;
+  --lien-hover: #d3e3f6;
+}
+
+/* AJOUT DE CLAUDE CODE, HORS DES BLOCS DE CLAUDE DESIGN (19 septembre 2026).
+   En clair Volt et Framboise, les cartes mises en avant sont claires : leur
+   texte vert doit foncer. Mesure : #9ccf8c y tombait a 1,6:1 ; #2f5226 tient
+   au-dessus de 5,5:1 sur les deux pastilles teintees. */
+:root[data-theme="clair"][data-palette] {
+  --vert-sur-sombre: #2f5226;
 }
 
 /* ===========================================================================
@@ -318,7 +700,7 @@ body.a-nav .nav { display: flex; }
   background: var(--texte);
 }
 .nav-btn-on { color: var(--texte); font-weight: 800; }
-.nav-btn-on .nav-p { background: var(--salle-bg); color: var(--salle-fg); }
+.nav-btn-on .nav-p { background: var(--action-bg); color: var(--action-fg); }
 
 /* ===========================================================================
    SPLASH
@@ -443,7 +825,7 @@ body.a-nav .nav { display: flex; }
    il gardait le `--bord` de `.ob-dot`. La barre de progression du diagnostic ne
    montrait donc aucune progression. Trouve par verifier_jetons_css.py. */
 .ob-dot-past { background: var(--bord-fort); }
-.ob-dot-on { background: var(--salle-bg); height: 6px; }
+.ob-dot-on { background: var(--action-bg); height: 6px; }
 
 .ob-step-label {
   text-align: center; font-size: 11px; color: var(--texte-3); margin-bottom: 14px;
@@ -472,7 +854,7 @@ body.a-nav .nav { display: flex; }
   font-size: 15px; font-weight: 700; display: flex; flex-direction: column; gap: 2px;
 }
 .ob-chip-s { font-size: 12.5px; font-weight: 400; color: var(--texte-2); }
-.ob-chip-on { border-color: var(--salle-bg); background: rgba(244,217,18,.14); }
+.ob-chip-on { border-color: var(--action-bg); background: var(--action-selection); }
 
 /* GAP RESSERRE A 3 px POUR ATTEINDRE LES 44 px. A 375 px de large, la
    gouttiere laisse 335 px : sept boutons et six ecarts de 5 px ne donnaient
@@ -483,7 +865,7 @@ body.a-nav .nav { display: flex; }
   min-height: 52px; border-radius: 11px; border: 1.5px solid var(--bord);
   background: var(--fond-carte); color: var(--texte-1b); font-size: 12.5px; font-weight: 700;
 }
-.ob-day-on { background: var(--salle-bg); border-color: var(--salle-bg); color: var(--salle-fg); }
+.ob-day-on { background: var(--action-bg); border-color: var(--action-bg); color: var(--action-fg); }
 
 .ob-jour { margin-bottom: 14px; }
 .ob-jour-t { font-size: 13px; font-weight: 800; margin-bottom: 6px; color: var(--texte); }
@@ -533,7 +915,7 @@ body.a-nav .nav { display: flex; }
   padding: 11px 2px;
   border: 0;
   background: transparent;
-  color: var(--citron-encre);
+  color: var(--action-encre);
   font-family: inherit;
   font-size: 14px;
   font-weight: 800;
@@ -578,13 +960,13 @@ body.a-nav .nav { display: flex; }
   min-height: 58px; padding: 10px 12px; border-radius: 13px;
   border: 1.5px solid var(--bord); background: var(--fond-carte); color: var(--texte);
 }
-.ob-case-on { border-color: var(--salle-bg); background: rgba(244,217,18,.14); }
+.ob-case-on { border-color: var(--action-bg); background: var(--action-selection); }
 .ob-case-box {
   width: 24px; height: 24px; border-radius: 7px; border: 1.5px solid var(--texte-3c);
   flex: 0 0 auto; display: flex; align-items: center; justify-content: center;
   font-size: 14px; font-weight: 800; color: transparent;
 }
-.ob-case-on .ob-case-box { background: var(--sombre-carte); border-color: var(--sombre-carte); color: var(--salle-bg); }
+.ob-case-on .ob-case-box { background: var(--sombre-carte); border-color: var(--sombre-carte); color: var(--action-sur-sombre); }
 .ob-case-txt { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
 .ob-case-t { font-size: 14.5px; font-weight: 700; }
 .ob-case-s { font-size: 12px; color: var(--texte-2); }
@@ -596,7 +978,7 @@ body.a-nav .nav { display: flex; }
    Ouvert, il prend le fond des encarts et un filet citron a gauche : la liste
    se lit alors comme le CONTENU de la case, pas comme une section voisine. */
 .ob-mach { border-radius: 13px; }
-.ob-mach-on { background: var(--fond-encart); border-left: 4px solid var(--salle-bg); }
+.ob-mach-on { background: var(--fond-encart); border-left: 4px solid var(--action-bg); }
 .ob-mach-on > .ob-case { background: transparent; border-color: transparent; }
 .ob-mach-c { padding: 0 10px 12px 10px; }
 .ob-mach-l { font-size: 12.5px; color: var(--texte-2); margin: 0 0 10px; }
@@ -609,7 +991,7 @@ body.a-nav .nav { display: flex; }
   display: flex; align-items: center; justify-content: space-between; gap: 8px;
   width: 100%; min-height: 44px; padding: 0 12px;
   background: transparent; border: 0; text-align: left;
-  font-family: inherit; font-size: 13px; font-weight: 700; color: var(--citron-encre);
+  font-family: inherit; font-size: 13px; font-weight: 700; color: var(--action-encre);
 }
 .ob-plier-ch { flex: 0 0 auto; font-size: 13px; }
 
@@ -695,7 +1077,7 @@ body.a-nav .nav { display: flex; }
   font-family: inherit; font-size: 14px; font-weight: 700;
 }
 .ob-h-large { flex-basis: 100%; }
-.ob-h-on { background: var(--salle-bg); border-color: var(--salle-bg); color: var(--salle-fg); }
+.ob-h-on { background: var(--action-bg); border-color: var(--action-bg); color: var(--action-fg); }
 .ob-h-c { font-weight: 800; }
 
 /* LES QUATRE CONDITIONS DE PESEE. Elles vivaient dans PESEE_COND et ne
@@ -711,7 +1093,7 @@ body.a-nav .nav { display: flex; }
 }
 .cond-t {
   font-size: 11px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase;
-  color: var(--salle-sur-sombre); margin-bottom: 10px;
+  color: var(--action-sur-sombre); margin-bottom: 10px;
 }
 .cond-l {
   font-size: 14.5px; color: var(--sombre-texte); line-height: 1.5;
@@ -727,7 +1109,7 @@ body.a-nav .nav { display: flex; }
 .ob-voir {
   flex: 0 0 auto; display: flex; align-items: center;
   padding: 0 12px; min-width: 44px; justify-content: center;
-  font-size: 12px; color: var(--citron-encre);
+  font-size: 12px; color: var(--action-encre);
   text-decoration: underline; text-underline-offset: 2px;
 }
 
@@ -764,8 +1146,12 @@ body.a-nav .nav { display: flex; }
 }
 .ob-next {
   flex: 1; min-height: 56px; border-radius: 14px; border: 0;
-  background: var(--salle-bg); color: var(--salle-fg); font-size: 16px; font-weight: 800;
+  background: var(--action-bg); color: var(--action-fg); font-size: 16px; font-weight: 800;
 }
+/* « Continuer » tant que ni Homme ni Femme n'est choisi (19 septembre 2026) :
+   grise, mais son texte reste lisible (encre secondaire sur l'encart). */
+.ob-next:disabled { background: var(--fond-encart); color: var(--texte-2); cursor: default; }
+.ob-requis { font-size: 13px; color: var(--texte-2); margin: 16px 0 -4px; text-align: center; }
 
 /* ===========================================================================
    LEMMON FIT v1.22.0 : ECRANS AUJOURD'HUI ET MODE ENTRAINEMENT
@@ -785,7 +1171,7 @@ body.a-nav .nav { display: flex; }
 .jour-r { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .jour-r .ecran-titre { margin: 2px 0 0; }
 .serie { display: flex; align-items: center; gap: 5px; font-size: 22px; }
-.serie-n { font-size: 26px; font-weight: 800; color: var(--citron-encre); }
+.serie-n { font-size: 26px; font-weight: 800; color: var(--action-encre); }
 
 .motiv { background: var(--fond-encart); border-radius: 14px; padding: 13px 14px; margin-bottom: 12px; }
 .motiv-h { font-size: 15px; font-weight: 800; margin-bottom: 3px; }
@@ -813,14 +1199,14 @@ body.a-nav .nav { display: flex; }
   color: var(--texte); font-size: 15px; font-weight: 700;
 }
 
-.cs-code { font-size: 26px; font-weight: 800; letter-spacing: -.4px; color: var(--salle-sur-sombre); }
+.cs-code { font-size: 26px; font-weight: 800; letter-spacing: -.4px; color: var(--action-sur-sombre); }
 .carte-cours .cs-code { color: var(--cours-sur-sombre); }
 .carte-run .cs-code { color: var(--run-sur-sombre); }
 /* L'EN-TETE DE LA CARTE DU JOUR. « SÉANCE PULL · prévue jeudi » sur une ligne
    discrete : le gros titre, en dessous, est ce que la seance TRAVAILLE. Le code
    seul en gros ne disait pas ce qu'on allait faire. */
 .cs-haut { font-size: 11.5px; font-weight: 800; letter-spacing: 1.1px; text-transform: uppercase; }
-.cs-haut .cs-code { color: var(--salle-sur-sombre); font-size: 11.5px; }
+.cs-haut .cs-code { color: var(--action-sur-sombre); font-size: 11.5px; }
 .cs-quand { color: var(--sombre-texte-3); font-weight: 700; }
 
 /* Les deux boutons sous l'appel principal. En BLOC et non en lien souligne :
@@ -841,7 +1227,7 @@ body.a-nav .nav { display: flex; }
    tous noirs. */
 .cs-toutes {
   background: var(--fond-carte);
-  border: 1.5px solid var(--salle-bg);
+  border: 1.5px solid var(--action-bg);
   border-radius: 18px;
   padding: 16px;
   margin-bottom: 12px;
@@ -957,7 +1343,7 @@ body.a-nav .nav { display: flex; }
    parcourt, on ne la contemple pas. */
 .cs-nom {
   font-size: 32px; font-weight: 800; letter-spacing: -.8px; line-height: 1.05;
-  color: var(--salle-sur-sombre); text-align: center;
+  color: var(--action-sur-sombre); text-align: center;
 }
 .cs-sub {
   font-size: 15.5px; color: var(--sombre-texte-2); margin-top: 4px;
@@ -970,11 +1356,11 @@ body.a-nav .nav { display: flex; }
 .cs-txt { font-size: 14px; line-height: 1.55; color: var(--sombre-texte-2); margin: 10px 0 0; }
 .cs-cta {
   width: 100%; min-height: 60px; border-radius: 14px; border: 0; margin-top: 14px;
-  background: var(--salle-bg); color: var(--salle-fg); font-size: 16px; font-weight: 800;
+  background: var(--action-bg); color: var(--action-fg); font-size: 16px; font-weight: 800;
 }
 .cs-cta-cours { background: var(--cours-bg); color: var(--cours-fg); }
 .cs-cta-run { background: var(--run-bg); color: var(--run-fg); }
-.cs-cta-clair { background: var(--salle-bg); color: var(--salle-fg); }
+.cs-cta-clair { background: var(--action-bg); color: var(--action-fg); }
 
 .cs-libre-t {
   font-size: 10.5px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase;
@@ -1106,7 +1492,7 @@ body.a-nav .nav { display: flex; }
 
 .sa-valider {
   width: 100%; min-height: 60px; border-radius: 14px; border: 0; margin-top: 8px;
-  background: var(--salle-bg); color: var(--salle-fg); font-size: 16px; font-weight: 800;
+  background: var(--action-bg); color: var(--action-fg); font-size: 16px; font-weight: 800;
 }
 
 
@@ -1131,7 +1517,7 @@ body.a-nav .nav { display: flex; }
 }
 /* Ouvert, le bouton porte la couleur de la seance : on voit lequel des deux
    a produit le panneau qui vient de s'ouvrir en dessous. */
-.sa-act-on { border-color: var(--salle-sur-sombre); color: var(--salle-sur-sombre); }
+.sa-act-on { border-color: var(--action-sur-sombre); color: var(--action-sur-sombre); }
 
 .sa-tech { margin-top: 12px; }
 .sa-tech-l {
@@ -1149,7 +1535,7 @@ body.a-nav .nav { display: flex; }
   height: 22px;
   border-radius: 50%;
   background: var(--sombre-pastille);
-  color: var(--salle-sur-sombre);
+  color: var(--action-sur-sombre);
   font-size: 11.5px;
   font-weight: 800;
   display: flex;
@@ -1203,12 +1589,12 @@ body.a-nav .nav { display: flex; }
   margin: -6px 0 18px;
   overflow: hidden;
 }
-.sa-barre-v { display: block; height: 100%; background: var(--salle-bg); border-radius: 2px; }
+.sa-barre-v { display: block; height: 100%; background: var(--action-bg); border-radius: 2px; }
 
 /* --- La fiche de l'exercice ---------------------------------------------- */
 .sa-muscle {
   font-size: 11px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase;
-  color: var(--salle-sur-sombre); margin-bottom: 4px;
+  color: var(--action-sur-sombre); margin-bottom: 4px;
 }
 
 /* Une pastille par serie prevue. Faite, elle porte sa valeur ; a venir, un
@@ -1223,9 +1609,9 @@ body.a-nav .nav { display: flex; }
 }
 .sa-past-r { font-size: 11px; font-weight: 800; color: var(--sombre-texte-3); }
 .sa-past-v { font-size: 13px; font-weight: 700; color: var(--sombre-texte-2); }
-.sa-past-ok { border-color: var(--salle-sur-sombre); }
+.sa-past-ok { border-color: var(--action-sur-sombre); }
 .sa-past-ok .sa-past-r,
-.sa-past-ok .sa-past-v { color: var(--salle-sur-sombre); }
+.sa-past-ok .sa-past-v { color: var(--action-sur-sombre); }
 
 /* La carte de saisie : le rang de la serie, la derniere fois, les deux
    molettes et la validation dans un MEME cadre. A plat, ces quatre elements ne
@@ -1259,7 +1645,7 @@ body.a-nav .nav { display: flex; }
   border: 1.5px solid var(--sombre-bord); background: transparent;
   color: var(--sombre-texte); font-size: 13px; font-weight: 700;
 }
-.fin-forme-on { background: var(--salle-bg); border-color: var(--salle-bg);
+.fin-forme-on { background: var(--action-bg); border-color: var(--action-bg);
                 color: var(--sombre-carte); }
 
 .sa-conseil {
@@ -1313,7 +1699,7 @@ body.a-nav .nav { display: flex; }
   font-size: 13px; line-height: 1.45; color: var(--sombre-texte-3);
   margin: 12px 0 0; text-align: center;
 }
-.fin-releve .num { color: var(--salle-bg); font-weight: 800; }
+.fin-releve .num { color: var(--action-sur-sombre); font-weight: 800; }
 
 .sa-steppers { display: block; margin-bottom: 22px; }
 .sa-steppers .st:last-child { margin-bottom: 0; }
@@ -1338,14 +1724,14 @@ body.a-nav .nav { display: flex; }
 /* L'arc se vide dans le sens horaire. La transition suit le decompte a la
    seconde : sans elle, l'anneau saute par crans. */
 .sa-anneau-arc {
-  fill: none; stroke: var(--salle-bg); stroke-width: 12; stroke-linecap: round;
+  fill: none; stroke: var(--action-bg); stroke-width: 12; stroke-linecap: round;
   transition: stroke-dashoffset 1s linear;
 }
 .sa-anneau-c {
   position: absolute; inset: 0;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
 }
-.sa-anneau-v { font-size: 44px; font-weight: 800; color: var(--salle-sur-sombre); line-height: 1.1; }
+.sa-anneau-v { font-size: 44px; font-weight: 800; color: var(--action-sur-sombre); line-height: 1.1; }
 .sa-anneau-s { font-size: 13px; color: var(--sombre-texte-3); }
 
 .sa-ensuite-l {
@@ -1381,7 +1767,10 @@ body.a-nav .nav { display: flex; }
   font-size: 10.5px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase;
   color: #9ccf8c;
 }
-.tr-fait-n { font-size: 17px; font-weight: 800; color: var(--sombre-texte); }
+/* Le bandeau « fait » garde son vert fonce EN DUR dans toutes les palettes
+   (prompt de Claude Design) : son texte reste donc clair lui aussi. Il suivait
+   `--sombre-texte`, qui fonce en clair Volt et Framboise (1,2:1 mesure). */
+.tr-fait-n { font-size: 17px; font-weight: 800; color: #f7f3ea; }
 .tr-fait-d { font-size: 13px; color: #9ccf8c; }
 
 .tr-s { font-size: 14px; color: var(--sombre-texte-3); line-height: 1.5; margin: 4px 0 16px; }
@@ -1389,17 +1778,17 @@ body.a-nav .nav { display: flex; }
 
 .tr-a-r {
   flex: 0 0 30px; width: 30px; height: 30px; border-radius: 9px;
-  background: var(--sombre-pastille); color: var(--salle-sur-sombre);
+  background: var(--sombre-pastille); color: var(--action-sur-sombre);
   display: flex; align-items: center; justify-content: center;
   font-size: 12px; font-weight: 800;
 }
 .tr-a-c { display: flex; flex-direction: column; gap: 1px; flex: 1; min-width: 0; text-align: left; }
-.tr-a-e { font-size: 12.5px; font-weight: 700; color: #9ccf8c; white-space: nowrap; }
+.tr-a-e { font-size: 12.5px; font-weight: 700; color: var(--vert-sur-sombre); white-space: nowrap; }
 
 /* --- Seance terminee ----------------------------------------------------- */
 .fin-rond {
   width: 84px; height: 84px; border-radius: 50%;
-  background: var(--salle-bg); color: var(--salle-fg);
+  background: var(--action-bg); color: var(--action-fg);
   display: flex; align-items: center; justify-content: center;
   font-size: 40px; font-weight: 800;
   margin: 26px auto 18px;
@@ -1420,7 +1809,7 @@ body.a-nav .nav { display: flex; }
 .fin-b-n { font-size: 14.5px; color: var(--sombre-texte); }
 /* Le vert dit la hausse. Il ne sert QUE quand il y a eu hausse : une ligne
    n'existe pas si rien n'a bouge, donc il n'y a jamais de « + 0 kg ». */
-.fin-b-v { font-size: 14px; font-weight: 800; color: #9ccf8c; white-space: nowrap; }
+.fin-b-v { font-size: 14px; font-weight: 800; color: var(--vert-sur-sombre); white-space: nowrap; }
 .sa-quitter { width: 100%; min-height: 52px; border-radius: 13px; border: 1.5px solid var(--sombre-bord); background: transparent; color: var(--sombre-texte-2); font-size: 15px; }
 .sa-vide { color: var(--sombre-texte-3); }
 
@@ -1436,7 +1825,7 @@ body.a-nav .nav { display: flex; }
 
 .tr-suivant {
   width: 100%; text-align: left; border-radius: 16px; border: 0; margin-top: 18px;
-  background: var(--salle-bg); color: var(--salle-fg); padding: 14px 16px; min-height: 60px;
+  background: var(--action-bg); color: var(--action-fg); padding: 14px 16px; min-height: 60px;
   display: flex; flex-direction: column; gap: 2px;
 }
 .tr-s-l { font-size: 10.5px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; opacity: .7; }
@@ -1506,8 +1895,8 @@ body.a-nav .nav { display: flex; }
 }
 .cb-zone { position: relative; height: 132px; margin-top: 18px; }
 .cb-svg { width: 100%; height: 100%; display: block; overflow: visible; }
-.cb-aire { fill: var(--salle-pale); stroke: none; }
-.cb-ligne { fill: none; stroke: var(--citron-courbe); stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; }
+.cb-aire { fill: var(--action-pale); stroke: none; }
+.cb-ligne { fill: none; stroke: var(--action-courbe); stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; }
 /* Les deux pointilles tombent a 10 % et 90 %, exactement ou la formule place
    cy(max) et cy(min). Voir le commentaire de courbePoints. */
 .cb-guide { position: absolute; left: 0; right: 0; border-top: 1px dashed var(--bord-fort); }
@@ -1515,7 +1904,7 @@ body.a-nav .nav { display: flex; }
 .cb-guide-b { top: 90%; }
 .cb-point {
   position: absolute; width: 10px; height: 10px; border-radius: 50%;
-  background: var(--citron-courbe); border: 2px solid var(--fond);
+  background: var(--action-courbe); border: 2px solid var(--fond);
   transform: translate(-50%, -50%);
 }
 .cb-pieds { display: flex; justify-content: space-between; gap: 12px; margin-top: 8px; }
@@ -1617,7 +2006,7 @@ body.a-nav .nav { display: flex; }
   border: 1.5px solid var(--bord); background: var(--fond-carte);
   color: var(--texte-1b); font-size: 13px; font-weight: 700;
 }
-.pr-mode-on { background: var(--sombre-carte); border-color: var(--sombre-carte); color: var(--salle-bg); }
+.pr-mode-on { background: var(--sombre-carte); border-color: var(--sombre-carte); color: var(--action-sur-sombre); }
 
 /* UN SEUL BLEU dans toute la carte : bordure, chiffre et barre partagent les
    trois memes valeurs. Deux bleus voisins se lisent comme une erreur. */
@@ -1706,7 +2095,7 @@ body.a-nav .nav { display: flex; }
   text-align: left; cursor: pointer;
 }
 .mp-plier .mp-sub { display: block; }
-.mp-ch { flex: 0 0 auto; font-size: 13px; color: var(--citron-encre); }
+.mp-ch { flex: 0 0 auto; font-size: 13px; color: var(--action-encre); }
 .mp-exos { list-style: none; margin: 10px 0 0; padding: 0; }
 .mp-e {
   display: flex; align-items: center; gap: 8px; min-height: 52px;
@@ -1732,7 +2121,7 @@ body.a-nav .nav { display: flex; }
 .mp-d-n { flex: 1; font-size: 13.5px; }
 .mp-d-b {
   min-height: 44px; padding: 0 14px; border-radius: 11px; border: 0;
-  background: var(--sombre-carte); color: var(--salle-bg); font-size: 13px; font-weight: 700;
+  background: var(--sombre-carte); color: var(--action-sur-sombre); font-size: 13px; font-weight: 700;
 }
 
 /* --- APPARENCE ----------------------------------------------------------- */
@@ -1754,7 +2143,7 @@ body.a-nav .nav { display: flex; }
 }
 .ia-ong-on { background: var(--sombre-carte); border-color: var(--sombre-carte); }
 .ia-ong-t { font-size: 14.5px; font-weight: 800; }
-.ia-ong-on .ia-ong-t { color: var(--salle-bg); }
+.ia-ong-on .ia-ong-t { color: var(--action-sur-sombre); }
 .ia-ong-s { font-size: 11.5px; color: var(--texte-2); }
 .ia-ong-on .ia-ong-s { color: var(--sombre-texte-3); }
 
@@ -1830,7 +2219,7 @@ body.a-nav .nav { display: flex; }
   font-weight: 800;
   padding: 0 8px;
 }
-.ia-appl { border: 0; background: var(--salle-bg); color: var(--salle-fg); }
+.ia-appl { border: 0; background: var(--action-bg); color: var(--action-fg); }
 .ia-ign {
   border: 1.5px solid var(--bord-fort);
   background: transparent;
@@ -1934,7 +2323,7 @@ body.a-nav .nav { display: flex; }
   padding: 0 16px;
 }
 .sa-r-l { font-size: 13.5px; font-weight: 600; }
-.sa-r-v { font-size: 16px; font-weight: 800; color: var(--salle-sur-sombre); white-space: nowrap; }
+.sa-r-v { font-size: 16px; font-weight: 800; color: var(--action-sur-sombre); white-space: nowrap; }
 
 /* ---------------------------------------------------------------------------
    FICHE EXERCICE : refaite d'apres la maquette
@@ -1949,7 +2338,7 @@ body.a-nav .nav { display: flex; }
 
 .fi-carte { background: var(--sombre-carte); border-radius: 20px; padding: 17px 18px 15px; margin-bottom: 12px; }
 .fi-haut { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; gap: 12px; }
-.fi-lbl { font-size: 11px; font-weight: 800; letter-spacing: 1.3px; text-transform: uppercase; color: var(--salle-sur-sombre); margin-bottom: 4px; }
+.fi-lbl { font-size: 11px; font-weight: 800; letter-spacing: 1.3px; text-transform: uppercase; color: var(--action-sur-sombre); margin-bottom: 4px; }
 .fi-val { font-size: 30px; font-weight: 700; color: var(--sombre-texte); line-height: 1; white-space: nowrap; }
 .fi-u { font-size: 15px; color: var(--sombre-texte-3); margin-left: 4px; font-weight: 600; }
 .fi-droite { text-align: right; flex: 0 0 auto; }
@@ -1975,12 +2364,12 @@ body.a-nav .nav { display: flex; }
 .fi-set-r { display: block; font-size: 11px; color: var(--texte-2); margin-top: 2px; }
 
 .fi-tech { background: var(--fond-carte); border: 1px solid var(--bord); border-radius: 18px; padding: 16px; margin-top: 14px; margin-bottom: 20px; }
-.fi-tech-t { font-size: 11px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; color: var(--citron-encre); margin-bottom: 12px; }
+.fi-tech-t { font-size: 11px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; color: var(--action-encre); margin-bottom: 12px; }
 .fi-lines { display: flex; flex-direction: column; gap: 11px; margin-bottom: 14px; }
 .fi-line { display: flex; gap: 10px; align-items: flex-start; }
 .fi-num {
-  flex: 0 0 20px; height: 20px; border-radius: 6px; background: var(--salle-pale);
-  color: var(--salle-encre); font-size: 11px; font-weight: 800;
+  flex: 0 0 20px; height: 20px; border-radius: 6px; background: var(--action-pale);
+  color: var(--action-encre); font-size: 11px; font-weight: 800;
   display: flex; align-items: center; justify-content: center;
 }
 .fi-txt { flex: 1; font-size: 13.5px; line-height: 1.5; color: var(--texte-1b); }
@@ -2015,7 +2404,7 @@ body.a-nav .nav { display: flex; }
 .pr-attente-t { font-size: 14.5px; font-weight: 800; color: var(--texte); }
 .pr-attente-p { font-size: 13.5px; color: var(--texte-1b); line-height: 1.5; margin: 6px 0 0; }
 .pr-mode { flex: 1 1 0; min-width: 70px; min-height: 44px; border-radius: 11px; border: 1.5px solid var(--bord-champ); background: transparent; color: var(--texte-1b); font-size: 12.5px; font-weight: 700; }
-.pr-mode-on { background: var(--sombre-carte); border-color: var(--sombre-carte); color: var(--salle-bg); }
+.pr-mode-on { background: var(--sombre-carte); border-color: var(--sombre-carte); color: var(--action-sur-sombre); }
 
 /* La courbe vit maintenant DANS la carte : axe en colonne flex a gauche, zone
    a droite. Mon montage precedent la posait a nu avec un axe en absolu. */
@@ -2042,9 +2431,9 @@ body.a-nav .nav { display: flex; }
 .ro-st-l { display: block; font-size: 11px; color: var(--texte-1b); margin-top: 4px; line-height: 1.3; }
 
 .pr-stagne { background: var(--sombre-carte); border-radius: 18px; padding: 16px 17px; margin-bottom: 14px; }
-.pr-st-t { font-size: 11px; font-weight: 800; letter-spacing: 1.3px; text-transform: uppercase; color: var(--salle-sur-sombre); margin-bottom: 7px; }
+.pr-st-t { font-size: 11px; font-weight: 800; letter-spacing: 1.3px; text-transform: uppercase; color: var(--action-sur-sombre); margin-bottom: 7px; }
 .pr-st-p { font-size: 14.5px; line-height: 1.55; color: var(--sombre-texte-b); margin-bottom: 14px; }
-.pr-st-b { width: 100%; min-height: 56px; border-radius: 14px; border: 0; background: var(--salle-bg); color: var(--salle-fg); font-size: 15.5px; font-weight: 800; }
+.pr-st-b { width: 100%; min-height: 56px; border-radius: 14px; border: 0; background: var(--action-bg); color: var(--action-fg); font-size: 15.5px; font-weight: 800; }
 
 .pr-recs { background: var(--fond-carte); border: 1px solid var(--bord); border-radius: 18px; padding: 16px 16px 6px; margin-bottom: 14px; }
 .pr-recs-t { font-size: 12px; font-weight: 800; letter-spacing: 1.1px; text-transform: uppercase; color: var(--texte-1b); margin-bottom: 14px; }
@@ -2054,7 +2443,7 @@ body.a-nav .nav { display: flex; }
 .pr-rec-v { font-size: 13px; font-weight: 700; color: var(--texte); white-space: nowrap; }
 .pr-rec-b { display: flex; align-items: center; gap: 9px; }
 .pr-piste { flex: 1; height: 8px; border-radius: 4px; background: var(--fond-encart); overflow: hidden; }
-.pr-barre { display: block; height: 100%; border-radius: 4px; background: var(--salle-bg); }
+.pr-barre { display: block; height: 100%; border-radius: 4px; background: var(--action-bg); }
 .pr-gain { font-size: 12px; font-weight: 700; flex: 0 0 auto; white-space: nowrap; }
 
 /* ---------------------------------------------------------------------------
@@ -2065,7 +2454,7 @@ body.a-nav .nav { display: flex; }
 .moi-ident { flex: 1; min-height: 60px; background: transparent; border: 0; text-align: left; padding: 0; display: flex; flex-direction: column; justify-content: center; min-width: 0; }
 .moi-nom { display: block; font-size: 18px; font-weight: 800; color: var(--sombre-texte); }
 .moi-sous { display: block; font-size: 13px; color: var(--sombre-texte-3); margin-top: 2px; }
-.moi-chev { width: 44px; height: 44px; flex: 0 0 44px; border-radius: 50%; border: 0; background: transparent; color: var(--salle-sur-sombre); font-size: 20px; }
+.moi-chev { width: 44px; height: 44px; flex: 0 0 44px; border-radius: 50%; border: 0; background: transparent; color: var(--action-sur-sombre); font-size: 20px; }
 .moi-note { font-size: 12px; color: var(--texte-3); margin: 0 0 16px; line-height: 1.5; }
 
 .mo-g { margin-bottom: 14px; }
@@ -2110,7 +2499,7 @@ body.a-nav .nav { display: flex; }
 .cs-libre-s { font-size: 12.5px; color: var(--sombre-texte-3); line-height: 1.5; margin-bottom: 8px; }
 .run-t { font-size: 16px; font-weight: 800; color: var(--sombre-texte); margin-top: 12px; }
 
-.mp-ia-t { font-size: 16px; font-weight: 800; color: var(--salle-sur-sombre); letter-spacing: -.2px; }
+.mp-ia-t { font-size: 16px; font-weight: 800; color: var(--action-sur-sombre); letter-spacing: -.2px; }
 
 .th-note {
   background: var(--fond-encart); border-radius: 14px; padding: 13px 14px;
@@ -2191,7 +2580,7 @@ body.a-nav .nav { display: flex; }
   gap: 12px; margin-top: 14px;
 }
 .nu-l-t { font-size: 17px; font-weight: 800; color: var(--sombre-texte); }
-.nu-l-v { font-size: 20px; font-weight: 800; color: var(--salle-sur-sombre); white-space: nowrap; }
+.nu-l-v { font-size: 20px; font-weight: 800; color: var(--action-sur-sombre); white-space: nowrap; }
 .nu-l-s { font-size: 12.5px; color: var(--sombre-texte-3); line-height: 1.5; margin-top: 2px; }
 
 /* ---------------------------------------------------------------------------
@@ -2279,7 +2668,7 @@ body.a-nav .nav { display: flex; }
 .rp-scan {
   width: 100%; min-height: 56px; margin: 4px 0 12px;
   border: 0; border-radius: 14px;
-  background: var(--salle-bg); color: var(--salle-fg);
+  background: var(--action-bg); color: var(--action-fg);
   font-family: inherit; font-size: 15.5px; font-weight: 800;
 }
 
@@ -2296,10 +2685,10 @@ body.a-nav .nav { display: flex; }
 .sc-video { width: 100%; height: 100%; object-fit: cover; display: block; }
 .sc-cadre {
   position: absolute; left: 8%; right: 8%; top: 30%; bottom: 30%;
-  border: 2px solid var(--salle-bg); border-radius: 10px;
+  border: 2px solid var(--action-bg); border-radius: 10px;
   display: flex; align-items: center;
 }
-.sc-trait { width: 100%; height: 2px; background: var(--salle-bg); opacity: .85; }
+.sc-trait { width: 100%; height: 2px; background: var(--action-bg); opacity: .85; }
 
 /* 🔴 « CHOISIR AUTRE CHOSE » PORTAIT `.cs-btn`, DONC DU TEXTE CLAIR.
    `.cs-btn` habille les boutons de la carte SOMBRE de l'ecran du jour : ses
@@ -8553,19 +8942,23 @@ body.a-nav .nav { display: flex; }
 
   // Le remplissage dit qui mene la seance ; les trois disciplines sont donc
   // pleines, chacune dans sa teinte. Le contour ne sert plus qu'au vide.
+  // 🔴 LES COULEURS SONT DES VARIABLES CSS depuis le 19 septembre 2026, plus
+  // des hexadecimaux. Ecrites en dur, elles ne suivaient ni le theme sombre
+  // (les pastilles attenuees y restaient claires) ni les palettes homme et
+  // femme. Elles ne servent que dans des attributs `style`, ou `var(...)` vaut.
   var DISC = {
-    salle: { t: "Salle", court: "SALLE", bg: "#f4d912", fg: "#100f0d", bd: "#f4d912",
-      pale: "#fdf4bd", encre: "#4a4000" },
-    cours: { t: "Cours collectif", court: "COURS", bg: "#d9741a", fg: "#100f0d", bd: "#d9741a",
-      pale: "#f8ddc2", encre: "#7d3d05" },
-    run: { t: "Running", court: "RUNNING", bg: "#1f6dc0", fg: "#fffdf7", bd: "#1f6dc0",
-      pale: "#d3e3f6", encre: "#16497f" },
+    salle: { t: "Salle", court: "SALLE", bg: "var(--salle-bg)", fg: "var(--salle-fg)",
+      bd: "var(--salle-bg)", pale: "var(--salle-pale)", encre: "var(--salle-encre)" },
+    cours: { t: "Cours collectif", court: "COURS", bg: "var(--cours-bg)", fg: "var(--cours-fg)",
+      bd: "var(--cours-bg)", pale: "var(--cours-pale)", encre: "var(--cours-encre)" },
+    run: { t: "Running", court: "RUNNING", bg: "var(--run-bg)", fg: "var(--run-fg)",
+      bd: "var(--run-bg)", pale: "var(--run-pale)", encre: "var(--run-encre)" },
     // UNE ACTIVITE NOTEE HORS PROGRAMME : marche, velo, natation, padel...
     // ⚠️ UNE COULEUR A PART, et pas celle d'une des trois disciplines : dans le
     // calendrier et l'Historique, un tour de velo du dimanche ne doit pas se
     // lire comme une seance de salle ou un running du programme.
-    libre: { t: "Autre activité", court: "AUTRE", bg: "#7a5cc0", fg: "#fffdf7", bd: "#7a5cc0",
-      pale: "#e6def6", encre: "#4a3585" }
+    libre: { t: "Autre activité", court: "AUTRE", bg: "var(--autre-bg)", fg: "var(--autre-fg)",
+      bd: "var(--autre-bg)", pale: "var(--autre-pale)", encre: "var(--autre-encre)" }
   };
 
   var NATURES = [{ t: "Cardio" }, { t: "Renforcement" }, { t: "Mobilité" }];
@@ -18159,7 +18552,10 @@ body.a-nav .nav { display: flex; }
   // avec la couleur de sa discipline, bleu en Distance, citron en Tonnage,
   // et nomme ce qu'elle mesure au-dessus de la courbe. Sans ca, quatre modes
   // rendaient quatre courbes identiques a l'oeil.
-  var T_SALLE = { trait: "var(--citron-courbe)", aire: "var(--salle-pale)", encre: "var(--citron-encre)" };
+  // ⚠️ LE TONNAGE PREND LA COULEUR DE LA PALETTE, plus le jaune Salle
+  // (Olivier, 19 septembre 2026) : comme la courbe de poids. Distance garde
+  // le bleu du running.
+  var T_SALLE = { trait: "var(--action-courbe)", aire: "var(--action-pale)", encre: "var(--action-encre)" };
   var T_RUN   = { trait: "var(--run-bg)",        aire: "var(--run-pale)",   encre: "var(--run-encre)" };
   var T_VERT  = { trait: "var(--vert-bg)",       aire: "var(--vert-pale)",  encre: "var(--vert-encre)" };
 
@@ -19355,11 +19751,16 @@ body.a-nav .nav { display: flex; }
       h += champHtml("ob-prenom", "Prénom", state.obPrenom, "ob-prenom", "", true);
       h += champHtml("ob-age", "Âge", state.obAge, "ob-age", "", false, "38");
       h += champHtml("ob-taille", "Taille", state.obTaille, "ob-taille", "", false, "178");
+      // 🔴 RIEN N'EST PRESELECTIONNE (19 septembre 2026) : la reponse choisit
+      // aussi la palette (Volt pour les hommes, Framboise pour les femmes), et
+      // « Homme » coche d'office l'aurait imposee. Tant que `obSexeDit` vaut 0,
+      // aucun bouton n'est presse et la palette reste neutre.
       h += '<div class="ob-champ"><span class="ob-champ-l">Tu es</span><div class="ob-natures">';
       for (var i = 0; i < OB_SEXES.length; i++) {
-        h += '<button type="button" class="ob-nature' + (state.obSexe === i ? " ob-nature-on" : "") +
-             '" style="' + (state.obSexe === i ? "background:var(--salle-bg);border-color:var(--salle-bg);color:var(--salle-fg)" : "") + '"' +
-             ' aria-pressed="' + (state.obSexe === i ? "true" : "false") + '"' +
+        var sexeOn = !!state.obSexeDit && state.obSexe === i;
+        h += '<button type="button" class="ob-nature' + (sexeOn ? " ob-nature-on" : "") +
+             '" style="' + (sexeOn ? "background:var(--action-bg);border-color:var(--action-bg);color:var(--action-fg)" : "") + '"' +
+             ' aria-pressed="' + (sexeOn ? "true" : "false") + '"' +
              ' data-action="ob-sexe" data-v="' + i + '">' + esc(OB_SEXES[i]) + "</button>";
       }
       h += "</div></div>";
@@ -20028,7 +20429,7 @@ body.a-nav .nav { display: flex; }
     for (i = 0; i < OB_ALCOOL.length; i++) {
       on = state.obAlcool === i;
       h += '<button type="button" class="ob-nature' + (on ? " ob-nature-on" : "") +
-           '" style="' + (on ? "background:var(--salle-bg);border-color:var(--salle-bg);color:var(--salle-fg)" : "") + '"' +
+           '" style="' + (on ? "background:var(--action-bg);border-color:var(--action-bg);color:var(--action-fg)" : "") + '"' +
            ' aria-pressed="' + (on ? "true" : "false") + '"' +
            ' data-action="ob-single" data-cle="obAlcool" data-v="' + i + '">' +
            esc(OB_ALCOOL[i]) + "</button>";
@@ -20073,7 +20474,7 @@ body.a-nav .nav { display: flex; }
     h += '<div class="ob-champ"><span class="ob-champ-l">À quel moment</span><div class="ob-natures">';
     for (i = 0; i < PESEE_MOMENTS.length; i++) {
       h += '<button type="button" class="ob-nature' + (state.obPeseeMoment === i ? " ob-nature-on" : "") +
-           '" style="' + (state.obPeseeMoment === i ? "background:var(--salle-bg);border-color:var(--salle-bg);color:var(--salle-fg)" : "") + '"' +
+           '" style="' + (state.obPeseeMoment === i ? "background:var(--action-bg);border-color:var(--action-bg);color:var(--action-fg)" : "") + '"' +
            ' aria-pressed="' + (state.obPeseeMoment === i ? "true" : "false") + '"' +
            ' data-action="ob-single" data-cle="obPeseeMoment" data-v="' + i + '">' +
            esc(PESEE_MOMENTS[i].t) + "</button>";
@@ -20315,13 +20716,19 @@ body.a-nav .nav { display: flex; }
     // Le lien « Annuler et revenir » disparait du meme coup : il n'a plus de
     // role distinct, et Olivier demandait justement a quoi il servait.
     var _corrige = !!state.vu;
+    // HOMME OU FEMME, AVANT DE CONTINUER (Olivier, 19 septembre 2026) : le
+    // bouton est grise et une phrase dit pourquoi. La reponse choisit la
+    // palette et sert au modele de charge ; plus rien ne la presuppose.
+    var _sansSexe = ob.nom === "Toi" && !state.obSexeDit;
+    if (_sansSexe) h += '<p class="ob-requis">Choisis Homme ou Femme pour continuer.</p>';
     h += '<div class="ob-nav">';
     if (_corrige) {
       h += '<button type="button" class="ob-prev" data-action="ob-quitter">Annuler</button>';
     } else if (step > 0) {
       h += '<button type="button" class="ob-prev" data-action="ob-prev">Retour</button>';
     }
-    h += '<button type="button" class="ob-next" data-action="ob-next">' +
+    h += '<button type="button" class="ob-next" data-action="ob-next"' +
+         (_sansSexe ? ' disabled aria-disabled="true"' : "") + ">" +
          (_corrige ? "Enregistrer" : (rang >= vis.length - 1 ? "Ouvrir l'appli" : "Continuer")) +
          "</button>";
     h += "</div>";
@@ -20372,6 +20779,9 @@ body.a-nav .nav { display: flex; }
   // « Refaire le diagnostic », depuis Moi, remet `vu` a false et retrouve donc
   // le parcours complet.
   function obSuivant() {
+    // Le bouton est grise sans reponse Homme / Femme ; ceci garde la porte si
+    // un autre chemin appelait la suite.
+    if (OB[state.obStep] && OB[state.obStep].nom === "Toi" && !state.obSexeDit) return;
     if (state.vu) { obQuitter(true); return; }
     var suiv = etapeApres(state.obStep);
     if (suiv === null) { ouvrirLAppli(); return; }
@@ -23025,7 +23435,7 @@ body.a-nav .nav { display: flex; }
   function courbeHtml(vals, unite, etiqDepart, etiqFin, ecart, libelle, teinte) {
     var c = courbePoints(vals), i, ligne = [], aire = [], dernier;
     if (!c.pts.length) return '<div class="cb-vide">Pas encore de mesure.</div>';
-    teinte = teinte || { trait: "var(--citron-courbe)", aire: "var(--salle-pale)", encre: "var(--citron-encre)" };
+    teinte = teinte || { trait: "var(--action-courbe)", aire: "var(--action-pale)", encre: "var(--action-encre)" };
 
     for (i = 0; i < c.pts.length; i++) { ligne.push(c.pts[i].x + "," + c.pts[i].y); }
     aire = ligne.slice();
@@ -23344,7 +23754,7 @@ body.a-nav .nav { display: flex; }
   // hauteurs a l'oeil.
   function barreCouleur(v, prec) {
     if (prec === null) return { c: "var(--sombre-barre)", t: "var(--sombre-texte-3)" };
-    if (v > prec) return { c: "var(--salle-bg)", t: "var(--salle-bg)" };
+    if (v > prec) return { c: "var(--action-bg)", t: "var(--action-sur-sombre)" };
     if (v < prec) return { c: "var(--cours-bg)", t: "var(--cours-sur-sombre)" };
     return { c: "var(--sombre-bord)", t: "var(--sombre-texte-2)" };
   }
@@ -24755,6 +25165,9 @@ body.a-nav .nav { display: flex; }
         maj[k] = vk;
         repris++;
       }
+      // La meme reprise que `lire()` pour « Tu es » (19 septembre 2026) : une
+      // sauvegarde d'avant, diagnostic termine, garde sa reponse et sa palette.
+      if (o.vu && has(o, "obSexe") && !has(o, "obSexeDit")) maj.obSexeDit = 1;
       if (refuse) {
         poser({ importMsg: "Fichier refusé : la valeur de « " + refuse +
                            " » n'a pas la forme attendue. Rien n'a été modifié." });
@@ -26881,7 +27294,7 @@ body.a-nav .nav { display: flex; }
    module a l'autre.
    =========================================================================== */
 
-  var APP_VERSION = "1.28.2";
+  var APP_VERSION = "1.29.0";
 
   function has(o, k) { return Object.prototype.hasOwnProperty.call(o, k); }
 
@@ -27014,6 +27427,11 @@ body.a-nav .nav { display: flex; }
     obPoids: "", obPoidsCible: "",
 
     obSexe: 0, obObjectif: 0, obPratique: 2, obDuree: 1,
+    // LA QUESTION « TU ES » A-T-ELLE RECU UNE REPONSE ? (19 septembre 2026)
+    // `obSexe` vaut 0 par defaut, et 0 veut dire « Homme » : sans ce temoin,
+    // on ne distinguerait pas un homme d'une personne qui n'a pas repondu. Il
+    // decide la palette (neutre tant qu'il vaut 0) et grise « Continuer ».
+    obSexeDit: 0,
     // ⚠️ LE TEMOIN DE LA QUESTION « OU TU EN ES », PAS SA REPONSE.
     // `obPratique` vaut 2 par defaut, et 2 veut dire « Regulier ». Tant que
     // personne ne lisait ce champ, ce defaut ne faisait rien. Le jour ou il
@@ -27233,7 +27651,7 @@ body.a-nav .nav { display: flex; }
   // depuis, ni en imposer un que le code ne connait plus.
   var CLES_SAUVEES = ["vu", "seance", "modeChart", "theme", "exclus",
     "obPrenom", "obAge", "obTaille", "obPoids", "obPoidsCible",
-    "obSexe", "obObjectif", "obPratique", "obPratiqueDite", "obDuree", "obDureeLibre", "obJours", "obEquip", "obGear",
+    "obSexe", "obSexeDit", "obObjectif", "obPratique", "obPratiqueDite", "obDuree", "obDureeLibre", "obJours", "obEquip", "obGear",
     "obHalt", "obPrefPdc", "obPetitDej", "obCollation", "obCuisine", "obAlcool",
     "obPeseeJour", "obPeseeMoment", "peseeFaite", "obSupps", "obAct", "actFaits",
     "obRunNiveau", "obRunDuree", "obEviter",
@@ -27371,6 +27789,12 @@ body.a-nav .nav { display: flex; }
     // attribue « Regulier » : c'est exactement ce que son ecran lui montrait.
     if (o.vu && has(o, "obPratique") && !has(o, "obPratiqueDite")) {
       r.obPratiqueDite = 1;
+    }
+    // MEME RAISONNEMENT POUR « TU ES » (19 septembre 2026) : un diagnostic
+    // termine a traverse la question, sa reponse est celle qu'il porte. Il
+    // retrouve donc la palette de cette reponse au lancement.
+    if (o.vu && has(o, "obSexe") && !has(o, "obSexeDit")) {
+      r.obSexeDit = 1;
     }
     // LE PLAN DE QUI A FAIT SON DIAGNOSTIC AVANT LE CHANTIER HORIZON commence le
     // jour de la mise a jour. Sans date, l'horizon resterait sur le plan pour
@@ -27964,8 +28388,31 @@ body.a-nav .nav { display: flex; }
   // Appele au DEBUT de chaque rendu, donc auto-correcteur. Une PWA iOS mise en
   // veille ne recoit pas toujours l'evenement « change » de matchMedia ;
   // dependre de lui laissait le theme systeme bloque sur son ancienne valeur.
+  // LA PALETTE SUIT LA REPONSE « TU ES » (19 septembre 2026) : « homme »
+  // (Volt), « femme » (Framboise), ou rien tant qu'on n'a pas repondu (palette
+  // neutre). Le theme reste un reglage a part. Les blocs vivent en tete de
+  // block_css.css.
+  function paletteResolue() {
+    if (!state.obSexeDit) return "";
+    return state.obSexe === 1 ? "femme" : "homme";
+  }
+
+  var _themeColor = "";
   function appliqueTheme() {
-    try { document.documentElement.setAttribute("data-theme", themeResolu()); } catch (e) {}
+    var r = document.documentElement, p, f, m;
+    try {
+      r.setAttribute("data-theme", themeResolu());
+      p = paletteResolue();
+      if (p) r.setAttribute("data-palette", p); else r.removeAttribute("data-palette");
+      // La barre du navigateur prend le fond de la palette active. Elle etait
+      // figee sur le creme du theme clair, meme en theme sombre.
+      f = window.getComputedStyle(r).getPropertyValue("--fond").trim();
+      if (f && f !== _themeColor) {
+        m = document.querySelector('meta[name="theme-color"]');
+        if (m) m.setAttribute("content", f);
+        _themeColor = f;
+      }
+    } catch (e) {}
   }
 
   // =========================================================================
@@ -28564,7 +29011,13 @@ body.a-nav .nav { display: flex; }
       if (_cleS === "obPratique") o.obPratiqueDite = 1;
       poser(o); return;
     }
-    if (action === "ob-sexe") { poser({ obSexe: parseInt(n.getAttribute("data-v"), 10) }); return; }
+    // Toucher Homme ou Femme applique la palette SUR-LE-CHAMP, ecran de la
+    // question compris (Olivier, 19 septembre 2026) : `poser` redessine, et
+    // `appliqueTheme` pose `data-palette` au debut du rendu.
+    if (action === "ob-sexe") {
+      poser({ obSexe: parseInt(n.getAttribute("data-v"), 10) === 1 ? 1 : 0, obSexeDit: 1 });
+      return;
+    }
     if (action === "ob-bascule") {
       var c = n.getAttribute("data-cle");
       o[c] = state[c] ? 0 : 1;
