@@ -125,6 +125,7 @@
   --action-sur-sombre: #f4d912;
   --action-selection:  #f5ecb0;
   --action-courbe:     #c9ae00;
+  --action-bord: transparent;
 
   /* LA QUATRIEME DISCIPLINE, « AUTRE ACTIVITE », qui n'avait pas de variable :
      la table des disciplines du code (`DISC`) la lit desormais ici. */
@@ -221,15 +222,25 @@
 
   --lien:       #bcdcff;
   --lien-hover: #d3e3f6;
+
+  /* Le contour des aplats d'action : sans effet ici (20 septembre 2026), il
+     ne sert qu'en homme clair. */
+  --action-bord: transparent;
 }
 
 /* ===========================================================================
    LES PALETTES HOMME ET FEMME (19 septembre 2026)
    ---------------------------------------------------------------------------
-   « Volt » pour les hommes, « Framboise » pour les femmes : directions
-   choisies par Olivier sur les maquettes de Claude Design, blocs recopies
-   TELS QUELS de `DOSSIER_CLAUDE_DESIGN_COULEURS/03_PROMPT_CLAUDE_CODE.md`
-   par un script, sans retouche. Elles surchargent le theme par l'attribut
+   🔴 « VOLT » EST ABANDONNEE DEPUIS LE 20 SEPTEMBRE 2026. La palette homme
+   est « Citron & encre » : le citron de LEMMON reste la seule couleur vive,
+   sur des neutres modernes. Olivier l'a preferee a Volt « pour sa modernite,
+   sa simplicite, et parce que le citron est le nom et l'icone de l'appli ».
+   Framboise (femme) n'a pas bouge d'une valeur.
+   « Citron & encre » pour les hommes, « Framboise » pour les femmes :
+   directions choisies par Olivier sur les maquettes de Claude Design, blocs
+   recopies TELS QUELS de
+   `DOSSIER_CLAUDE_DESIGN_COULEURS/03_PROMPT_CLAUDE_CODE 2.md`
+   par `controle/poser_palettes.py`, sans retouche. Elles surchargent le theme par l'attribut
    `data-palette` pose sur <html> d'apres la reponse « Tu es : Homme / Femme »
    (`appliqueTheme`, block_socle.js). Sans reponse : pas d'attribut, palette
    neutre (les deux blocs ci-dessus).
@@ -241,41 +252,42 @@
 /* Homme clair */
 :root[data-theme="clair"][data-palette="homme"] {
   /* Surfaces et bords */
-  --fond: #f2f3f1;
-  --fond-carte: #fcfdfc;
-  --fond-encart: #e8e9e7;
-  --sep: #eeefed;
-  --bord: #d4d6d1;
-  --bord-discret: #e0e2df;
-  --bord-champ: #c4c8c1;
-  --bord-fort: #adb2a9;
+  --fond: #f6f6f2;
+  --fond-carte: #ffffff;
+  --fond-encart: #efefea;
+  --sep: #ededea;
+  --bord: #dddcd5;
+  --bord-discret: #e6e5df;
+  --bord-champ: #cfcec6;
+  --bord-fort: #bebdb4;
   /* Textes */
-  --texte: #171816;
-  --texte-1b: #454941;
-  --texte-2: #54594f;
-  --texte-3: #54594f;
-  --texte-3b: #707769;
-  --texte-3c: #707769;
+  --texte: #161615;
+  --texte-1b: #3f4247;
+  --texte-2: #5a5f66;
+  --texte-3: #5a5f66;
+  --texte-3b: #74787e;
+  --texte-3c: #74787e;
   /* Cartes mises en avant (variables --sombre-*) */
-  --sombre-carte: #eef8d7;
-  --sombre-fond: #f2f3f1;
-  --sombre-fond-2: #f0f6e4;
-  --sombre-piste: #e0e2df;
-  --sombre-pastille: #dff2ae;
-  --sombre-barre: #e0e2df;
-  --sombre-bord: #adb2a9;
-  --sombre-texte: #171816;
-  --sombre-texte-b: #171816;
-  --sombre-texte-2: #454941;
-  --sombre-texte-3: #54594f;
+  --sombre-carte: #fdf9e1;
+  --sombre-fond: #f6f6f2;
+  --sombre-fond-2: #faf8ea;
+  --sombre-piste: #e6e5df;
+  --sombre-pastille: #f4edc4;
+  --sombre-barre: #e6e5df;
+  --sombre-bord: #bebdb4;
+  --sombre-texte: #161615;
+  --sombre-texte-b: #161615;
+  --sombre-texte-2: #3f4247;
+  --sombre-texte-3: #5a5f66;
   /* Action principale (NOUVELLES variables, remplacent le citron) */
-  --action-bg: #a6dc14;
+  --action-bg: #f5d90a;
   --action-fg: #111111;
-  --action-pale: #eefbc6;
-  --action-encre: #3e5500;
-  --action-sur-sombre: #3e5500;
-  --action-selection: #e3eec5;
-  --action-courbe: #6f9400;
+  --action-pale: #fbf3c0;
+  --action-encre: #5c5100;
+  --action-sur-sombre: #5c5100;
+  --action-selection: #f6f0c4;
+  --action-courbe: #b89f00;
+  --action-bord: #8a7700;
   /* Discipline Salle */
   --salle-bg: #f4d912;
   --salle-fg: #100f0d;
@@ -323,41 +335,42 @@
 /* Homme sombre */
 :root[data-theme="sombre"][data-palette="homme"] {
   /* Surfaces et bords */
-  --fond: #0d0e0c;
-  --fond-carte: #1a1b18;
-  --fond-encart: #141613;
-  --sep: #262924;
-  --bord: #333630;
-  --bord-discret: #40443c;
-  --bord-champ: #363932;
-  --bord-fort: #858c7d;
+  --fond: #0e0e0d;
+  --fond-carte: #1a1a18;
+  --fond-encart: #151514;
+  --sep: #262624;
+  --bord: #32322f;
+  --bord-discret: #42423e;
+  --bord-champ: #32322f;
+  --bord-fort: #85857e;
   /* Textes */
-  --texte: #ebecea;
-  --texte-1b: #cfd1cc;
-  --texte-2: #abb0a6;
-  --texte-3: #abb0a6;
-  --texte-3b: #abb0a6;
-  --texte-3c: #abb0a6;
+  --texte: #ecebe6;
+  --texte-1b: #cfcec8;
+  --texte-2: #a3a39c;
+  --texte-3: #a3a39c;
+  --texte-3b: #a3a39c;
+  --texte-3c: #a3a39c;
   /* Cartes mises en avant (variables --sombre-*) */
-  --sombre-carte: #1a1b18;
-  --sombre-fond: #0d0e0c;
+  --sombre-carte: #1a1a18;
+  --sombre-fond: #0e0e0d;
   --sombre-fond-2: #141412;
-  --sombre-piste: #474d42;
-  --sombre-pastille: #363a31;
-  --sombre-barre: #474d42;
-  --sombre-bord: #666e5e;
-  --sombre-texte: #edeeec;
-  --sombre-texte-b: #ebecea;
-  --sombre-texte-2: #cfd1cc;
-  --sombre-texte-3: #a6aba0;
+  --sombre-piste: #3a3a36;
+  --sombre-pastille: #2e2e2b;
+  --sombre-barre: #3a3a36;
+  --sombre-bord: #5e5e58;
+  --sombre-texte: #ecebe6;
+  --sombre-texte-b: #ecebe6;
+  --sombre-texte-2: #cfcec8;
+  --sombre-texte-3: #a3a39c;
   /* Action principale (NOUVELLES variables, remplacent le citron) */
-  --action-bg: #c6f032;
+  --action-bg: #f5d90a;
   --action-fg: #111111;
-  --action-pale: #2c3a05;
-  --action-encre: #c6f032;
-  --action-sur-sombre: #c6f032;
-  --action-selection: #272e11;
-  --action-courbe: #a8d41a;
+  --action-pale: #3d3500;
+  --action-encre: #f5d90a;
+  --action-sur-sombre: #f5d90a;
+  --action-selection: #2e2a0d;
+  --action-courbe: #d9bf00;
+  --action-bord: transparent;
   /* Discipline Salle */
   --salle-bg: #f4d912;
   --salle-fg: #100f0d;
@@ -440,6 +453,7 @@
   --action-sur-sombre: #a3104f;
   --action-selection: #f0c3d6;
   --action-courbe: #d41c6a;
+  --action-bord: transparent;
   /* Discipline Salle */
   --salle-bg: #f4d912;
   --salle-fg: #100f0d;
@@ -522,6 +536,7 @@
   --action-sur-sombre: #ff84b3;
   --action-selection: #2d0b19;
   --action-courbe: #ff5c9a;
+  --action-bord: transparent;
   /* Discipline Salle */
   --salle-bg: #f4d912;
   --salle-fg: #100f0d;
@@ -606,6 +621,22 @@ p { text-wrap: pretty; }
    courtes, tonnages. C'est ce qui aligne les colonnes et rend un tableau de
    charges lisible d'un coup d'oeil. */
 .num { font-family: ui-monospace, "SF Mono", monospace; }
+/* ⚠️ L'INDICATION D'UN CHAMP N'EST PAS UN NOMBRE. « facultatif » s'affichait
+   dans la police des chiffres, parce que le champ la porte pour la valeur
+   qu'on y tape. */
+.num::placeholder { font-family: inherit; font-family: initial; }
+
+/* « POURQUOI CE CHIFFRE ? » : le lien qui deplie l'explication, et
+   l'explication. Bouton, jamais lien souligne : c'est une action. */
+.pourquoi {
+  display: inline; padding: 0; border: 0; background: transparent;
+  color: var(--action-encre); font-family: inherit; font-size: inherit;
+  font-weight: 700; text-decoration: underline;
+}
+.pourquoi-t {
+  font-size: 13px; line-height: 1.55; color: var(--texte-2);
+  margin: 6px 0 0; padding-left: 10px; border-left: 2px solid var(--bord);
+}
 
 /* ===========================================================================
    CHASSIS : ecran, gouttiere, nav basse
@@ -701,6 +732,25 @@ body.a-nav .nav { display: flex; }
 }
 .nav-btn-on { color: var(--texte); font-weight: 800; }
 .nav-btn-on .nav-p { background: var(--action-bg); color: var(--action-fg); }
+
+/* LE CONTOUR DES APLATS D'ACTION (20 septembre 2026, direction « Citron &
+   encre » de Claude Design). En homme clair, le citron ne ressort qu'a 1,3:1
+   du fond : c'est ce contour qui porte le reperage, a 4,1:1. Partout ailleurs
+   `--action-bord` vaut `transparent`, donc la regle ne se voit pas.
+   ⚠️ TRACE A L'INTERIEUR (`inset`) : ni la taille ni la zone tactile ne
+   bougent, c'est la condition posee par le prompt.
+   ⚠️ NI SUR LES BARRES DE RECORDS NI SUR LE SEGMENT ACTIF DE LA PROGRESSION
+   DU QUESTIONNAIRE : le prompt les exclut nommement. */
+.ob-next,
+.cs-cta,
+.sa-valider,
+.tr-suivant,
+.pr-st-b,
+.rp-ch-scan,
+.ia-appl,
+.nav-btn-on .nav-p {
+  box-shadow: inset 0 0 0 1.5px var(--action-bord);
+}
 
 /* ===========================================================================
    SPLASH
@@ -825,7 +875,12 @@ body.a-nav .nav { display: flex; }
    il gardait le `--bord` de `.ob-dot`. La barre de progression du diagnostic ne
    montrait donc aucune progression. Trouve par verifier_jetons_css.py. */
 .ob-dot-past { background: var(--bord-fort); }
-.ob-dot-on { background: var(--action-bg); height: 6px; }
+/* LE JALON EN COURS GARDE UN FUT NEUTRE. C'est son remplissage qui porte la
+   couleur d'action : un segment entierement citron des la premiere question se
+   lirait comme un jalon deja fini. Il herite donc du `--bord` de `.ob-dot` et
+   ne se distingue que par sa hauteur. */
+.ob-dot-on { height: 6px; }
+.ob-dot-fait { display: block; height: 100%; border-radius: 2px; background: var(--action-bg); }
 
 .ob-step-label {
   text-align: center; font-size: 11px; color: var(--texte-3); margin-bottom: 14px;
@@ -1199,7 +1254,14 @@ body.a-nav .nav { display: flex; }
   color: var(--texte); font-size: 15px; font-weight: 700;
 }
 
-.cs-code { font-size: 26px; font-weight: 800; letter-spacing: -.4px; color: var(--action-sur-sombre); }
+/* ⚠️ L'INTERLIGNE EST SERRE, COMME POUR `.cs-nom`. Sans lui, un titre de 26 px
+   heritait de l'interligne du texte (1,5) : « Calories cramées par le sport »
+   sur deux lignes laissait un trou qui se lit comme un saut de ligne oublie
+   (signale par Olivier le 20 septembre 2026, capture a l'appui). */
+.cs-code {
+  font-size: 26px; font-weight: 800; letter-spacing: -.4px; line-height: 1.1;
+  color: var(--action-sur-sombre);
+}
 .carte-cours .cs-code { color: var(--cours-sur-sombre); }
 .carte-run .cs-code { color: var(--run-sur-sombre); }
 /* L'EN-TETE DE LA CARTE DU JOUR. « SÉANCE PULL · prévue jeudi » sur une ligne
@@ -1315,6 +1377,13 @@ body.a-nav .nav { display: flex; }
   font-size: 11px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase;
   color: var(--texte-3); margin-bottom: 8px;
 }
+/* LE BLOC REPLIE : une seule ligne, qui dit ce qu'elle ouvre. Meme hauteur de
+   cible que les boutons qu'elle cache. */
+.remp-plier {
+  width: 100%; min-height: 48px; border-radius: 12px;
+  border: 1.5px solid var(--bord); background: transparent;
+  color: var(--texte-2); font-family: inherit; font-size: 13.5px; font-weight: 700;
+}
 /* DEUX COLONNES DE MEME LARGEUR (Olivier, 17 septembre 2026 : « uniformiser la
    largeur de ces blocs »). En ligne souple, chaque bouton prenait la largeur de
    son texte : « Un running » etait deux fois plus etroit que ses voisins. Un
@@ -1354,6 +1423,12 @@ body.a-nav .nav { display: flex; }
   text-align: center;
 }
 .cs-txt { font-size: 14px; line-height: 1.55; color: var(--sombre-texte-2); margin: 10px 0 0; }
+/* LA SEANCE FAITE (lot 2 du parcours) : une ligne qui se lit d'un coup d'oeil,
+   a la place de la liste d'exercices et du gros bouton. */
+.cs-fait {
+  font-size: 15px; font-weight: 800; color: var(--sombre-texte);
+  margin: 12px 0 0; text-align: center;
+}
 .cs-cta {
   width: 100%; min-height: 60px; border-radius: 14px; border: 0; margin-top: 14px;
   background: var(--action-bg); color: var(--action-fg); font-size: 16px; font-weight: 800;
@@ -1559,6 +1634,22 @@ body.a-nav .nav { display: flex; }
   font-weight: 700;
   text-decoration: none;
 }
+/* Le meme bloc pour ouvrir la fiche de l'exercice : c'est un bouton, pas un
+   lien, il lui faut la largeur et la police du lien voisin. */
+.sa-tech-fiche { width: 100%; background: transparent; font-family: inherit; }
+/* LE BOUTON D'ACTIONS DE L'EXERCICE, a droite de son nom. Rond et discret :
+   il ne concurrence pas les deux actions de la seance. */
+.sa-titre { display: flex; align-items: center; gap: 10px; }
+.sa-titre .sa-exo { flex: 1 1 auto; min-width: 0; }
+.sa-exo-p {
+  flex: 0 0 44px; width: 44px; height: 44px; border-radius: 50%;
+  border: 1.5px solid var(--sombre-bord); background: transparent;
+  color: var(--sombre-texte-2); font-family: inherit; font-size: 20px; line-height: 1;
+}
+.sa-exo-p-on { border-color: var(--action-sur-sombre); color: var(--action-sur-sombre); }
+.sa-menu { margin-top: 12px; }
+.sa-menu-t { font-size: 13.5px; line-height: 1.5; color: var(--sombre-texte-2); margin: 0; }
+.sa-menu-b { width: 100%; background: transparent; font-family: inherit; }
 
 /* ===========================================================================
    MODE ENTRAINEMENT : LE DESIGN DE LA MAQUETTE
@@ -2501,11 +2592,6 @@ body.a-nav .nav { display: flex; }
 
 .mp-ia-t { font-size: 16px; font-weight: 800; color: var(--action-sur-sombre); letter-spacing: -.2px; }
 
-.th-note {
-  background: var(--fond-encart); border-radius: 14px; padding: 13px 14px;
-  font-size: 12.5px; line-height: 1.6; color: var(--texte-1b); margin: 4px 0 20px;
-}
-
 .mo-v-h { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 4px; }
 .mo-v-t { font-size: 15.5px; font-weight: 800; color: var(--texte); }
 .mo-v-n { font-size: 13.5px; font-weight: 700; color: var(--texte); }
@@ -2663,13 +2749,46 @@ body.a-nav .nav { display: flex; }
 .rp-nb-v { font-size: 26px; font-weight: 800; min-width: 38px; text-align: center; }
 .rp-nb-u { font-size: 15px; color: var(--texte-1b); }
 
-/* Le bouton de scan, en tete de l'ecran du repas. Plein et colore : c'est
-   l'action principale, la recherche au clavier est le repli. */
-.rp-scan {
-  width: 100%; min-height: 56px; margin: 4px 0 12px;
+/* LE SCAN A COTE DE LA RECHERCHE (lot 1 du parcours, 19 septembre 2026). Il
+   etait en tete, plein et pleine largeur ; un repas fait maison se cherche.
+   Meme hauteur que le champ, meme couleur d'action qu'avant. */
+.rp-ch { display: flex; gap: 8px; }
+.rp-ch .rp-in { flex: 1; min-width: 0; }
+.rp-ch-scan {
+  flex: 0 0 auto; min-height: 52px; padding: 0 16px;
   border: 0; border-radius: 14px;
   background: var(--action-bg); color: var(--action-fg);
-  font-family: inherit; font-size: 15.5px; font-weight: 800;
+  font-family: inherit; font-size: 15px; font-weight: 800;
+}
+
+/* « Refaire ton déjeuner d'hier » : un geste, et il dit ce qu'il reprend. */
+.rp-refaire {
+  width: 100%; min-height: 64px; margin: 12px 0 2px; padding: 10px 16px;
+  display: flex; flex-direction: column; gap: 3px; text-align: left;
+  border: 1.5px solid var(--action-bg); border-radius: 14px;
+  background: var(--action-selection); color: var(--texte); font-family: inherit;
+}
+.rp-refaire-t { font-size: 15.5px; font-weight: 800; }
+.rp-refaire-s { font-size: 12.5px; color: var(--texte-1b); line-height: 1.4; }
+
+/* TES HABITUELS : une ligne = un toucher = un aliment ajoute. */
+.rp-hab-note { font-size: 12.5px; color: var(--texte-2); margin: 2px 0 6px; }
+.rp-hab {
+  width: 100%; min-height: 56px; padding: 8px 0; display: flex; align-items: center; gap: 10px;
+  border: 0; border-bottom: 1px solid var(--sep); background: transparent;
+  color: var(--texte); text-align: left; font-family: inherit;
+}
+.rp-hab:last-of-type { border-bottom: 0; }
+.rp-hab-c { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.rp-hab-n { font-size: 14.5px; font-weight: 700; line-height: 1.3; }
+.rp-hab-q { font-size: 12px; color: var(--texte-2); }
+.rp-hab-k { font-size: 13px; color: var(--texte-1b); white-space: nowrap; }
+/* Le « + » en version douce : six ronds pleins de la couleur d'action
+   faisaient trop de couleur forte sur un seul ecran (constat 3.5 de l'audit). */
+.rp-hab-plus {
+  flex: 0 0 36px; width: 36px; height: 36px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--action-selection); color: var(--action-encre); font-size: 20px; font-weight: 800;
 }
 
 /* LA VISEE.
@@ -9345,16 +9464,18 @@ body.a-nav .nav { display: flex; }
   // La ROTATION du programme. Les journees ne portent pas de jour : c'est
   // l'etape Rythme qui les affecte, sinon une seance resterait proposee un jour
   // que l'utilisateur vient de decocher.
+  var OB_JALONS = ["Qui tu es", "Ton programme", "Tes repères"];
+
   var OB = [
-    { nom: "Toi", titre: "On commence par toi", sous: "Rien de tout ça ne quitte ton téléphone.", type: "champs",
+    { nom: "Toi", jalon: 1, titre: "On commence par toi", sous: "Rien de tout ça ne quitte ton téléphone.", type: "champs",
       // ⚠️ PAS DE `champs` ICI. Le prototype y rangeait « Olivier », « 38 ans »,
       // « 178 cm » pour peupler ses captures. Le rendu ne les lit pas, mais un
       // rendu futur qui recablerait cette structure ecrirait le profil d'un
       // autre chez tout le monde. Les valeurs viennent de l'etat.
     },
-    { nom: "Poids", titre: "Où tu en es, où tu vas", sous: "Ton poids sert à estimer les calories que tu crames à l’entraînement.", type: "champs",
+    { nom: "Poids", jalon: 1, titre: "Où tu en es, où tu vas", sous: "Ton poids sert à estimer les calories que tu crames à l’entraînement.", type: "champs",
     },
-    { nom: "Objectif", titre: "Tu cherches quoi ?", sous: "Ça règle les répétitions, les repos et ce qui passe en premier dans tes séances.", type: "chips", single: "obObjectif",
+    { nom: "Objectif", jalon: 1, titre: "Tu cherches quoi ?", sous: "Ça règle les répétitions, les repos et ce qui passe en premier dans tes séances.", type: "chips", single: "obObjectif",
       // 🔴 PLUS AUCUNE CALORIE ICI. Decision d'Olivier, 15 septembre 2026 : l'app
       // ne montre que les calories cramees par le sport et le deficit qu'il
       // induit. Deficit plafonne, maintien et surplus attendent la nutrition.
@@ -9377,7 +9498,7 @@ body.a-nav .nav { display: flex; }
       chips: [{ t: "Perdre du gras", s: "Repos plus courts, cardio au choix" },
               { t: "Maintenir", s: "Plus de répétitions, repos plus courts" },
               { t: "Prendre du muscle", s: "Moins de répétitions, repos plus longs" }] },
-    { nom: "Rythme", titre: "Quels jours tu t'entraînes ?", sous: "Pour chaque jour coché, choisis ce que tu fais : salle, cours collectif ou running.", type: "jours" },
+    { nom: "Rythme", jalon: 2, titre: "Quels jours tu t'entraînes ?", sous: "Pour chaque jour coché, choisis ce que tu fais : salle, cours collectif ou running.", type: "jours" },
     // \U0001F534 APRES RYTHME, ET C'EST LA SEULE PLACE POSSIBLE. Cette etape ne se
     // pose qu'a quelqu'un qui a declare une seance de salle, et cette
     // information n'existe qu'apres Rythme. Posee avant, comme elle l'etait
@@ -9386,7 +9507,7 @@ body.a-nav .nav { display: flex; }
     // la question, `obPratiqueDite` restait a 0, et le modele de charge
     // appliquait le coefficient debutant : 11 exercices mesures a 54 % en
     // moyenne de la charge attendue, squat barre a 35 kg au lieu de 65.
-    { nom: "Pratique", titre: "Tu en es où avec la musculation ?", sous: "Elle est reprise dans la demande que tu enverras à ton assistant. Le programme, lui, se règle sur ta durée et ton matériel.", type: "chips", single: "obPratique",
+    { nom: "Pratique", jalon: 2, titre: "Tu en es où avec la musculation ?", sous: "Elle est reprise dans la demande que tu enverras à ton assistant. Le programme, lui, se règle sur ta durée et ton matériel.", type: "chips", single: "obPratique",
       chips: [{ t: "Je débute", s: "Moins de 3 mois" },
               { t: "Je reprends", s: "J'ai déjà pratiqué, arrêté depuis" },
               { t: "Régulier", s: "6 mois et plus, sans coupure" },
@@ -9394,13 +9515,13 @@ body.a-nav .nav { display: flex; }
     // \u26a0\ufe0f APRES RYTHME, ET C'EST LA SEULE PLACE POSSIBLE. Sa pertinence se
     // lit dans les jours declares : posee avant, elle s'afficherait pour
     // quelqu'un qui n'a pas encore dit qu'il court, et disparaitrait ensuite.
-    { nom: "Course", titre: "Tu en es où avec la course ?", sous: "Le niveau fixe ton allure et la longueur ordinaire d'une sortie. La sortie longue de la semaine va plus loin, c'est son rôle. La durée demandée est celle d'une sortie, pas d'une séance en salle.", type: "course" },
-    { nom: "Durée", titre: "Combien de temps pour une séance en salle ?", sous: "Uniquement pour tes séances de salle : c'est ce qui fixe le nombre d'exercices et la longueur des repos. Un cours collectif ou une sortie running gardent leur propre durée. Réponds avec le temps que tu as vraiment, pas celui que tu voudrais avoir.", type: "duree" },
-    { nom: "Matériel", titre: "Tu t'entraînes où, avec quoi ?", sous: "Ce que tu coches ici détermine les exercices que je te propose : c'est la réponse qui évite le plus d'erreurs. Le poids du plus lourd haltère, lui, ne sert qu'à ton assistant.", type: "materiel" },
+    { nom: "Course", jalon: 2, titre: "Tu en es où avec la course ?", sous: "Le niveau fixe ton allure et la longueur ordinaire d'une sortie. La sortie longue de la semaine va plus loin, c'est son rôle. La durée demandée est celle d'une sortie, pas d'une séance en salle.", type: "course" },
+    { nom: "Durée", jalon: 2, titre: "Combien de temps pour une séance en salle ?", sous: "Uniquement pour tes séances de salle : c'est ce qui fixe le nombre d'exercices et la longueur des repos. Un cours collectif ou une sortie running gardent leur propre durée. Réponds avec le temps que tu as vraiment, pas celui que tu voudrais avoir.", type: "duree" },
+    { nom: "Matériel", jalon: 2, titre: "Tu t'entraînes où, avec quoi ?", sous: "Ce que tu coches ici détermine les exercices que je te propose : c'est la réponse qui évite le plus d'erreurs. Le poids du plus lourd haltère, lui, ne sert qu'à ton assistant.", type: "materiel" },
     // \u26a0\ufe0f APRES MATERIEL, AVANT PROGRAMME. Elle doit etre posee avant que
     // le programme s'affiche, sinon on montre des exercices qu'on va retirer
     // dans la foulee.
-    { nom: "Zones", titre: "Une zone à ménager ?", sous: "Coche ce que tu préfères ne pas travailler : une douleur, une blessure, une zone que tu ne veux pas solliciter. Je ne te proposerai plus aucun exercice qui la vise. Tu peux ne rien cocher.", type: "zones" },
+    { nom: "Zones", jalon: 2, titre: "Une zone à ménager ?", sous: "Coche ce que tu préfères ne pas travailler : une douleur, une blessure, une zone que tu ne veux pas solliciter. Je ne te proposerai plus aucun exercice qui la vise. Tu peux ne rien cocher.", type: "zones" },
     // L'ETAPE CARDIO, 18 septembre 2026 au soir. Olivier : « il faudrait qu'on
     // puisse dire des le debut "je veux faire que de la muscu et jamais de
     // cardio", et tu previens que sans cardio la perte de poids est plus
@@ -9409,26 +9530,26 @@ body.a-nav .nav { display: flex; }
     // ⚠️ APRES ZONES, AVANT PROGRAMME : le programme affiche juste apres montre
     // deja le choix, et l'avertissement se chiffre avec la duree et le
     // materiel, deja connus. Les etapes se visent par leur nom (`rangEtape`).
-    { nom: "Cardio", titre: "Et le cardio ?", sous: "Pour perdre du poids dans le temps que tu as, le plus efficace est de finir chaque séance de salle par un bloc de cardio. Tu peux aussi ne faire que de la musculation.", type: "cardio" },
-    { nom: "Programme", titre: "Voilà ton programme", sous: "Une carte par activité déclarée. Déplie-les, et refuse ce qui ne te convient pas : je remplace par un mouvement équivalent, quand ton matériel en permet un.", type: "programme" },
+    { nom: "Cardio", jalon: 2, titre: "Et le cardio ?", sous: "Pour perdre du poids dans le temps que tu as, le plus efficace est de finir chaque séance de salle par un bloc de cardio. Tu peux aussi ne faire que de la musculation.", type: "cardio" },
+    { nom: "Programme", jalon: 2, titre: "Voilà ton programme", sous: "Une carte par activité déclarée. Déplie-les, et refuse ce qui ne te convient pas : je remplace par un mouvement équivalent, quand ton matériel en permet un.", type: "programme" },
     // 🔴 « L'APPLI, ELLE, NE COMPTE RIEN DE CE QUE TU MANGES » EST PARTI le 18
     // septembre 2026 : c'etait faux depuis la 1.27.0, qui compte les repas.
     // Defaut 1 de l'etat des lieux du parcours, corrige en passant par le
     // chantier horizon, qui touche cette fin de diagnostic.
-    { nom: "Habitudes", titre: "Comment tu manges, et ce que tu prends", sous: "Elles servent à décrire tes habitudes dans la demande que tu enverras à ton assistant.", type: "nutri" },
+    { nom: "Habitudes", jalon: 3, titre: "Comment tu manges, et ce que tu prends", sous: "Elles servent à décrire tes habitudes dans la demande que tu enverras à ton assistant.", type: "nutri" },
     // L'ETAPE HORIZON, chantier du 18 septembre 2026 : les deux chemins et le
     // choix de revoir ou non son alimentation. Elle ne se pose qu'en perte
     // (`etapePertinente`, block_onboarding.js).
     // ⚠️ AVANT « C'EST PARTI », ET C'EST LA SEULE ENTREE AJOUTEE : les etapes se
     // visent par leur nom (`rangEtape`), et seule « C'est parti » glisse d'un
     // rang.
-    { nom: "Horizon", titre: "Ton horizon", sous: "Deux chemins vers ton poids visé. Choisis le tien : tu pourras changer d’avis depuis l’onglet Nutrition.", type: "horizon" },
+    { nom: "Horizon", jalon: 3, titre: "Ton horizon", sous: "Deux chemins vers ton poids visé. Choisis le tien : tu pourras changer d’avis depuis l’onglet Nutrition.", type: "horizon" },
     // 🔴 L'ETAPE « REPERES » EST RETIREE, le 15 septembre 2026. Elle affichait
     // un maintien estime, une cible calorique et un horizon en semaines.
     // Decision d'Olivier : l'app ne montre que les calories cramees par le sport
     // et le deficit qu'il induit ; le maintien attend le chantier nutrition. Les
     // proteines restent sur l'ecran Nutrition.
-    { nom: "C'est parti", titre: "Tout est prêt", sous: "Tu peux revenir sur chaque réponse depuis Profil, dans le menu en haut à droite, à tout moment.", type: "recap",
+    { nom: "C'est parti", jalon: 3, titre: "Tout est prêt", sous: "Tu peux revenir sur chaque réponse depuis Profil, dans le menu en haut à droite, à tout moment.", type: "recap",
       // ⚠️ PAS DE `recap` : il portait « Olivier · 38 ans », « 78,4 vers
       // 75 kg », et deux jetons « @JOURS@ » et « @PROG@ » que RIEN ne
       // substituait, ni ici ni dans l'assembleur.
@@ -13817,10 +13938,25 @@ body.a-nav .nav { display: flex; }
     // « + cardio ». Olivier : « Full body + cardio mais sans sous-titre ». Le
     // nom court de la bande de la semaine reste celui de la seance d'origine :
     // « CARDIO+ » trois fois de suite ne dirait plus rien des trois journees.
-    var m = s.match(/^(.*) \+ CARDIO$/), b;
+    var m = s.match(/^(.*) \+ CARDIO$/), b, dom;
     if (m) {
       b = nomsDe(m[1]);
-      return { nom: b.nom.split(" / ")[0] + " + cardio", court: b.court };
+      // 🔴 LE NOM GARDE LA DOMINANTE (20 septembre 2026). « Full Body +
+      // cardio » etait donne aux TROIS journees de la semaine, qui ne portent
+      // pourtant pas les memes exercices : on ne savait plus laquelle on
+      // prenait, ni laquelle on relisait dans l'Historique.
+      //
+      // ⚠️ ET LA FAMILLE RESTE, ELLE AUSSI. Olivier a d'abord demande de ne
+      // garder que « Push », « Pull » ou « Leg ». Mesure faite le meme jour :
+      // la journee « Leg » porte leg press, souleve de terre roumain ET
+      // developpe poitrine, rowing, mollets. C'est un FULL BODY a dominante
+      // jambes, pas une journee de jambes : le nom court aurait promis ce que
+      // la seance ne fait pas.
+      //
+      // ⚠️ LE « + » DE LA DOMINANTE SAUTE, sinon le nom porterait deux plus a
+      // la suite (« Full Body / Push+ + cardio »).
+      dom = b.nom.replace(/\+$/, "").trim();
+      return { nom: dom + " + cardio", court: b.court };
     }
     if (has(NOMS_SEANCE, s)) return NOMS_SEANCE[s];
     return { nom: s, court: s };
@@ -14914,7 +15050,18 @@ body.a-nav .nav { display: flex; }
   // Remplace `SEANCES[si]`. Elle ne rend JAMAIS undefined : dix endroits
   // dereferencaient `SEANCES[si].code` sans garde, et un index hors bornes y
   // vidait l'ecran en pleine seance.
-  function seanceProgramme(si) {
+  // 🔴 LES LETTRES A, B, C ONT ETE RETIREES LE 20 SEPTEMBRE 2026, LE JOUR MEME
+  // OU ELLES ONT ETE POSEES. Olivier : « mettre A B C dans le nom des séances
+  // est quelque chose que nous avions banni au début du projet, ça ne parle à
+  // personne ». Le constat de l'audit (trois seances du meme nom dans la
+  // semaine) reste entier : il tient au NOM des seances mixtes, qui jette la
+  // dominante (voir `nomsDe`), et c'est la que se fera la correction.
+
+  // LE LABEL ET LE SOUS-TITRE D'UNE SEANCE, une fois retirees les promesses
+  // qu'elle ne tient pas. Sorti de `seanceProgramme` le 20 septembre 2026 :
+  // le nom AFFICHE d'une seance se calcule ainsi sans passer par
+  // `seanceProgramme`, qui ne peut pas s'appeler lui-meme.
+  function labelAjuste(si) {
     var r = seanceMoteurDe(si);
     // ⚠️ L'EN-TETE DIT CE QUE LA SEANCE CONTIENT, PAS CE QUE LE GABARIT PROMET.
     //
@@ -14958,7 +15105,11 @@ body.a-nav .nav { display: flex; }
       }
       if (!_gain) sub = sub.replace(/\s*\+\s*gainage\s*$/, "");
     }
+    return { lab: lab, sub: sub, r: r };
+  }
 
+  function seanceProgramme(si) {
+    var _a = labelAjuste(si), r = _a.r, lab = _a.lab, sub = _a.sub;
     var _n = nomsDe(lab);
     return {
       code: _n.nom,
@@ -20652,34 +20803,66 @@ body.a-nav .nav { display: flex; }
   // RENDU DE L'ETAPE
   // -------------------------------------------------------------------------
   function onboardingHtml() {
-    var step = state.obStep, ob = OB[step], h = "", i, cls;
+    var step = state.obStep, ob = OB[step], h = "", i, cls, jc, k, dedans, part;
     if (!ob) { step = 0; ob = OB[0]; }
 
     h += '<div class="ob">';
 
-    // Chaque pastille vit DANS un bouton de 44 px. La barre reste fine a
+    // Chaque segment vit DANS un bouton de 44 px. La barre reste fine a
     // l'oeil, mais la cible tactile fait la taille reglementaire.
-    // Les pastilles ne montrent que les etapes VISIBLES : une pastille qu'on ne
-    // peut pas atteindre laisserait croire qu'on a saute une reponse.
+    //
+    // 🔴 LE COMPTEUR RECULAIT, ET C'ETAIT LE SEUL CHIFFRE DE L'APPLI A SE
+    // DEJUGER. Il comptait les etapes VISIBLES : « Etape 1 sur 8 » au depart,
+    // puis « Etape 7 sur 13 » des qu'on cochait trois jours de salle, parce
+    // que six etapes ne se posent qu'au vu des reponses d'avant (Pratique,
+    // Duree, Materiel et Zones demandent de la salle, Course une sortie,
+    // Cardio et Horizon la perte de poids). On croyait avoir fait un huitieme
+    // du chemin, puis la fin s'eloignait. Decision d'Olivier du 20 septembre
+    // 2026, option A du chantier questionnaire : TROIS JALONS FIXES.
+    //
+    // Le total vaut 3 EN TOUTES CIRCONSTANCES, parce que chaque jalon garde au
+    // moins une etape que personne ne peut faire disparaitre : Toi, Rythme,
+    // Habitudes. Aucune question n'est retiree, aucune reponse perdue.
+    //
+    // La progression fine ne disparait pas pour autant : le segment du jalon
+    // en cours se remplit a mesure des etapes.
     var vis = etapesVisibles(), rang = vis.indexOf(step);
     if (rang < 0) rang = 0;
+    jc = OB[vis[rang]].jalon || 1;
 
     h += '<div class="ob-dots" role="group" aria-label="Progression du diagnostic">';
-    for (i = 0; i < vis.length; i++) {
-      cls = vis[i] === step ? "ob-dot ob-dot-on" : (i < rang ? "ob-dot ob-dot-past" : "ob-dot");
-      h += '<button type="button" class="ob-dot-btn" data-action="ob-aller" data-v="' + vis[i] + '"' +
-           ' aria-label="Étape ' + (i + 1) + ", " + esc(OB[vis[i]].nom) + '"' +
-           ' aria-current="' + (vis[i] === step ? "step" : "false") + '">' +
-           '<span class="' + cls + '"></span></button>';
+    for (i = 1; i <= OB_JALONS.length; i++) {
+      dedans = [];
+      for (k = 0; k < vis.length; k++) {
+        if ((OB[vis[k]].jalon || 1) === i) dedans.push(vis[k]);
+      }
+      // Un jalon sans aucune etape visible ne se dessine pas. Le cas ne peut
+      // pas se produire aujourd'hui, mais un segment vide qui resterait
+      // affiche mentirait sur ce qu'il reste a faire.
+      if (!dedans.length) continue;
+      cls = i < jc ? "ob-dot ob-dot-past" : (i === jc ? "ob-dot ob-dot-on" : "ob-dot");
+      // Le remplissage se lit « on est AU MILIEU de l'etape en cours » : la
+      // premiere etape d'un jalon ne montre donc pas un segment vide, et la
+      // derniere ne le montre pas plein alors qu'il reste a repondre.
+      part = i === jc
+        ? Math.round(((Math.max(0, dedans.indexOf(vis[rang])) + 0.5) / dedans.length) * 100)
+        : 0;
+      h += '<button type="button" class="ob-dot-btn" data-action="ob-aller" data-v="' + dedans[0] + '"' +
+           ' aria-label="Jalon ' + i + " sur " + OB_JALONS.length + ", " + esc(OB_JALONS[i - 1]) + '"' +
+           ' aria-current="' + (i === jc ? "step" : "false") + '">' +
+           '<span class="' + cls + '">' +
+           (i === jc ? '<i class="ob-dot-fait" style="width:' + part + '%"></i>' : "") +
+           "</span></button>";
     }
     h += "</div>";
 
-    // LA PREMIERE ETAPE SEULE NE PORTE PAS SON NOM. Demande d'Olivier a la
-    // revue : « Toi » redisait le titre juste en dessous, « On commence par
-    // toi ». Les autres etapes le gardent, parce que la leur ajoute quelque
-    // chose : « Objectif » sous « Tu cherches quoi ? ».
-    h += '<div class="ob-step-label">Étape ' + (rang + 1) + " sur " + vis.length +
-         (rang > 0 ? " · " + esc(ob.nom) : "") + "</div>";
+    // ⚠️ LE NOM DE L'ETAPE A QUITTE CETTE LIGNE, il y a maintenant celui du
+    // jalon. Le gros titre juste en dessous dit deja de quelle question il
+    // s'agit (« Tu t'entraînes où, avec quoi ? » sous « 2 sur 3 · Ton
+    // programme »), et la premiere etape ne redit plus son titre, ce qui etait
+    // la demande d'Olivier a la revue.
+    h += '<div class="ob-step-label">' + jc + " sur " + OB_JALONS.length +
+         " · " + esc(OB_JALONS[jc - 1]) + "</div>";
     // Espace insecable devant « ? ! : ; » : en gros caracteres, « Tu
     // t'entraînes où, avec quoi ? » laissait le point d'interrogation seul sur
     // sa ligne (capture du 19 septembre 2026).
@@ -20920,11 +21103,17 @@ body.a-nav .nav { display: flex; }
   // au numero du jour : meme phrase toute la journee, une autre demain. Un
   // tirage aleatoire changerait de phrase a chaque rendu, donc a chaque
   // toucher, et l'ecran paraitrait instable.
+  // Les rubriques qui parlent de la seance A VENIR. ⚠️ JAMAIS SUR L'ECRAN DE
+  // FIN (`ctx.fin`) : « Reprise en douceur. Ta séance du jour t'attend » ou
+  // « Jour de repos » juste apres une seance faite se contredisent.
+  var MOTIV_AVANT_SEANCE = { start: 1, comeback: 1, repos: 1 };
+
   function motivation(ctx) {
     var i, k, m, h, p, val;
     var jour = jourNumero();
     for (i = 0; i < MOTIV.length; i++) {
       m = MOTIV[i];
+      if (ctx.fin && MOTIV_AVANT_SEANCE[m.k]) continue;
       if (!m.si(ctx)) continue;
       h = 0;
       for (k = 0; k < m.k.length; k++) { h = (h * 31 + m.k.charCodeAt(k)) % 9973; }
@@ -21030,6 +21219,33 @@ body.a-nav .nav { display: flex; }
     };
   }
 
+  // 🔴 L'ECRAN DE FIN COMPTE LA SEANCE QU'ON VIENT DE FINIR (lot 2 du parcours,
+  // audit UX du 19 septembre 2026, constat 3.8). Elle n'entre au journal qu'au
+  // toucher « Enregistrer la séance » : lu avant, le journal ne la contenait
+  // pas, et la fin de la toute premiere seance disait « Aucun historique, rien
+  // à rattraper » au-dessus d'une tuile « 0 jours d'affilée ».
+  //
+  // On lit le contexte avec la seance posee dans le journal comme
+  // `enregistrerSeance` la poserait (meme creneau, meme remplacement d'une
+  // entree du meme jour), puis on rend le journal tel quel : RIEN N'EST ECRIT.
+  function contexteFin(tonnage) {
+    var sauve = state.hist, cr = creneauSeanceEnCours(), auj = cleDate(new Date());
+    var ji = jourIndexAujourdhui(), h = [], i, ctx;
+    for (i = 0; i < (sauve || []).length; i++) {
+      if (!(sauve[i].d === auj && sauve[i].ji === ji && sauve[i].k === cr.k)) h.push(sauve[i]);
+    }
+    h.push({ d: auj, ji: ji, k: cr.k, t: "salle", code: seanceProgramme(state.seance).code,
+             tonnage: tonnage || 0, plus: cr.plus });
+    state.hist = h;
+    try {
+      ctx = contexteMotivation();
+    } finally {
+      state.hist = sauve;
+    }
+    ctx.fin = true;
+    return ctx;
+  }
+
   function frDec(n) {
     var s = String(Math.round(n * 10) / 10);
     return s.replace(".", ",");
@@ -21096,7 +21312,7 @@ body.a-nav .nav { display: flex; }
     // L'ordre est maintenant : le NOM, ce qu'elle travaille, puis le detail.
     // Le jour prevu descend avec le detail : c'est une precision, pas un titre.
     var h = '<section class="carte-sombre">';
-    h += '<div class="cs-nom">' + esc(S.code) + "</div>";
+    h += '<div class="cs-nom">' + titreSeanceHtml(S.code) + "</div>";
     // Le sous-titre ne sort que s'il ajoute quelque chose au nom.
     if (S.sub) h += '<div class="cs-sub">' + esc(S.sub) + "</div>";
     // LA DUREE VIENT DE LA SEANCE, PLUS DU REGLAGE. `dureeLibelle()` annoncait
@@ -21107,9 +21323,18 @@ body.a-nav .nav { display: flex; }
          '<span class="num">' + ex.length + "</span> exercices · " +
          '<span class="num">' + series + '</span> séries · <span class="num">' +
          esc(S.duree) + "</span></div>";
-    if (fait) h += ligneDepenseCarte(entreeDuCreneauAujourdhui(a.ji, a.k));
-    h += '<button type="button" class="cs-cta" data-action="demarrer-seance">' +
-         (fait ? "Refaire la séance" : "Démarrer la séance") + "</button>";
+    // 🔴 UNE SEANCE FAITE SE REPLIE (lot 2 du parcours, audit UX du 19
+    // septembre 2026, constat 3.4). La carte gardait tout : la liste des
+    // exercices, « Refaire » en gros bouton vert, « Changer de seance ». On ne
+    // savait plus ce qui restait a faire. Faite, elle dit son nom, qu'elle est
+    // faite et ce qu'elle a coute ; « Refaire » reste, en bouton secondaire.
+    if (fait) {
+      h += '<p class="cs-fait">✓ Faite aujourd’hui</p>';
+      h += ligneDepenseCarte(entreeDuCreneauAujourdhui(a.ji, a.k));
+      h += '<button type="button" class="cs-btn" data-action="demarrer-seance">Refaire la séance</button>';
+      return h + "</section>";
+    }
+    h += '<button type="button" class="cs-cta" data-action="demarrer-seance">Démarrer la séance</button>';
 
     // LE CONTENU, SOUS LE BOUTON ET DANS LA MEME CARTE.
     // \u26a0\ufe0f IL DISPARAIT PENDANT QU'ON CHOISIT UNE AUTRE SEANCE : montrer
@@ -21149,7 +21374,7 @@ body.a-nav .nav { display: flex; }
     // nombre de creneaux de salle declares : un seul full body pour une seance
     // par semaine, trois pour trois, haut et bas pour quatre. Le titre ne peut
     // donc plus annoncer un chiffre, et la boucle ne peut plus s'arreter a cinq.
-    if (!state.listeFermee) h += listeSeancesHtml(a.si, fait, "Toutes les séances de ton programme");
+    if (!state.listeFermee) h += listeSeancesHtml(a.si, false, "Toutes les séances de ton programme");
     return h;
   }
 
@@ -21280,26 +21505,44 @@ body.a-nav .nav { display: flex; }
 
   function carteCoursHtml(a) {
     var fait = !!state.actFaits[a.ji + "-" + a.k];
+    // 🔴 UN COURS VALIDE SE CORRIGE, IL NE SE REVALIDE PLUS (lot 2 du parcours,
+    // 19 septembre 2026). « ✓ Cours validé » restait un bouton qui appelait la
+    // validation : la saisie etant videe a l'archivage, le retoucher
+    // reenregistrait le cours avec la duree PREVUE et effacait la duree faite
+    // et les calories de la montre. Mesure : 45 min et 400 kcal notees
+    // devenaient 60 min et 427 kcal estimees.
+    var edite = fait && state.corrige === a.ji + "-" + a.k;
+    var e = fait ? entreeDuCreneauAujourdhui(a.ji, a.k) : null;
     var h = '<section class="carte-sombre carte-cours">';
     h += '<div class="cs-code">' + esc(a.nom || "Cours collectif") + "</div>";
+    // Fait, la pastille dit la duree FAITE, pas celle du programme.
     h += '<div class="cs-sur">' + esc(NATURES[a.nat].t) +
          (a.plus ? " · en plus aujourd’hui" : a.ponctuel ? " · à la place, aujourd’hui" : " · prévu aujourd'hui") +
-         ' <span class="cs-pill num">' + a.min + " min</span></div>";
+         ' <span class="cs-pill num">' + (e && e.min ? e.min : a.min) + " min</span></div>";
     // UNE FOIS VALIDE, LA CARTE LE DIT ET DIT CE QUE CA COMPTE. Ma version se
     // contentait de cocher le bouton : rien ne confirmait que le cours entrait
     // dans la serie et dans l'assiduite, ce qui est justement la question qu'on
     // se pose en validant un cours qu'on n'a pas fait dans l'appli.
-    h += '<p class="cs-txt">' + (fait
+    h += '<p class="cs-txt">' + (edite
+      ? "Corrige la durée ou les calories, puis enregistre."
+      : fait
       ? (a.plus
          ? "Cours validé. Il compte dans ton historique et ta dépense ; il était en plus, donc pas dans ta série."
          : "Cours validé. Il compte dans ta série et dans ton assiduité.")
       : "Ton coach mène la séance. Tu la valides en sortant.") + "</p>";
-    if (fait) h += ligneDepenseCarte(entreeDuCreneauAujourdhui(a.ji, a.k));
+    if (fait && !edite) {
+      h += ligneDepenseCarte(e);
+      h += '<button type="button" class="cs-btn" data-action="act-corriger"' +
+           ' data-ji="' + a.ji + '" data-k="' + esc(String(a.k)) + '">Corriger le cours</button>';
+      return h + "</section>";
+    }
     // 🔴 LA DUREE FAITE SE CONFIRME EN VALIDANT. « J'ai fait le cours »
     // archivait la duree prevue, sans moyen de dire qu'on etait parti avant la
     // fin. Decision d'Olivier : pre-remplie avec la duree prevue, corrigeable.
     // Les calories, facultatives, pour qui porte une montre.
-    if (!fait) {
+    // En correction, les champs arrivent remplis de ce qui a ete enregistre
+    // (`corrigerActivite`).
+    if (!fait || edite) {
       var _cc = a.ji + "-" + a.k, _cm = (state.coursMin || {})[_cc];
       h += '<div class="run-champs"><div class="run-c">' +
            '<label class="run-l" for="cours-min">Durée faite</label>' +
@@ -21319,7 +21562,10 @@ body.a-nav .nav { display: flex; }
     }
     h += '<button type="button" class="cs-cta cs-cta-cours"' +
          ' data-action="valider-act" data-ji="' + a.ji + '" data-k="' + a.k + '">' +
-         (fait ? "✓ Cours validé" : "J'ai fait le cours") + "</button>";
+         (edite ? "Enregistrer la correction" : "J'ai fait le cours") + "</button>";
+    if (edite) {
+      h += '<button type="button" class="cs-btn" data-action="act-annuler">Annuler</button>';
+    }
     // Le lien « Faire une séance en salle à la place » est remplacé par le bloc
     // commun des trois disciplines, pose sous la carte par jourHtml.
     return h + "</section>";
@@ -21333,8 +21579,60 @@ body.a-nav .nav { display: flex; }
   function runMinDe(a) { var t = state.runMin; return (t && t[cleRun(a)]) || ""; }
   function runKcalDe(a) { var t = state.runKcal; return (t && t[cleRun(a)]) || ""; }
 
+  // 🔴 LE SLASH DU GRAND TITRE DEVIENT UN RETOUR A LA LIGNE (20 septembre
+  // 2026, demande d'Olivier, capture a l'appui) : « Full Body / Leg + cardio »
+  // se lit mieux sur deux lignes que coupe par une barre oblique.
+  //
+  // ⚠️ SEULEMENT A L'AFFICHAGE DE LA GRANDE CARTE. Le nom garde son slash
+  // partout ailleurs (liste des seances, Mon programme, Historique, archive du
+  // journal), ou il tient sur une ligne et sert de reperage.
+  function titreSeanceHtml(code) {
+    var s = String(code == null ? "" : code), i = s.indexOf(" / ");
+    if (i < 0) return esc(s);
+    // L'espace avant le retour garde un mot separe de l'autre pour qui lit le
+    // texte sans la mise en forme (lecteur d'ecran, banc).
+    return esc(s.slice(0, i)) + " <br>" + esc(s.slice(i + 3));
+  }
+
+  // LA QUESTION SUR L'ENERGIE DU JOUR, posee sous une sortie notee.
+  function questionFormeHtml() {
+    var h = '<div class="fin-forme"><div class="fin-forme-q">Ton énergie aujourd\'hui ?</div>' +
+            '<div class="fin-forme-l">';
+    var _rj = formeDuJour(pgAujourdhui()), _ri;
+    for (_ri = 0; _ri < FORME_NIVEAUX.length; _ri++) {
+      h += '<button type="button" class="fin-forme-b' +
+           (_rj === FORME_NIVEAUX[_ri].v ? " fin-forme-on" : "") +
+           '" data-action="forme-poser" data-v="' + FORME_NIVEAUX[_ri].v + '">' +
+           esc(FORME_NIVEAUX[_ri].t) + "</button>";
+    }
+    return h + "</div></div>";
+  }
+
+  // 🔴 LA SORTIE NOTEE SE RESUME (lot 2 du parcours, 19 septembre 2026). La
+  // carte gardait le formulaire VIDE sous « Sortie notée », avec un bouton
+  // « ✓ Sortie enregistrée » qui, retouche, refusait faute de duree. Elle dit
+  // maintenant ce qui a ete note, et « Corriger » rouvre le formulaire rempli.
+  function resumeRunHtml(a) {
+    var e = entreeDuCreneauAujourdhui(a.ji, a.k);
+    var h = '<div class="run-t">Sortie notée</div>';
+    if (e && e.minutes) {
+      h += '<p class="cs-txt"><b class="num">' + esc(e.minutes) + " min</b>" +
+           (e.km ? ' · <span class="num">' + esc(e.km) + " km</span>" : "") +
+           " · " + esc((LIEUX[e.lieu] || LIEUX[0]).t) + "</p>";
+    }
+    h += ligneDepenseCarte(e);
+    // ⚠️ LA QUESTION D'ENERGIE NE RESTE QUE TANT QU'ELLE N'A PAS DE REPONSE.
+    // Repondue, trois boutons de plus sur une carte finie ne servent a rien ;
+    // elle se change depuis « Corriger la sortie ».
+    if (!formeDuJour(pgAujourdhui())) h += questionFormeHtml();
+    h += '<button type="button" class="cs-btn" data-action="act-corriger"' +
+         ' data-ji="' + a.ji + '" data-k="' + esc(String(a.k)) + '">Corriger la sortie</button>';
+    return h;
+  }
+
   function carteRunHtml(a) {
     var fait = !!state.actFaits[cleRun(a)], i;
+    var edite = fait && state.corrige === cleRun(a);
     // 🔴 LA SEANCE PRESCRITE PAR LE MOTEUR. Elle etait calculee et jetee : la
     // carte affichait deux champs vides et rien d'autre, alors que le moteur
     // savait dire ENDURANCE, 6 km, allure 8 min/km, avec echauffement et retour
@@ -21352,7 +21650,10 @@ body.a-nav .nav { display: flex; }
          (a.plus ? " · en plus aujourd’hui" : a.ponctuel ? " · à la place, aujourd’hui" : " · prévue aujourd'hui") +
          "</div>";
 
-    if (s) {
+    // Une fois notee, la prescription a servi : la carte passe au resume.
+    if (fait && !edite) return h + resumeRunHtml(a) + "</section>";
+
+    if (s && !fait) {
       // Les blocs a enchainer, dans l'ordre : echauffement, bloc courable,
       // retour au calme, etirements. Chacun porte deja sa consigne, ecrite par
       // le moteur ; on ne la reecrit pas.
@@ -21385,8 +21686,7 @@ body.a-nav .nav { display: flex; }
       }
     }
 
-    h += '<div class="run-t">' + (fait ? "Sortie notée" : "Note ta sortie") + "</div>";
-    if (fait) h += ligneDepenseCarte(entreeDuCreneauAujourdhui(a.ji, a.k));
+    h += '<div class="run-t">' + (edite ? "Corrige ta sortie" : "Note ta sortie") + "</div>";
     // 🔴 LA DUREE EST OBLIGATOIRE, ET LE PROGRAMME NE PRE-REMPLIT PLUS RIEN.
     // Decision d'Olivier, 15 septembre : « obligé de saisir, a minima la durée,
     // et idéalement le km, et idéalement encore les calories cramées ». Valider
@@ -21444,7 +21744,10 @@ body.a-nav .nav { display: flex; }
     h += "</div>";
     h += '<button type="button" class="cs-cta cs-cta-run"' +
          ' data-action="valider-act" data-ji="' + a.ji + '" data-k="' + a.k + '">' +
-         (fait ? "✓ Sortie enregistrée" : "Enregistrer la sortie") + "</button>";
+         (edite ? "Enregistrer la correction" : "Enregistrer la sortie") + "</button>";
+    if (edite) {
+      h += '<button type="button" class="cs-btn" data-action="act-annuler">Annuler</button>';
+    }
 
     // 🔴 LA QUESTION SUR LA FORME N'EXISTAIT QUE SUR L'ECRAN DE FIN D'UNE
     // SEANCE DE SALLE. Un coureur pur ne pouvait donc JAMAIS y repondre, et la
@@ -21454,19 +21757,9 @@ body.a-nav .nav { display: flex; }
     // raison : c'est la qu'on sait comment ca s'est passe.
     //
     // ⚠️ APRES L'ENREGISTREMENT, PAS AVANT. Demandee a l'avance, elle
-    // porterait sur une sortie qui n'a pas eu lieu.
-    if (fait) {
-      h += '<div class="fin-forme"><div class="fin-forme-q">Ton énergie aujourd\'hui ?</div>' +
-           '<div class="fin-forme-l">';
-      var _rj = formeDuJour(pgAujourdhui()), _ri;
-      for (_ri = 0; _ri < FORME_NIVEAUX.length; _ri++) {
-        h += '<button type="button" class="fin-forme-b' +
-             (_rj === FORME_NIVEAUX[_ri].v ? " fin-forme-on" : "") +
-             '" data-action="forme-poser" data-v="' + FORME_NIVEAUX[_ri].v + '">' +
-             esc(FORME_NIVEAUX[_ri].t) + "</button>";
-      }
-      h += "</div></div>";
-    }
+    // porterait sur une sortie qui n'a pas eu lieu. Sur la carte notee, c'est
+    // `resumeRunHtml` qui la pose ; en correction, elle reste modifiable ici.
+    if (edite) h += questionFormeHtml();
     // ⚠️ PLUS DE PHRASE QUI PROMET CE QU'ON NE FAIT PAS. L'ancien commentaire
     // disait « aucune allure, aucune calorie » comme une decision assumee, alors
     // que le moteur calculait les deux. Elles sont desormais affichees.
@@ -21506,8 +21799,7 @@ body.a-nav .nav { display: flex; }
            esc(prochain.nom.toLowerCase()) + " · <b>" + esc(quoi) + "</b>" +
            (_cp
             ? ". Un jour sans courir vaut mieux qu'une sortie de trop."
-            : ". La récupération fait partie du programme, mais rien " +
-              "ne t\u2019empêche de t\u2019entraîner.") + "</p>";
+            : ". La récupération fait partie du programme.") + "</p>";
       // « Faire une séance quand même » vit maintenant dans le bloc « Autre
       // chose aujourd'hui », juste en dessous : une seance de salle en plus,
       // choisie dans la liste, et aussi un cours ou un running.
@@ -21588,9 +21880,10 @@ body.a-nav .nav { display: flex; }
     // LA PHRASE DE LA MAQUETTE DIT POURQUOI, avec un ordre de grandeur. La
     // mienne se contentait d'une consigne ; celle-ci donne la raison de la
     // consigne, ce qui la rend tenable.
-    h += '<p class="cr-p">Une pesée ne vaut que comparée à la précédente. ' +
-         "Change une seule condition et le chiffre bouge de 300 g à 1 kg, assez " +
-         "pour croire à une progression qui n'existe pas.</p>";
+    h += pourquoiHtml("pesee-conditions", "Une pesée ne vaut que comparée à la précédente.",
+                      "Change une seule condition et le chiffre bouge de 300 g à 1 kg, assez " +
+                      "pour croire à une progression qui n’existe pas.",
+                      "Pourquoi ?");
     h += '<ul class="pesee-cond">';
     for (var i = 0; i < PESEE_COND.length; i++) {
       // ⚠️ `PESEE_COND` EST UN TABLEAU DE CHAINES, pas d'objets. Le `.t`
@@ -21971,6 +22264,19 @@ body.a-nav .nav { display: flex; }
            "Revenir au " + esc(libelleActivitePrevue()) + " du jour</button>";
     }
 
+    // 🔴 REPLIE PAR DEFAUT (accord d'Olivier, 20 septembre 2026). Quatre
+    // boutons ouverts en bas de l'ecran Seance repondaient a une question que
+    // l'on se pose rarement, et ils allongeaient l'ecran tous les jours. Ils
+    // coutent un toucher de plus, et l'ecran repond d'abord a ce qui est prevu.
+    //
+    // ⚠️ IL S'OUVRE TOUT SEUL DES QU'UNE QUESTION EST EN COURS : replier un
+    // bloc au milieu d'un choix perdrait le choix.
+    if (!state.autreOuvert && !state.autreChoix && state.choixPour !== "plus") {
+      h += '<button type="button" class="remp-plier" data-action="autre-ouvrir"' +
+           ' aria-expanded="false">Autre chose aujourd’hui</button>';
+      return h + "</section>";
+    }
+
     h += '<div class="remp-t">Autre chose aujourd’hui</div>';
 
     // UNE SEANCE DE SALLE EN PLUS SE CHOISIT DANS LA LISTE, avec l'apercu.
@@ -22003,7 +22309,9 @@ body.a-nav .nav { display: flex; }
       h += '<button type="button" class="remp-x" data-action="autre-choix" data-t="' +
            opts[i].t + '">' + esc(opts[i].l) + "</button>";
     }
-    return h + "</div></section>";
+    h += "</div>";
+    h += '<button type="button" class="remp-annuler" data-action="autre-fermer">Fermer</button>';
+    return h + "</section>";
   }
 
   // -------------------------------------------------------------------------
@@ -22041,13 +22349,17 @@ body.a-nav .nav { display: flex; }
     var fait = !!state.actFaits[a.ji + "-" + a.k];
     for (i = 0; i < ex.length; i++) series += ex[i].n;
     var h = '<section class="carte-sombre">';
-    h += '<div class="cs-nom">' + esc(S.code) + "</div>";
+    h += '<div class="cs-nom">' + titreSeanceHtml(S.code) + "</div>";
     if (S.sub) h += '<div class="cs-sub">' + esc(S.sub) + "</div>";
     h += '<div class="cs-det">en plus · <span class="num">' + ex.length + "</span> exercices · " +
          '<span class="num">' + series + '</span> séries · <span class="num">' +
          esc(S.duree) + "</span></div>";
-    if (fait) h += ligneDepenseCarte(entreeDuCreneauAujourdhui(a.ji, a.k));
-    h += '<button type="button" class="cs-cta" data-action="demarrer-seance" data-si="' + a.si +
+    // Faite, elle se replie comme la seance prevue (`carteSalleHtml`).
+    if (fait) {
+      h += '<p class="cs-fait">✓ Faite aujourd’hui</p>';
+      h += ligneDepenseCarte(entreeDuCreneauAujourdhui(a.ji, a.k));
+    }
+    h += '<button type="button" class="' + (fait ? "cs-btn" : "cs-cta") + '" data-action="demarrer-seance" data-si="' + a.si +
          '" data-k="' + esc(a.k) + '">' + (fait ? "Refaire la séance" : "Démarrer la séance") +
          "</button>";
     return h + "</section>";
@@ -22240,7 +22552,11 @@ body.a-nav .nav { display: flex; }
     // Le titre suit l'onglet depuis le 17 septembre 2026 : « Seance ».
     h += '<div class="jour-r"><h1 class="ecran-titre">' + esc(TITRES.jour) + "</h1>" +
          '<div class="jour-droite">' +
-         '<div class="serie" aria-label="' + serie + ' séances validées cette semaine">' +
+         // ⚠️ ELLE S'ANNONCAIT « SEANCES VALIDEES CETTE SEMAINE », alors
+         // qu'elle compte les jours prevus faits d'affilee (`serieCourante`) :
+         // un lecteur d'ecran lisait un autre chiffre que celui affiche.
+         '<div class="serie" aria-label="Série : ' + serie + (serie > 1 ? " jours" : " jour") +
+         ' d’affilée">' +
          '<span aria-hidden="true">🔥</span><span class="serie-n num">' + serie + "</span></div>" +
          menuBoutonHtml() + "</div></div>";
     h += "</header>";
@@ -22399,7 +22715,7 @@ body.a-nav .nav { display: flex; }
       // et non « zero calorie » : c'est ce zero qui fait retomber la seance sur
       // l'estimation, au lieu de la facturer a rien.
       kcal: dernier && dernier.kcal > 0 ? dernier.kcal : 0,
-      tech: false, chrono: state.chrono || 0
+      tech: false, exoMenu: false, chrono: state.chrono || 0
     });
   }
 
@@ -22712,8 +23028,10 @@ body.a-nav .nav { display: flex; }
       h += anneauReposHtml();
       h += '<div class="sa-ensuite-l">Ensuite</div>';
       h += '<div class="sa-ensuite-n">' + esc(exo.nom) + "</div>";
-      h += '<div class="sa-ensuite-d num">Série ' + (faites + 1) + " · " +
-           esc(libelleSerie(state.kg, state.reps, exo)) + "</div>";
+      // La police des chiffres sur les chiffres seulement : le mot « Série »
+      // reste dans la police du texte (lot coherence, 20 septembre 2026).
+      h += '<div class="sa-ensuite-d">Série <b class="num">' + (faites + 1) + "</b> · " +
+           '<b class="num">' + esc(libelleSerie(state.kg, state.reps, exo)) + "</b></div>";
       h += '<div class="sa-repos-btns">';
       h += '<button type="button" class="sa-act" data-action="repos-regler" data-d="30">+ 30 s</button>';
       h += '<button type="button" class="sa-valider sa-valider-court"' +
@@ -22724,7 +23042,17 @@ body.a-nav .nav { display: flex; }
 
     // ---- LA SERIE ----
     h += '<div class="sa-muscle">' + esc(exo.muscle || "") + "</div>";
-    h += '<div class="sa-exo">' + esc(exo.nom) + "</div>";
+    // LE NOM, ET LE BOUTON D'ACTIONS DE L'EXERCICE A SA DROITE. Il etait dans
+    // la rangee du bas, ou il serrait « Changer d'exercice » sur deux lignes.
+    // Ici, il designe ce sur quoi il agit : l'exercice nomme a cote de lui.
+    h += '<div class="sa-titre"><div class="sa-exo">' + esc(exo.nom) + "</div>";
+    if (exo.cle) {
+      h += '<button type="button" class="sa-exo-p' + (state.exoMenu ? " sa-exo-p-on" : "") + '"' +
+           ' aria-expanded="' + (state.exoMenu ? "true" : "false") + '" aria-controls="sa-menu"' +
+           ' aria-label="Autres actions sur cet exercice"' +
+           ' data-action="basculer-exo-menu">…</button>';
+    }
+    h += "</div>";
     h += '<div class="sa-mat">' + esc(exo.mat || "") + "</div>";
 
     // LES PASTILLES DE SERIE, une par serie prevue. Celles qui sont faites
@@ -22864,6 +23192,29 @@ body.a-nav .nav { display: flex; }
     h += '<button type="button" class="sa-act" data-action="aller-trans">Changer d\'exercice</button>';
     h += "</div>";
 
+    // 🔴 AGIR SUR L'EXERCICE DEPUIS LA SEANCE (audit UX du 19 septembre 2026,
+    // constat 3.7 ; accord d'Olivier le 20 septembre). Retirer un exercice
+    // demandait six gestes par Profil, Mon programme, deplier. Le bouton « … »
+    // vit a cote du nom de l'exercice ; son panneau s'ouvre ici, sous les deux
+    // actions de la seance.
+    //
+    // LE PANNEAU DE L'EXERCICE. ⚠️ LE RETRAIT NE PREND EFFET QU'A LA SEANCE
+    // SUIVANTE (`retireApres`) : appliqué tout de suite, il changerait la liste
+    // qu'on est en train de faire, donc le rang des series deja validees et
+    // l'exercice affiche. On le dit sur le panneau, et il se defait tant que la
+    // seance dure.
+    if (state.exoMenu && exo.cle) {
+      var _enAttente = !!(state.retireApres || {})[exo.cle];
+      h += '<section class="sa-menu" id="sa-menu">';
+      h += '<p class="sa-menu-t">' + (_enAttente
+        ? "Retiré du programme à partir de la prochaine séance."
+        : "Il reste dans la séance d’aujourd’hui, et ne reviendra pas la prochaine fois.") + "</p>";
+      h += '<button type="button" class="sa-tech-video sa-menu-b" data-action="' +
+           (_enAttente ? "exo-garder" : "exo-retirer-seance") + '" data-cle="' + esc(exo.cle) + '">' +
+           (_enAttente ? "Le garder finalement" : "Retirer du programme") + "</button>";
+      h += "</section>";
+    }
+
     // LE MEMO, replie par defaut. Il sort des `lines` de l'exercice, les memes
     // que la fiche : une seule source, pas une seconde redaction a tenir.
     if (state.tech) {
@@ -22883,6 +23234,15 @@ body.a-nav .nav { display: flex; }
            "https://www.youtube.com/results?search_query=" +
            encodeURIComponent(exo.nom + " technique musculation") +
            '"><span aria-hidden="true">▶</span> Voir une vidéo de ce mouvement</a>';
+      // 🔴 LA FICHE DE L'EXERCICE, DEPUIS LA SEANCE (lot 2 du parcours, audit
+      // UX du 19 septembre 2026, constat 3.7). Elle ne s'ouvrait que par le
+      // menu, l'Historique et une recherche au clavier : 6 gestes et 4
+      // frappes. ⚠️ SEULEMENT SI L'EXERCICE A DEJA ETE FAIT : sa fiche n'aurait
+      // sinon aucune charge a montrer.
+      if (seancesDeExercice(exo.nom, 1).length) {
+        h += '<button type="button" class="sa-tech-video sa-tech-fiche" data-action="fiche-exo"' +
+             ' data-nom="' + esc(exo.nom) + '">Ta progression sur cet exercice</button>';
+      }
       h += "</section>";
     }
 
@@ -22923,7 +23283,7 @@ body.a-nav .nav { display: flex; }
            '<span class="tr-fait-c">' +
            '<span class="tr-fait-l">Exercice terminé</span>' +
            '<span class="tr-fait-n">' + esc(fini.nom) + "</span>" +
-           '<span class="tr-fait-d num">' + f[state.finiIdx].length + " série" +
+           '<span class="tr-fait-d"><b class="num">' + f[state.finiIdx].length + "</b> série" +
            (f[state.finiIdx].length > 1 ? "s" : "") + "</span></span></section>";
     }
 
@@ -22937,9 +23297,9 @@ body.a-nav .nav { display: flex; }
       h += '<button type="button" class="tr-suivant" data-action="ouvrir-exo" data-i="' + suivant + '">' +
            '<span class="tr-s-l">Prévu ensuite</span>' +
            '<span class="tr-s-n">' + esc(ex[suivant].nom) + "</span>" +
-           '<span class="tr-s-d num">' + esc(ex[suivant].n + " série" +
-           (ex[suivant].n > 1 ? "s" : "") + " · " +
-           libelleSerie(ex[suivant].kg, ex[suivant].reps, ex[suivant])) + "</span></button>";
+           '<span class="tr-s-d"><b class="num">' + ex[suivant].n + "</b> série" +
+           (ex[suivant].n > 1 ? "s" : "") + ' · <b class="num">' +
+           esc(libelleSerie(ex[suivant].kg, ex[suivant].reps, ex[suivant])) + "</b></span></button>";
     }
 
     // LA LISTE N'Y REMET PAS CELUI QUI EST DEJA PROPOSE AU-DESSUS. Le voir deux
@@ -22980,7 +23340,9 @@ body.a-nav .nav { display: flex; }
         }
       }
     }
-    var ctx = contexteMotivation(), mot = motivation(ctx);
+    // La seance qu'on vient de finir COMPTE deja ici (`contexteFin`), pour la
+    // phrase comme pour la tuile de serie.
+    var ctx = contexteFin(Math.round(tonnage)), mot = motivation(ctx);
 
     var h = '<div class="salle">';
     h += enteteSalleHtml(state.tIdx + 1, ex.length);
@@ -23099,7 +23461,9 @@ body.a-nav .nav { display: flex; }
   // UNE SEULE ECRITURE POUR LES TROIS DISCIPLINES : c'est ce qui garantit
   // qu'un cours et une sortie apparaissent dans l'Historique au meme titre
   // qu'une seance de salle, et pas seulement dans un bandeau qu'on ferme.
-  function archiver(enr, texte, garderSeance) {
+  // `ecranApres` : l'ecran ou l'on arrive, l'Historique par defaut. Une
+  // correction passe "jour" : elle reste sur la carte qu'on vient de corriger.
+  function archiver(enr, texte, garderSeance, ecranApres) {
     var h = (state.hist || []).slice(), i, maj = {}, k;
 
     // Une meme date et un meme creneau ne peuvent porter qu'une seance : on
@@ -23139,10 +23503,13 @@ body.a-nav .nav { display: flex; }
       runKcal: sansCeCreneau(state.runKcal),
       coursMin: sansCeCreneau(state.coursMin),
       coursKcal: sansCeCreneau(state.coursKcal),
-      saisieMsg: "", saisieCle: "",
+      saisieMsg: "", saisieCle: "", corrige: "",
       actFaits: maj,
-      archive: texte,
-      ecran: "histo"
+      // ⚠️ SANS BANDEAU QUAND ON RESTE SUR LE JOUR : celui de la premiere
+      // validation, lu plus tard dans l'Historique, redonnerait les chiffres
+      // d'avant la correction.
+      archive: ecranApres ? null : texte,
+      ecran: ecranApres || "histo"
     };
     // ⚠️ UNE ACTIVITE NOTEE HORS PROGRAMME NE TOUCHE PAS A LA SEANCE EN COURS.
     // L'archivage d'une seance remet a zero les series, le chrono et la phase :
@@ -23157,9 +23524,30 @@ body.a-nav .nav { display: flex; }
     window.scrollTo(0, 0);
   }
 
+  // LE CRENEAU SOUS LEQUEL LA SEANCE EN COURS S'ARCHIVERA, et si elle est EN
+  // PLUS. Une seule lecture pour l'enregistrement et pour l'ecran de fin
+  // (`contexteFin`), qui la compte avant qu'elle soit enregistree : deux
+  // calculs finiraient par ne plus designer le meme creneau.
+  function creneauSeanceEnCours() {
+    var d = deriver(), auj = jourIndexAujourdhui(), k = null, i;
+    // On archive sur le CRENEAU du jour qui porte cette seance, pas sur le
+    // premier : une salle peut occuper le second.
+    // UNE SEANCE FAITE EN PLUS s'archive sous SA cle, jamais sous celle du
+    // creneau prevu : l'archivage ne garde qu'une entree par cle, et la seance
+    // prevue deja faite aurait ete effacee.
+    var plus = !!(state.seanceCle && trouverEnPlus(state.seanceCle));
+    if (plus) return { k: state.seanceCle, plus: true };
+    for (i = 0; i < d.slotsSalle.length; i++) {
+      if (d.slotsSalle[i].ji === auj && d.slotsSalle[i].a.si === state.seance) {
+        k = d.slotsSalle[i].a.k;
+      }
+    }
+    return { k: k === null ? (state.slotAuj || 0) : k, plus: false };
+  }
+
   function enregistrerSeance() {
     var ex = exosCourants(), f = faitsOu(), i, j, series = 0, tonnage = 0, detail = [];
-    var d = deriver(), auj = jourIndexAujourdhui(), k = null;
+    var auj = jourIndexAujourdhui(), cr = creneauSeanceEnCours(), k = cr.k;
 
     for (i = 0; i < ex.length; i++) {
       series += f[i].length;
@@ -23181,22 +23569,8 @@ body.a-nav .nav { display: flex; }
       if (f[i].length) detail.push({ nom: ex[i].nom, unite: ex[i].unite || "", sets: f[i].slice() });
     }
 
-    // On archive sur le CRENEAU du jour qui porte cette seance, pas sur le
-    // premier : une salle peut occuper le second.
-    // UNE SEANCE FAITE EN PLUS s'archive sous SA cle, jamais sous celle du
-    // creneau prevu : l'archivage ne garde qu'une entree par cle, et la seance
-    // prevue deja faite aurait ete effacee.
-    var _plus = !!(state.seanceCle && trouverEnPlus(state.seanceCle));
-    if (_plus) {
-      k = state.seanceCle;
-    } else {
-      for (i = 0; i < d.slotsSalle.length; i++) {
-        if (d.slotsSalle[i].ji === auj && d.slotsSalle[i].a.si === state.seance) {
-          k = d.slotsSalle[i].a.k;
-        }
-      }
-      if (k === null) k = state.slotAuj || 0;
-    }
+    // Le creneau et le drapeau « en plus » : `creneauSeanceEnCours`.
+    var _plus = cr.plus;
 
     // LA DEPENSE REELLE, CALCULEE ICI ET FIGEE DANS L'ARCHIVE. Voir
     // `depenseSeanceSalle` (block_nutrition.js) : elle part des series faites,
@@ -23234,6 +23608,9 @@ body.a-nav .nav { display: flex; }
     }, seanceProgramme(state.seance).code + " · " + dateLongue(new Date()).toLowerCase() +
        " · " + series + " série" + (series > 1 ? "s" : "") +
        ", " + millier(Math.round(tonnage)) + " kg");
+    // APRES L'ARCHIVAGE, jamais avant : l'archive se calcule sur la liste
+    // d'exercices de la seance qu'on vient de faire, retrait compris.
+    appliquerRetireApres();
   }
 
   function validerActivite(ji, k) {
@@ -23304,7 +23681,59 @@ body.a-nav .nav { display: flex; }
     // activite ajoutee de valider un jour prevu dans la serie (decision
     // d'Olivier), sans qu'il faille deviner quoi que ce soit de sa cle.
     if (a.plus) enr.plus = true;
-    archiver(enr, txt);
+    // UNE CORRECTION RESTE SUR L'ECRAN DU JOUR : on corrige un chiffre sur la
+    // carte, on n'a pas a etre emmene dans l'Historique pour le relire.
+    // Elle ne concerne jamais une seance de salle en cours : on la garde.
+    if (state.corrige === _cle) archiver(enr, txt, true, "jour");
+    // 🔴 NOTER UNE SORTIE OU UN COURS RESTE SUR L'ECRAN SEANCE (accord
+    // d'Olivier, 20 septembre 2026). On partait dans l'Historique pour y lire
+    // un bandeau ; la carte porte maintenant le resume de ce qui a ete note,
+    // et c'est la qu'on le lit.
+    else if (a.t === "run" || a.t === "cours") archiver(enr, txt, false, "jour");
+    else archiver(enr, txt);
+  }
+
+  // 🔴 CORRIGER UNE ACTIVITE DEJA NOTEE (lot 2 du parcours, 19 septembre 2026).
+  // Le formulaire se rouvre REMPLI avec ce qui a ete enregistre, et la
+  // validation remplace l'entree (`archiver` n'en garde qu'une par jour et par
+  // creneau).
+  //
+  // ⚠️ LES CALORIES NE REVIENNENT QUE SI ELLES ONT ETE NOTEES. Une estimation
+  // remise dans le champ « Calories, si ta montre les donne » repasserait pour
+  // un chiffre de montre a la validation suivante.
+  function corrigerActivite(ji, k) {
+    var cle = ji + "-" + k, e = entreeDuCreneauAujourdhui(ji, k);
+    var maj = { corrige: cle, saisieMsg: "", saisieCle: "" };
+    var mesure = !!(e && e.kcalSrc === "mesure" && typeof e.kcal === "number");
+    function avec(t, v) {
+      var o = {}, x;
+      for (x in t) { if (has(t, x) && x !== cle) o[x] = t[x]; }
+      if (v) o[cle] = v;
+      return o;
+    }
+    if (e && e.t === "run") {
+      maj.runMin = avec(state.runMin, e.minutes ? String(e.minutes) : "");
+      maj.runKm = avec(state.runKm, e.km ? String(e.km) : "");
+      maj.runKcal = avec(state.runKcal, mesure ? String(e.kcal) : "");
+    } else if (e && e.t === "cours") {
+      maj.coursMin = avec(state.coursMin, e.min ? String(e.min) : "");
+      maj.coursKcal = avec(state.coursKcal, mesure ? String(e.kcal) : "");
+    }
+    poser(maj);
+  }
+
+  // « Annuler » : on referme sans toucher a l'entree, et sans laisser de
+  // brouillon qui rouvrirait la carte de la semaine prochaine avec ces chiffres.
+  function annulerCorrection() {
+    var cle = state.corrige, maj = { corrige: "", saisieMsg: "", saisieCle: "" };
+    var noms = ["runMin", "runKm", "runKcal", "coursMin", "coursKcal"], i, o, x, t;
+    for (i = 0; cle && i < noms.length; i++) {
+      t = state[noms[i]] || {};
+      o = {};
+      for (x in t) { if (has(t, x) && x !== cle) o[x] = t[x]; }
+      maj[noms[i]] = o;
+    }
+    poser(maj);
   }
 
   // La pesee entre dans SA propre liste, pas dans le journal des seances : ce
@@ -23318,7 +23747,37 @@ body.a-nav .nav { display: flex; }
     poser({ pesees: p, peseeFaite: true });
   }
 
+  // LES RETRAITS DEMANDES PENDANT LA SEANCE, POSES DANS LE PROGRAMME.
+  // Appelee quand la seance se termine, s'enregistre ou est abandonnee, et au
+  // demarrage de la suivante : une demande ne doit pas survivre a la seance ou
+  // elle a ete faite.
+  function appliquerRetireApres() {
+    var r = state.retireApres || {}, k, vide = true, maj = {}, aj = {};
+    for (k in r) { if (has(r, k)) vide = false; }
+    if (vide) return;
+    for (k in state.obRetires) { if (has(state.obRetires, k)) maj[k] = state.obRetires[k]; }
+    for (k in r) { if (has(r, k)) maj[k] = 1; }
+    // Retirer annule un ajout, comme dans Mon programme (`exoRetirer`).
+    for (k in state.obAjouts) { if (has(state.obAjouts, k) && !r[k]) aj[k] = state.obAjouts[k]; }
+    poser({ obRetires: maj, obAjouts: aj, retireApres: {}, exoMenu: false });
+  }
+
+  function exoRetirerApresSeance(cle) {
+    if (!cle) return;
+    var m = {}, k;
+    for (k in state.retireApres) { if (has(state.retireApres, k)) m[k] = state.retireApres[k]; }
+    m[cle] = 1;
+    poser({ retireApres: m });
+  }
+
+  function exoGarder(cle) {
+    var m = {}, k;
+    for (k in state.retireApres) { if (has(state.retireApres, k) && k !== cle) m[k] = state.retireApres[k]; }
+    poser({ retireApres: m });
+  }
+
   function demarrerSeance() {
+    appliquerRetireApres();
     var ex = exosCourants(), i, f = [];
     for (i = 0; i < ex.length; i++) f.push([]);
     poser({ ecran: "salle", demarre: true, tIdx: 0, phase: "set", faits: f,
@@ -23359,6 +23818,7 @@ body.a-nav .nav { display: flex; }
   function quitterSeance() {
     if (nbSeriesFaites() > 0) { poser({ quitterDemande: true }); return; }
     poser({ ecran: "jour", demarre: false, phase: "set", quitterDemande: false });
+    appliquerRetireApres();
   }
 
   function quitterDemandeHtml() {
@@ -23721,9 +24181,9 @@ body.a-nav .nav { display: flex; }
     for (j = 0; j < s.ex.length; j++) {
       // Le premier exercice qui porte une charge : c'est celui dont la fiche
       // montre une courbe. Un maintien en secondes n'en a pas.
-      if (!s.ex[j].unite) { poser({ ficheEx: s.ex[j].nom, ecran: "fiche" }); window.scrollTo(0, 0); return; }
+      if (!s.ex[j].unite) { poser({ ficheEx: s.ex[j].nom, ficheRetour: "", ecran: "fiche" }); window.scrollTo(0, 0); return; }
     }
-    poser({ ficheEx: s.ex[0].nom, ecran: "fiche" });
+    poser({ ficheEx: s.ex[0].nom, ficheRetour: "", ecran: "fiche" });
     window.scrollTo(0, 0);
   }
 
@@ -23771,8 +24231,12 @@ body.a-nav .nav { display: flex; }
     // LE RETOUR SE POSE AVANT TOUTE SORTIE ANTICIPEE. Il etait plus bas, donc
     // une fiche ouverte sans exercice n'avait AUCUNE issue : meme famille de
     // defaut que le diagnostic dont on ne pouvait pas sortir.
-    var retour = '<button type="button" class="fi-retour" data-action="onglet" ' +
-                 'data-ecran="histo"><span aria-hidden="true">‹</span> Historique</button>';
+    // Ouverte depuis la seance, elle y ramene (`ficheRetour`).
+    var retour = state.ficheRetour === "salle"
+      ? '<button type="button" class="fi-retour" data-action="fiche-retour">' +
+        '<span aria-hidden="true">‹</span> Retour à la séance</button>'
+      : '<button type="button" class="fi-retour" data-action="onglet" ' +
+        'data-ecran="histo"><span aria-hidden="true">‹</span> Historique</button>';
     if (!nom) return retour + '<p class="cb-vide">Aucun exercice sélectionné.</p>';
 
     // On cherche la description dans le CATALOGUE DU MOTEUR, pas dans le
@@ -24335,11 +24799,15 @@ body.a-nav .nav { display: flex; }
   // fichier, « Retirer la photo » et ses messages d'erreur sont partis avec.
   function identiteHtml() {
     var h = '<div class="moi-carte">';
-    h += '<button type="button" class="moi-ident" data-action="aller-profil">' +
+    // 🔴 ELLE OUVRE L'ETAPE « Toi », ET PLUS L'ECRAN « Mes infos » (lot 4,
+    // 20 septembre 2026) : cet ecran repetait les reponses que Profil porte
+    // maintenant lui-meme, avec leurs valeurs.
+    var _toi = String(rangEtape("Toi"));
+    h += '<button type="button" class="moi-ident" data-action="ob-etape" data-v="' + _toi + '">' +
          '<span class="moi-nom">' + esc(state.obPrenom || "Toi") + "</span>" +
          '<span class="moi-sous">' + esc(resumeProfilCourt()) + "</span></button>";
-    h += '<button type="button" class="moi-chev" data-action="aller-profil"' +
-         ' aria-label="Ouvrir mes infos">›</button>';
+    h += '<button type="button" class="moi-chev" data-action="ob-etape" data-v="' + _toi + '"' +
+         ' aria-label="Changer qui tu es">›</button>';
     h += "</div>";
     return h;
   }
@@ -24372,7 +24840,9 @@ body.a-nav .nav { display: flex; }
       h += '<button type="button" class="mo-l" data-action="' + l.a + '"' +
            (l.v !== undefined ? ' data-v="' + esc(l.v) + '"' : "") + ">" +
            '<span class="mo-n">' + esc(l.t) + "</span>" +
-           (l.s ? '<span class="mo-s num">' + esc(l.s) + "</span>" : "") +
+           // La police des chiffres seulement si la valeur en est un
+           // (`estValeurChiffree`) : « 78 kg » oui, « Perdre du gras » non.
+           (l.s ? '<span class="' + classeNum(l.s, "mo-s") + '">' + esc(l.s) + "</span>" : "") +
            '<span class="mo-c" aria-hidden="true">›</span></button>';
     }
     return h + "</div></div>";
@@ -24415,27 +24885,7 @@ body.a-nav .nav { display: flex; }
       { t: "Apparence", s: ["Clair", "Sombre", "Système"][state.theme], a: "aller-theme" }
     ]);
 
-    h += '<div class="mo-g"><div class="mo-g-t">Données</div><div class="mo-g-c">';
-    h += '<button type="button" class="mo-l" data-action="exporter">' +
-         '<span class="mo-n">Exporter journal<span class="mo-fmt">format JSON</span></span>' +
-         '<span class="mo-c" aria-hidden="true">›</span></button>';
-    // L'IMPORT MANQUAIT. Le README exige « export / import JSON du journal »,
-    // mais aucun des dix prompts ne l'a commande : il est tombe entre l'etape 6,
-    // qui ne demandait que l'export, et la recette, qui le teste au parcours 11.
-    // UN <label> QUI CONTIENT L'INPUT FILE, transparent en absolute inset 0.
-    // C'est ce montage, et lui seul, qui ouvre le selecteur de fichiers au
-    // premier toucher : un bouton qui appelle .click() sur un input cache est
-    // bloque par Safari hors geste direct.
-    h += '<label class="mo-l mo-l-file">' +
-         '<span class="mo-n">Importer un journal<span class="mo-fmt">' +
-         "remplace tout ce qui est enregistré</span></span>" +
-         '<span class="mo-c" aria-hidden="true">›</span>' +
-         '<input type="file" accept="application/json,.json" class="moi-file"' +
-         ' data-action="importer" aria-label="Choisir un fichier de journal"></label>';
-    if (state.importMsg) {
-      h += '<div class="mo-l mo-l-msg"><span class="mo-n">' + esc(state.importMsg) + "</span></div>";
-    }
-    h += "</div></div>";
+    h += donneesHtml();
 
     // Carte version. « Recharger la derniere version » vide le cache et
     // reprend le fichier en ligne : pour ceux qui ont deja le lien en ecran
@@ -24445,8 +24895,10 @@ body.a-nav .nav { display: flex; }
     // alors qu'il va chercher une version publiee depuis.
     h += '<section class="carte"><div class="mo-v-h"><span class="mo-v-t">Version installée</span>' +
          '<span class="mo-v-n num">v' + esc(APP_VERSION) + "</span></div>";
-    h += '<p class="cr-p">Ton téléphone garde l\'appli en mémoire pour qu\'elle s\'ouvre ' +
-         "hors-ligne. Si j'ai publié des nouveautés, ce bouton va les chercher.</p>";
+    h += pourquoiHtml("maj-hors-ligne", "Ce bouton va chercher les nouveautés publiées.",
+                      "Ton téléphone garde l’appli en mémoire pour qu’elle s’ouvre " +
+                      "hors-ligne : sans ce bouton, elle peut rester sur la version " +
+                      "qu’elle a déjà.", "Pourquoi ?");
     h += '<button type="button" class="cr-btn" data-action="recharger-maj">' +
          "Recharger la dernière version</button>";
     if (state.majMsg) h += '<p class="cr-p">' + esc(state.majMsg) + "</p>";
@@ -24456,7 +24908,7 @@ body.a-nav .nav { display: flex; }
 
     // La ligne de pied. Elle tient en une phrase ce que l'appli promet sur les
     // donnees, a l'endroit ou l'on vient justement les gerer.
-    h += '<div class="mo-pied num">Lemmon Fit · hors-ligne · aucune donnée envoyée</div>';
+    h += '<div class="mo-pied">Lemmon Fit · hors-ligne · aucune donnée envoyée</div>';
     return h;
   }
 
@@ -24476,6 +24928,127 @@ body.a-nav .nav { display: flex; }
   // ⚠️ IL LISTE LES ETAPES VISIBLES, PAS LES DOUZE. Un coureur pur n'a ni
   // Duree ni Materiel ni Pratique : les lui proposer ouvrirait des questions
   // que `etapePertinente` refuse d'afficher, donc des ecrans vides.
+  // LE LIBELLE D'UNE REPONSE A CHOIX, lu dans l'etape elle-meme. ⚠️ JAMAIS
+  // RECOPIE ICI : deux listes de libelles finiraient par ne plus dire la meme
+  // chose, et c'est l'ecran de reglages qui mentirait.
+  function libelleChip(nomEtape, rang) {
+    var e = OB[rangEtape(nomEtape)];
+    var c = e && e.chips && e.chips[rang];
+    return c ? c.t : "non renseigné";
+  }
+
+  function nbZones() {
+    var k, n = 0;
+    for (k in state.obEviter) { if (has(state.obEviter, k) && state.obEviter[k]) n++; }
+    return n;
+  }
+
+  // -------------------------------------------------------------------------
+  // TES REPONSES : UNE LIGNE PAR REGLAGE, AVEC SA VALEUR
+  // -------------------------------------------------------------------------
+  // 🔴 LOT 4 DU CHANTIER PARCOURS (audit UX du 19 septembre 2026, constat
+  // 3.6). Cet ecran listait ONZE ETAPES BRUTES, sans une seule valeur : « Toi,
+  // Poids, Objectif, Rythme, Pratique, Durée, Matériel, Zones, Cardio,
+  // Habitudes, Horizon ». On ne savait pas ce qu'on avait repondu sans ouvrir
+  // chaque etape, et trois de ces mots ne veulent rien dire hors du
+  // questionnaire.
+  //
+  // Chaque ligne porte donc sa valeur, et un nom qui se comprend seul. Les
+  // groupes sont ceux de l'ecran « Mes infos », qui disparait : il affichait
+  // les memes reponses, un niveau plus bas, et son groupe « Mes données »
+  // etait deja ici.
+  //
+  // ⚠️ UNE LIGNE NE S'AFFICHE QUE SI SON ETAPE SE POSE. Mener a une question
+  // que `etapePertinente` refuse ouvrirait un ecran vide, et le compteur
+  // d'etapes ne saurait plus quoi annoncer. Seul « Matériel » est force : le
+  // diagnostic le saute sans salle, or c'est justement le cas ou l'on veut le
+  // changer (« un week-end chez des potes »).
+  function reglagesHtml() {
+    var d = deriver(), p = profilDepuisEtat(), h = "", i;
+    var vis = etapesVisibles(), pose = {};
+    for (i = 0; i < vis.length; i++) pose[OB[vis[i]].nom] = 1;
+    function etape(nom) { return String(rangEtape(nom)); }
+
+    var toi = [];
+    if (state.obPrenom) toi.push(state.obPrenom);
+    if (state.obAge) toi.push(state.obAge + " ans");
+    if (state.obTaille) toi.push(state.obTaille + " cm");
+    var poids = state.obPoids
+      ? fmtVal(p.startWeight) + (state.obPoidsCible ? " → " + fmtVal(p.targetWeight) : "") + " kg"
+      : "non renseigné";
+
+    h += groupeHtml("Toi", [
+      { t: "Qui tu es", s: toi.length ? toi.join(" · ") : "non renseigné",
+        a: "ob-etape", v: etape("Toi") },
+      { t: "Ton poids", s: poids, a: "ob-etape", v: etape("Poids") },
+      { t: "Jour de pesée", s: JOURS[state.obPeseeJour] + " · " + PESEE_MOMENTS[state.obPeseeMoment].t,
+        a: "ob-etape", v: etape("Habitudes") }
+    ]);
+
+    var prog = [
+      { t: "Tes jours et tes activités", s: resumeJours(d), a: "ob-etape", v: etape("Rythme") }
+    ];
+    if (pose["Pratique"]) {
+      prog.push({ t: "Ton niveau en musculation", s: libelleChip("Pratique", state.obPratique),
+                  a: "ob-etape", v: etape("Pratique") });
+    }
+    if (pose["Course"]) {
+      prog.push({ t: "Ton niveau en course", s: libelleChip("Course", state.obRunNiveau),
+                  a: "ob-etape", v: etape("Course") });
+    }
+    if (pose["Durée"]) {
+      prog.push({ t: "Durée d'une séance en salle", s: dureeLibelle(), a: "ob-etape", v: etape("Durée") });
+    }
+    prog.push({ t: "Ton matériel", s: resumeMateriel(), a: "ob-etape", v: etape("Matériel") });
+    if (pose["Zones"]) {
+      prog.push({ t: "Zones à ménager", s: nbZones() ? nbZones() + " zone" + (nbZones() > 1 ? "s" : "") : "aucune",
+                  a: "ob-etape", v: etape("Zones") });
+    }
+    if (pose["Cardio"]) {
+      prog.push({ t: "Le cardio", s: depenseActive() ? "En fin de séance" : "Musculation seule",
+                  a: "ob-etape", v: etape("Cardio") });
+    }
+    // ⚠️ « MON PROGRAMME » N'EST PAS UNE REPONSE AU DIAGNOSTIC, c'est
+    // l'ecran ou l'on retire et ajoute des exercices. Il ferme le groupe, et
+    // il ne dit plus « 166 exercices » : ce chiffre est celui du CATALOGUE, et
+    // il vit dans cet ecran-la (audit UX, constat 3.6).
+    prog.push({ t: "Mon programme", s: d.slots.length + " activité" +
+                (d.slots.length > 1 ? "s" : "") + " par semaine", a: "aller-monprog" });
+    h += groupeHtml("Ton programme", prog);
+
+    var nutri = [
+      { t: "Ton objectif", s: ["Perdre du gras", "Maintenir", "Prendre du muscle"][state.obObjectif],
+        a: "ob-etape", v: etape("Objectif") },
+      { t: "Tes habitudes alimentaires", s: resumeHabitudes(), a: "ob-etape", v: etape("Habitudes") },
+      { t: "Tes compléments", s: nbSupps() + (nbSupps() > 1 ? " retenus" : " retenu"),
+        a: "ob-etape", v: etape("Habitudes") }
+    ];
+    if (pose["Horizon"]) {
+      nutri.push({ t: "Ton horizon",
+                   s: state.obNutri === 2 ? "Avec un plafond de calories"
+                      : state.obNutri === 1 ? "Programme seul" : "à choisir",
+                   a: "ob-etape", v: etape("Horizon") });
+    }
+    h += groupeHtml("Nutrition", nutri);
+    return h;
+  }
+
+  // Les jours declares, et ce qu'ils portent : « Lun, Mer, Ven » ne disait pas
+  // si c'etait de la salle ou de la course.
+  function resumeJours(d) {
+    var i, out = [];
+    for (i = 0; i < d.progJours.length; i++) out.push(d.progJours[i].nom.slice(0, 3));
+    if (!out.length) return "aucun jour";
+    var parts = [out.join(", ")], n;
+    n = d.slotsSalle.length;
+    if (n) parts.push(n + " salle");
+    n = d.slotsCours.length;
+    if (n) parts.push(n + " cours");
+    n = d.slotsRun.length;
+    if (n) parts.push(n + " running");
+    return parts.join(" · ");
+  }
+
   function refaireHtml() {
     var vis = etapesVisibles(), d = deriver(), i, h = "";
 
@@ -24486,51 +25059,11 @@ body.a-nav .nav { display: flex; }
     // ou vit « Mes exercices ». C'est le seul point du haut de l'ecran que le
     // panneau ne recouvrait PAS : le retirer sans le remettre ici aurait rendu
     // cet ecran inatteignable.
-    h += '<div class="mo-g"><div class="mo-g-t">Programme</div><div class="mo-g-c">';
-    h += '<button type="button" class="mo-l" data-action="aller-monprog">' +
-         '<span class="mo-n">Mon programme</span>' +
-         '<span class="mo-s num">' + d.slots.length + " activités · " +
-         nbExercicesActifs() + " exercices</span>" +
-         '<span class="mo-c" aria-hidden="true">›</span></button>';
-    h += "</div></div>";
+    // 🔴 LES ONZE ETAPES BRUTES SONT REMPLACEES PAR LEURS REPONSES
+    // (lot 4, 20 septembre 2026). Voir `reglagesHtml`.
+    h += reglagesHtml();
 
-    // LE PANNEAU EST TOUJOURS OUVERT. Il etait derriere un interrupteur qui
-    // vivait dans le groupe du haut, lequel vient de disparaitre : garder
-    // l'interrupteur aurait demande de le remettre quelque part, pour cacher
-    // une liste de dix lignes qui EST la section.
-    h += '<section class="carte mo-refaire"><div class="carte-t">Reprendre le diagnostic</div>';
-    h += '<p class="cr-p">Touche l\'étape que tu veux changer. Tu reviens ici ' +
-         "juste après, et rien d’autre ne bouge.</p>";
-    h += '<div class="mo-g-c">';
-    // ⚠️ « MATERIEL » EST FORCE DANS LA LISTE, MEME SANS SALLE. Le
-    // diagnostic saute cette etape quand la semaine ne porte aucune seance de
-    // salle ; c'est defendable pendant le questionnaire, ou l'on ne veut pas
-    // poser une question sans objet. Ici c'est un menu de correction, et le
-    // materiel concerne aussi un coureur : tapis, corde a sauter et appareils
-    // de cardio vivent dans la meme liste.
-    var mat = rangEtape("Matériel");
-    if (mat >= 0 && vis.indexOf(mat) < 0) {
-      vis = vis.slice();
-      vis.push(mat);
-      vis.sort(function (x, y) { return x - y; });
-    }
-    for (i = 0; i < vis.length; i++) {
-      // ⚠️ ON SAUTE « C'est parti » PAR SON NOM, et pas par son type : un
-      // futur ecran `recap` pourrait porter des reponses. (L'etape « Reperes »,
-      // l'autre `recap`, a ete retiree le 15 septembre 2026.) C'est un ecran de
-      // fin, il ne contient aucune reponse a corriger.
-      if (OB[vis[i]].nom === "C'est parti") continue;
-      // ⚠️ ET ON SAUTE « Programme » : la ligne « Mon programme »
-      // ci-dessus mene au meme sujet en mieux, et deux lignes qui portent le
-      // meme mot dans la meme section sont exactement le doublon qu'on retire.
-      if (OB[vis[i]].nom === "Programme") continue;
-      h += '<button type="button" class="mo-l" data-action="ob-etape" data-v="' +
-           vis[i] + '">' +
-           '<span class="mo-n">' + esc(OB[vis[i]].nom) + "</span>" +
-           '<span class="mo-c" aria-hidden="true">›</span></button>';
-    }
-    h += "</div>";
-
+    h += '<section class="carte mo-refaire">';
     // ⚠️ « TOUT REPRENDRE » DEMANDE CONFIRMATION, et c'est la que vit le
     // bouton Annuler qu'Olivier reclamait. Le panneau ne se replie plus, donc
     // la confirmation ne peut plus etre le fait de l'ouvrir : elle se pose sur
@@ -24620,80 +25153,21 @@ body.a-nav .nav { display: flex; }
     return s;
   }
 
-  /* -------------------------------------------------------------------------
-     PROFIL : chaque ligne mene a l'etape qui la definit
-     -------------------------------------------------------------------------
-     Le numero d'etape voyage AVEC la ligne. Sans lui, « Jour de pesée »
-     renverrait au debut du diagnostic et il faudrait traverser huit ecrans
-     pour corriger une reponse.
-     ------------------------------------------------------------------------- */
-  function profilHtml() {
-    var p = profilDepuisEtat(), d = deriver(), h = "", i, noms = [];
-    for (i = 0; i < d.progJours.length; i++) noms.push(d.progJours[i].nom.slice(0, 3));
-
-    var cours = [], run = [];
-    for (i = 0; i < d.slotsCours.length; i++) cours.push(d.slotsCours[i].a.nom || "Cours");
-    for (i = 0; i < d.slotsRun.length; i++) run.push(d.slotsRun[i].nom.slice(0, 3));
-
-    // LE SOUS-TITRE MANQUAIT. Il dit a quoi servent ces reponses, donc pourquoi
-    // les corriger change quelque chose.
-    // ⚠️ LA PHRASE COIFFAIT DEUX GROUPES QU'ELLE NE DECRIT PAS.
-    // « Complements » et « Habitudes » ne sont consultes ni par le programme ni
-    // par le calcul des calories cramees : ils servent au texte que l'utilisateur enverra a
-    // son assistant. Les ranger sous « utilisent pour se calculer » invitait a
-    // revenir corriger des reponses dont la correction ne change rien.
-    h += '<p class="ob-lead">Ce qui sert à construire ton programme, à estimer tes ' +
-         "calories cramées, et ce que ton assistant recevra.</p>";
-    h += groupeHtml("Toi", [
-      { t: "Prénom", s: state.obPrenom || "non renseigné", a: "ob-etape", v: String(rangEtape("Toi")) },
-      { t: "Âge", s: state.obAge ? state.obAge + " ans" : "non renseigné", a: "ob-etape", v: String(rangEtape("Toi")) },
-      { t: "Taille", s: state.obTaille ? state.obTaille + " cm" : "non renseignée", a: "ob-etape", v: String(rangEtape("Toi")) }
-    ]);
-    // ⚠️ « NON RENSEIGNE » PLUTOT QU'UN POIDS INVENTE. Les trois lignes du
-    // groupe precedent savent deja le dire ; ces deux-la affichaient 80 kg et
-    // 75 kg a qui n'a jamais donne son poids, parce qu'elles lisaient le profil
-    // envoye au moteur, ou le repli est necessaire, au lieu de l'etat.
-    h += groupeHtml("Poids", [
-      { t: "Poids de départ", s: state.obPoids ? fmtVal(p.startWeight) + " kg" : "non renseigné",
-        a: "ob-etape", v: String(rangEtape("Poids")) },
-      { t: "Poids cible", s: state.obPoidsCible ? fmtVal(p.targetWeight) + " kg" : "non renseigné",
-        a: "ob-etape", v: String(rangEtape("Poids")) },
-      { t: "Jour de pesée", s: JOURS[state.obPeseeJour] + " · " + PESEE_MOMENTS[state.obPeseeMoment].t,
-        a: "ob-etape", v: String(rangEtape("Habitudes")) }
-    ]);
-    // Meme regle que sur l'ecran Moi : la duree d'une seance en salle ne se
-    // montre que s'il y a des seances de salle.
-    var lignesProfilProg = [
-      { t: "Tes jours", s: noms.length ? noms.join(", ") : "aucun", a: "ob-etape", v: String(rangEtape("Rythme")) },
-      { t: "Tes cours collectifs", s: cours.length ? cours.join(", ") : "aucun", a: "ob-etape", v: String(rangEtape("Rythme")) },
-      { t: "Tes sorties running", s: run.length ? run.join(", ") : "aucune", a: "ob-etape", v: String(rangEtape("Rythme")) }
-    ];
-    if (deriver().slotsSalle.length) {
-      lignesProfilProg.push({ t: "Durée par séance", s: dureeLibelle(), a: "ob-etape", v: String(rangEtape("Durée")) });
-    }
-    // L'etape Cardio (18 septembre 2026), seulement la ou elle se pose.
-    if (cardioEnQuestion()) {
-      lignesProfilProg.push({ t: "Cardio", s: depenseActive() ? "En fin de séance" : "Musculation seule",
-                              a: "ob-etape", v: String(rangEtape("Cardio")) });
-    }
-    h += groupeHtml("Programme", lignesProfilProg);
-    h += groupeHtml("Nutrition", [
-      { t: "Objectif", s: ["Perdre du gras", "Maintenir", "Prendre du muscle"][state.obObjectif],
-        a: "ob-etape", v: String(rangEtape("Objectif")) },
-      { t: "Compléments", s: nbSupps() + " retenus", a: "ob-etape", v: String(rangEtape("Habitudes")) },
-      { t: "Habitudes", s: resumeHabitudes(), a: "ob-etape", v: String(rangEtape("Habitudes")) }
-    ]);
-    // LE GROUPE « MES DONNEES » VIT ICI, PAS DANS MOI. C'est la maquette qui le
-    // place sur le Profil, avec le poids du journal, les deux sens de
-    // l'echange, et l'avertissement sur le remplacement. Je l'avais reduit a
-    // une ligne d'export perdue dans l'ecran Moi.
+  // LE GROUPE DES DONNEES, sorti de « Mes infos » le 20 septembre 2026 quand
+  // cet ecran a disparu : il etait plus complet que celui de Profil (le poids
+  // du journal, la date du dernier export, l'avertissement sur l'import).
+  function donneesHtml() {
+    var h = "";
     var journal = state.hist || [], octets = 0;
     try { octets = JSON.stringify(journal).length; } catch (e) {}
     var taille = octets > 1024 ? Math.round(octets / 1024) + " Ko" : octets + " o";
 
     h += '<div class="mo-g"><div class="mo-g-t">Mes données</div><div class="mo-g-c">';
     h += '<div class="mo-l mo-l-msg"><span class="mo-n">Ton journal</span>' +
-         '<span class="mo-s num">' + journal.length + " séances · " + taille + "</span></div>";
+         // Une seance ne s'ecrit pas « 1 séances » (lot coherence).
+         '<span class="mo-s"><b class="num">' + journal.length + "</b> séance" +
+         (journal.length > 1 ? "s" : "") + " · " +
+         '<b class="num">' + esc(taille) + "</b></span></div>";
     h += '<button type="button" class="mo-l" data-action="exporter">' +
          '<span class="mo-n">Exporter le journal<span class="mo-fmt">format JSON</span></span>' +
          '<span class="mo-c" aria-hidden="true">›</span></button>';
@@ -24708,7 +25182,7 @@ body.a-nav .nav { display: flex; }
     }
     if (state.dernierExport) {
       h += '<div class="mo-l mo-l-msg"><span class="mo-n">Dernier export :</span>' +
-           '<span class="mo-s num">' + esc(dateCourte(state.dernierExport)) + "</span></div>";
+           '<span class="mo-s">' + esc(dateCourte(state.dernierExport)) + "</span></div>";
     }
     h += "</div>";
     h += '<div class="mo-avert"><b>Attention :</b> un import <b>remplace</b> le journal ' +
@@ -24843,7 +25317,7 @@ body.a-nav .nav { display: flex; }
     h += '<div class="mo-g"><div class="mo-g-t">Le catalogue</div><div class="mo-g-c">';
     h += '<button type="button" class="mo-l" data-action="aller-exos">' +
          '<span class="mo-n">Mes exercices</span>' +
-         '<span class="mo-s num">' + nbExercicesActifs() + " retenus</span>" +
+         '<span class="mo-s"><b class="num">' + nbExercicesActifs() + "</b> retenus</span>" +
          '<span class="mo-c" aria-hidden="true">›</span></button>';
     h += "</div>";
     h += '<p class="cr-p">Décocher un exercice ici l\'écarte de <b>toutes</b> tes ' +
@@ -25033,9 +25507,11 @@ body.a-nav .nav { display: flex; }
     // changerait la geometrie de la bande de semaine et des pastilles de date,
     // ce qui ne peut pas se verifier sans un ecran : on corrige donc la phrase,
     // et le rehaussement reste a faire, mesure a l'appui.
-    h += '<p class="th-note">Toutes les cibles tactiles font au moins 44 px et aucun ' +
-         "texte n'est sous 4,5:1 de contraste, dans les deux thèmes. Quelques " +
-         "libellés secondaires descendent à 9 px.</p>";
+    h += pourquoiHtml("theme-accessibilite",
+                      "Les deux thèmes tiennent le contraste et la taille des cibles.",
+                      "Toutes les cibles tactiles font au moins 44 px et aucun texte n’est " +
+                      "sous 4,5:1 de contraste. Quelques libellés secondaires descendent " +
+                      "à 9 px.", "Le détail");
     return h;
   }
 
@@ -26681,16 +27157,45 @@ body.a-nav .nav { display: flex; }
                    p: ALIM_TABLE[i].u === "piece" ? ALIM_TABLE[i].ut : "", court: true });
       }
     }
-    for (i = 0; i < CIQUAL.length && out.length < 40; i++) {
+    // 🔴 LA TABLE OFFICIELLE EST CLASSEE, PLUS LUE DANS SON ORDRE (lot 1 du
+    // parcours, 19 septembre 2026). Son ordre est celui de ses groupes : pour
+    // « poulet », la salade Cesar et six salades preemballees passaient avant
+    // le moindre filet de poulet. On garde TOUTES les correspondances, puis
+    // l'aliment lui-meme (« Poulet, filet, cuit ») passe devant les plats qui
+    // le contiennent, et les plats preemballes en dernier.
+    var trouves = [];
+    for (i = 0; i < CIQUAL.length; i++) {
       n = repasSansAccent(CIQUAL[i][0]);
       ok = true;
       for (j = 0; j < mots.length; j++) { if (n.indexOf(mots[j]) < 0) { ok = false; break; } }
-      if (ok) {
-        var po = repasPortionDe(CIQUAL[i][3], CIQUAL[i][0]);
-        out.push({ n: CIQUAL[i][0], k: CIQUAL[i][1], g: po.g, p: po.p, court: false });
-      }
+      if (ok) trouves.push({ i: i, s: repasRang(n, mots, CIQUAL[i][2]) });
+    }
+    trouves.sort(function (a, b) { return a.s - b.s || a.i - b.i; });
+    for (j = 0; j < trouves.length && out.length < 40; j++) {
+      i = trouves[j].i;
+      var po = repasPortionDe(CIQUAL[i][3], CIQUAL[i][0]);
+      out.push({ n: CIQUAL[i][0], k: CIQUAL[i][1], g: po.g, p: po.p, court: false });
     }
     return out;
+  }
+
+  // Le rang d'un nom de la table officielle pour une recherche : plus petit,
+  // plus haut. Le nom qui COMMENCE par le premier mot tape est l'aliment
+  // lui-meme ; un plat preemballe est rarement ce qu'on cherche ; a egalite,
+  // le nom le plus court est le plus general.
+  // ⚠️ LE CUIT AVANT LE CRU, POUR LES VIANDES, POISSONS ET FECULENTS (groupes 3
+  // et 4 de la table). Premier essai : « poulet » rendait « pilon cru »,
+  // « viande crue »... On note ce qu'on mange, et on mange ces aliments cuits.
+  // Les fruits et les legumes, eux, se mangent souvent crus : pas de penalite.
+  var CIQUAL_CUITS_D_ABORD = { 3: 1, 4: 1 };
+
+  function repasRang(nomSansAccent, mots, groupe) {
+    var s = 0, tete = nomSansAccent.split(",")[0];
+    if (tete.indexOf(mots[0]) === 0) s -= 100;
+    else if (nomSansAccent.indexOf(mots[0]) === 0) s -= 50;
+    if (/preemball/.test(nomSansAccent)) s += 60;
+    if (CIQUAL_CUITS_D_ABORD[groupe] && /\b(crue?s?|sec|seche?s?|secs)\b/.test(nomSansAccent)) s += 25;
+    return s + nomSansAccent.length / 10;
   }
 
   // -------------------------------------------------------------------------
@@ -26739,20 +27244,122 @@ body.a-nav .nav { display: flex; }
     poser({ repas: h, repasSel: null, repasQ: "", repasNb: 1 });
   }
 
-  function repasAjouter(m, nom, kcal100, grammes, libelle) {
-    var h = (state.repas || []).slice(), cleJ = cleDate(new Date()), i;
-    // ⚠️ ON NE PEUT PAS AVOIR SAUTE UN REPAS ET Y AVOIR MANGE. Noter un aliment
-    // efface la marque, sinon la carte dirait « sauté » sous un total qui ne
-    // l'est pas.
+  // ⚠️ ON NE PEUT PAS AVOIR SAUTE UN REPAS ET Y AVOIR MANGE. Noter un aliment
+  // efface la marque, sinon la carte dirait « sauté » sous un total qui ne
+  // l'est pas. UNE SEULE REGLE pour tous les chemins qui ajoutent (un aliment,
+  // un habituel, le repas d'hier) : recopiee, elle divergerait.
+  function repasSansMarqueSaute(h, cleJ, m) {
+    var i;
     for (i = h.length - 1; i >= 0; i--) {
       if (h[i].d === cleJ && h[i].m === m && h[i].saute) h.splice(i, 1);
     }
+    return h;
+  }
+
+  function repasAjouter(m, nom, kcal100, grammes, libelle) {
+    var h = repasSansMarqueSaute((state.repas || []).slice(), cleDate(new Date()), m);
     h.push({
       d: cleDate(new Date()), m: m, n: nom,
       g: Math.round(grammes), k: kcal100,
       kcal: Math.round(kcal100 * grammes / 100),
       q: libelle
     });
+    if (h.length > REPAS_MAX) h = h.slice(h.length - REPAS_MAX);
+    poser({ repas: h, repasSel: null, repasQ: "", repasNb: 1 });
+  }
+
+  // -------------------------------------------------------------------------
+  // TES HABITUELS, ET LE REPAS D'HIER (lot 1 du parcours, 19 septembre 2026)
+  // -------------------------------------------------------------------------
+  // Mesure de l'audit UX : un dejeuner de trois aliments coutait 12 gestes et
+  // 23 caracteres, jusqu'a quatre fois par jour. Or on mange surtout la meme
+  // chose. Le journal sait deja ce qu'on a note : on le relit.
+  //
+  // ⚠️ RIEN N'EST AJOUTE SANS UN TOUCHER. Chaque ligne proposee dit son nom, sa
+  // portion et ses calories ; c'est l'utilisateur qui la prend. Et la croix
+  // de « Ce que tu as noté » la retire comme n'importe quelle autre.
+  var HABITUELS_MAX = 6, HABITUELS_JOURS = 30, REFAIRE_JOURS = 14;
+
+  function repasCleIlYA(n) {
+    var d = new Date();
+    d.setDate(d.getDate() - n);
+    return cleDate(d);
+  }
+
+  // Les aliments les plus notes A CE REPAS depuis trente jours (trois fois plus
+  // de poids qu'ailleurs), puis les plus recents. La portion proposee est la
+  // derniere prise a ce repas, sinon la derniere tout court. Un aliment deja
+  // note aujourd'hui dans ce repas n'est pas repropose : un toucher de trop
+  // le compterait deux fois.
+  function repasHabituels(m) {
+    var h = state.repas || [], auj = cleDate(new Date()), limite = repasCleIlYA(HABITUELS_JOURS);
+    var st = {}, deja = {}, ordre = [], i, e, x, out = [];
+    for (i = 0; i < h.length; i++) {
+      e = h[i];
+      if (!e || e.saute || !e.n) continue;
+      if (e.d === auj && e.m === m) { deja[e.n] = 1; continue; }
+      if (e.d < limite) continue;
+      x = st[e.n];
+      if (!x) { x = st[e.n] = { ici: 0, ailleurs: 0, dernier: "", lIci: null, lTout: null }; ordre.push(e.n); }
+      if (e.m === m) {
+        x.ici++;
+        if (!x.lIci || e.d >= x.lIci.d) x.lIci = e;
+      } else {
+        x.ailleurs++;
+      }
+      if (!x.lTout || e.d >= x.lTout.d) x.lTout = e;
+      if (e.d > x.dernier) x.dernier = e.d;
+    }
+    for (i = 0; i < ordre.length; i++) {
+      x = st[ordre[i]];
+      if (deja[ordre[i]]) continue;
+      out.push({ l: x.lIci || x.lTout, ici: x.ici, ailleurs: x.ailleurs, dernier: x.dernier });
+    }
+    // D'ABORD CE QUI A ETE MANGE A CE REPAS, puis le reste en complement. Un
+    // poids unique (ici x 3 + ailleurs) proposait les flocons d'avoine du
+    // matin en tete du dejeuner : six petits-dejeuners pesaient plus qu'un
+    // dejeuner.
+    out.sort(function (a, b) {
+      return b.ici - a.ici || b.ailleurs - a.ailleurs ||
+             (a.dernier < b.dernier ? 1 : a.dernier > b.dernier ? -1 : 0);
+    });
+    return out.slice(0, HABITUELS_MAX).map(function (o) { return o.l; });
+  }
+
+  // Le meme repas, le dernier jour ou il a vraiment ete MANGE (jusqu'a deux
+  // semaines). Un jour « sauté » est passe : premier essai, un diner saute
+  // avant-hier cachait la soupe de lundi. Rend { d, lignes } ou null.
+  function repasAnterieur(m) {
+    var h = state.repas || [], auj = cleDate(new Date()), limite = repasCleIlYA(REFAIRE_JOURS);
+    var jour = "", i, lignes = [];
+    for (i = 0; i < h.length; i++) {
+      if (h[i] && h[i].m === m && !h[i].saute && h[i].d < auj && h[i].d >= limite && h[i].d > jour) {
+        jour = h[i].d;
+      }
+    }
+    if (!jour) return null;
+    for (i = 0; i < h.length; i++) {
+      if (h[i].m === m && h[i].d === jour && !h[i].saute) lignes.push(h[i]);
+    }
+    return lignes.length ? { d: jour, lignes: lignes } : null;
+  }
+
+  // « ton déjeuner d'hier », « ta collation de mardi ».
+  function repasDeQuand(m, jour) {
+    var ton = LES_REPAS[m].d.replace(/^le /, "ton ").replace(/^la /, "ta ");
+    if (jour === repasCleIlYA(1)) return ton + " d’hier";
+    var p = jour.split("-"), d = new Date(+p[0], +p[1] - 1, +p[2]);
+    return ton + " de " + ["dimanche", "lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi"][d.getDay()];
+  }
+
+  // Plusieurs lignes d'un coup, datees d'aujourd'hui, en un seul `poser`.
+  function repasAjouterLignes(m, lignes) {
+    var cleJ = cleDate(new Date()), i;
+    var h = repasSansMarqueSaute((state.repas || []).slice(), cleJ, m);
+    for (i = 0; i < lignes.length; i++) {
+      h.push({ d: cleJ, m: m, n: lignes[i].n, g: lignes[i].g, k: lignes[i].k,
+               kcal: lignes[i].kcal, q: lignes[i].q || "" });
+    }
     if (h.length > REPAS_MAX) h = h.slice(h.length - REPAS_MAX);
     poser({ repas: h, repasSel: null, repasQ: "", repasNb: 1 });
   }
@@ -26777,10 +27384,11 @@ body.a-nav .nav { display: flex; }
 
     // ⚠️ « 0 kcal POUR L'INSTANT » SOUS UNE COLLATION SAUTEE SE CONTREDIT : la
     // premiere moitie annonce une attente, la seconde dit que c'est reglé.
+    // Le nom du repas est deja le titre de l'ecran : il n'est pas redit ici
+    // (« Déjeuner » puis « Déjeuner, 0 kcal », relevé par l'audit UX).
     h = '<p class="cr-p">' + (repasEstSaute(lignes)
-      ? esc(LES_REPAS[m].t) + " " + esc(LES_REPAS[m].sa) + ", rien à compter."
-      : esc(LES_REPAS[m].t) + ", <b class=\"num\">" + repasTotal(lignes) +
-        " kcal</b> pour l’instant.") + "</p>";
+      ? esc(LES_REPAS[m].sa.charAt(0).toUpperCase() + LES_REPAS[m].sa.slice(1)) + ", rien à compter."
+      : "<b class=\"num\">" + repasTotal(lignes) + " kcal</b> pour l’instant.") + "</p>";
     // CE QUI RESTE SOUS LE PLAFOND, la ou l'on note : c'est la que la question
     // « je peux encore manger quoi ? » se pose (chantier horizon).
     if (plafondActif()) h += '<p class="cb-vide">' + resteDuJourTexte(plafondActif()) + "</p>";
@@ -26834,16 +27442,46 @@ body.a-nav .nav { display: flex; }
       return h;
     }
 
-    // LE SCAN PASSE DEVANT LE CLAVIER. Pour un produit emballe, viser est
-    // plus rapide que taper, et le resultat est exact au lieu d'etre moyen.
-    h += '<button type="button" class="rp-scan" data-action="scan-ouvrir">' +
-         "Scanner un code-barres</button>";
-    h += '<div class="rp-ch"><input class="rp-in" type="text" ' +
-         'placeholder="Cherche un aliment" value="' + esc(state.repasQ || "") +
-         '" data-action="repas-q"></div>';
+    // LE REPAS D'HIER, EN UN GESTE, tant que celui d'aujourd'hui est vide
+    // (lot 1 du parcours). Il dit de quel jour il vient et ce qu'il contient :
+    // on sait ce qu'on reprend avant de le toucher.
+    var q = state.repasQ || "", ant = !lignes.length && q.length < 2 ? repasAnterieur(m) : null;
+    if (ant) {
+      var noms = ant.lignes.map(function (l) { return l.n; });
+      h += '<button type="button" class="rp-refaire" data-action="repas-refaire">' +
+           '<span class="rp-refaire-t">Refaire ' + esc(repasDeQuand(m, ant.d)) + "</span>" +
+           '<span class="rp-refaire-s">' + esc(noms.slice(0, 3).join(", ") + (noms.length > 3 ? "…" : "")) +
+           ' · <span class="num">' + repasTotal(ant.lignes) + " kcal</span></span></button>";
+    }
 
-    var res = repasChercher(state.repasQ || "");
-    if ((state.repasQ || "").length > 1) {
+    // LA RECHERCHE ET LE SCAN, COTE A COTE. Le scan passait devant, en grand :
+    // parfait pour un produit emballe, mais un repas fait maison se cherche
+    // (audit UX, 19 septembre 2026).
+    h += '<div class="rp-ch"><input class="rp-in" type="text" ' +
+         'placeholder="Cherche un aliment" value="' + esc(q) +
+         '" data-action="repas-q">' +
+         '<button type="button" class="rp-ch-scan" data-action="scan-ouvrir" ' +
+         'aria-label="Scanner un code-barres">Scanner</button></div>';
+
+    var res = repasChercher(q), hab = [];
+    if (q.length < 2) {
+      // TES HABITUELS : un toucher ajoute l'aliment avec sa derniere portion.
+      hab = repasHabituels(m);
+      if (hab.length) {
+        h += '<section class="carte"><div class="carte-t">Tes habituels</div>' +
+             '<p class="rp-hab-note">Un toucher l’ajoute, avec la portion de la dernière fois.</p>';
+        for (i = 0; i < hab.length; i++) {
+          h += '<button type="button" class="rp-hab" data-action="repas-habituel" data-i="' + i + '"' +
+               ' aria-label="Ajouter ' + esc(hab[i].n) + ", " + esc(hab[i].q || "") + '">' +
+               '<span class="rp-hab-c"><span class="rp-hab-n">' + esc(hab[i].n) + "</span>" +
+               '<span class="rp-hab-q">' + esc(hab[i].q || "") + "</span></span>" +
+               '<span class="rp-hab-k num">' + hab[i].kcal + " kcal</span>" +
+               '<span class="rp-hab-plus" aria-hidden="true">+</span></button>';
+        }
+        h += "</section>";
+      }
+    }
+    if (q.length > 1) {
       if (!res.length) {
         h += '<p class="cb-vide">Rien trouvé. Essaie un autre mot, ' +
              "ou un mot plus court.</p>";
@@ -26856,7 +27494,9 @@ body.a-nav .nav { display: flex; }
         }
         h += "</section>";
       }
-    } else {
+    } else if (!hab.length) {
+      // La consigne ne sert qu'aux premiers jours : ensuite, les habituels
+      // prennent sa place.
       h += '<p class="cb-vide">Tape les premières lettres d’un aliment. ' +
            "Les calories viennent de la table officielle de l’Anses.</p>";
     }
@@ -27058,12 +27698,18 @@ body.a-nav .nav { display: flex; }
       h += '<p class="cb-vide">Il te reste ' + esc(repasEnumere(b.manquants)) +
            " à noter : ce chiffre va bouger.</p>";
     }
-    h += '<p class="cb-vide">Ce que ton corps dépense hors sport est ' +
-         (b.source === "mesure"
-           ? "mesuré sur tes pesées et tes repas des quatre dernières semaines."
-           : "estimé d’après ta taille, ton âge et ton poids. Avec deux " +
-             "semaines de repas notés en plus, ce chiffre viendra de ta balance.") +
-         "</p>";
+    // Une phrase, et d'où vient le chiffre derrière un toucher (lot coherence).
+    h += (b.source === "mesure"
+      ? pourquoiHtml("bilan-source",
+                     "Ta dépense hors sport est mesurée, pas estimée.",
+                     "Elle vient de tes pesées et de tes repas des quatre dernières " +
+                     "semaines : c’est ta balance qui la corrige.",
+                     "D’où vient ce chiffre ?")
+      : pourquoiHtml("bilan-source",
+                     "Ta dépense hors sport est une estimation.",
+                     "Elle part de ta taille, de ton âge et de ton poids. Avec deux " +
+                     "semaines de repas notés en plus, ce chiffre viendra de ta balance.",
+                     "D’où vient ce chiffre ?"));
     return h + "</section>";
   }
 
@@ -27084,9 +27730,10 @@ body.a-nav .nav { display: flex; }
     }
     h += '<p class="cr-p">Aujourd’hui, <b class="num">' + repasTotalJour(cleJ) +
          " kcal</b> mangées.</p>";
-    h += '<p class="cb-vide">Estimation. Les calories viennent de la table ' +
-         "officielle de l’Anses, la taille des portions est une moyenne. " +
-         "Tes pesées corrigeront le niveau avec le temps.</p>";
+    h += pourquoiHtml("repas-estimation", "Ces calories sont une estimation.",
+                      "Elles viennent de la table officielle de l’Anses, et la taille des " +
+                      "portions est une moyenne. Tes pesées corrigeront le niveau avec le temps.",
+                      "D’où vient ce chiffre ?");
     return h + "</section>";
   }
 
@@ -27112,9 +27759,11 @@ body.a-nav .nav { display: flex; }
 
   // Le message d'Olivier (question 5) : sans repas notes, pas de suivi. Et la
   // balance, qui voit ce qui n'est pas note.
-  var NUTRI_CONSIGNE = "Si tu revois ton alimentation, note tous tes repas et " +
-    "pèse-toi chaque semaine. Sans tes repas, l’app ne peut pas te dire si tu " +
-    "tiens ton plafond. Ta balance, elle, dira si tu avances.";
+  // ⚠️ LA CONSIGNE TIENT EN UNE LIGNE, sa raison se deplie (lot coherence,
+  // 20 septembre 2026). Elle disait la meme chose en trois phrases.
+  var NUTRI_COURT = "Note tous tes repas et pèse-toi chaque semaine.";
+  var NUTRI_LONG = "Sans tes repas, l’app ne peut pas te dire si tu tiens ton " +
+    "plafond. Ta balance, elle, dira si tu avances.";
 
   function semainesTexte(n) {
     return "~" + n + " semaine" + (n > 1 ? "s" : "");
@@ -27144,7 +27793,7 @@ body.a-nav .nav { display: flex; }
     }
     h += "</div>";
     if (hp.plafond) {
-      h += '<p class="cb-vide">' + esc(NUTRI_CONSIGNE) + "</p>";
+      h += pourquoiHtml("nutri-consigne", NUTRI_COURT, NUTRI_LONG, "Pourquoi ?");
     } else {
       // SANS TAILLE NI AGE, PAS DE PLAFOND : la depense de reference ne se
       // calcule pas, et un plafond invente serait pire que pas de plafond.
@@ -27294,7 +27943,7 @@ body.a-nav .nav { display: flex; }
    module a l'autre.
    =========================================================================== */
 
-  var APP_VERSION = "1.29.0";
+  var APP_VERSION = "1.36.0";
 
   function has(o, k) { return Object.prototype.hasOwnProperty.call(o, k); }
 
@@ -27307,6 +27956,62 @@ body.a-nav .nav { display: flex; }
     return String(s == null ? "" : s)
       .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
       .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+  }
+
+  // -------------------------------------------------------------------------
+  // LA POLICE DES CHIFFRES EST RESERVEE AUX NOMBRES
+  // -------------------------------------------------------------------------
+  // 🔴 Audit UX du 19 septembre 2026, constat 3.8 : la police a chasse fixe
+  // (`.num`) habillait aussi des mots, « Programme et repas », « Perdre du
+  // gras », « non renseigne », « Jeudi · Au lever ». Elle existe pour aligner
+  // des colonnes de chiffres ; sur du texte, elle se lit comme une erreur.
+  //
+  // UNE SEULE REGLE, ET C'EST ELLE QUE LE BANC MESURE (`banc_coherence.py`) :
+  // au moins un chiffre, et rien d'autre que des chiffres, des separateurs et
+  // une unite. Le « v » d'un numero de version est admis.
+  // Les unites ecrites en toutes lettres comptent aussi : « ~49 semaines » est
+  // un nombre suivi de son unite, comme « 8,5 km ». « Série », lui, PRECEDE le
+  // nombre : c'est un libelle, et il reste dans la police du texte.
+  var NUM_UNITES = "kg|g|mg|cm|m|km|min|mn|h|s|sec|kcal|kj|reps|o|ko|mo|ans|j|sem|%" +
+    "|semaine|semaines|jour|jours|minute|minutes|heure|heures|seconde|secondes|kilo|kilos";
+  // ⚠️ LE SIGNE MOINS S'ECRIT EN CODE (−), et le tiret cadratin
+  // n'est pas de la partie : la regle d'or l'interdit partout, y compris
+  // sous sa forme echappee, et le controle du livrable le verifie.
+  var NUM_RESTE = /[^0-9\s.,:;·\/+×x\u2212-]/g;
+
+  // ⚠️ ON NE JUGE QUE LES LETTRES. Une pastille vide (« - »), une coche ou une
+  // flamme ne sont pas des mots : les refuser ferait sortir de la police des
+  // chiffres des reperes qui s'alignent avec eux.
+  var NUM_LETTRE = /[A-Za-zÀ-ÖØ-öø-ÿ]/;
+
+  function estValeurChiffree(s) {
+    var t = String(s == null ? "" : s).trim();
+    t = t.replace(/^v(?=[0-9])/i, "");
+    t = t.replace(new RegExp("(^|[^A-Za-zÀ-ÖØ-öø-ÿ])(" + NUM_UNITES +
+                             ")(?![A-Za-zÀ-ÖØ-öø-ÿ])", "gi"), "$1 ");
+    return !NUM_LETTRE.test(t);
+  }
+
+  // La classe de la police des chiffres, posee seulement si la valeur en est un.
+  function classeNum(s, base) {
+    return (base ? base : "") + (estValeurChiffree(s) ? (base ? " num" : "num") : "");
+  }
+
+  // -------------------------------------------------------------------------
+  // « POURQUOI CE CHIFFRE ? » : UNE PHRASE UTILE, LE RESTE DERRIERE UN TOUCHER
+  // -------------------------------------------------------------------------
+  // 🔴 Audit UX, constat 3.3 : les cartes portaient deux a quatre phrases
+  // d'explication. C'est honnete, et c'est illisible entre deux series.
+  // L'honnetete ne disparait pas : elle se deplie. `court` et `longue` sont du
+  // HTML deja compose par l'appelant, jamais de la saisie.
+  function pourquoiHtml(cle, court, longue, libelle) {
+    var ouvert = state.pourquoi === cle;
+    var h = '<p class="cr-p">' + court +
+            ' <button type="button" class="pourquoi" data-action="pourquoi"' +
+            ' data-k="' + esc(cle) + '" aria-expanded="' + (ouvert ? "true" : "false") + '">' +
+            esc(libelle || "Pourquoi ce chiffre ?") + "</button></p>";
+    if (ouvert) h += '<p class="pourquoi-t">' + longue + "</p>";
+    return h;
   }
 
   // =========================================================================
@@ -27368,10 +28073,25 @@ body.a-nav .nav { display: flex; }
     // Le formulaire d'une autre activite, et la confirmation de sa suppression.
     // Non persistes : une saisie de quatre champs se refait.
     libreForm: null, libreSupprimer: false,
+    // LE BLOC « AUTRE CHOSE AUJOURD'HUI », REPLIE PAR DEFAUT (accord d'Olivier,
+    // 20 septembre 2026) : l'ecran repond d'abord a « qu'est-ce que je fais
+    // aujourd'hui ». Non persiste : il se replie a chaque ouverture de l'appli.
+    autreOuvert: false,
+    // LE PANNEAU D'ACTIONS DE L'EXERCICE EN COURS. Non persiste : il se
+    // rouvre a la demande, et se ferme a chaque changement d'exercice.
+    exoMenu: false,
+    // L'EXPLICATION DEPLIEE (« Pourquoi ce chiffre ? »), par sa cle, ou "".
+    // Non persistee : une explication lue hier n'a pas a rouvrir l'ecran
+    // d'aujourd'hui deplie.
+    pourquoi: "",
     // LA DEMANDE « TU T'ARRETES LA ? » en cours de seance, et le message d'une
     // saisie refusee sur une carte (une sortie sans duree). Non persistes : ils
     // n'ont de sens que sur l'ecran ou ils viennent d'apparaitre.
     quitterDemande: false, saisieMsg: "", saisieCle: "",
+    // L'ACTIVITE NOTEE QU'ON EST EN TRAIN DE CORRIGER, par sa cle « ji-k », ou
+    // "". Non persistee : rouvrir l'appli sur un formulaire de correction
+    // ouvert la veille n'aurait aucun sens.
+    corrige: "",
     // L'encart des cinq seances, sur l'accueil. Ouvert par defaut, comme la
     // maquette ; le bouton « Fermer la liste » le replie.
     // \u26a0\ufe0f REPLIEE PAR DEFAUT. Demande d'Olivier : sous la carte du jour on
@@ -27391,6 +28111,11 @@ body.a-nav .nav { display: flex; }
     // rechargement. Rouvrir l'appli sur une fiche qu'on consultait la veille
     // serait desorientant.
     recherche: "", ficheEx: "",
+    // D'OU LA FICHE A ETE OUVERTE : "salle" depuis une seance en cours, "" sinon
+    // (l'Historique). Elle decide de son bouton de retour, et depuis la seance
+    // elle retire la nav et le glissement : sortir par un onglet laisserait la
+    // seance en plan.
+    ficheRetour: "",
     // D'ou l'on est entre dans le diagnostic, pour savoir ou rendre la main.
     retourDe: "",
     // La reponse collee et sa relecture. EPHEMERES, et volontairement : garder
@@ -27616,6 +28341,10 @@ body.a-nav .nav { display: flex; }
     // duree l'avait ecarte. Les deux sont des DECISIONS de l'utilisateur, pas
     // du generateur : elles survivent a un changement de duree de seance.
     obRetires: {}, obAjouts: {},
+    // LES RETRAITS DEMANDES PENDANT UNE SEANCE, en attente de la fin de
+    // celle-ci (`appliquerRetireApres`). PERSISTE : une seance interrompue se
+    // reprend, et la demande doit la retrouver.
+    retireApres: {},
     // LE PLAN REPAS RAPPORTE DE L'ASSISTANT, et le jour ou il l'a ete.
     // PERSISTES : un plan qu'il faudrait recoller a chaque lancement ne servirait
     // a rien. Le texte est garde TEL QUEL, l'appli ne le decoupe pas : elle n'a
@@ -27656,7 +28385,7 @@ body.a-nav .nav { display: flex; }
     "obPeseeJour", "obPeseeMoment", "peseeFaite", "obSupps", "obAct", "actFaits",
     "obRunNiveau", "obRunDuree", "obEviter",
     "hist", "pesees", "dernierExport",
-    "obRetires", "obAjouts", "iaPlan", "progDec", "progRegl", "repas", "perso", "obDepense", "forme",
+    "obRetires", "obAjouts", "retireApres", "iaPlan", "progDec", "progRegl", "repas", "perso", "obDepense", "forme",
     // Le choix de l'alimentation et l'horizon (chantier du 18 septembre 2026).
     "obNutri", "nutriPlafond", "horizonDebut",
     // 🔴 `photo` N'EST PLUS SAUVEE depuis le 17 septembre 2026 (photo de profil
@@ -27970,7 +28699,7 @@ body.a-nav .nav { display: flex; }
   // affiche, repose a chaque rendu par `rendreCorps` (voir `dernierOnglet`).
   // Ouvert depuis Nutrition, l'Historique ramene a Nutrition. Les valeurs
   // ecrites ici ne servent qu'avant le premier rendu.
-  var PARENT = { fiche: "histo", profil: "moi", monprog: "moi", exos: "monprog", theme: "moi", ia: "moi",
+  var PARENT = { fiche: "histo", monprog: "moi", exos: "monprog", theme: "moi", ia: "moi",
                  apercu: "jour", libre: "jour", repas: "nutri", scan: "repas",
                  histo: "jour", moi: "jour" };
 
@@ -28004,7 +28733,9 @@ body.a-nav .nav { display: flex; }
     // CLES `moi` et `profil` ne changent pas : les bancs et la sauvegarde les
     // connaissent.
     moi:     "Profil",
-    profil:  "Mes infos",
+    // 🔴 L'ECRAN « Mes infos » A DISPARU LE 20 SEPTEMBRE 2026 (lot 4) :
+    // il repetait, un niveau plus bas, les reponses que Profil porte
+    // desormais avec leurs valeurs.
     monprog: "Mon programme",
     exos:    "Mes exercices",
     theme:   "Apparence",
@@ -28139,6 +28870,8 @@ body.a-nav .nav { display: flex; }
   function cibleDe(dir) {
     var e = state.ecran, i, n;
     if (FIGES[e]) return null;
+    // Une fiche ouverte depuis la seance ne se quitte que par son bouton.
+    if (e === "fiche" && state.ficheRetour === "salle") return null;
     if (has(PARENT, e)) return dir > 0 ? PARENT[e] : null;
     i = ONGLETS.indexOf(e);
     if (i < 0) return null;
@@ -28639,7 +29372,7 @@ body.a-nav .nav { display: flex; }
                           histoHtml() };
     }
     if (e === "fiche") {
-      return { plein: null, interieur: ficheHtml(), nav: nav };
+      return { plein: null, interieur: ficheHtml(), nav: nav && state.ficheRetour !== "salle" };
     }
     if (e === "prog") {
       return { plein: null, nav: nav,
@@ -28668,10 +29401,6 @@ body.a-nav .nav { display: flex; }
       return { plein: null, nav: nav,
                interieur: retourHtml(e) + '<h1 class="ecran-titre-2">' + esc(TITRES.moi) + "</h1>" +
                           moiHtml() };
-    }
-    if (e === "profil") {
-      return { plein: null, nav: nav,
-               interieur: retourHtml(e) + '<h1 class="ecran-titre-2">' + esc(TITRES.profil) + '</h1>' + profilHtml() };
     }
     if (e === "monprog") {
       return { plein: null, nav: nav,
@@ -29123,6 +29852,15 @@ body.a-nav .nav { display: flex; }
     if (action === "autre-place") { remplacerParAutreChose(); return; }
     if (action === "autre-plus") { ajouterAutreChoseEnPlus(state.autreChoix); return; }
     if (action === "autre-annuler") { poser({ autreChoix: "", choixPour: "" }); return; }
+    // Le bloc replie, et son ouverture (20 septembre 2026).
+    // Le depliant d'explication : un second toucher le referme.
+    if (action === "pourquoi") {
+      var _pk = n.getAttribute("data-k") || "";
+      poser({ pourquoi: state.pourquoi === _pk ? "" : _pk });
+      return;
+    }
+    if (action === "autre-ouvrir") { poser({ autreOuvert: true }); return; }
+    if (action === "autre-fermer") { poser({ autreOuvert: false, autreChoix: "", choixPour: "" }); return; }
     if (action === "plus-retirer") { retirerEnPlus(n.getAttribute("data-k")); return; }
     // --- Une autre activite : voir `libreHtml` (block_jour.js) ---
     if (action === "libre-modifier") {
@@ -29155,6 +29893,11 @@ body.a-nav .nav { display: flex; }
       validerActivite(parseInt(n.getAttribute("data-ji"), 10), cleDeCreneau(n.getAttribute("data-k")));
       return;
     }
+    if (action === "act-corriger") {
+      corrigerActivite(parseInt(n.getAttribute("data-ji"), 10), cleDeCreneau(n.getAttribute("data-k")));
+      return;
+    }
+    if (action === "act-annuler") { annulerCorrection(); return; }
     if (action === "run-lieu") {
       // Le lieu d'une sortie EN PLUS vit dans la liste du jour, pas dans les
       // activites declarees au diagnostic.
@@ -29183,6 +29926,21 @@ body.a-nav .nav { display: flex; }
       return;
     }
     if (action === "repas-annuler") { poser({ repasSel: null }); return; }
+    // TES HABITUELS ET LE REPAS D'HIER (lot 1 du parcours, 19 septembre 2026).
+    // La liste est recalculee au toucher, comme `repas-choisir` : elle est
+    // deterministe, le rang touche designe la meme ligne.
+    if (action === "repas-habituel") {
+      var _h = repasHabituels(state.repasM || 0)[parseInt(n.getAttribute("data-i"), 10)];
+      if (_h) repasAjouterLignes(state.repasM || 0, [_h]);
+      return;
+    }
+    if (action === "repas-refaire") {
+      var _a = repasAnterieur(state.repasM || 0);
+      if (_a && !repasDuJour(cleDate(new Date()))[state.repasM || 0].length) {
+        repasAjouterLignes(state.repasM || 0, _a.lignes);
+      }
+      return;
+    }
     if (action === "repas-moins") {
       poser({ repasNb: Math.max(1, (state.repasNb || 1) - 1) });
       return;
@@ -29342,7 +30100,6 @@ body.a-nav .nav { display: flex; }
     if (action === "mode-chart") { poser({ modeChart: parseInt(n.getAttribute("data-v"), 10) }); return; }
 
     // --- Branche Moi ---
-    if (action === "aller-profil") { aller("profil"); return; }
     // Mon programme s'ouvre replie a chaque visite (19 septembre 2026). Le
     // retour depuis « Mes exercices » ne passe pas ici : il retrouve ce qu'on
     // avait deplie.
@@ -29415,13 +30172,29 @@ body.a-nav .nav { display: flex; }
       return;
     }
     if (action === "exo-ajouter") { exoAjouter(n.getAttribute("data-cle")); return; }
+    // Les actions sur l'exercice EN COURS DE SEANCE. Le retrait ne prend effet
+    // qu'a la seance suivante (`appliquerRetireApres`).
+    if (action === "basculer-exo-menu") { poser({ exoMenu: !state.exoMenu }); return; }
+    if (action === "exo-retirer-seance") {
+      exoRetirerApresSeance(n.getAttribute("data-cle") || "");
+      return;
+    }
+    if (action === "exo-garder") { exoGarder(n.getAttribute("data-cle") || ""); return; }
     // La proposition de niveau de course. \u26a0\ufe0f LES DEUX BRANCHES POSENT UNE
     // DECISION : sans cela, refuser laisserait la carte reapparaitre au rendu
     // suivant avec exactement la meme phrase.
     if (action === "rv-oui") { runVerdictDecider(true); return; }
     if (action === "rv-non") { runVerdictDecider(false); return; }
 
-    if (action === "fiche") { poser({ ficheEx: n.getAttribute("data-nom"), ecran: "fiche" }); window.scrollTo(0,0); return; }
+    if (action === "fiche") { poser({ ficheEx: n.getAttribute("data-nom"), ficheRetour: "", ecran: "fiche" }); window.scrollTo(0,0); return; }
+    // LA FICHE OUVERTE DEPUIS LA SEANCE, et son retour. La seance en cours
+    // n'est pas touchee : on la retrouve a la serie ou on l'avait laissee.
+    if (action === "fiche-exo") {
+      poser({ ficheEx: n.getAttribute("data-nom"), ficheRetour: "salle", ecran: "fiche" });
+      window.scrollTo(0, 0);
+      return;
+    }
+    if (action === "fiche-retour") { poser({ ecran: "salle", ficheRetour: "" }); window.scrollTo(0, 0); return; }
     if (action === "fiche-seance") { ouvrirFicheSeance(n.getAttribute("data-d")); return; }
 
     if (action === "splash-passer") {
@@ -29840,7 +30613,7 @@ body.a-nav .nav { display: flex; }
     // faire sortir, ne se voit pas depuis le DOM. Il a fallu trois portes pour
     // s'apercevoir que les trois phrases sur le poids qui descend etaient
     // inaffichables, leur seule condition valant `false` ecrit en dur.
-    contexteMotivation: contexteMotivation,
+    contexteMotivation: contexteMotivation, contexteFin: contexteFin,
     motivation: motivation,
     MOTIV: MOTIV,
     // Le moteur greffe de la v1.21.0. Il reste enferme dans sa propre portee ;
