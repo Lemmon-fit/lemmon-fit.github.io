@@ -9613,9 +9613,18 @@ body.a-nav .nav { display: flex; }
      faire, et ces chiffres se relisent avant d'etre livres
      (`py controle/verifier_aliments.py`).
 
-     ⚠️ CES VALEURS SONT DES ORDRES DE GRANDEUR, pas des mesures. Elles
-     n'ont pas ete confrontees une par une a une table officielle. L'ecran
-     doit donc dire que le chiffre est une estimation.
+     CE QUE VALENT CES CHIFFRES, compte au 21 septembre 2026 et pas
+     estime. LES TROIS MACRONUTRIMENTS viennent de Ciqual pour 108 des
+     109 aliments : seule la boisson proteinee reste vide, parce que sa
+     composition est l'argument de vente du produit et va de 3 a 25 g.
+     L'ENERGIE, elle, est plus inegale : 24 aliments la tiennent de la
+     ligne Ciqual exacte dont ils portent le nom, 67 de la mediane d'un
+     nuage de lignes voisines, et 18 restent une estimation maison.
+
+     ⚠️ CES 18 VALEURS SONT DES ORDRES DE GRANDEUR, pas des mesures, et
+     les grammages des reperes de main aussi : aucune table officielle
+     ne dit ce que pese un poing. L'ecran doit donc continuer de dire
+     que le chiffre est une estimation.
      ========================================================================== */
 
   // Ce que valent les reperes de main, et comment on les explique. Si le
@@ -9666,15 +9675,15 @@ body.a-nav .nav { display: flex; }
     { n: "Veau", f: "viande-blanche", u: "paume", g: 110, ut: "paume", k: 170, kcal: 187, p: 28.6, prot: 31.5, gl: 0.0, gluc: 0.0, li: 9.6, lip: 10.6 },
     { n: "Œuf", f: "viande-blanche", u: "piece", g: 55, ut: "œuf", k: 145, kcal: 80, p: 13.2, prot: 7.3, gl: 1.2, gluc: 0.7, li: 8.8, lip: 4.8 },
     { n: "Porc", f: "viande-rouge", u: "paume", g: 110, ut: "paume", k: 240, kcal: 264, p: 30.0, prot: 33.0, gl: 0.0, gluc: 0.0, li: 8.4, lip: 9.2 },
-    { n: "Bœuf haché 5 %", f: "viande-rouge", u: "paume", g: 110, ut: "paume", k: 155, kcal: 170, p: 23.8, prot: 26.2, gl: 0.0, gluc: 0.0, li: 14.9, lip: 16.4 },
-    { n: "Bœuf haché 15 %", f: "viande-rouge", u: "paume", g: 110, ut: "paume", k: 239, kcal: 263, p: 23.8, prot: 26.2, gl: 0.0, gluc: 0.0, li: 14.9, lip: 16.4 },
-    { n: "Steak", f: "viande-rouge", u: "paume", g: 110, ut: "paume", k: 128, kcal: 141, p: 23.8, prot: 26.2, gl: 0, gluc: 0.0, li: 14.9, lip: 16.4 },
-    { n: "Agneau", f: "viande-rouge", u: "paume", g: 110, ut: "paume", k: 169, kcal: 186, p: 26.6, prot: 29.3, gl: 0.0, gluc: 0.0, li: 7.8, lip: 8.6 },
-    { n: "Jambon blanc", f: "charcuterie", u: "piece", g: 45, ut: "tranche", k: 117, kcal: 53, p: 20.3, prot: 9.1, gl: 0.8, gluc: 0.4, li: 4.2, lip: 1.9 },
+    { n: "Bœuf haché 5 %", f: "viande-rouge", u: "paume", g: 110, ut: "paume", k: 155, kcal: 170, p: 25.5, prot: 28.1, gl: 0.0, gluc: 0.0, li: 5.8, lip: 6.4 },
+    { n: "Bœuf haché 15 %", f: "viande-rouge", u: "paume", g: 110, ut: "paume", k: 239, kcal: 263, p: 23.6, prot: 26.0, gl: 0.0, gluc: 0.0, li: 16.1, lip: 17.7 },
+    { n: "Steak", f: "viande-rouge", u: "paume", g: 110, ut: "paume", k: 128, kcal: 141, p: 27.6, prot: 30.4, gl: 0.0, gluc: 0.0, li: 1.9, lip: 2.1 },
+    { n: "Agneau", f: "viande-rouge", u: "paume", g: 110, ut: "paume", k: 169, kcal: 186, p: 26.8, prot: 29.5, gl: 0.0, gluc: 0.0, li: 6.8, lip: 7.5 },
+    { n: "Jambon blanc", f: "charcuterie", u: "piece", g: 45, ut: "tranche", k: 117, kcal: 53, p: 20.5, prot: 9.2, gl: 0.8, gluc: 0.4, li: 3.5, lip: 1.6 },
     { n: "Saucisson", f: "charcuterie", u: "piece", g: 8, ut: "rondelle", k: 312, kcal: 25, p: 19.6, prot: 1.6, gl: 1.8, gluc: 0.1, li: 25.6, lip: 2.0 },
     { n: "Lardons", f: "charcuterie", u: "demi-paume", g: 50, ut: "demi-paume", k: 300, kcal: 150, p: 16.7, prot: 8.3, gl: 3.4, gluc: 1.7, li: 22.1, lip: 11.1 },
     { n: "Cabillaud", f: "poisson-blanc", u: "paume", g: 120, ut: "paume", k: 90, kcal: 108, p: 23.3, prot: 28.0, gl: 0.0, gluc: 0.0, li: 0.8, lip: 1.0 },
-    { n: "Colin", f: "poisson-blanc", u: "paume", g: 120, ut: "paume", k: 98, kcal: 118, p: 24.4, prot: 29.3, gl: 0, gluc: 0.0, li: 0.5, lip: 0.6 },
+    { n: "Colin", f: "poisson-blanc", u: "paume", g: 120, ut: "paume", k: 98, kcal: 118, p: 24.4, prot: 29.3, gl: 0.0, gluc: 0.0, li: 0.5, lip: 0.6 },
     { n: "Sole", f: "poisson-blanc", u: "paume", g: 120, ut: "paume", k: 78, kcal: 94, p: 15.7, prot: 18.8, gl: 0.0, gluc: 0.0, li: 1.5, lip: 1.8 },
     { n: "Crevettes", f: "poisson-blanc", u: "paume", g: 120, ut: "paume", k: 100, kcal: 120, p: 19.5, prot: 23.4, gl: 0.2, gluc: 0.2, li: 1.0, lip: 1.2 },
     { n: "Thon au naturel", f: "poisson-blanc", u: "paume", g: 120, ut: "paume", k: 143, kcal: 172, p: 26.8, prot: 32.2, gl: 0.0, gluc: 0.0, li: 3.9, lip: 4.7 },
@@ -9694,16 +9703,16 @@ body.a-nav .nav { display: flex; }
     { n: "Lentilles", f: "legumineuse", u: "poing", g: 150, ut: "poing", k: 115, kcal: 172, p: 10.1, prot: 15.2, gl: 16.2, gluc: 24.3, li: 0.6, lip: 0.9 },
     { n: "Pois chiches", f: "legumineuse", u: "poing", g: 150, ut: "poing", k: 145, kcal: 218, p: 8.3, prot: 12.4, gl: 17.7, gluc: 26.6, li: 3.0, lip: 4.5 },
     { n: "Haricots rouges", f: "legumineuse", u: "poing", g: 150, ut: "poing", k: 116, kcal: 174, p: 9.6, prot: 14.4, gl: 12.3, gluc: 18.4, li: 0.6, lip: 0.9 },
-    { n: "Pommes de terre", f: "tubercule", u: "poing", g: 150, ut: "poing", k: 81, kcal: 122, p: 2.8, prot: 4.2, gl: 21.6, gluc: 32.4, li: 3.2, lip: 4.8 },
+    { n: "Pommes de terre", f: "tubercule", u: "poing", g: 150, ut: "poing", k: 81, kcal: 122, p: 1.8, prot: 2.7, gl: 16.8, gluc: 25.2, li: 0.3, lip: 0.5 },
     { n: "Patate douce", f: "tubercule", u: "poing", g: 150, ut: "poing", k: 90, kcal: 135, p: 1.6, prot: 2.4, gl: 20.8, gluc: 31.2, li: 0.1, lip: 0.1 },
     { n: "Frites", f: "tubercule", u: "poing", g: 150, ut: "poing", k: 236, kcal: 354, p: 3.5, prot: 5.2, gl: 32.7, gluc: 49.0, li: 9.2, lip: 13.8 },
     { n: "Purée", f: "tubercule", u: "poing", g: 150, ut: "poing", k: 90, kcal: 135, p: 1.9, prot: 2.9, gl: 12.8, gluc: 19.2, li: 5.2, lip: 7.8 },
-    { n: "Flocons d'avoine", f: "cereale-seche", u: "coupe", g: 45, ut: "coupe", k: 369, kcal: 166, p: 7.1, prot: 3.2, gl: 34.0, gluc: 15.3, li: 4.7, lip: 2.1 },
+    { n: "Flocons d'avoine", f: "cereale-seche", u: "coupe", g: 45, ut: "coupe", k: 369, kcal: 166, p: 11.4, prot: 5.1, gl: 57.7, gluc: 26.0, li: 7.8, lip: 3.5 },
     { n: "Muesli", f: "cereale-seche", u: "coupe", g: 45, ut: "coupe", k: 400, kcal: 180, p: 9.4, prot: 4.2, gl: 62.3, gluc: 28.0, li: 14.4, lip: 6.5 },
     { n: "Céréales au chocolat", f: "cereale-seche", u: "coupe", g: 45, ut: "coupe", k: 393, kcal: 177, p: 8.2, prot: 3.7, gl: 74.7, gluc: 33.6, li: 5.1, lip: 2.3 },
     { n: "Pétales de maïs", f: "cereale-seche", u: "coupe", g: 45, ut: "coupe", k: 380, kcal: 171, p: 6.5, prot: 2.9, gl: 83.9, gluc: 37.8, li: 0.8, lip: 0.4 },
-    { n: "Brocoli", f: "legume-cuit", u: "poing", g: 150, ut: "poing", k: 22, kcal: 33, p: 2.5, prot: 3.8, gl: 1.2, gluc: 1.8, li: 0.5, lip: 0.8 },
-    { n: "Haricots verts", f: "legume-cuit", u: "poing", g: 150, ut: "poing", k: 29, kcal: 44, p: 1.7, prot: 2.5, gl: 4.2, gluc: 6.3, li: 2.9, lip: 4.3 },
+    { n: "Brocoli", f: "legume-cuit", u: "poing", g: 150, ut: "poing", k: 22, kcal: 33, p: 2.2, prot: 3.3, gl: 1.0, gluc: 1.5, li: 0.5, lip: 0.8 },
+    { n: "Haricots verts", f: "legume-cuit", u: "poing", g: 150, ut: "poing", k: 29, kcal: 44, p: 2.0, prot: 3.0, gl: 3.0, gluc: 4.5, li: 0.2, lip: 0.3 },
     { n: "Courgette", f: "legume-cuit", u: "poing", g: 150, ut: "poing", k: 20, kcal: 30, p: 1.2, prot: 1.8, gl: 2.3, gluc: 3.5, li: 0.3, lip: 0.5 },
     { n: "Carottes", f: "legume-cuit", u: "poing", g: 150, ut: "poing", k: 35, kcal: 52, p: 0.4, prot: 0.6, gl: 6.2, gluc: 9.3, li: 0.3, lip: 0.5 },
     { n: "Épinards", f: "legume-cuit", u: "poing", g: 150, ut: "poing", k: 25, kcal: 38, p: 3.3, prot: 5.0, gl: 0.1, gluc: 0.1, li: 0.4, lip: 0.6 },
@@ -9714,8 +9723,8 @@ body.a-nav .nav { display: flex; }
     { n: "Tomates", f: "legume-cru", u: "poing", g: 70, ut: "poing", k: 19, kcal: 13, p: 0.6, prot: 0.4, gl: 3.7, gluc: 2.6, li: 0.5, lip: 0.3 },
     { n: "Concombre", f: "legume-cru", u: "poing", g: 70, ut: "poing", k: 12, kcal: 8, p: 0.6, prot: 0.4, gl: 2.5, gluc: 1.8, li: 0.3, lip: 0.2 },
     { n: "Carottes râpées", f: "legume-cru", u: "poing", g: 70, ut: "poing", k: 30, kcal: 21, p: 0.8, prot: 0.6, gl: 5.2, gluc: 3.6, li: 0.5, lip: 0.3 },
-    { n: "Pomme", f: "fruit", u: "piece", g: 150, ut: "pomme", k: 54, kcal: 81, p: 0.2, prot: 0.3, gl: 12.9, gluc: 19.4, li: 0.5, lip: 0.8 },
-    { n: "Banane", f: "fruit", u: "piece", g: 120, ut: "banane", k: 88, kcal: 106, p: 1.1, prot: 1.3, gl: 28.9, gluc: 34.7, li: 0.4, lip: 0.5 },
+    { n: "Pomme", f: "fruit", u: "piece", g: 150, ut: "pomme", k: 54, kcal: 81, p: 0.2, prot: 0.3, gl: 11.6, gluc: 17.4, li: 0.2, lip: 0.3 },
+    { n: "Banane", f: "fruit", u: "piece", g: 120, ut: "banane", k: 88, kcal: 106, p: 1.1, prot: 1.3, gl: 19.7, gluc: 23.6, li: 0.5, lip: 0.6 },
     { n: "Orange", f: "fruit", u: "piece", g: 150, ut: "orange", k: 47, kcal: 70, p: 0.8, prot: 1.2, gl: 8.0, gluc: 12.0, li: 0.5, lip: 0.8 },
     { n: "Clémentine", f: "fruit", u: "piece", g: 70, ut: "clémentine", k: 47, kcal: 33, p: 0.8, prot: 0.6, gl: 9.2, gluc: 6.4, li: 0.5, lip: 0.3 },
     { n: "Kiwi", f: "fruit", u: "piece", g: 80, ut: "kiwi", k: 60, kcal: 48, p: 0.9, prot: 0.7, gl: 11.0, gluc: 8.8, li: 0.6, lip: 0.5 },
@@ -9725,8 +9734,8 @@ body.a-nav .nav { display: flex; }
     { n: "Yaourt nature", f: "laitier", u: "piece", g: 125, ut: "pot", k: 60, kcal: 75, p: 4.2, prot: 5.2, gl: 4.7, gluc: 5.9, li: 2.8, lip: 3.5 },
     { n: "Yaourt aux fruits", f: "laitier", u: "piece", g: 125, ut: "pot", k: 95, kcal: 119, p: 3.3, prot: 4.1, gl: 11.7, gluc: 14.6, li: 2.6, lip: 3.2 },
     { n: "Skyr", f: "laitier", u: "piece", g: 125, ut: "pot", k: 60, kcal: 75, p: 10.0, prot: 12.5, gl: 4.0, gluc: 5.0, li: 0.2, lip: 0.2 },
-    { n: "Fromage blanc", f: "laitier", u: "piece", g: 125, ut: "pot", k: 76, kcal: 95, p: 6.5, prot: 8.1, gl: 4.5, gluc: 5.6, li: 3.2, lip: 4.0 },
-    { n: "Lait", f: "laitier", u: "piece", g: 200, ut: "verre", k: 48, kcal: 96, p: 3.4, prot: 6.8, gl: 5.5, gluc: 11.0, li: 1.6, lip: 3.2 },
+    { n: "Fromage blanc", f: "laitier", u: "piece", g: 125, ut: "pot", k: 76, kcal: 95, p: 7.1, prot: 8.9, gl: 3.9, gluc: 4.9, li: 3.2, lip: 4.0 },
+    { n: "Lait", f: "laitier", u: "piece", g: 200, ut: "verre", k: 48, kcal: 96, p: 3.4, prot: 6.8, gl: 5.0, gluc: 10.0, li: 1.6, lip: 3.2 },
     { n: "Emmental", f: "fromage", u: "pouce", g: 30, ut: "pouce", k: 380, kcal: 114, p: 27.3, prot: 8.2, gl: 0.0, gluc: 0.0, li: 28.8, lip: 8.6 },
     { n: "Comté", f: "fromage", u: "pouce", g: 30, ut: "pouce", k: 400, kcal: 120, p: 27.2, prot: 8.2, gl: 0.0, gluc: 0.0, li: 33.8, lip: 10.1 },
     { n: "Camembert", f: "fromage", u: "pouce", g: 30, ut: "pouce", k: 300, kcal: 90, p: 19.1, prot: 5.7, gl: 0.0, gluc: 0.0, li: 21.5, lip: 6.5 },
@@ -9737,9 +9746,9 @@ body.a-nav .nav { display: flex; }
     { n: "Huile d'olive", f: "matiere-grasse", u: "pouce", g: 12, ut: "pouce", k: 900, kcal: 108, p: 0.2, prot: 0.0, gl: 0.0, gluc: 0.0, li: 99.9, lip: 12.0 },
     { n: "Huile de colza", f: "matiere-grasse", u: "pouce", g: 12, ut: "pouce", k: 900, kcal: 108, p: 0.0, prot: 0.0, gl: 0.0, gluc: 0.0, li: 100.0, lip: 12.0 },
     { n: "Beurre", f: "matiere-grasse", u: "pouce", g: 12, ut: "pouce", k: 750, kcal: 90, p: 0.6, prot: 0.1, gl: 0.8, gluc: 0.1, li: 69.8, lip: 8.4 },
-    { n: "Crème fraîche", f: "matiere-grasse", u: "pouce", g: 12, ut: "pouce", k: 300, kcal: 36, p: 2.5, prot: 0.3, gl: 3.0, gluc: 0.4, li: 30.0, lip: 3.6 },
+    { n: "Crème fraîche", f: "matiere-grasse", u: "pouce", g: 12, ut: "pouce", k: 285, kcal: 34, p: 2.3, prot: 0.3, gl: 1.4, gluc: 0.2, li: 29.9, lip: 3.6 },
     { n: "Beurre de cacahuète", f: "matiere-grasse", u: "pouce", g: 12, ut: "pouce", k: 600, kcal: 72, p: 25.4, prot: 3.0, gl: 17.3, gluc: 2.1, li: 51.4, lip: 6.2 },
-    { n: "Mayonnaise", f: "sauce", u: "pouce", g: 15, ut: "pouce", k: 692, kcal: 104, p: 1.2, prot: 0.2, gl: 6.1, gluc: 0.9, li: 51.5, lip: 7.7 },
+    { n: "Mayonnaise", f: "sauce", u: "pouce", g: 15, ut: "pouce", k: 692, kcal: 104, p: 1.3, prot: 0.2, gl: 3.4, gluc: 0.5, li: 74.5, lip: 11.2 },
     { n: "Vinaigrette", f: "sauce", u: "pouce", g: 15, ut: "pouce", k: 450, kcal: 68, p: 0.6, prot: 0.1, gl: 2.9, gluc: 0.4, li: 50.5, lip: 7.6 },
     { n: "Ketchup", f: "sauce", u: "pouce", g: 15, ut: "pouce", k: 88, kcal: 13, p: 1.3, prot: 0.2, gl: 18.8, gluc: 2.8, li: 0.1, lip: 0.0 },
     { n: "Sauce tomate", f: "sauce", u: "pouce", g: 15, ut: "pouce", k: 60, kcal: 9, p: 1.8, prot: 0.3, gl: 7.6, gluc: 1.1, li: 2.9, lip: 0.4 },
@@ -9757,10 +9766,10 @@ body.a-nav .nav { display: flex; }
     { n: "Croissant", f: "sucrerie", u: "piece", g: 60, ut: "pièce", k: 400, kcal: 240, p: 7.2, prot: 4.3, gl: 45.7, gluc: 27.4, li: 21.1, lip: 12.7 },
     { n: "Glace", f: "sucrerie", u: "piece", g: 60, ut: "boule", k: 200, kcal: 120, p: 3.2, prot: 1.9, gl: 26.8, gluc: 16.1, li: 14.9, lip: 8.9 },
     { n: "Jus d'orange", f: "boisson", u: "piece", g: 200, ut: "verre", k: 45, kcal: 90, p: 0.6, prot: 1.2, gl: 9.6, gluc: 19.2, li: 0.1, lip: 0.2 },
-    { n: "Soda", f: "boisson", u: "piece", g: 200, ut: "verre", k: 40, kcal: 80, p: 0, prot: 0.0, gl: 10.6, gluc: 21.2, li: 0, lip: 0.0 },
+    { n: "Soda", f: "boisson", u: "piece", g: 200, ut: "verre", k: 40, kcal: 80, p: 0.0, prot: 0.0, gl: 10.0, gluc: 20.0, li: 0.0, lip: 0.0 },
     { n: "Bière", f: "boisson", u: "piece", g: 250, ut: "verre", k: 40, kcal: 100, p: 0.4, prot: 1.0, gl: 4.6, gluc: 11.5, li: 0.0, lip: 0.0 },
     { n: "Vin", f: "boisson", u: "piece", g: 125, ut: "verre", k: 85, kcal: 106, p: 0.2, prot: 0.2, gl: 0, gluc: 0.0, li: 0.0, lip: 0.0 },
-    { n: "Café", f: "boisson", u: "piece", g: 200, ut: "tasse", k: 6, kcal: 12, p: 0.1, prot: 0.2, gl: 0, gluc: 0.0, li: 0, lip: 0.0 },
+    { n: "Café", f: "boisson", u: "piece", g: 200, ut: "tasse", k: 6, kcal: 12, p: 0.2, prot: 0.4, gl: 1.4, gluc: 2.8, li: 0.0, lip: 0.0 },
     { n: "Boisson protéinée", f: "boisson", u: "piece", g: 300, ut: "shaker", k: 40, kcal: 120 },
     { n: "Pizza", f: "plat", u: "piece", g: 120, ut: "part", k: 260, kcal: 312, p: 9.7, prot: 11.6, gl: 26.6, gluc: 31.9, li: 8.9, lip: 10.7 },
     { n: "Sandwich", f: "plat", u: "piece", g: 200, ut: "sandwich", k: 230, kcal: 460, p: 10.4, prot: 20.8, gl: 28.2, gluc: 56.4, li: 9.8, lip: 19.6 },
@@ -26529,13 +26538,37 @@ body.a-nav .nav { display: flex; }
   }
 
   /* -------------------------------------------------------------------------
-     NUTRITION : EN CHANTIER
+     NUTRITION
      -------------------------------------------------------------------------
-     ON LIVRE EXACTEMENT CE QUE MONTRE LA MAQUETTE, ET RIEN DE PLUS. Aucun
-     suivi alimentaire, aucune base d'aliments, aucune jauge de progression :
-     une jauge qui se remplit quand on coche un repas mesurerait des coches,
-     pas des calories, et l'utilisateur croirait suivre ce qu'il mange.
+     ⚠️ CET EN-TETE DISAIT « EN CHANTIER : aucun suivi alimentaire, aucune base
+     d'aliments ». C'etait faux depuis le 16 septembre 2026 (repas, Ciqual,
+     code-barres, bilan du jour, proteines du jour), et corrige le 21. Ce qui
+     reste vrai : aucune JAUGE qui se remplit quand on coche un repas. Elle
+     mesurerait des coches, pas des calories.
      ------------------------------------------------------------------------- */
+
+  // CE QU'IL RESTE A PRENDRE EN PROTEINES (21 septembre 2026). Olivier :
+  // « construit la phrase ».
+  //
+  // C'est la premiere marche d'un generateur de repas, reduite a ce qu'elle
+  // peut dire sans rien inventer : la cible moins ce qui est compte. Proposer
+  // un aliment et son grammage a ete chiffre puis ecarte le meme soir. Sur une
+  // journee banale d'un homme de 80 kg, 107 g de proteines restaient a 16 h,
+  // soit 330 g de viande pour la soiree : la cible de 1,8 g par kilo et le
+  // plafond de calories n'ont jamais ete confrontes, et une proposition les
+  // aurait mis face a face tous les soirs. Cette phrase montre le manque reel,
+  // et c'est lui qui dira si une proposition a un sens.
+  //
+  // 🔴 « AU PLUS » QUAND DES ALIMENTS NE SONT PAS CONNUS. Ils apportent peut-
+  // etre des proteines : le reste reel est inferieur ou egal a la difference.
+  // Pour la meme raison, une cible atteinte sur les seuls aliments connus est
+  // atteinte pour de bon, et se dit sans reserve.
+  function protResteHtml(reste, auPlus) {
+    if (reste <= 0) return '<p class="cr-p">Ta cible est atteinte.</p>';
+    return '<p class="cr-p">Il t’en reste ' + (auPlus ? "au plus " : "") +
+           '<b class="num">' + reste + " g</b>.</p>";
+  }
+
   function nutriHtml() {
     var h = "";
     var cal = caloriesDuSport(), pv = proteinesVisees();
@@ -26655,13 +26688,18 @@ body.a-nav .nav { display: flex; }
              "ses protéines : rien à compter.</p>";
       } else if (_pj.lignes && _pj.complet) {
         h += '<p class="cr-p">Aujourd’hui : <b class="num">' + _pj.g +
-             " g</b>.</p>";
+             " g</b>.</p>" + protResteHtml(pv.prot - _pj.g, false);
       } else if (_pj.lignes) {
         h += '<p class="cr-p">Aujourd’hui : <b class="num">' + _pj.g +
              " g</b>, sur " + _pj.connues + " aliment" +
              (_pj.connues > 1 ? "s" : "") + " sur " + _pj.lignes +
-             ". Les autres ne sont pas connus.</p>";
+             ". Les autres ne sont pas connus.</p>" +
+             protResteHtml(pv.prot - _pj.g, true);
       }
+      // ⚠️ RIEN QUAND RIEN N'EST NOTE, et rien non plus quand aucun aliment
+      // note ne porte ses proteines (premiere branche) : « il t'en reste
+      // 145 g » serait vrai le matin et faux le soir d'une journee qu'on n'a
+      // pas notee. Seul ce qui est enregistre compte.
       h += "</section>";
     }
 
@@ -28154,7 +28192,7 @@ body.a-nav .nav { display: flex; }
    module a l'autre.
    =========================================================================== */
 
-  var APP_VERSION = "1.37.0";
+  var APP_VERSION = "1.38.0";
 
   function has(o, k) { return Object.prototype.hasOwnProperty.call(o, k); }
 
@@ -30829,6 +30867,8 @@ body.a-nav .nav { display: flex; }
     reglEtat: reglEtat,
     depensePrevueSemaine: depensePrevueSemaine,
     proteinesVisees: proteinesVisees,
+    // Pour `banc_proteines_reste.py`, qui recalcule le reste affiche.
+    proteinesDuJour: proteinesDuJour,
     aDeLaForce: aDeLaForce,
     // Ce que la preference materiel ou poids du corps ecarte, pour les bancs.
     parPreference: function () { return profilDepuisEtat().parPreference; },
