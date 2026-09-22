@@ -9814,7 +9814,7 @@ body.a-nav .nav { display: flex; }
   // quand le nom de l'aliment dit qu'il est cru : une portion de riz
   // cru pese la moitie d'une portion de riz cuit.
   var CIQUAL_PORTIONS = [{"g":100},{"g":150},{"g":250,"p":"bol"},{"g":250},{"g":150,"p":"part"},{"g":180,"p":"sandwich"},{"g":80,"p":"pièce"},{"g":150},{"g":150},{"g":150,"cru":60},{"g":130,"p":"fruit"},{"g":25},{"g":150,"cru":70},{"g":40,"p":"tranche"},{"g":30},{"g":30},{"g":100},{"g":120},{"g":130},{"g":50,"p":"tranche"},{"g":100},{"g":120},{"g":130},{"g":100},{"g":100},{"g":100},{"g":55,"p":"œuf"},{"g":200,"p":"verre"},{"g":125,"p":"pot"},{"g":30},{"g":30},{"g":250,"p":"verre"},{"g":200,"p":"verre"},{"g":150,"p":"verre"},{"g":15},{"g":20,"p":"carré"},{"g":25},{"g":20},{"g":60,"p":"pièce"},{"g":25,"p":"biscuit"},{"g":40},{"g":30,"p":"barre"},{"g":80,"p":"part"},{"g":100},{"g":60,"p":"boule"},{"g":60,"p":"boule"},{"g":80,"p":"pièce"},{"g":10},{"g":10},{"g":10},{"g":5},{"g":10},{"g":20},{"g":15},{"g":10},{"g":1},{"g":1},{"g":2},{"g":5},{"g":30},{"g":100},{"g":30},{"g":200,"p":"biberon"},{"g":130,"p":"pot"},{"g":100,"p":"pot"},{"g":25}];
-  var TAILLES = [{"cle":"petite","t":"Petite","coef":0.6},{"cle":"normale","t":"Normale","coef":1.0},{"cle":"genereuse","t":"Généreuse","coef":1.5}];
+  var TAILLES = [{"cle":"petite","t":"Petite portion","avant":"petite","coef":0.6},{"cle":"normale","t":"Portion moyenne","avant":"normale","coef":1.0},{"cle":"genereuse","t":"Portion généreuse","avant":"généreuse","coef":1.5}];
 
   // [ nom, kcal pour 100 g, rang du groupe, rang du sous-groupe,
   //   proteines, glucides, lipides, en grammes pour 100 g ]
@@ -26750,7 +26750,7 @@ body.a-nav .nav { display: flex; }
      LIRE UN CODE-BARRES
      --------------------------------------------------------------------------
      Chantier cadre avec Olivier le 16 septembre 2026, voir
-     `CHANTIER_NUTRITION.md`.
+     `CHANTIER_NUTRITION.md`. Decodeur refait le 22 septembre 2026.
 
      🔴 POURQUOI CE DECODAGE EST ECRIT A LA MAIN, ET NON PRIS AILLEURS.
 
@@ -26760,14 +26760,31 @@ body.a-nav .nav { display: flex; }
      l'a pas. S'appuyer dessus donnerait une fonction qui marche chez Google et
      pas chez Olivier, qui a les deux telephones.
 
-     Les bibliotheques toutes faites resolvent ca, au prix de deux à trois cents
+     Les bibliotheques toutes faites resolvent ca, au prix de deux a trois cents
      kilo-octets de code compresse que personne ici ne peut relire, et parfois
-     d'un module WebAssembly, qui obligerait à ouvrir la politique de securite
+     d'un module WebAssembly, qui obligerait a ouvrir la politique de securite
      de l'application. Sur un fichier unique dont chaque ligne est commentee et
      verifiee, c'est un corps etranger.
 
-     Un EAN-13 est une norme publique, stable depuis 1977, et son decodage tient
-     en deux cents lignes lisibles. On les ecrit.
+     🔴 LE 22 SEPTEMBRE 2026, LE PREMIER VRAI TELEPHONE N'A RIEN LU.
+     Olivier, sur son iPhone, depuis l'icone : une image nette, le code-barres
+     sur le trait, et rien. Le premier decodeur n'avait jamais vu que des images
+     fabriquees, parfaites : des barres d'un nombre entier de pixels, noires a 25,
+     blanches a 235, sans flou. Mesure sur 157 VRAIES photos prises au telephone
+     (le corpus de test du projet libre ZXing, `controle/sources/zxing-ean13`) :
+     il en lisait UNE. Trois causes, toutes corrigees ici :
+       1. il comptait les barres en pixels ENTIERS. A deux pixels par module,
+          un demi-pixel d'erreur a chaque bord fait deja un quart de module ;
+       2. un seul seuil pour toute la ligne, a mi-chemin du plus clair et du plus
+          sombre. Une barre fine floutee n'atteint jamais le noir franc : elle
+          disparait, et tout ce qui suit sur la ligne est decale ;
+       3. il n'admettait que 0,75 module d'ecart, cumule sur les quatre barres
+          d'un chiffre. Une vraie photo en a souvent davantage, et c'est a la cle
+          de controle de rattraper un chiffre mal lu, pas a la tolerance de
+          l'interdire.
+     Le nouveau decodeur en lit 106 sur 157, sans aucune lecture fausse. Les
+     18 photos floues du dossier ean13-5, que ZXing lui-meme ne lit pas, ne
+     rendent rien, et c'est ce qu'on attend d'elles.
 
      COMMENT UN EAN-13 EST FAIT, puisque tout le fichier en depend :
 
@@ -26778,8 +26795,7 @@ body.a-nav .nav { display: flex; }
      Un MODULE est la plus fine barre possible. Chaque chiffre occupe sept
      modules, decoupes en quatre barres alternees dont les largeurs font sept.
      Le 0 s'ecrit 0001101, soit trois blancs, deux noirs, un blanc, un noir :
-     les largeurs 3,2,1,1. C'est cette suite de largeurs qu'on mesure, et non
-     les pixels : elle ne depend NI de la distance NI de la taille de l'image.
+     les largeurs 3,2,1,1.
 
      🔴 LE PREMIER CHIFFRE N'EST DESSINE NULLE PART. Douze chiffres seulement
      sont imprimes en barres. Le treizieme, celui de gauche, se lit dans la
@@ -26790,8 +26806,9 @@ body.a-nav .nav { display: flex; }
 
      ⚠️ ON NE REND JAMAIS UN CODE DOUTEUX. Le treizieme chiffre est une CLE DE
      CONTROLE calculee sur les douze autres. Un code mal lu la rate presque
-     toujours, et il est jete. La regle du projet vaut ici comme ailleurs :
-     mieux vaut ne rien rendre que rendre un chiffre faux.
+     toujours, et il est jete. Et il faut que deux lignes de l'image rendent le
+     meme code. La regle du projet vaut ici comme ailleurs : mieux vaut ne rien
+     rendre que rendre un chiffre faux.
      ========================================================================== */
 
   // Les dix chiffres, en LARGEURS de barres, version L.
@@ -26819,119 +26836,214 @@ body.a-nav .nav { display: flex; }
     "LGGLLG", "LGGGLL", "LGLGLG", "LGLGGL", "LGGLGL"
   ];
 
-  // L'ecart tolere entre les largeurs mesurees et celles du chiffre modele,
-  // en modules cumules sur les quatre barres. Au-dela, on refuse de trancher.
-  // ⚠️ CE NOMBRE EST UN COMPROMIS, PAS UNE VERITE : trop serre, un code un peu
-  // flou n'est jamais lu ; trop large, deux chiffres voisins se confondent et
-  // c'est la cle de controle qui doit rattraper, ce qui gaspille des lectures.
-  var CB_ECART_MAX = 0.75;
+  // -------------------------------------------------------------------------
+  // CE QUE L'ON MESURE D'UN CHIFFRE : LES DISTANCES ENTRE BORDS DE MEME SENS
+  // -------------------------------------------------------------------------
+  // C'est la methode de decodage de la norme. Un chiffre a quatre barres e0,
+  // e1, e2, e3. Au lieu de leurs largeurs, on mesure t1 = e0 + e1 (du debut de
+  // e0 au debut de e2) et t2 = e1 + e2 (du debut de e1 au debut de e3).
+  // Chacune va d'un bord a un bord DU MEME SENS, noir vers blanc ou blanc vers
+  // noir : si l'encre epaissit toutes les barres noires d'une meme quantite,
+  // les deux bords bougent ensemble et la distance ne change pas.
+  //
+  // ⚠️ CE CHOIX SUIT LA NORME, AUCUNE MESURE NE L'IMPOSE. Mesure du 22
+  // septembre 2026 : sur les 157 photos, cette methode en lit 106, la
+  // comparaison des largeurs (facon ZXing) 104, et les deux tiennent une encre
+  // qui bave de 0,4 module (197 codes sur 200). Ce qui a fait la difference
+  // avec l'ancien decodeur, ce sont les bords a la virgule, le seuil local et
+  // la tolerance, pas la methode.
+  //
+  // t1 et t2 valent de 2 a 5 modules, et designent le chiffre, sauf deux
+  // paires qui ont les memes : 1 et 7, 2 et 8. Celles-la se departagent a la
+  // largeur totale des barres noires, qui differe de deux modules entiers.
+  //
+  // Les tables se CALCULENT depuis CB_L et CB_G, pour ne pas en recopier une.
+  // `noirsImpairs` dit ou sont les barres noires : a gauche un chiffre commence
+  // par un blanc (noirs en e1 et e3), a droite par un noir (noirs en e0 et e2).
+  function cbTableBords(table, noirsImpairs) {
+    var out = [], d, w;
+    for (d = 0; d < 10; d++) {
+      w = table[d];
+      out.push({ t1: w[0] + w[1], t2: w[1] + w[2],
+                 noirs: noirsImpairs ? w[1] + w[3] : w[0] + w[2] });
+    }
+    return out;
+  }
+  var CB_BORDS_GAUCHE = [
+    { table: cbTableBords(CB_L, true), v: "L" },
+    { table: cbTableBords(CB_G, true), v: "G" }
+  ];
+  var CB_BORDS_DROITE = [{ table: cbTableBords(CB_L, false), v: "R" }];
+
+  // L'ecart tolere entre une distance mesuree et le nombre entier de modules le
+  // plus proche. Au-dela de 0,5 on ne sait plus lequel ; un peu en deca, on
+  // refuse de trancher plutot que de parier.
+  var CB_TOL_BORDS = 0.42;
+
+  // 1 et 7 (ou 2 et 8) : l'avance, en modules, que doit avoir le meilleur des
+  // deux sur l'autre. Les deux candidats different de deux modules de noir, et
+  // une encre qui bave de e module rapproche la mesure de l'autre de 2e.
+  // ⚠️ MESURE, PAS CHOISI A L'OEIL. A 0,4, une encre qui bave de 0,4 module
+  // n'etait plus lue qu'une fois sur trois (64 codes sur 200), alors que la
+  // cle de controle rattrape de toute facon un chiffre isole mal departage. A
+  // 0, un code FAUX est sorti a 0,5 module, la ou 1 et 7 ne se distinguent
+  // plus. A 0,1 : 197 sur 200 a 0,4 module, et rien de faux a 0,5.
+  var CB_TOL_NOIRS = 0.1;
+
+  // 🔴 UN CHIFFRE FAIT SEPT MODULES, ET SON VOISIN AUSSI. D'un chiffre au
+  // suivant la largeur ne varie que de peu, meme de biais ou sur une boite
+  // ronde. Un chiffre qui en fait six ou huit est un chiffre abime : un module
+  // retourne par un pli ou une rayure dessine parfois un AUTRE chiffre valide,
+  // et quand ce chiffre fait six ou huit modules, c'est ce verrou qui le jette.
+  // Mesure du 22 septembre 2026 sur 50 000 codes abimes : 39 sortaient faux
+  // sans lui, 23 avec, exactement autant que l'ancien decodeur.
+  // ⚠️ CEUX QUI RESTENT NE SE RATTRAPERONT PAS : l'abime y dessine un autre
+  // chiffre valide de sept modules, et la cle de controle tombe juste. Aucun
+  // decodeur ne peut les distinguer d'un vrai code.
+  var CB_TOL_CHIFFRE = 0.12;
+
+  // Les gardes centrale et de fin, comparees a la largeur des chiffres.
+  var CB_TOL_GARDE = 0.4;
+
+  // La marge blanche avant et apres le code, en modules. La norme en demande
+  // onze et sept ; une photo cadree serre en laisse moins, trois suffisent a
+  // ecarter un faux depart pris au milieu d'un texte.
+  var CB_MARGE = 2.5;
+
+  // Une ligne sans contraste ne porte pas de code-barres. La declarer lisible
+  // reviendrait a decouper du bruit en barres.
+  var CB_CONTRASTE_MIN = 40;
 
   // -------------------------------------------------------------------------
-  // DES PIXELS AUX LARGEURS
+  // DES PIXELS AUX BARRES
   // -------------------------------------------------------------------------
-  // Une ligne de gris devient une suite de barres : leur couleur et leur
-  // longueur en pixels.
+  // Une ligne de l'image, moyennee avec ses deux voisines. Les barres sont
+  // verticales : moyenner dans leur sens retire du bruit sans rien flouter.
+  function cbProfil(gris, larg, haut, y) {
+    var p = new Float32Array(larg), x, k, n = 0, base;
+    for (k = Math.max(0, y - 1); k <= Math.min(haut - 1, y + 1); k++) {
+      base = k * larg;
+      for (x = 0; x < larg; x++) p[x] += gris[base + x];
+      n++;
+    }
+    for (x = 0; x < larg; x++) p[x] /= n;
+    return p;
+  }
+
+  // RENDRE DU RELIEF A UNE BARRE FINE. Chaque point s'ecarte de la moyenne de
+  // ses deux voisins : c'est ce que le flou a retire. Une barre d'un module
+  // floutee retrouve assez de noir pour franchir le seuil.
+  function cbAccentuer(p) {
+    var n = p.length, s = new Float32Array(n), x;
+    s[0] = p[0]; s[n - 1] = p[n - 1];
+    for (x = 1; x < n - 1; x++) s[x] = 2 * p[x] - (p[x - 1] + p[x + 1]) / 2;
+    return s;
+  }
+
+  // Un profil devient une suite de barres : leur couleur et leur largeur, en
+  // pixels A VIRGULE.
   //
-  // ⚠️ LE SEUIL EST CALCULE SUR CHAQUE LIGNE, jamais fixe une fois pour
-  // toutes. Une photo prise dans un rayon de supermarche est sombre d'un cote
-  // et brulee de l'autre : un seuil global rendrait la moitie de l'image toute
-  // noire. Le milieu entre le plus clair et le plus sombre DE CETTE LIGNE
-  // suit l'eclairage.
-  function cbBarres(gris, debut, n) {
-    var min = 255, max = 0, i, v, seuil, out = [], noir, courant = -1;
-    for (i = 0; i < n; i++) {
-      v = gris[debut + i];
-      if (v < min) min = v;
-      if (v > max) max = v;
-    }
-    // Une ligne sans contraste ne porte pas de code-barres. La declarer
-    // lisible reviendrait a decouper du bruit en barres.
-    if (max - min < 40) return out;
-    seuil = (min + max) / 2;
-    for (i = 0; i < n; i++) {
-      noir = gris[debut + i] < seuil;
-      if (noir !== courant) {
-        out.push({ noir: noir, n: 1 });
-        courant = noir;
-      } else {
-        out[out.length - 1].n++;
+  // ⚠️ LE SEUIL SUIT L'ECLAIRAGE. Une photo prise dans un rayon de supermarche
+  // est sombre d'un cote et brulee de l'autre. La ligne est coupee en blocs ;
+  // le seuil d'un bloc est le milieu entre le plus clair et le plus sombre de
+  // ses voisins, et il glisse d'un bloc a l'autre au lieu de sauter. Dans une
+  // plage unie, ou il n'y a rien a separer, on reprend le seuil de la ligne
+  // entiere : sinon le moindre grain d'un fond blanc deviendrait des barres.
+  //
+  // ⚠️ LE BORD TOMBE ENTRE DEUX PIXELS, la ou la courbe croise le seuil, et non
+  // sur le pixel le plus proche. C'est ce qui rend lisible un code de deux
+  // pixels par module.
+  function cbBarresDuProfil(p) {
+    var n = p.length, min = 1e9, max = -1e9, x, v, out = [];
+    for (x = 0; x < n; x++) { v = p[x]; if (v < min) min = v; if (v > max) max = v; }
+    if (max - min < CB_CONTRASTE_MIN) return out;
+    var global = (min + max) / 2, plancher = Math.max(24, 0.25 * (max - min));
+    var B = Math.max(8, Math.round(n / 64)), nb = Math.ceil(n / B);
+    var bmin = [], bmax = [], seuils = new Float32Array(nb), b, i, lo, hi;
+    for (b = 0; b < nb; b++) {
+      lo = 1e9; hi = -1e9;
+      for (x = b * B; x < Math.min(n, (b + 1) * B); x++) {
+        v = p[x]; if (v < lo) lo = v; if (v > hi) hi = v;
       }
+      bmin.push(lo); bmax.push(hi);
     }
+    for (b = 0; b < nb; b++) {
+      lo = 1e9; hi = -1e9;
+      for (i = Math.max(0, b - 3); i <= Math.min(nb - 1, b + 3); i++) {
+        if (bmin[i] < lo) lo = bmin[i];
+        if (bmax[i] > hi) hi = bmax[i];
+      }
+      seuils[b] = (hi - lo >= plancher) ? (lo + hi) / 2 : global;
+    }
+    function seuil(xx) {
+      var f = xx / B - 0.5, b0 = Math.floor(f), t;
+      if (b0 < 0) return seuils[0];
+      if (b0 >= nb - 1) return seuils[nb - 1];
+      t = f - b0;
+      return seuils[b0] * (1 - t) + seuils[b0 + 1] * t;
+    }
+    var prec = p[0] - seuil(0), noir = prec < 0, debut = 0, d, pos;
+    for (x = 1; x < n; x++) {
+      d = p[x] - seuil(x);
+      if ((d < 0) !== noir) {
+        pos = (x - 1) + prec / (prec - d);
+        if (!(pos >= x - 1 && pos <= x)) pos = x - 0.5;
+        out.push({ noir: noir, n: pos - debut });
+        debut = pos;
+        noir = d < 0;
+      }
+      prec = d;
+    }
+    out.push({ noir: noir, n: n - debut });
     return out;
   }
 
   // -------------------------------------------------------------------------
-  // DES LARGEURS AUX CHIFFRES
+  // DES BARRES AUX CHIFFRES
   // -------------------------------------------------------------------------
-  // Quatre barres valent un chiffre. On ramene leurs largeurs a des modules,
-  // puis on cherche le modele le plus proche, dans L et dans G.
-  //
-  // ⚠️ L'UNITE SE RECALCULE A CHAQUE CHIFFRE, a partir de ses quatre barres,
-  // et n'est pas prise une fois sur la garde de debut. Un code-barres
-  // photographie de biais, ou colle sur une bouteille ronde, n'a pas la meme
-  // echelle a gauche et a droite : une unite figee perdrait le dernier tiers.
-  function cbChiffre(barres, i) {
-    var total = 0, k, unite, ecart, meilleur = null, mEcart = CB_ECART_MAX;
-    for (k = 0; k < 4; k++) {
-      if (!barres[i + k]) return null;
-      total += barres[i + k].n;
-    }
-    unite = total / 7;
-    if (!(unite > 0)) return null;
-
-    function essayer(table, version) {
-      var d, e;
-      for (d = 0; d < 10; d++) {
-        e = 0;
-        for (k = 0; k < 4; k++) e += Math.abs(barres[i + k].n / unite - table[d][k]);
-        if (e < mEcart) { mEcart = e; meilleur = { d: d, v: version }; }
+  // Quatre barres valent un chiffre, lu dans une des tables donnees. Rend
+  // { d, v, P } (le chiffre, sa version, sa largeur en pixels) ou null.
+  function cbChiffre(barres, i, tables) {
+    var e0, e1, e2, e3, P, T1, T2, r1, r2, k, j, t, cand = [], noirs, ec,
+        meilleur = null, second = null;
+    for (k = 0; k < 4; k++) if (!barres[i + k]) return null;
+    e0 = barres[i].n; e1 = barres[i + 1].n; e2 = barres[i + 2].n; e3 = barres[i + 3].n;
+    P = e0 + e1 + e2 + e3;
+    if (!(P > 0)) return null;
+    T1 = (e0 + e1) * 7 / P;
+    T2 = (e1 + e2) * 7 / P;
+    r1 = Math.round(T1);
+    r2 = Math.round(T2);
+    if (Math.abs(T1 - r1) > CB_TOL_BORDS || Math.abs(T2 - r2) > CB_TOL_BORDS) return null;
+    for (j = 0; j < tables.length; j++) {
+      t = tables[j].table;
+      for (k = 0; k < 10; k++) {
+        if (t[k].t1 === r1 && t[k].t2 === r2) cand.push({ d: k, v: tables[j].v, noirs: t[k].noirs });
       }
     }
-    essayer(CB_L, "L");
-    essayer(CB_G, "G");
-    return meilleur;
-  }
-
-  // Les six chiffres de DROITE n'ont qu'une version. Leur essayer aussi la
-  // version G ferait accepter des lectures que la parite doit refuser, et le
-  // premier chiffre, qui se lit dans cette parite, deviendrait n'importe quoi.
-  function cbChiffreDroite(barres, i) {
-    var total = 0, k, unite, meilleur = null, mEcart = CB_ECART_MAX, d, e;
-    for (k = 0; k < 4; k++) {
-      if (!barres[i + k]) return null;
-      total += barres[i + k].n;
+    if (!cand.length) return null;
+    if (cand.length === 1) return { d: cand[0].d, v: cand[0].v, P: P };
+    noirs = (barres[i].noir ? e0 + e2 : e1 + e3) * 7 / P;
+    for (j = 0; j < cand.length; j++) {
+      ec = Math.abs(noirs - cand[j].noirs);
+      if (!meilleur || ec < meilleur.ec) { second = meilleur; meilleur = { c: cand[j], ec: ec }; }
+      else if (!second || ec < second.ec) second = { c: cand[j], ec: ec };
     }
-    unite = total / 7;
-    if (!(unite > 0)) return null;
-    for (d = 0; d < 10; d++) {
-      e = 0;
-      for (k = 0; k < 4; k++) e += Math.abs(barres[i + k].n / unite - CB_L[d][k]);
-      if (e < mEcart) { mEcart = e; meilleur = d; }
-    }
-    return meilleur;
+    if (second && second.ec - meilleur.ec < CB_TOL_NOIRS) return null;
+    return { d: meilleur.c.d, v: meilleur.c.v, P: P };
   }
 
-  // Trois barres de meme largeur : la garde de debut ou celle de fin.
-  function cbGarde3(barres, i) {
-    var a, b, c, u;
-    if (!barres[i] || !barres[i + 1] || !barres[i + 2]) return false;
-    a = barres[i].n; b = barres[i + 1].n; c = barres[i + 2].n;
-    u = (a + b + c) / 3;
-    if (!(u > 0)) return false;
-    return Math.abs(a - u) / u < 0.6 && Math.abs(b - u) / u < 0.6 &&
-           Math.abs(c - u) / u < 0.6;
-  }
-
-  // Cinq barres de meme largeur : la garde centrale.
-  function cbGarde5(barres, i) {
+  // Une garde : `nb` barres d'un module chacune. Rend la largeur moyenne d'une
+  // barre, ou 0 si elles ne se ressemblent pas.
+  function cbGarde(barres, i, nb) {
     var u = 0, k;
-    for (k = 0; k < 5; k++) { if (!barres[i + k]) return false; u += barres[i + k].n; }
-    u /= 5;
-    if (!(u > 0)) return false;
-    for (k = 0; k < 5; k++) {
-      if (Math.abs(barres[i + k].n - u) / u >= 0.6) return false;
+    for (k = 0; k < nb; k++) { if (!barres[i + k]) return 0; u += barres[i + k].n; }
+    u /= nb;
+    if (!(u > 0)) return 0;
+    for (k = 0; k < nb; k++) {
+      if (Math.abs(barres[i + k].n - u) / u >= 0.6) return 0;
     }
-    return true;
+    return u;
   }
 
   // LA CLE DE CONTROLE. Un chiffre sur deux compte triple, en partant du
@@ -26946,37 +27058,48 @@ body.a-nav .nav { display: flex; }
   // -------------------------------------------------------------------------
   // UNE LIGNE ENTIERE
   // -------------------------------------------------------------------------
-  // On cherche une garde de debut, puis on deroule les 59 barres du code. Si
-  // rien ne sort, on recommence plus loin : une image porte du decor avant le
-  // code-barres, et la premiere barre noire venue n'est pas une garde.
+  // On cherche une garde de debut precedee de blanc, puis on deroule les 59
+  // barres du code, suivies de blanc. Si rien ne sort, on recommence plus
+  // loin : une image porte du decor avant le code-barres, et la premiere barre
+  // noire venue n'est pas une garde.
   function cbLireBarres(barres) {
-    var dep, i, k, g, gauche, parite, droite, ch, premier;
-    for (dep = 0; dep + 59 <= barres.length; dep++) {
+    var dep, i, k, g, u, uMil, uFin, gauche, parite, droite, ch, premier, Pprec;
+    for (dep = 1; dep + 59 < barres.length; dep++) {
       if (!barres[dep].noir) continue;
-      if (!cbGarde3(barres, dep)) continue;
+      u = cbGarde(barres, dep, 3);
+      if (!u || barres[dep - 1].n < CB_MARGE * u) continue;
 
-      gauche = []; parite = "";
+      gauche = []; parite = ""; Pprec = 7 * u;
       i = dep + 3;
       for (k = 0; k < 6; k++) {
-        g = cbChiffre(barres, i + k * 4);
+        g = cbChiffre(barres, i + k * 4, CB_BORDS_GAUCHE);
         if (!g) break;
+        // Le premier chiffre se compare a la garde, mesuree sur trois barres
+        // fines donc approximative ; les suivants a leur voisin.
+        if (k === 0 ? (g.P < 0.6 * Pprec || g.P > 1.5 * Pprec)
+                    : Math.abs(g.P / Pprec - 1) > CB_TOL_CHIFFRE) break;
+        Pprec = g.P;
         gauche.push(g.d); parite += g.v;
       }
       if (gauche.length !== 6) continue;
 
       i = dep + 3 + 24;
-      if (!cbGarde5(barres, i)) continue;
+      uMil = cbGarde(barres, i, 5);
+      if (!uMil || Math.abs(uMil * 7 / Pprec - 1) > CB_TOL_GARDE) continue;
 
       droite = [];
       i = i + 5;
       for (k = 0; k < 6; k++) {
-        g = cbChiffreDroite(barres, i + k * 4);
-        if (g === null) break;
-        droite.push(g);
+        g = cbChiffre(barres, i + k * 4, CB_BORDS_DROITE);
+        if (!g || Math.abs(g.P / Pprec - 1) > CB_TOL_CHIFFRE) break;
+        Pprec = g.P;
+        droite.push(g.d);
       }
       if (droite.length !== 6) continue;
 
-      if (!cbGarde3(barres, i + 24)) continue;
+      uFin = cbGarde(barres, i + 24, 3);
+      if (!uFin || Math.abs(uFin * 7 / Pprec - 1) > CB_TOL_GARDE) continue;
+      if (barres[i + 27].n < CB_MARGE * uFin) continue;
 
       premier = CB_PARITE.indexOf(parite);
       if (premier < 0) continue;
@@ -26988,41 +27111,47 @@ body.a-nav .nav { display: flex; }
     return "";
   }
 
-  // Un code-barres presente a l'envers se lit a l'envers. Plutot que d'ecrire
-  // un second decodeur, on retourne les barres et on relance le premier.
-  function cbLireLigne(gris, debut, n) {
-    var barres = cbBarres(gris, debut, n), code;
-    if (barres.length < 59) return "";
-    code = cbLireBarres(barres);
-    if (code) return code;
-    return cbLireBarres(barres.slice().reverse());
+  // Une ligne, lue deux fois : telle quelle, puis accentuee. Et dans les deux
+  // sens, un code-barres presente a l'envers se lisant a l'envers.
+  function cbLireProfil(p) {
+    var essais = [p, cbAccentuer(p)], j, barres, code;
+    for (j = 0; j < essais.length; j++) {
+      barres = cbBarresDuProfil(essais[j]);
+      if (barres.length < 61) continue;
+      code = cbLireBarres(barres);
+      if (code) return code;
+      code = cbLireBarres(barres.slice().reverse());
+      if (code) return code;
+    }
+    return "";
   }
 
   // -------------------------------------------------------------------------
   // UNE IMAGE
   // -------------------------------------------------------------------------
-  // On essaie plusieurs lignes horizontales reparties sur la hauteur. Une
-  // seule suffirait si la photo etait parfaite ; elle ne l'est jamais. Un
-  // reflet, un pli de l'etiquette ou un doigt suffit a tuer une ligne, et pas
-  // ses voisines.
-  //
-  // ⚠️ ON EXIGE DEUX LIGNES D'ACCORD, ET CE VERROU N'EST PAS PROUVE.
-  // Le raisonnement tient : la cle de controle laisse passer une lecture fausse
-  // sur dix parmi celles qui la franchissent par hasard, et deux lignes
-  // independantes qui rendent le MEME code ramenent ce risque a presque rien.
-  // Mais `controle/saboter_codebarre.py` a beau le desactiver, le banc reste
-  // vert : aucune image du corpus, meme quatre cents images de barres tirees au
-  // hasard ligne par ligne, n'a jamais rendu un code faux sur une seule ligne.
-  // On le garde parce qu'il ne coute rien, pas parce qu'une mesure l'exige. Le
-  // jour ou une image le rend necessaire, elle a sa place dans le banc.
-  function cbLireImage(gris, larg, haut, lignes) {
-    var n = lignes || 15, vus = {}, k, y, code;
+  // Les codes lus sur `n` lignes reparties sur la hauteur, une entree par ligne
+  // qui a rendu quelque chose. La camera s'en sert pour faire voter plusieurs
+  // images de suite.
+  function cbCodesDesLignes(gris, larg, haut, n) {
+    var out = [], k, y, code;
     for (k = 0; k < n; k++) {
       y = Math.floor(haut * (k + 1) / (n + 1));
-      code = cbLireLigne(gris, y * larg, larg);
-      if (!code) continue;
-      vus[code] = (vus[code] || 0) + 1;
-      if (vus[code] >= 2) return code;
+      code = cbLireProfil(cbProfil(gris, larg, haut, y));
+      if (code) out.push(code);
+    }
+    return out;
+  }
+
+  // ⚠️ ON EXIGE DEUX LIGNES D'ACCORD. La cle de controle laisse passer une
+  // lecture fausse sur dix parmi celles qui la franchissent par hasard ; deux
+  // lignes independantes qui rendent le MEME code ramenent ce risque a presque
+  // rien. Une seule ligne suffirait si la photo etait parfaite ; elle ne l'est
+  // jamais, et un reflet ou un doigt tue une ligne, pas ses voisines.
+  function cbLireImage(gris, larg, haut, lignes) {
+    var codes = cbCodesDesLignes(gris, larg, haut, lignes || 15), vus = {}, i;
+    for (i = 0; i < codes.length; i++) {
+      vus[codes[i]] = (vus[codes[i]] || 0) + 1;
+      if (vus[codes[i]] >= 2) return codes[i];
     }
     return "";
   }
@@ -27059,19 +27188,51 @@ body.a-nav .nav { display: flex; }
           les y oblige. L'application retient, et ne redemandera jamais.
      ========================================================================== */
 
-  // La largeur a laquelle on analyse l'image. Plus grand ne lit pas mieux : un
-  // code-barres tient dans 400 pixels de large, et chaque pixel en plus coute
-  // du temps sur toutes les lignes lues.
-  var SCAN_LARG = 640;
+  // 🔴 CE QUE LA CAMERA DONNE, ET CE QU'ON EN LIT.
+  // Jusqu'au 22 septembre 2026, on demandait 1280 x 720, on REDUISAIT toute
+  // l'image a 640 pixels de large, et on lisait quinze lignes reparties sur
+  // TOUTE sa hauteur. Or un code-barres net se tient a 15 ou 20 centimetres :
+  // il n'occupe alors qu'un quart ou un tiers de la largeur (un module faisait
+  // un pixel et demi), et une ou deux lignes seulement le croisaient, quand il
+  // en faut deux d'accord. Assez pour que l'oeil voie une image nette, pas
+  // assez pour compter les barres.
+  //
+  // Mesure sur des images simulees (`controle/banc-materiel/banc_codebarre.py`,
+  // cas J, et le detail dans le compte rendu du 22 septembre 2026), code net a
+  // 20 cm : l'ancienne chaine ne lisait rien. Les trois changements ci-dessous
+  // ne pesent pas pareil :
+  //   - les lignes serrees dans la bande du cadre font l'essentiel de pres ;
+  //   - la definition demandee fait l'essentiel des qu'on s'eloigne ou que
+  //     l'image est un peu floue (a 25 cm, 30 % des images lues en 720 contre
+  //     95 % en 1080) ;
+  //   - lire sans reduire n'apporte que 5 a 10 points, au bord de la zone.
+  var SCAN_DEMANDE_L = 1920, SCAN_DEMANDE_H = 1080;
+
+  // Au-dela de cette largeur, on reduit quand meme : le cout grandit avec la
+  // largeur de chaque ligne lue. 1 600 laisse entiere la largeur visible d'une
+  // video de 1920 x 1080 tenue a l'horizontale (1 440 pixels).
+  var SCAN_LARG_MAX = 1600;
+
+  // Les lignes lues dans la bande du cadre, a chaque image. Le code-barres n'a
+  // qu'a croiser le trait : plus les lignes sont serrees, plus il en croise.
+  var SCAN_LIGNES = 24;
 
   // Combien d'images par seconde on tente. Au-dela, on chauffe le telephone
   // sans rien lire de plus : la main ne bouge pas si vite.
   var SCAN_PAR_SEC = 8;
 
+  // DEUX LECTURES DU MEME CODE, meme sur deux images qui se suivent. Deux
+  // images sont deux prises independantes, comme deux lignes d'une meme image :
+  // le verrou des deux lignes d'accord tient, et une main qui tremble ne le
+  // paie plus. Au-dela de ce delai, une lecture isolee est oubliee.
+  var SCAN_ACCORD_MS = 1500;
+
   var scanFlux = null;      // le flux de la camera, a rendre en partant
   var scanMinuteur = 0;
   var scanVideo = null;
   var scanCanvas = null;
+  var scanCtx = null;
+  var scanVus = [];         // les lectures recentes : { code, t }
 
   // -------------------------------------------------------------------------
   // MES PRODUITS
@@ -27149,6 +27310,7 @@ body.a-nav .nav { display: flex; }
       scanFlux = null;
     }
     scanVideo = null;
+    scanVus = [];
   }
 
   function scanDemarrer() {
@@ -27158,12 +27320,14 @@ body.a-nav .nav { display: flex; }
       return;
     }
     poser({ scanEtat: "cherche" });
+    scanVus = [];
     // `ideal` et non `exact` : sur un ordinateur portable il n'y a pas de
     // camera arriere, et `exact` ferait echouer la demande au lieu de prendre
-    // celle qui existe.
+    // celle qui existe. Meme chose pour la definition : une camera qui ne sait
+    // pas faire 1920 x 1080 rend la plus proche, et la lecture s'y adapte.
     nav.mediaDevices.getUserMedia({
       video: { facingMode: { ideal: "environment" },
-               width: { ideal: 1280 }, height: { ideal: 720 } },
+               width: { ideal: SCAN_DEMANDE_L }, height: { ideal: SCAN_DEMANDE_H } },
       audio: false
     }).then(function (flux) {
       scanFlux = flux;
@@ -27181,19 +27345,88 @@ body.a-nav .nav { display: flex; }
     });
   }
 
-  function scanUneImage() {
-    var v = scanVideo, larg, haut, ctx, d, code;
-    if (!v || !v.videoWidth) return;
-    larg = SCAN_LARG;
-    haut = Math.max(1, Math.round(v.videoHeight * larg / v.videoWidth));
+  // LA PARTIE DE LA VIDEO QUE L'ON LIT : la bande du cadre, sur toute la
+  // largeur visible. Rend { sx, sy, sw, sh } en pixels de la video.
+  //
+  // `vw` x `vh` est la video, `bw` x `bh` la boite qui l'affiche, `yHaut` et
+  // `yBas` le haut et le bas du cadre dans cette boite. La video la remplit
+  // en `object-fit: cover` : elle est agrandie jusqu'a la couvrir, et ce qui
+  // deborde est rogne a parts egales. On refait ce calcul a l'envers.
+  //
+  // ⚠️ SUR TOUTE LA LARGEUR VISIBLE, PAS SEULEMENT CELLE DU CADRE : tenu de
+  // pres, un code-barres deborde du cadre, et une ligne qui le coupe ne se lit
+  // pas. En hauteur au contraire, on s'en tient au cadre, puisque le code doit
+  // croiser le trait.
+  function scanZone(vw, vh, bw, bh, yHaut, yBas) {
+    var s, ox, oy, x0, x1, y0, y1;
+    if (!(vw > 0 && vh > 0 && bw > 0 && bh > 0 && yBas > yHaut)) {
+      return { sx: 0, sy: 0, sw: Math.max(1, vw || 1), sh: Math.max(1, vh || 1) };
+    }
+    s = Math.max(bw / vw, bh / vh);
+    ox = (bw - vw * s) / 2;
+    oy = (bh - vh * s) / 2;
+    x0 = Math.max(0, -ox / s);
+    x1 = Math.min(vw, (bw - ox) / s);
+    y0 = Math.max(0, (yHaut - oy) / s);
+    y1 = Math.min(vh, (yBas - oy) / s);
+    return { sx: Math.round(x0), sy: Math.round(y0),
+             sw: Math.max(1, Math.round(x1 - x0)), sh: Math.max(1, Math.round(y1 - y0)) };
+  }
+
+  // La zone de l'ecran tel qu'il est dessine. Sans mise en page lisible (pas
+  // de boite, pas de cadre), on lit l'image entiere plutot que rien.
+  function scanZoneAffichee(v) {
+    var rv, rc, cadre;
+    try {
+      rv = v.getBoundingClientRect();
+      cadre = document.querySelector(".sc-cadre");
+      rc = cadre ? cadre.getBoundingClientRect() : null;
+    } catch (e) { rv = null; }
+    if (!rv || !rc) return scanZone(v.videoWidth, v.videoHeight, 0, 0, 0, 0);
+    return scanZone(v.videoWidth, v.videoHeight, rv.width, rv.height,
+                    rc.top - rv.top, rc.bottom - rv.top);
+  }
+
+  // Les codes lus dans une zone d'une source d'image (la video, ou pour le
+  // banc un canvas). Une entree par ligne qui a rendu quelque chose.
+  function scanLireSource(src, z) {
+    var larg = Math.min(z.sw, SCAN_LARG_MAX),
+        haut = Math.max(1, Math.round(z.sh * larg / z.sw)), d;
     if (!scanCanvas) scanCanvas = document.createElement("canvas");
     if (scanCanvas.width !== larg || scanCanvas.height !== haut) {
       scanCanvas.width = larg; scanCanvas.height = haut;
+      scanCtx = null;
     }
-    ctx = scanCanvas.getContext("2d");
-    ctx.drawImage(v, 0, 0, larg, haut);
-    d = ctx.getImageData(0, 0, larg, haut);
-    code = cbLireImage(cbGrisDe(d.data, larg, haut), larg, haut);
+    // `willReadFrequently` : on relit les pixels huit fois par seconde, le
+    // navigateur garde alors l'image en memoire plutot que sur la carte
+    // graphique. Un navigateur qui ne connait pas l'option l'ignore.
+    if (!scanCtx) scanCtx = scanCanvas.getContext("2d", { willReadFrequently: true });
+    scanCtx.drawImage(src, z.sx, z.sy, z.sw, z.sh, 0, 0, larg, haut);
+    d = scanCtx.getImageData(0, 0, larg, haut);
+    return cbCodesDesLignes(cbGrisDe(d.data, larg, haut), larg, haut, SCAN_LIGNES);
+  }
+
+  // Le vote : rend un code des qu'il a ete lu deux fois dans le delai, sur la
+  // meme image ou sur deux images qui se suivent.
+  function scanVoter(codes, t) {
+    var i, j, n, garde = [];
+    for (i = 0; i < scanVus.length; i++) {
+      if (t - scanVus[i].t <= SCAN_ACCORD_MS) garde.push(scanVus[i]);
+    }
+    scanVus = garde;
+    for (i = 0; i < codes.length; i++) {
+      scanVus.push({ code: codes[i], t: t });
+      n = 0;
+      for (j = 0; j < scanVus.length; j++) if (scanVus[j].code === codes[i]) n++;
+      if (n >= 2) return codes[i];
+    }
+    return "";
+  }
+
+  function scanUneImage() {
+    var v = scanVideo, code;
+    if (!v || !v.videoWidth) return;
+    code = scanVoter(scanLireSource(v, scanZoneAffichee(v)), Date.now());
     if (code) scanTrouve(code);
   }
 
@@ -27508,6 +27741,25 @@ body.a-nav .nav { display: flex; }
     poser({ repas: h, repasSel: null, repasQ: "", repasNb: 1 });
   }
 
+  // LA PORTION DITE AVEC LES MOTS D'AUJOURD'HUI. Depuis le 22 septembre 2026,
+  // les tailles s'appellent « Petite portion », « Portion moyenne »,
+  // « Portion généreuse » (decision d'Olivier), et c'est ce que les nouvelles
+  // lignes enregistrent. Les repas notes avant portent « petite, 66 g »,
+  // « normale, 110 g » : on les AFFICHE avec les mots d'aujourd'hui, sans
+  // reecrire ce qui est enregistre. Le mot d'avant vient de `TAILLES`
+  // (champ `avant`, dans `controle/portions.json`), jamais d'ici.
+  function portionDite(q) {
+    var i, a;
+    q = q || "";
+    for (i = 0; i < TAILLES.length; i++) {
+      a = TAILLES[i].avant;
+      if (a && (q === a || q.indexOf(a + ", ") === 0)) {
+        return TAILLES[i].t.toLowerCase() + q.slice(a.length);
+      }
+    }
+    return q;
+  }
+
   // -------------------------------------------------------------------------
   // TES HABITUELS, ET LE REPAS D'HIER (lot 1 du parcours, 19 septembre 2026)
   // -------------------------------------------------------------------------
@@ -27601,8 +27853,9 @@ body.a-nav .nav { display: flex; }
       // pas : un repas repris d'hier doit valoir exactement ce qu'il valait
       // hier. Une ligne d'avant le 20 septembre 2026 n'en a pas, et la copie
       // n'en aura pas non plus, ce qui est la verite.
+      // La copie porte les mots d'aujourd'hui, meme reprise d'une ligne d'avant.
       var _c = { d: cleJ, m: m, n: lignes[i].n, g: lignes[i].g, k: lignes[i].k,
-                 kcal: lignes[i].kcal, q: lignes[i].q || "" };
+                 kcal: lignes[i].kcal, q: portionDite(lignes[i].q) };
       if (typeof lignes[i].prot === "number") {
         _c.pr = lignes[i].pr;
         _c.prot = lignes[i].prot;
@@ -27649,7 +27902,7 @@ body.a-nav .nav { display: flex; }
         h += '<div class="rp-l"><div class="rp-l-t">' +
              (lignes[i].saute ? esc(LES_REPAS[m].t) + " " + esc(LES_REPAS[m].sa)
                               : esc(lignes[i].n)) + "</div>" +
-             '<div class="rp-l-q">' + esc(lignes[i].q || "") + "</div>" +
+             '<div class="rp-l-q">' + esc(portionDite(lignes[i].q)) + "</div>" +
              '<div class="rp-l-k num">' +
              (lignes[i].saute ? "" : lignes[i].kcal + " kcal") + "</div>" +
              '<button type="button" class="rp-x" data-action="repas-retirer" data-i="' +
@@ -27721,9 +27974,9 @@ body.a-nav .nav { display: flex; }
              '<p class="rp-hab-note">Un toucher l’ajoute, avec la portion de la dernière fois.</p>';
         for (i = 0; i < hab.length; i++) {
           h += '<button type="button" class="rp-hab" data-action="repas-habituel" data-i="' + i + '"' +
-               ' aria-label="Ajouter ' + esc(hab[i].n) + ", " + esc(hab[i].q || "") + '">' +
+               ' aria-label="Ajouter ' + esc(hab[i].n) + ", " + esc(portionDite(hab[i].q)) + '">' +
                '<span class="rp-hab-c"><span class="rp-hab-n">' + esc(hab[i].n) + "</span>" +
-               '<span class="rp-hab-q">' + esc(hab[i].q || "") + "</span></span>" +
+               '<span class="rp-hab-q">' + esc(portionDite(hab[i].q)) + "</span></span>" +
                '<span class="rp-hab-k num">' + hab[i].kcal + " kcal</span>" +
                '<span class="rp-hab-plus" aria-hidden="true">+</span></button>';
         }
@@ -28192,7 +28445,7 @@ body.a-nav .nav { display: flex; }
    module a l'autre.
    =========================================================================== */
 
-  var APP_VERSION = "1.38.0";
+  var APP_VERSION = "1.39.0";
 
   function has(o, k) { return Object.prototype.hasOwnProperty.call(o, k); }
 
@@ -30848,6 +31101,12 @@ body.a-nav .nav { display: flex; }
     scanProduit: scanProduit,
     scanEnregistrer: scanEnregistrer,
     scanUneImage: scanUneImage,
+    // La chaine de la camera sans la camera (22 septembre 2026) : la zone lue,
+    // la lecture d'une source d'image, le vote entre images successives.
+    scanZone: scanZone,
+    scanLireSource: scanLireSource,
+    scanVoter: scanVoter,
+    cbCodesDesLignes: cbCodesDesLignes,
     scanPoserFlux: scanPoserFlux,
     scanFluxActif: scanFluxActif,
     cbGrisDe: cbGrisDe,
