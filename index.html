@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; connect-src 'self'; img-src 'self' data:; media-src 'self' blob: mediastream:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; manifest-src 'self'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; connect-src 'self' https://world.openfoodfacts.org; img-src 'self' data: https://images.openfoodfacts.org; media-src 'self' blob: mediastream:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; manifest-src 'self'; base-uri 'none'; form-action 'none'">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#f7f3ea">
@@ -2738,6 +2738,32 @@ body.a-nav .nav { display: flex; }
 .rp-taille-t { font-size: 15.5px; font-weight: 800; }
 .rp-taille-g { font-size: 12.5px; color: var(--texte-2); }
 .rp-taille-k { font-size: 15px; font-weight: 800; grid-column: 2; grid-row: 1 / span 2; align-self: center; text-align: right; }
+
+/* CE QUI A ETE LU, A COTE DE CE QUI A ETE TROUVE (23 septembre 2026). La
+   photo du produit chez Open Food Facts en vignette, le nom et le code a
+   cote ; un toucher sur la vignette la met en pleine largeur, au-dessus du
+   nom. La photo est ENTIERE (contain) : une face d'emballage est souvent en
+   hauteur, la rogner couperait la marque. Sans photo, le meme carre en
+   pointille dit pourquoi. La carte grandit ainsi d'une centaine de pixels :
+   avec trois lignes deja notees, sur un ecran de 667, les portions
+   passeraient sous la barre du bas, d'ou le defilement de
+   `scanMontrerCombien`. */
+.rp-scan { display: flex; align-items: center; gap: 12px; margin: 4px 0 12px; }
+.rp-scan-photo {
+  flex: 0 0 96px; height: 96px; padding: 0; border: 1px solid var(--bord);
+  border-radius: 10px; overflow: hidden; background: var(--fond-carte); cursor: pointer;
+}
+.rp-scan-photo img { display: block; width: 100%; height: 100%; object-fit: contain; }
+.rp-scan-vide {
+  cursor: default; border-style: dashed; padding: 6px;
+  display: flex; align-items: center; justify-content: center; text-align: center;
+  font-size: 11.5px; line-height: 1.3; color: var(--texte-2);
+}
+.rp-scan-grand { flex-direction: column; align-items: stretch; }
+.rp-scan-grand .rp-scan-photo { flex-basis: auto; width: 100%; height: 300px; }
+.rp-scan-t { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.rp-scan-t b { font-size: 16px; line-height: 1.3; overflow-wrap: anywhere; }
+.rp-scan-c { font-size: 12.5px; color: var(--texte-2); }
 
 /* Le compteur, pour ce qui se compte. */
 .rp-nb { display: flex; align-items: center; gap: 14px; margin: 10px 0 4px; }
@@ -27227,12 +27253,61 @@ body.a-nav .nav { display: flex; }
   // paie plus. Au-dela de ce delai, une lecture isolee est oubliee.
   var SCAN_ACCORD_MS = 1500;
 
+  // 🔴 UNE CAMERA QUI NE DONNE PAS D'IMAGE DOIT SE DIRE. Le 23 septembre 2026,
+  // Olivier : le premier scan d'un repas marche, le suivant « plante
+  // silencieusement ». Chrome enchaine trois scans sans faute dans le meme
+  // repas (vraie video, meme chemin) : la panne est propre a l'iPhone et n'a
+  // pas ete reproduite. On ne sait donc pas la corriger a coup sur ; on sait
+  // en revanche qu'elle ne doit plus etre muette.
+  // Si aucune image nouvelle n'arrive pendant ce delai, camera ouverte, on la
+  // relance une fois sans rien demander, puis on le dit. Le delai ne court
+  // qu'une fois la permission donnee : la question de l'iPhone peut rester a
+  // l'ecran aussi longtemps qu'elle veut.
+  var SCAN_MUETTE_MS = 3000;
+  // Le temps laisse au telephone pour rendre la camera avant de la redemander.
+  var SCAN_RELANCE_MS = 600;
+
+  // 🔴 LA PHOTO DU PRODUIT VIENT D'OPEN FOOD FACTS, AU MOMENT DU SCAN.
+  // Demande d'Olivier du 23 septembre 2026 : « ça va super vite, difficile de
+  // voir si c'est le bon produit », puis « je ne veux pas la photo du code, je
+  // veux la photo du produit ». La table embarquee n'a que le nom et les
+  // calories : la photo ne peut venir que de leur serveur. C'est la SEULE
+  // sortie de l'application vers l'exterieur, et elle est etroite :
+  //   - un appel par code lu, jamais en masse (leur regle : « 1 appel API =
+  //     1 scan par un utilisateur reel ») ;
+  //   - le code-barres part chez eux, rien d'autre ;
+  //   - la CSP n'ouvre que ces deux hotes (`assemble1220.py`) ;
+  //   - sans reseau, pas de photo, et le reste marche comme avant.
+  var SCAN_OFF_API = "https://world.openfoodfacts.org/api/v2/product/";
+  // Au-dela, on renonce : un reseau faible ne repond pas, il traine. Deux
+  // delais, parce que ce sont deux serveurs : leur API repond en moins d'une
+  // seconde, leur serveur d'images a mis 10 a 25 SECONDES pour une photo de
+  // 26 Ko, trois fois de suite, le 23 septembre 2026.
+  var SCAN_OFF_MS = 8000;
+  var SCAN_IMAGE_MS = 30000;
+
   var scanFlux = null;      // le flux de la camera, a rendre en partant
   var scanMinuteur = 0;
   var scanVideo = null;
   var scanCanvas = null;
   var scanCtx = null;
   var scanVus = [];         // les lectures recentes : { code, t }
+  var scanGen = 0;          // le numero de l'ouverture en cours
+  var scanEssais = 0;       // les ouvertures sans image, d'affilee
+  var scanVuA = 0;          // l'heure de la derniere image nouvelle
+  var scanDernierT = -1;    // la position de la video a cette image
+  var scanRecu = "";        // ce que la camera a donne, dit en cas de panne
+  // La photo de chaque code demande pendant la session : { etat, url }, etat
+  // valant "charge", "ok", "aucune" (le produit n'a pas de photo chez eux) ou
+  // "hors" (pas de reponse). Hors de `state` : rien de tout ceci ne merite
+  // d'etre ecrit dans la memoire du telephone.
+  // ⚠️ "ok" ATTEND QUE LA PHOTO SOIT TELECHARGEE, pas seulement son adresse.
+  // Le 23 septembre, "ok" tombait des l'adresse connue : la vignette puis la
+  // photo agrandie restaient vides tant que leur serveur d'images, lent, ne
+  // l'avait pas envoyee. Une fois telechargee, le navigateur la garde : la
+  // balise reecrite a chaque rendu ne la redemande pas (mesure, sabotage a
+  // l'appui).
+  var scanPhotos = {}, scanPhotoGrande = false;
 
   // -------------------------------------------------------------------------
   // MES PRODUITS
@@ -27268,15 +27343,21 @@ body.a-nav .nav { display: flex; }
   function scanTrouve(code) {
     var p = scanProduit(code);
     scanArreter();
+    scanPhotoGrande = false;
     if (p) {
+      // La photo se demande AVANT le rendu : « Combien ? » s'ouvre deja avec
+      // « Photo en chargement », et se redessine quand elle arrive.
+      scanPhotoChercher(code);
       // On rejoint le chemin habituel : le meme panneau « Combien ? » que pour
       // un aliment cherche au clavier. Un produit scanne n'est pas un citoyen
-      // a part.
+      // a part, a une chose pres : `c` garde le code lu, pour que « Combien ? »
+      // montre ce qui a ete lu a cote de ce qui a ete trouve.
       poser({
         ecran: "repas", scanEtat: "", scanCode: "",
-        repasSel: { n: p.n, k: p.k, g: 100, p: "" },
+        repasSel: { n: p.n, k: p.k, g: 100, p: "", c: code },
         repasNb: 1
       });
+      scanMontrerCombien();
       return;
     }
     poser({ scanEtat: "inconnu", scanCode: code, scanNom: "", scanKcal: "" });
@@ -27288,39 +27369,153 @@ body.a-nav .nav { display: flex; }
     var kcal = nombreOu(state.scanKcal, -1);
     if (!code || nom.length < 2 || !(kcal >= 0 && kcal <= 900)) return;
     persoPoser(code, nom, Math.round(kcal));
+    // Absent de notre table ne veut pas dire absent de leur base : la photo
+    // dira si le nom qu'on vient de taper va avec le bon emballage.
+    scanPhotoChercher(code);
     poser({
       ecran: "repas", scanEtat: "", scanCode: "", scanNom: "", scanKcal: "",
-      repasSel: { n: nom, k: Math.round(kcal), g: 100, p: "" }, repasNb: 1
+      repasSel: { n: nom, k: Math.round(kcal), g: 100, p: "", c: code }, repasNb: 1
     });
+    scanMontrerCombien();
+  }
+
+  // « COMBIEN ? » DOIT ETRE A L'ECRAN QUAND ON REVIENT DE LA CAMERA. Il tombe
+  // sous les lignes deja notees : a partir de trois, sur un ecran de 667, les
+  // portions passent sous la barre du bas, et on croirait qu'il ne s'est rien
+  // passe. Si la carte deborde, on l'amene a 12 pixels du haut, sans
+  // animation (meme regle que les rubriques du diagnostic). Si elle tient, on
+  // ne bouge rien : les lignes deja notees restent en vue.
+  function scanMontrerCombien() {
+    try {
+      var n = document.querySelector(".rp-scan"),
+          carte = n && n.closest ? n.closest(".carte") : null,
+          barre = document.querySelector(".nav"),
+          bas = barre ? barre.getBoundingClientRect().top : window.innerHeight, r;
+      if (!carte) return;
+      r = carte.getBoundingClientRect();
+      if (r.bottom > bas) window.scrollTo(0, window.pageYOffset + r.top - 12);
+    } catch (e) { /* sans mise en page lisible, on laisse l'ecran tel quel */ }
+  }
+
+  // LA PHOTO DU PRODUIT, demandee a Open Food Facts. Une seule demande par code
+  // et par session ; la reponse redessine l'ecran si ce code y est encore.
+  function scanPhotoChercher(code) {
+    var f = window.fetch, arret = null, minuteur;
+    if (has(scanPhotos, code) && scanPhotos[code].etat !== "hors") return;
+    if (!f) { scanPhotos[code] = { etat: "hors", url: "" }; return; }
+    scanPhotos[code] = { etat: "charge", url: "" };
+    try { arret = new AbortController(); } catch (e) { arret = null; }
+    minuteur = window.setTimeout(function () { if (arret) arret.abort(); fin("hors", ""); }, SCAN_OFF_MS);
+
+    function fin(etat, url) {
+      window.clearTimeout(minuteur);
+      if (scanPhotos[code].etat !== "charge") return;   // deja tranche
+      scanPhotos[code] = { etat: etat, url: url };
+      if (state.ecran === "repas" && state.repasSel && state.repasSel.c === code) rendre();
+    }
+
+    // « Photo en chargement » tient jusqu'a ce que la photo soit LA, pas
+    // seulement jusqu'a ce que son adresse soit connue.
+    function charger(url) {
+      var im = new Image();
+      window.clearTimeout(minuteur);
+      minuteur = window.setTimeout(function () { fin("hors", ""); }, SCAN_IMAGE_MS);
+      im.onload = function () { fin("ok", url); };
+      im.onerror = function () { fin("hors", ""); };
+      im.src = url;
+    }
+
+    f.call(window, SCAN_OFF_API + encodeURIComponent(code) +
+           "?fields=image_front_url,image_url", arret ? { signal: arret.signal } : {})
+      // Un produit qu'ils ne connaissent pas revient en 404, avec une reponse
+      // lisible : c'est « pas de photo », pas une panne.
+      .then(function (r) { return r.json().catch(function () { return null; }); })
+      .then(function (o) {
+        var p = o && o.product, url = p ? (p.image_front_url || p.image_url || "") : "";
+        // On n'affiche que ce qui vient de leur serveur d'images : c'est le
+        // seul que la CSP laisse passer, et une adresse d'ailleurs ne serait
+        // qu'une image cassee.
+        if (/^https:\/\/images\.openfoodfacts\.org\//.test(url)) charger(url);
+        else fin(o ? "aucune" : "hors", "");
+      })
+      .catch(function () { fin("hors", ""); });
+  }
+
+  // CE QUI A ETE LU, A COTE DE CE QUI A ETE TROUVE, en tete de « Combien ? » :
+  // la photo du produit chez Open Food Facts, son nom, et le code. Un toucher
+  // sur la photo l'agrandit.
+  function scanRappelHtml(sel) {
+    var ph = has(scanPhotos, sel.c) ? scanPhotos[sel.c] : { etat: "hors", url: "" },
+        grand = ph.etat === "ok" && scanPhotoGrande,
+        h = '<div class="rp-scan' + (grand ? " rp-scan-grand" : "") + '">';
+    if (ph.etat === "ok") {
+      h += '<button type="button" class="rp-scan-photo" data-action="scan-photo" aria-label="' +
+           (grand ? "Réduire la photo" : "Agrandir la photo") + '">' +
+           '<img src="' + esc(ph.url) + '" alt="Photo du produit"></button>';
+    } else {
+      // « Indisponible », et non « sans réseau » : leur serveur peut aussi
+      // etre trop lent, le reseau du telephone marchant tres bien.
+      h += '<div class="rp-scan-photo rp-scan-vide">' +
+           (ph.etat === "charge" ? "Photo en chargement"
+            : ph.etat === "aucune" ? "Pas de photo de ce produit"
+            : "Photo indisponible") + "</div>";
+    }
+    h += '<div class="rp-scan-t"><b>' + esc(sel.n) + "</b>" +
+         '<span class="rp-scan-c">Code-barres <span class="num">' + esc(sel.c) +
+         "</span></span></div></div>";
+    return h;
+  }
+
+  function scanBasculerPhoto() {
+    scanPhotoGrande = !scanPhotoGrande;
+    rendre();
   }
 
   // -------------------------------------------------------------------------
   // LA CAMERA
   // -------------------------------------------------------------------------
+  function scanCouperFlux(flux) {
+    try {
+      var t = flux.getTracks(), i;
+      for (i = 0; i < t.length; i++) t[i].stop();
+    } catch (e) { /* le flux etait deja mort */ }
+  }
+
   function scanArreter() {
+    // Toute reponse de la camera encore en route appartient desormais a une
+    // ouverture abandonnee : elle sera coupee a son arrivee.
+    scanGen++;
     if (scanMinuteur) { clearInterval(scanMinuteur); scanMinuteur = 0; }
     // ⚠️ ON COUPE CHAQUE PISTE, UNE PAR UNE. Laisser tomber la reference ne
     // suffit pas : la camera resterait allumee, avec sa pastille verte, jusqu'a
     // ce que la page soit fermee.
     if (scanFlux) {
-      try {
-        var t = scanFlux.getTracks(), i;
-        for (i = 0; i < t.length; i++) t[i].stop();
-      } catch (e) { /* le flux etait deja mort */ }
+      scanCouperFlux(scanFlux);
       scanFlux = null;
+    }
+    // ET ON DETACHE LA VIDEO DU FLUX. Un element video qui tient encore un flux
+    // coupe peut garder la camera reservee sur l'iPhone ; le lacher ne coute
+    // rien ailleurs.
+    if (scanVideo) {
+      try { scanVideo.pause(); scanVideo.srcObject = null; } catch (e2) { /* deja parti */ }
     }
     scanVideo = null;
     scanVus = [];
   }
 
-  function scanDemarrer() {
-    var nav = window.navigator;
+  // `relance` : la camera est rouverte par le garde, pas par un toucher. Le
+  // compte des ouvertures sans image continue alors, au lieu de repartir de 0.
+  function scanDemarrer(relance) {
+    var nav = window.navigator, gen;
     if (!nav || !nav.mediaDevices || !nav.mediaDevices.getUserMedia) {
       poser({ scanEtat: "impossible" });
       return;
     }
+    // Une ouverture precedente qui trainerait encore est coupee d'abord.
+    scanArreter();
+    gen = scanGen;
+    if (!relance) scanEssais = 0;
     poser({ scanEtat: "cherche" });
-    scanVus = [];
     // `ideal` et non `exact` : sur un ordinateur portable il n'y a pas de
     // camera arriere, et `exact` ferait echouer la demande au lieu de prendre
     // celle qui existe. Meme chose pour la definition : une camera qui ne sait
@@ -27330,6 +27525,10 @@ body.a-nav .nav { display: flex; }
                width: { ideal: SCAN_DEMANDE_L }, height: { ideal: SCAN_DEMANDE_H } },
       audio: false
     }).then(function (flux) {
+      // ⚠️ LA REPONSE PEUT ARRIVER APRES QU'ON EST PARTI (retour, onglet,
+      // « Taper les chiffres »). Une camera ouverte pour un ecran qui n'existe
+      // plus est une pastille verte que plus rien n'eteindrait.
+      if (gen !== scanGen || state.ecran !== "scan") { scanCouperFlux(flux); return; }
       scanFlux = flux;
       var v = document.getElementById("scan-video");
       if (!v) { scanArreter(); return; }
@@ -27338,11 +27537,40 @@ body.a-nav .nav { display: flex; }
       v.setAttribute("playsinline", "");   // sinon iOS ouvre son lecteur plein ecran
       v.muted = true;
       var j = v.play();
-      if (j && j.catch) j.catch(function () { /* l'utilisateur relancera */ });
+      // Une video qui ne demarre pas, ou une camera que le telephone reprend
+      // (appel, autre application), n'avance plus : le garde de
+      // `scanUneImage` s'en apercoit, il n'y a rien a ecouter de plus.
+      if (j && j.catch) j.catch(function () { /* le garde relancera */ });
+      scanVuA = Date.now();
+      scanDernierT = -1;
       scanMinuteur = setInterval(scanUneImage, Math.round(1000 / SCAN_PAR_SEC));
     }).catch(function () {
+      if (gen !== scanGen || state.ecran !== "scan") return;
       poser({ scanEtat: "refus" });
     });
+  }
+
+  // LA CAMERA N'A RIEN DONNE. Une fois, on la rouvre sans rien demander ; la
+  // deuxieme, on le dit, avec ce qu'elle a donne.
+  function scanMuette() {
+    var v = scanVideo, g;
+    var recu = v && v.videoWidth
+      ? "une image de " + v.videoWidth + " x " + v.videoHeight + " qui ne bouge plus"
+      : "aucune image";
+    scanArreter();
+    scanEssais++;
+    if (scanEssais < 2) {
+      g = scanGen;
+      window.setTimeout(function () {
+        if (g === scanGen && state.ecran === "scan" && state.scanEtat === "cherche") {
+          scanDemarrer(true);
+        }
+      }, SCAN_RELANCE_MS);
+      return;
+    }
+    scanEssais = 0;
+    scanRecu = recu;
+    poser({ scanEtat: "muette" });
   }
 
   // LA PARTIE DE LA VIDEO QUE L'ON LIT : la bande du cadre, sur toute la
@@ -27424,9 +27652,24 @@ body.a-nav .nav { display: flex; }
   }
 
   function scanUneImage() {
-    var v = scanVideo, code;
-    if (!v || !v.videoWidth) return;
-    code = scanVoter(scanLireSource(v, scanZoneAffichee(v)), Date.now());
+    var v = scanVideo, code, t = Date.now(), j;
+    if (!v) return;
+    // LE GARDE. Une image est nouvelle quand la video a avance depuis la
+    // precedente.
+    if (v.videoWidth && v.readyState >= 2 && v.currentTime !== scanDernierT) {
+      scanDernierT = v.currentTime;
+      scanVuA = t;
+      scanEssais = 0;
+    } else if (t - scanVuA > SCAN_MUETTE_MS) {
+      scanMuette();
+      return;
+    }
+    // Une video que le telephone a mise en pause ne repart pas seule.
+    if (v.paused) {
+      try { j = v.play(); if (j && j.catch) j.catch(function () {}); } catch (e) {}
+    }
+    if (!v.videoWidth) return;
+    code = scanVoter(scanLireSource(v, scanZoneAffichee(v)), t);
     if (code) scanTrouve(code);
   }
 
@@ -27464,6 +27707,19 @@ body.a-nav .nav { display: flex; }
            "Enregistrer ce produit</button>";
       h += '<button type="button" class="rp-autre" data-action="scan-reessayer">' +
            "Scanner autre chose</button>";
+      return h + "</section>";
+    }
+
+    // LA CAMERA OUVERTE QUI NE DONNE RIEN, deja relancee une fois. On dit ce
+    // qu'elle a donne : c'est ce qui permettra de comprendre la panne.
+    if (e === "muette") {
+      h += '<section class="carte"><div class="carte-t">La caméra ne répond pas</div>';
+      h += '<p class="cr-p">Elle s’est ouverte deux fois, et le téléphone n’a donné ' +
+           esc(scanRecu || "aucune image") + ".</p>";
+      h += '<button type="button" class="cs-cta" data-action="scan-reessayer">' +
+           "Relancer la caméra</button>";
+      h += '<button type="button" class="rp-autre" data-action="scan-main">' +
+           "Taper les chiffres à la main</button>";
       return h + "</section>";
     }
 
@@ -27916,7 +28172,7 @@ body.a-nav .nav { display: flex; }
     // portion normale, et proposer des grammes n'aurait aucun sens.
     if (sel) {
       h += '<section class="carte"><div class="carte-t">Combien ?</div>';
-      h += '<p class="cr-p"><b>' + esc(sel.n) + "</b></p>";
+      h += sel.c ? scanRappelHtml(sel) : '<p class="cr-p"><b>' + esc(sel.n) + "</b></p>";
       if (sel.p) {
         var nb = state.repasNb || 1;
         h += '<div class="rp-nb">';
@@ -27937,6 +28193,11 @@ body.a-nav .nav { display: flex; }
                '<span class="rp-taille-k num">' + Math.round(sel.k * g / 100) +
                " kcal</span></button>";
         }
+      }
+      // Pas le bon produit : on revient droit a la camera.
+      if (sel.c) {
+        h += '<button type="button" class="rp-autre" data-action="scan-ouvrir">' +
+             "Scanner à nouveau</button>";
       }
       h += '<button type="button" class="rp-autre" data-action="repas-annuler">' +
            "Choisir autre chose</button>";
@@ -28445,7 +28706,7 @@ body.a-nav .nav { display: flex; }
    module a l'autre.
    =========================================================================== */
 
-  var APP_VERSION = "1.39.0";
+  var APP_VERSION = "1.40.0";
 
   function has(o, k) { return Object.prototype.hasOwnProperty.call(o, k); }
 
@@ -30511,19 +30772,23 @@ body.a-nav .nav { display: flex; }
 
     // LE SCAN. ⚠️ `scanDemarrer` est appele APRES le rendu, jamais avant : il
     // cherche l'element video, et celui-ci n'existe pas tant que l'ecran n'est
-    // pas dessine.
+    // pas dessine. `poser` dessine tout de suite, d'ou l'appel juste apres.
+    // Il se faisait par un minuteur jusqu'a la 1.39.0 ; appele dans le toucher
+    // lui-meme, la demande de camera reste liee au geste de l'utilisateur, ce
+    // que Safari surveille de pres.
     if (action === "scan-ouvrir") {
       poser({ ecran: "scan", scanEtat: "cherche", scanCode: "",
               scanNom: "", scanKcal: "", repasSel: null });
-      window.setTimeout(scanDemarrer, 0);
+      scanDemarrer();
       return;
     }
     if (action === "scan-main") { scanArreter(); poser({ scanEtat: "main" }); return; }
     if (action === "scan-reessayer") {
       poser({ scanEtat: "cherche", scanCode: "", scanNom: "", scanKcal: "" });
-      window.setTimeout(scanDemarrer, 0);
+      scanDemarrer();
       return;
     }
+    if (action === "scan-photo") { scanBasculerPhoto(); return; }
     if (action === "scan-valider-code") {
       var _cb = String(state.scanCode || "").replace(/\D/g, "");
       if (_cb.length >= 8) scanTrouve(_cb);
