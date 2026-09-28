@@ -454,12 +454,15 @@
   --action-selection: #f0c3d6;
   --action-courbe: #d41c6a;
   --action-bord: transparent;
-  /* Discipline Salle */
-  --salle-bg: #f4d912;
-  --salle-fg: #100f0d;
-  --salle-pale: #fdf4bd;
-  --salle-encre: #4a4000;
-  --salle-sur-sombre: #4a4000;
+  /* Discipline Salle : FRAMBOISE PALE en profil femme (Olivier, 28 septembre
+     2026 : « pourquoi les champs apparaissent en jaune dans un profil
+     feminin ? »). Distincte du framboise vif des boutons (--action-bg). Seules
+     ces cinq valeurs du bloc femme ont bouge, a sa demande. */
+  --salle-bg: #f5b3cf;
+  --salle-fg: #3b0a20;
+  --salle-pale: #fce4ee;
+  --salle-encre: #8f1f52;
+  --salle-sur-sombre: #8f1f52;
   /* Discipline Cours collectif */
   --cours-bg: #d9741a;
   --cours-fg: #100f0d;
@@ -537,12 +540,12 @@
   --action-selection: #2d0b19;
   --action-courbe: #ff5c9a;
   --action-bord: transparent;
-  /* Discipline Salle */
-  --salle-bg: #f4d912;
-  --salle-fg: #100f0d;
-  --salle-pale: #4a4000;
-  --salle-encre: #f4d912;
-  --salle-sur-sombre: #f4d912;
+  /* Discipline Salle : framboise pale, comme le theme clair (28 sept 2026). */
+  --salle-bg: #f2a7c4;
+  --salle-fg: #2a0816;
+  --salle-pale: #4a1a30;
+  --salle-encre: #f2a7c4;
+  --salle-sur-sombre: #f2a7c4;
   /* Discipline Cours collectif */
   --cours-bg: #d9741a;
   --cours-fg: #100f0d;
@@ -29531,7 +29534,7 @@ body.a-nav .nav { display: flex; }
    module a l'autre.
    =========================================================================== */
 
-  var APP_VERSION = "1.41.1";
+  var APP_VERSION = "1.41.2";
 
   function has(o, k) { return Object.prototype.hasOwnProperty.call(o, k); }
 
