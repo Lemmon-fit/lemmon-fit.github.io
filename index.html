@@ -25534,8 +25534,11 @@ body.a-nav .nav { display: flex; }
              " avant cette version, ou sans poids renseigné.</p>";
     }
     if (ds.estime) {
-      out += '<p class="cb-vide">Estimations d’après tes séries, tes durées et ta morphologie, ' +
-             "sauf les calories que tu as notées.</p>";
+      // Meme phrase que l'ecran Nutrition, reecrite le 28 septembre 2026 (voir
+      // block_ia.js) : « sauf » faisait croire que les calories notees
+      // n'etaient pas comptees.
+      out += '<p class="cb-vide">Estimations d’après tes séries, tes durées et ton poids. ' +
+             "Quand tu notes les calories affichées par un appareil ou ta montre, c’est ton chiffre qui compte.</p>";
     }
     return out;
   }
@@ -27506,8 +27509,11 @@ body.a-nav .nav { display: flex; }
            (cal.semaine.sansChiffre > 1 ? "s" : "") + " avant cette version, ou sans poids renseigné.</div>";
     }
     if (cal.semaine.estime) {
-      h += '<div class="nu-l-s">Estimations d’après tes séries, tes durées et ta morphologie, ' +
-           "sauf les calories que tu as notées.</div>";
+      // « sauf les calories que tu as notees » se lisait « elles ne sont pas
+      // comptees » (Olivier, 28 septembre 2026). Elles le sont, a la place de
+      // l'estimation (`kcalNotee`, block_nutrition.js).
+      h += '<div class="nu-l-s">Estimations d’après tes séries, tes durées et ton poids. ' +
+           "Quand tu notes les calories affichées par un appareil ou ta montre, c’est ton chiffre qui compte.</div>";
     }
     if (!pv.pret) {
       h += '<p class="cs-txt">Sans ton poids, tes séances ne sont pas estimées.</p>';
@@ -29537,7 +29543,7 @@ body.a-nav .nav { display: flex; }
    module a l'autre.
    =========================================================================== */
 
-  var APP_VERSION = "1.41.3";
+  var APP_VERSION = "1.41.4";
 
   function has(o, k) { return Object.prototype.hasOwnProperty.call(o, k); }
 
