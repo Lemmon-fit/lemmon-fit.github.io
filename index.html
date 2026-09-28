@@ -9620,8 +9620,8 @@ body.a-nav .nav { display: flex; }
     // ⚠️ LE CHOIX PASSE AVANT TOUT (arbitrage d'Olivier) : le jour choisi finit
     // par un bloc sur cet appareil, meme en prise de muscle ou en musculation
     // seule, et meme s'il depense moins que la seance sans lui.
-    { nom: "Appareil", jalon: 2, titre: "Un appareil que tu veux utiliser absolument ?", sous: "Choisis un appareil pour un jour : la séance de ce jour finira par un bloc dessus. Sans préférence, c’est l’appli qui décide.", type: "appareil",
-      chips: [{ t: "Oui, je choisis", s: "Un appareil par jour de salle" },
+    { nom: "Appareil", jalon: 2, titre: "Un appareil de cardio que tu veux utiliser absolument ?", sous: "Choisis un appareil de cardio pour un jour : la séance de ce jour finira par un bloc dessus. Sans préférence, c’est l’appli qui décide.", type: "appareil",
+      chips: [{ t: "Oui, je choisis", s: "Un appareil de cardio par jour de salle" },
               { t: "Pas de préférence", s: "L’appli décide" }] },
     { nom: "Programme", jalon: 2, titre: "Voilà ton programme", sous: "Une carte par activité déclarée. Déplie-les, et refuse ce qui ne te convient pas : je remplace par un mouvement équivalent, quand ton matériel en permet un.", type: "programme" },
     // 🔴 « L'APPLI, ELLE, NE COMPTE RIEN DE CE QUE TU MANGES » EST PARTI le 18
@@ -26701,7 +26701,10 @@ body.a-nav .nav { display: flex; }
   // nulle part dans l'application. On s'en sert enfin.
   function rechargerMaj() {
     var fini = function () {
-      window.location.href = window.location.pathname + "?v=" + jourNumero() + "-" + (state.hist || []).length;
+      // 🔴 `replace`, PAS `href` (28 septembre 2026). `href` ajoutait une page
+      // a l'historique : sur l'iPhone d'Olivier, glisser depuis le bord gauche
+      // y revenait, l'appli redemarrait et fermait le questionnaire en cours.
+      window.location.replace(window.location.pathname + "?v=" + jourNumero() + "-" + (state.hist || []).length);
     };
     var vider = function () {
       try {
@@ -29534,7 +29537,7 @@ body.a-nav .nav { display: flex; }
    module a l'autre.
    =========================================================================== */
 
-  var APP_VERSION = "1.41.2";
+  var APP_VERSION = "1.41.3";
 
   function has(o, k) { return Object.prototype.hasOwnProperty.call(o, k); }
 
@@ -30006,6 +30009,11 @@ body.a-nav .nav { display: flex; }
     "obRunNiveau", "obRunDuree", "obEviter",
     // Les trois reponses du 28 septembre 2026 (retours des beta-testeurs).
     "obMuscler", "obAbdos", "obAbdosJours", "obAppareil", "obAppJour",
+    // 🔴 L'ETAPE DU QUESTIONNAIRE, depuis le 28 septembre 2026 : un
+    // redemarrage (iOS qui tue l'appli, un glissement depuis le bord) reprend
+    // a la meme question au lieu de tout refaire (Olivier : « maintenant je
+    // dois tout refaire »). Les reponses, elles, etaient deja sauvees.
+    "obStep",
     "hist", "pesees", "dernierExport",
     "obRetires", "obAjouts", "retireApres", "iaPlan", "progDec", "progRegl", "repas", "perso", "obDepense", "forme",
     // Le choix de l'alimentation et l'horizon (chantier du 18 septembre 2026).
