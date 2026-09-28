@@ -2904,6 +2904,12 @@ body.a-nav .nav { display: flex; }
   background: var(--fond-carte); border: 1px solid var(--bord); border-radius: 18px;
   box-shadow: 0 12px 32px rgba(16, 15, 13, .22);
 }
+/* SON VOILE A ELLE (28 septembre 2026). Elle reprenait celui du menu, a 28 % :
+   en theme sombre, noir sur quasi-noir, il ne se voyait pas, et la fenetre,
+   du meme fond que les cartes, semblait posee en travers de l'ecran Seance
+   (capture d'Olivier sur iPhone : « une superposition d'ecran tres bizarre »).
+   Le menu garde son voile leger : il s'ouvre sur un ecran qu'on consulte. */
+.pop-voile { background: rgba(0, 0, 0, .62); }
 .pop-nutri-t { font-size: 19px; font-weight: 800; letter-spacing: -.2px; margin-bottom: 8px; }
 .pop-nutri-p { font-size: 14.5px; line-height: 1.5; color: var(--texte-1b); margin: 0 0 18px; }
 
@@ -20506,6 +20512,12 @@ body.a-nav .nav { display: flex; }
       if (state.obAbdos === 2 && !nbJoursAbdos()) return "Choisis au moins un jour, ou réponds Jamais.";
     }
     if (ob.type === "appareil" && state.obAppareil === 0) return "Choisis une réponse pour continuer.";
+    // Rien n'est coche d'office depuis le 28 septembre 2026, poids du corps
+    // compris : l'etape demande au moins une case.
+    if (ob.type === "materiel" && !state.obEquip[I_MACHINES] && !libreCochees() &&
+        !state.obEquip[I_POIDS_DU_CORPS]) {
+      return "Coche au moins une case pour continuer : ce avec quoi tu t’entraînes.";
+    }
     return "";
   }
 
@@ -21049,49 +21061,61 @@ body.a-nav .nav { display: flex; }
     return { muscu: muscu, cardio: cardio };
   }
 
+  // 🔴 28 SEPTEMBRE 2026, CAPTURE D'OLIVIER : les deux listes de machines,
+  // musculation et cardio, sont REPLIEES PAR DEFAUT, chacune avec son bouton,
+  // y compris juste apres avoir coche « Machines de salle ». Le compte coche
+  // reste lisible sur le bouton replie.
   function blocMachinesHtml() {
-    var on = !!state.obEquip[I_MACHINES], ouvert = on && !!state.obMachOuvert;
+    var on = !!state.obEquip[I_MACHINES];
     var r = rangsDesMachines(), tous = r.muscu.concat(r.cardio), k, h;
-    var n = nCochees(tous, "obGear");
+    var n = nCochees(tous, "obGear"), nm = nCochees(r.muscu, "obGear"), nc = nCochees(r.cardio, "obGear");
+    var om = on && !!state.obMachOuvert, oc = on && !!state.obCardioOuvert;
     h = '<div class="ob-mach ob-salle' + (on ? " ob-mach-on" : "") + '">';
     h += caseHtml("ob-equip", I_MACHINES, on, EQUIP[I_MACHINES].t, EQUIP[I_MACHINES].s);
-    if (on) {
-      h += plierHtml("machines", ouvert, ouvert ? "Replier la liste des machines"
-        : "Voir les machines (" + n + " sur " + tous.length + " cochée" + (n > 1 ? "s" : "") + ")");
-    }
-    // AUCUNE MACHINE COCHEE, LA CATEGORIE OUVERTE, LA LISTE REPLIEE : on le
-    // dit. Les machines partent decochees chez un nouvel utilisateur (19
-    // septembre 2026) : cocher « Machines de salle » sans rien cocher dessous ne
-    // donne aucun exercice sur machine, et l'ecran ne doit pas le taire. Liste
-    // depliee, les cases vides et la consigne le disent deja.
-    if (on && !n && !ouvert) {
+    if (!on) return h + "</div>";
+    // AUCUNE MACHINE COCHEE : on le dit. Cocher « Machines de salle » sans
+    // rien cocher dessous ne donne aucun exercice sur machine.
+    if (!n) {
       h += '<p class="ob-mach-l ob-mach-vide">Aucune machine cochée : coche celles de ta ' +
            "salle, sinon je ne te proposerai aucun exercice sur machine.</p>";
     }
-    if (ouvert) {
-      h += '<div class="ob-mach-c">';
-      h += '<p class="ob-mach-l">Coche les appareils de ta salle. Je ne proposerai jamais ' +
-           "un exercice qui demande un appareil absent.</p>";
-      h += '<div class="ob-sect">Appareils de musculation</div><div class="ob-liste">';
+    h += plierHtml("machines", om, "Appareils de musculation : " + nm + " sur " + r.muscu.length +
+                   " coché" + (nm > 1 ? "s" : ""));
+    if (om) {
+      h += '<div class="ob-mach-c"><div class="ob-liste">';
       for (k = 0; k < r.muscu.length; k++) h += caseMachineHtml(r.muscu[k]);
-      h += '</div><div class="ob-sect">Appareils de cardio</div><div class="ob-liste">';
+      h += "</div></div>";
+    }
+    h += plierHtml("cardio", oc, "Appareils de cardio : " + nc + " sur " + r.cardio.length +
+                   " coché" + (nc > 1 ? "s" : ""));
+    if (oc) {
+      h += '<div class="ob-mach-c"><div class="ob-liste">';
       for (k = 0; k < r.cardio.length; k++) h += caseMachineHtml(r.cardio[k]);
       h += "</div></div>";
     }
     return h + "</div>";
   }
 
+  // LE MATERIEL LIBRE (28 septembre 2026, capture d'Olivier : « pourquoi pas de
+  // case a cocher devant Autre materiel ? », renomme « Materiel libre »). Il a
+  // maintenant sa case, comme les deux autres blocs. Cochee, elle deplie la
+  // liste ; decochee, elle retire tout ce que la liste portait, comme on
+  // declare n'avoir aucun materiel libre.
+  // ⚠️ LA CASE N'A PAS D'ETAT A ELLE : elle est cochee quand un element l'est,
+  // ou quand on vient de la cocher (`obLibreOn`, non persiste).
+  function libreCochees() {
+    var M = MATERIEL_BLOCS;
+    return nCochees(M.hors, "obEquip") + nCochees(M.horsGear, "obGear");
+  }
+
   function blocHorsHtml() {
-    var M = MATERIEL_BLOCS, ouvert = !!state.obHorsOuvert, k, i, h;
-    var n = nCochees(M.hors, "obEquip") + nCochees(M.horsGear, "obGear");
-    var tot = M.hors.length + M.horsGear.length;
-    h = '<div class="ob-mach ob-hors' + (ouvert ? " ob-mach-on" : "") + '">';
-    h += '<button type="button" class="ob-case" data-action="ob-plier" data-bloc="hors"' +
-         ' aria-expanded="' + (ouvert ? "true" : "false") + '">' +
-         '<span class="ob-case-txt"><span class="ob-case-t">Autre matériel</span>' +
-         '<span class="ob-case-s">Barres, haltères, traction, élastiques, bancs, corde : ' +
-         n + " sur " + tot + " coché" + (n > 1 ? "s" : "") + "</span></span>" +
-         '<span class="ob-case-ch" aria-hidden="true">' + (ouvert ? "▴" : "▾") + "</span></button>";
+    var M = MATERIEL_BLOCS, k, i, h, n = libreCochees();
+    var tot = M.hors.length + M.horsGear.length, on = n > 0 || !!state.obLibreOn;
+    var ouvert = on && !!state.obHorsOuvert;
+    h = '<div class="ob-mach ob-hors' + (on ? " ob-mach-on" : "") + '">';
+    h += caseHtml("ob-libre", 0, on, "Matériel libre", "Barres, haltères, traction, élastiques, bancs, corde");
+    if (!on) return h + "</div>";
+    h += plierHtml("hors", ouvert, "Ton matériel libre : " + n + " sur " + tot + " coché" + (n > 1 ? "s" : ""));
     if (ouvert) {
       h += '<div class="ob-mach-c"><div class="ob-liste">';
       for (k = 0; k < M.hors.length; k++) {
@@ -29507,7 +29531,7 @@ body.a-nav .nav { display: flex; }
    module a l'autre.
    =========================================================================== */
 
-  var APP_VERSION = "1.41.0";
+  var APP_VERSION = "1.41.1";
 
   function has(o, k) { return Object.prototype.hasOwnProperty.call(o, k); }
 
@@ -29819,6 +29843,9 @@ body.a-nav .nav { display: flex; }
     // Le repli des blocs de l'etape Materiel. Non persiste : l'etape s'ouvre
     // toujours blocs replies (Olivier, 19 septembre 2026).
     obMachOuvert: false, obHorsOuvert: false,
+    // Depuis le 28 septembre 2026 : la liste des appareils de cardio se replie a
+    // part, et la case « Materiel libre » cochee sans rien dessous. Non persistes.
+    obCardioOuvert: false, obLibreOn: false,
     // Les seances depliees de Mon programme, par rang. Non persiste : l'ecran
     // s'ouvre toujours replie (Olivier, 19 septembre 2026).
     mpOuvert: {},
@@ -30037,10 +30064,15 @@ body.a-nav .nav { display: flex; }
   // d'avant (`completerParDefaut`) : une machine qu'on n'avait jamais decochee
   // reste presente a la mise a jour. Seule une installation SANS sauvegarde
   // passe ici. Rangs ecrits en chiffres, comme dans `completerParDefaut`.
+  // 🔴 ET « POIDS DU CORPS » AUSSI, DEPUIS LE 28 SEPTEMBRE 2026 (Olivier :
+  // « par defaut poids de corps ne doit pas etre selectionne »). L'etape
+  // Materiel bloque « Continuer » tant que rien n'est coche
+  // (`reponseManquante`, block_onboarding.js). Qui ne va pas en salle saute
+  // cette etape : ses sorties et ses cours ne demandent aucun materiel.
   function poserMaterielNeuf() {
     var i;
     for (i = 0; i < state.obEquip.length; i++) {
-      if (i !== 5 && i !== 6) state.obEquip[i] = 0;
+      if (i !== 5) state.obEquip[i] = 0;
     }
     for (i = 0; i < state.obGear.length; i++) state.obGear[i] = 0;
   }
@@ -30843,7 +30875,7 @@ body.a-nav .nav { display: flex; }
   // onglets clone `#ecran`, et une fenetre ouverte ne doit pas partir avec le
   // volet.
   function popNutriHtml() {
-    return '<div class="menu-voile" data-action="pop-nutri-fermer"></div>' +
+    return '<div class="menu-voile pop-voile" data-action="pop-nutri-fermer"></div>' +
            '<section class="pop-nutri" role="dialog" aria-modal="true"' +
            ' aria-label="Côté assiette">' +
            '<div class="pop-nutri-t">Et côté assiette ?</div>' +
@@ -31285,9 +31317,22 @@ body.a-nav .nav { display: flex; }
       // ⚠️ SAUF A LA COCHE DE « MACHINES DE SALLE » ELLE-MEME, depuis le meme
       // soir : les machines partent decochees chez un nouvel utilisateur, et
       // cocher la categorie sans voir sa liste ne declarerait aucune machine.
-      if (iEq === I_MACHINES && state.obEquip[I_MACHINES] && !state.obMachOuvert) {
-        poser({ obMachOuvert: true });
-        montrerLesMachines("machines");
+      // 🔴 LES LISTES NE S'OUVRENT PLUS TOUTES SEULES (Olivier, 28 septembre
+      // 2026 : « repliees par defaut ») : cocher la case montre les deux
+      // boutons replies et leur compte.
+      return;
+    }
+    // LA CASE « MATERIEL LIBRE ». Cochee, elle deplie sa liste ; decochee,
+    // elle retire tout ce que la liste portait.
+    if (action === "ob-libre") {
+      var ML = MATERIEL_BLOCS, eqL = state.obEquip.slice(), geL = state.obGear.slice(), kL;
+      if (libreCochees() > 0 || state.obLibreOn) {
+        for (kL = 0; kL < ML.hors.length; kL++) eqL[ML.hors[kL]] = 0;
+        for (kL = 0; kL < ML.horsGear.length; kL++) geL[ML.horsGear[kL]] = 0;
+        poser({ obEquip: eqL, obGear: geL, obLibreOn: false, obHorsOuvert: false });
+      } else {
+        poser({ obLibreOn: true, obHorsOuvert: true });
+        montrerLesMachines("hors");
       }
       return;
     }
@@ -31296,7 +31341,8 @@ body.a-nav .nav { display: flex; }
     // un ecran de 667 px, la premiere ligne tomberait sous la ligne de
     // flottaison et l'on croirait qu'il ne s'est rien passe.
     if (action === "ob-plier") {
-      var blocPl = n.getAttribute("data-bloc"), clePl = blocPl === "hors" ? "obHorsOuvert" : "obMachOuvert";
+      var blocPl = n.getAttribute("data-bloc");
+      var clePl = blocPl === "hors" ? "obHorsOuvert" : (blocPl === "cardio" ? "obCardioOuvert" : "obMachOuvert");
       var chPl = {};
       chPl[clePl] = !state[clePl];
       poser(chPl);
@@ -31792,10 +31838,8 @@ body.a-nav .nav { display: flex; }
       // les machines, pas sur les cinq cases qui les precedent.
       // ⚠️ LE BLOC EST REPLIE PAR DEFAUT depuis le 19 septembre 2026 : venu de
       // cette ligne-la, on le deplie, puisque c'est lui qu'on vient voir.
-      if (etape === etapeMateriel() && state.obEquip[I_MACHINES]) {
-        poser({ obMachOuvert: true });
-        montrerLesMachines("machines");
-      }
+      // 🔴 PLUS DEPUIS LE 28 SEPTEMBRE 2026 : les listes restent repliees
+      // (Olivier), et leurs boutons disent deja combien d'appareils sont cochés.
       return;
     }
     if (action === "ob-quitter") { obQuitter(false); return; }
