@@ -26929,7 +26929,14 @@ body.a-nav .nav { display: flex; }
       // 🔴 `replace`, PAS `href` (28 septembre 2026). `href` ajoutait une page
       // a l'historique : sur l'iPhone d'Olivier, glisser depuis le bord gauche
       // y revenait, l'appli redemarrait et fermait le questionnaire en cours.
-      window.location.replace(window.location.pathname + "?v=" + jourNumero() + "-" + (state.hist || []).length);
+      // 🔴 UNE ADRESSE UNIQUE A CHAQUE TOUCHER (29 septembre 2026, « la 1.42.1
+      // ne redescend pas »). L'ancienne cle, le jour et le nombre de seances,
+      // restait la meme toute la journee ; GitHub Pages et le navigateur la
+      // gardent 10 minutes (`max-age=600`). Un premier essai fait avant la
+      // publication figeait donc l'ancienne version sous cette adresse, et
+      // chaque nouvel essai la resservait. L'heure a la milliseconde ne se
+      // repete jamais.
+      window.location.replace(window.location.pathname + "?v=" + new Date().getTime());
     };
     var vider = function () {
       try {
@@ -29765,7 +29772,7 @@ body.a-nav .nav { display: flex; }
    module a l'autre.
    =========================================================================== */
 
-  var APP_VERSION = "1.42.1";
+  var APP_VERSION = "1.42.2";
 
   function has(o, k) { return Object.prototype.hasOwnProperty.call(o, k); }
 
