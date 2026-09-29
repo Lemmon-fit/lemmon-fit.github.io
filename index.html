@@ -1553,7 +1553,6 @@ body.a-nav .nav { display: flex; }
 .sa-haut { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
 
 
-.sa-chrono { font-size: 17px; font-weight: 700; color: var(--sombre-texte-2); }
 .sa-exo { font-size: 27px; font-weight: 800; letter-spacing: -.5px; line-height: 1.15; }
 .sa-mat { font-size: 13px; color: var(--sombre-texte-3); margin-top: 4px; }
 .sa-serie { font-size: 14px; color: var(--sombre-texte-2); margin: 14px 0 18px; }
@@ -1835,7 +1834,11 @@ body.a-nav .nav { display: flex; }
 .sa-ensuite-n { font-size: 21px; font-weight: 800; color: var(--sombre-texte); text-align: center; margin-top: 4px; }
 .sa-ensuite-d { font-size: 13.5px; color: var(--sombre-texte-3); text-align: center; margin-top: 2px; }
 .sa-repos-btns { display: flex; gap: 10px; margin-top: 22px; }
-.sa-repos-btns .sa-act { flex: 0 0 38%; }
+/* Deux rangees depuis le 29 septembre 2026 : − 15 s / + 15 s, puis
+   « C'est reparti » ; le chrono en marche reprend la meme mise en page. */
+.sa-repos-btns + .sa-repos-btns { margin-top: 12px; }
+.sa-repos-btns .sa-act { flex: 1 1 0; }
+.sa-repos-btns .sa-valider { flex: 1 1 0; margin-top: 0; }
 .sa-valider-court { flex: 1; margin-top: 0; }
 
 /* --- Fin d'exercice ------------------------------------------------------ */
@@ -23698,6 +23701,8 @@ body.a-nav .nav { display: flex; }
     if (f0[state.tIdx].length >= exo.n) return;
 
     faits = copierFaits(f0);
+    // Un chrono en cours ou fini s'arrete avec la serie qu'il accompagnait.
+    state.minuteur = null;
     faits[state.tIdx].push({ kg: state.kg, reps: state.reps,
                              // Le releve de l'appareil voyage AVEC la serie, et
                              // pas a cote : `faits` est deja sauvegarde, donc il
@@ -23737,6 +23742,13 @@ body.a-nav .nav { display: flex; }
     if (_tic) return;
     _tic = window.setInterval(function () {
       if (state.ecran !== "salle" || !state.demarre) return;
+      // Le chrono des intervalles et des maintiens avance a son propre pas ;
+      // le temps de la seance, lui, continue de courir en dessous.
+      if (state.minuteur && !state.minuteur.pause && state.phase === "set") {
+        state.chrono = state.chrono + 1;
+        avancerMinuteur();
+        return;
+      }
       if (state.phase === "repos") {
         if (state.repos <= 1) {
           state.phase = "set";
@@ -23747,19 +23759,200 @@ body.a-nav .nav { display: flex; }
         state.chrono = state.chrono + 1;
         rendre();
       } else if (state.phase === "set") {
+        // Le temps de la seance compte en silence : plus rien a redessiner
+        // (chrono de l'entete retire le 29 septembre 2026).
         state.chrono = state.chrono + 1;
-        majChrono();
       }
     }, 1000);
   }
 
-  // Pendant une serie, SEUL le chiffre du chrono change. Reconstruire tout
-  // l'ecran chaque seconde relancerait le rendu 3 600 fois par heure et
-  // reprendrait le focus des champs. On touche donc le seul noeud concerne.
-  function majChrono() {
-    var n = document.getElementById("chrono-v");
-    if (n) n.innerHTML = esc(mmss(state.chrono));
+  // =========================================================================
+  // LE CHRONO DES INTERVALLES ET DES MAINTIENS (29 septembre 2026)
+  // -------------------------------------------------------------------------
+  // Olivier : « il manque un timer quand on fait du Tabata ou des abdos. Un
+  // chrono qu'on declenche soi-meme ; c'est l'appli qui decide de la duree
+  // suivant le programme, mais on doit pouvoir modifier a la hausse ou a la
+  // baisse les temps de pause. En les reduisant, tu augmentes l'intensite. »
+  //
+  //   intervalles  un exercice d'intervalles (patron `hiit`) : effort, puis
+  //                recuperation, tour par tour. Les durees et le nombre de
+  //                tours viennent du catalogue (« 20 sec fort / 40 sec
+  //                souple », 15 tours). La recuperation se regle par 5 s, et
+  //                le reglage est RETENU pour cet exercice (`recupPerso`).
+  //   maintien     un gainage compte en secondes : le maintien prevu.
+  //
+  // Un bip a chaque changement, trois dans les trois dernieres secondes. Le
+  // son demande un toucher pour s'ouvrir sur iPhone : c'est « Lancer ».
+  // ⚠️ SANS SON EN MODE SILENCIEUX sur iPhone : le telephone le coupe.
+  // ⚠️ LE CHRONO NE VALIDE RIEN : a la fin, on valide la serie comme avant.
+  // =========================================================================
+  var RECUP_PAS = 5, RECUP_MAX = 120;
+
+  function minuteurDe(exo) {
+    var c = exo && MOTEUR.CAT_BY_ID ? MOTEUR.CAT_BY_ID[exo.id] : null, m, ef, rc;
+    if (!c) return null;
+    if (c.pat === "hiit") {
+      m = String(c.dur || "").match(/(\d+)\s*sec\D+(\d+)\s*sec/);
+      if (m) { ef = parseInt(m[1], 10); rc = parseInt(m[2], 10); }
+      else {
+        m = String(c.dur || "").match(/(\d+)\s*sec/);
+        if (!m) return null;
+        ef = parseInt(m[1], 10);
+        rc = c.rest > 0 ? c.rest : 0;
+      }
+      if (state.recupPerso && typeof state.recupPerso[exo.id] === "number") rc = state.recupPerso[exo.id];
+      return { type: "intervalles", effort: ef, recup: rc, tours: c.sets > 0 ? c.sets : 1 };
+    }
+    if (c.pat === "core" && exo.unite === "s") {
+      return { type: "maintien", effort: state.reps > 0 ? state.reps : 30, recup: 0, tours: 1 };
+    }
+    return null;
   }
+
+  var _son = null;
+  function preparerSon() {
+    try {
+      var A = window.AudioContext || window.webkitAudioContext;
+      if (!_son && A) _son = new A();
+      if (_son && _son.resume) _son.resume();
+    } catch (e) { _son = null; }
+  }
+
+  function bip(n, aigu) {
+    var i, o, g, t;
+    try {
+      if (!_son) return;
+      t = _son.currentTime;
+      for (i = 0; i < n; i++) {
+        o = _son.createOscillator();
+        g = _son.createGain();
+        o.frequency.value = aigu ? 1320 : 880;
+        g.gain.value = 0.2;
+        o.connect(g);
+        g.connect(_son.destination);
+        o.start(t + i * 0.2);
+        o.stop(t + i * 0.2 + 0.12);
+      }
+    } catch (e) { /* un bip rate ne doit rien casser */ }
+  }
+
+  function lancerMinuteur() {
+    var exo = exosCourants()[state.tIdx], d = minuteurDe(exo);
+    if (!d) return;
+    preparerSon();
+    bip(1, true);
+    poser({ minuteur: { id: exo.id, type: d.type, phase: "effort", reste: d.effort, tour: 1,
+                        tours: d.tours, effort: d.effort, recup: d.recup, pause: false } });
+  }
+
+  function avancerMinuteur() {
+    var m = state.minuteur, exo = exosCourants()[state.tIdx];
+    if (!exo || exo.id !== m.id) { state.minuteur = null; rendre(); return; }
+    if (m.phase === "fini") return;
+    m.reste--;
+    if (m.reste > 0) {
+      if (m.reste <= 3) bip(1, false);
+      rendre();
+      return;
+    }
+    if (m.phase === "effort") {
+      if (m.tour >= m.tours) {
+        m.phase = "fini";
+        m.reste = 0;
+        // LA DUREE A VALIDER DEVIENT CELLE QU'ON A FAITE : une recuperation
+        // raccourcie raccourcit le bloc (20 tours a 20 s + 30 s = 16 min, pas
+        // 20). La derniere recuperation n'est pas faite, elle ne compte pas.
+        if (m.type === "intervalles") {
+          state.reps = Math.max(1, Math.round((m.tours * m.effort + (m.tours - 1) * m.recup) / 60));
+        }
+        bip(3, true);
+        rendre();
+        return;
+      }
+      if (m.recup > 0) { m.phase = "recup"; m.reste = m.recup; bip(1, true); rendre(); return; }
+      m.tour++;
+      m.reste = m.effort;
+      bip(1, true);
+      rendre();
+      return;
+    }
+    m.tour++;
+    m.phase = "effort";
+    m.reste = m.effort;
+    bip(1, true);
+    rendre();
+  }
+
+  // Regler la recuperation, avant ou pendant le chrono. Retenu pour cet
+  // exercice : la prochaine fois, il repart de ce reglage.
+  function reglerRecup(d) {
+    var exo = exosCourants()[state.tIdx], def = minuteurDe(exo), m = state.minuteur, perso = {}, k, v;
+    if (!def || def.type !== "intervalles") return;
+    v = Math.max(0, Math.min(RECUP_MAX, def.recup + d * RECUP_PAS));
+    for (k in state.recupPerso) { if (has(state.recupPerso, k)) perso[k] = state.recupPerso[k]; }
+    perso[exo.id] = v;
+    if (m && m.id === exo.id) {
+      m.recup = v;
+      if (m.phase === "recup") m.reste = Math.max(1, Math.min(v, m.reste + d * RECUP_PAS));
+    }
+    poser({ recupPerso: perso });
+  }
+
+  function anneauHtml(reste, total, sous) {
+    var part = total > 0 ? Math.min(1, Math.max(0, reste) / total) : 0;
+    var R = 78, C = 2 * Math.PI * R;
+    return '<div class="sa-anneau"><svg viewBox="0 0 180 180" aria-hidden="true">' +
+           '<circle class="sa-anneau-fond" cx="90" cy="90" r="' + R + '"></circle>' +
+           '<circle class="sa-anneau-arc" cx="90" cy="90" r="' + R + '"' +
+           ' stroke-dasharray="' + C.toFixed(1) + '"' +
+           ' stroke-dashoffset="' + (C * (1 - part)).toFixed(1) + '"></circle></svg>' +
+           '<div class="sa-anneau-c"><div class="sa-anneau-v num">' + esc(mmss(Math.max(0, reste))) + "</div>" +
+           '<div class="sa-anneau-s">' + esc(sous) + "</div></div></div>";
+  }
+
+  // Le chrono en marche : il prend l'ecran, comme le repos.
+  function minuteurEnMarcheHtml(exo) {
+    var m = state.minuteur, h = "", total, sous;
+    if (m.phase === "fini") return "";
+    total = m.phase === "recup" ? m.recup : m.effort;
+    sous = m.type === "maintien" ? "tiens" : (m.phase === "recup" ? "récupère" : "à fond");
+    h += '<div class="sa-repos-l">' + (m.type === "maintien" ? "Maintien" :
+         (m.phase === "recup" ? "Récupération" : "Effort")) + "</div>";
+    h += anneauHtml(m.reste, total, sous);
+    h += '<div class="sa-ensuite-n">' + esc(exo.nom) + "</div>";
+    if (m.type === "intervalles") {
+      h += '<div class="sa-ensuite-d">Tour <b class="num">' + m.tour + '</b> sur <b class="num">' +
+           m.tours + "</b> · récup <b class=\"num\">" + m.recup + " s</b></div>";
+      h += '<div class="sa-repos-btns">' +
+           '<button type="button" class="sa-act" data-action="recup-pas" data-d="-1">Récup − 5 s</button>' +
+           '<button type="button" class="sa-act" data-action="recup-pas" data-d="1">Récup + 5 s</button></div>';
+    }
+    h += '<div class="sa-repos-btns">' +
+         '<button type="button" class="sa-act" data-action="minuteur-arreter">Arrêter</button>' +
+         '<button type="button" class="sa-valider sa-valider-court" data-action="minuteur-pause">' +
+         (m.pause ? "Reprendre" : "Pause") + "</button></div>";
+    return h;
+  }
+
+  // Le chrono a l'arret, dans la carte de la serie.
+  function minuteurReposeHtml(d, exo) {
+    var fini = state.minuteur && state.minuteur.id === exo.id && state.minuteur.phase === "fini", h;
+    // Un maintien ne redit pas sa duree : la molette « Durée » juste dessous la
+    // porte, et c'est elle que le chrono decompte.
+    if (d.type === "intervalles" || fini) {
+      h = '<div class="sa-conseil">' + (fini ? "Chrono terminé : valide ta série. " : "") +
+          (d.type === "intervalles"
+            ? d.effort + " s d’effort, " + d.recup + " s de récup, " + d.tours + " tours." : "") + "</div>";
+    } else {
+      h = "";
+    }
+    if (d.type === "intervalles") h += stepper("recup-pas", d.recup, "s", "Récupération");
+    h += '<button type="button" class="sa-reprendre" style="margin:6px 0 18px"' +
+         ' data-action="minuteur-lancer">' +
+         '<span class="sa-r-l">' + (fini ? "Relancer le chrono" : "Lancer le chrono") + "</span></button>";
+    return h;
+  }
+
 
   function stepper(action, val, unite, libelle) {
     return '<div class="st"><div class="st-l">' + esc(libelle) + "</div>" +
@@ -23901,7 +24094,10 @@ body.a-nav .nav { display: flex; }
     h += '<div class="sa-pos">' +
          (rang > 0 ? 'Exercice <b class="num">' + rang + '</b> / <b class="num">' + total + "</b>" : "") +
          "</div>";
-    h += '<div class="sa-chrono num" id="chrono-v">' + esc(mmss(state.chrono)) + "</div>";
+    // 🔴 LE CHRONO DE LA SEANCE N'EST PLUS AFFICHE (Olivier, 29 septembre
+    // 2026 : « il n'apporte rien et ne merite meme pas d'etre arrete »). Il
+    // continue de compter en silence : la duree de la seance part au journal
+    // (`sec`) et s'affiche a l'ecran de fin et dans l'Historique.
     h += "</div>";
     h += '<div class="sa-barre"><span class="sa-barre-v" style="width:' +
          avancementSeance() + '%"></span></div>';
@@ -23999,12 +24195,23 @@ body.a-nav .nav { display: flex; }
       // reste dans la police du texte (lot coherence, 20 septembre 2026).
       h += '<div class="sa-ensuite-d">Série <b class="num">' + (faites + 1) + "</b> · " +
            '<b class="num">' + esc(libelleSerie(state.kg, state.reps, exo)) + "</b></div>";
+      // RACCOURCIR AUSSI, depuis le 29 septembre 2026 (Olivier : « en les
+      // reduisant, tu augmentes l'intensite »). Le repos ne descend pas sous
+      // 15 s (`repos-regler`, block_socle.js).
       h += '<div class="sa-repos-btns">';
-      h += '<button type="button" class="sa-act" data-action="repos-regler" data-d="30">+ 30 s</button>';
-      h += '<button type="button" class="sa-valider sa-valider-court"' +
-           ' data-action="repos-passer">C\'est reparti</button>';
+      h += '<button type="button" class="sa-act" data-action="repos-regler" data-d="-15">− 15 s</button>';
+      h += '<button type="button" class="sa-act" data-action="repos-regler" data-d="15">+ 15 s</button>';
+      h += "</div>";
+      h += '<div class="sa-repos-btns">';
+      h += '<button type="button" class="sa-valider" data-action="repos-passer">C\'est reparti</button>';
       h += "</div>";
       return h + "</div></div>";
+    }
+
+    // ---- LE CHRONO DES INTERVALLES OU DU MAINTIEN, EN MARCHE ----
+    var mdef = minuteurDe(exo);
+    if (mdef && state.minuteur && state.minuteur.id === exo.id && state.minuteur.phase !== "fini") {
+      return h + minuteurEnMarcheHtml(exo) + "</div></div>";
     }
 
     // ---- LA SERIE ----
@@ -24064,6 +24271,8 @@ body.a-nav .nav { display: flex; }
     if (prov.texte) {
       h += '<div class="sa-conseil">' + esc(prov.texte) + "</div>";
     }
+    // Le chrono des intervalles ou du maintien, a l'arret (29 septembre 2026).
+    if (mdef) h += minuteurReposeHtml(mdef, exo);
 
     // ⚠️ PAS DE MOLETTE DE CHARGE SUR UN EXERCICE CHRONOMETRE.
     // Elle etait posee quand meme, avec un suffixe vide, ce qui donnait une
@@ -25963,7 +26172,12 @@ body.a-nav .nav { display: flex; }
                   a: "ob-etape", v: etape("Pratique") });
     }
     if (pose["Course"]) {
-      prog.push({ t: "Ton niveau en course", s: libelleChip("Course", state.obRunNiveau),
+      // 🔴 IL DISAIT « NON RENSEIGNE » QUOI QU'ON REPONDE (capture d'Olivier,
+      // 29 septembre 2026) : `libelleChip` lit les `chips` de l'etape, et
+      // l'etape Course n'en a pas, elle dessine RUN_NIVEAUX et RUN_DUREES.
+      prog.push({ t: "Ton niveau en course",
+                  s: (RUN_NIVEAUX[state.obRunNiveau] ? RUN_NIVEAUX[state.obRunNiveau].t : "non renseigné") +
+                     (RUN_DUREES[state.obRunDuree] ? " · " + RUN_DUREES[state.obRunDuree].t : ""),
                   a: "ob-etape", v: etape("Course") });
     }
     if (pose["Durée"]) {
@@ -29543,7 +29757,7 @@ body.a-nav .nav { display: flex; }
    module a l'autre.
    =========================================================================== */
 
-  var APP_VERSION = "1.41.4";
+  var APP_VERSION = "1.42.0";
 
   function has(o, k) { return Object.prototype.hasOwnProperty.call(o, k); }
 
@@ -29935,6 +30149,11 @@ body.a-nav .nav { display: flex; }
     // block_moteur.js) : une serie de plus, et le creneau ne saute plus quand
     // la seance est courte. Les autres zones restent (arbitrage d'Olivier).
     obMuscler: {},
+    // LE CHRONO DES INTERVALLES ET DES MAINTIENS (29 septembre 2026). `minuteur`
+    // ne se sauve pas : un chrono ne reprend pas apres une fermeture. La
+    // recuperation reglee, elle, est retenue par exercice (`recupPerso`).
+    minuteur: null,
+    recupPerso: {},
     // LES ABDOS EN FIN DE SEANCE, une question depuis le 28 septembre 2026 :
     //   0 pas encore repondu (installation neuve, pendant le diagnostic)
     //   1 a chaque seance, la regle du 19 septembre ; c'est le defaut, pour
@@ -30014,7 +30233,7 @@ body.a-nav .nav { display: flex; }
     "obPeseeJour", "obPeseeMoment", "peseeFaite", "obSupps", "obAct", "actFaits",
     "obRunNiveau", "obRunDuree", "obEviter",
     // Les trois reponses du 28 septembre 2026 (retours des beta-testeurs).
-    "obMuscler", "obAbdos", "obAbdosJours", "obAppareil", "obAppJour",
+    "obMuscler", "obAbdos", "obAbdosJours", "obAppareil", "obAppJour", "recupPerso",
     // 🔴 L'ETAPE DU QUESTIONNAIRE, depuis le 28 septembre 2026 : un
     // redemarrage (iOS qui tue l'appli, un glissement depuis le bord) reprend
     // a la meme question au lieu de tout refaire (Olivier : « maintenant je
@@ -30480,8 +30699,8 @@ body.a-nav .nav { display: flex; }
   // restait que deux prises reelles, et elles sont traitees :
   //   - les identifiants, que getElementById resoudrait sur le decor : les
   //     volets sont depouilles (voir depouiller) ;
-  //   - le seul chrono qui vit dans le DOM, `chrono-v`, qui n'existe que dans
-  //     le mode entrainement, ou le glissement est fige.
+  //   - le chrono de l'entete du mode entrainement, `chrono-v`, qui n'existe
+  //     plus depuis le 29 septembre 2026 (et le glissement y est fige).
   //
   // Seuils. GLISSE_RATIO 1,8 vient du README section 5 : sans lui un
   // defilement un peu oblique monterait la piste. GLISSE_MS 800 ne sert plus
@@ -31802,6 +32021,14 @@ body.a-nav .nav { display: flex; }
       return;
     }
     if (action === "repos-passer") { poser({ phase: "set", repos: 90, reposTotal: 90 }); return; }
+    // LE CHRONO DES INTERVALLES ET DES MAINTIENS (29 septembre 2026, block_salle.js).
+    if (action === "minuteur-lancer") { lancerMinuteur(); return; }
+    if (action === "minuteur-arreter") { poser({ minuteur: null }); return; }
+    if (action === "minuteur-pause") {
+      if (state.minuteur) { state.minuteur.pause = !state.minuteur.pause; if (!state.minuteur.pause) preparerSon(); rendre(); }
+      return;
+    }
+    if (action === "recup-pas") { reglerRecup(parseInt(n.getAttribute("data-d"), 10)); return; }
     if (action === "annuler-serie") { annulerSerie(); return; }
     if (action === "aller-trans") { poser({ ecran: "trans", phase: "transition", finiIdx: state.tIdx }); return; }
     if (action === "finir-seance") { poser({ ecran: "salle", phase: "fin" }); return; }
@@ -32330,6 +32557,10 @@ body.a-nav .nav { display: flex; }
     // Ce que la preference materiel ou poids du corps ecarte, pour les bancs.
     parPreference: function () { return profilDepuisEtat().parPreference; },
     abdosEnFin: abdosEnFin,
+    // Le chrono des intervalles et des maintiens (29 septembre 2026) : un banc
+    // fait avancer le temps sans attendre de vraies secondes.
+    minuteurDe: minuteurDe,
+    avancerMinuteur: function () { if (state.minuteur) avancerMinuteur(); },
     // Les trois reponses du 28 septembre 2026, pour les bancs.
     abdosDeSeance: abdosDeSeance,
     appareilDeSeance: appareilDeSeance,
