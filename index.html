@@ -599,6 +599,12 @@
 * { box-sizing: border-box; }
 
 html, body { margin: 0; padding: 0; }
+/* PAS DE ZOOM AU DOUBLE TOUCHER (capture d'Olivier, 29 septembre 2026 : deux
+   touchers rapides sur « − 15 s » agrandissaient l'ecran du repos). Sur toute
+   la page, et pas seulement sur `#ecran` : le mode entrainement s'affiche en
+   plein ecran, hors de ce conteneur. `manipulation` garde le defilement et le
+   zoom a deux doigts, utile a qui lit mal ; seul le double toucher saute. */
+html, body { touch-action: manipulation; }
 
 body {
   background: var(--fond);
@@ -24203,7 +24209,9 @@ body.a-nav .nav { display: flex; }
       h += '<button type="button" class="sa-act" data-action="repos-regler" data-d="15">+ 15 s</button>';
       h += "</div>";
       h += '<div class="sa-repos-btns">';
-      h += '<button type="button" class="sa-valider" data-action="repos-passer">C\'est reparti</button>';
+      // « Reprendre maintenant » (Olivier, 29 septembre 2026) : le bouton dit
+      // qu'il coupe le repos, « C'est reparti » ne le disait pas.
+      h += '<button type="button" class="sa-valider" data-action="repos-passer">Reprendre maintenant</button>';
       h += "</div>";
       return h + "</div></div>";
     }
@@ -29757,7 +29765,7 @@ body.a-nav .nav { display: flex; }
    module a l'autre.
    =========================================================================== */
 
-  var APP_VERSION = "1.42.0";
+  var APP_VERSION = "1.42.1";
 
   function has(o, k) { return Object.prototype.hasOwnProperty.call(o, k); }
 
